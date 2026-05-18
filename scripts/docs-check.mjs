@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { parse as parseYaml } from "yaml";
 
 const root = process.cwd();
 
@@ -85,6 +86,30 @@ function validateSourceAccountWording(file, content) {
   if (unsafeAcceptance.test(content)) {
     fail(file, "suggests public G... addresses are accepted for --source");
   }
+}
+
+function validateWorkflowYaml(file, content) {
+  const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0);
+
+  if (lines.length < 5) {
+    fail(file, "appears compressed; expected at least 5 non-empty lines");
+  }
+
+  try {
+    parseYaml(content);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    fail(file, `invalid YAML: ${message}`);
+  }
+}
+
+const workflowDir = path.join(root, ".github/workflows");
+
+for (const entry of readdirSync(workflowDir)) {
+  if (!entry.endsWith(".yml") && !entry.endsWith(".yaml")) continue;
+
+  const file = path.join(".github/workflows", entry);
+  validateWorkflowYaml(file, read(file));
 }
 
 for (const file of markdownFiles) {

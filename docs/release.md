@@ -29,9 +29,15 @@ Any exception must be called out in release notes and package changelogs.
 
 ## Release Gate
 
-The `Release Gate` workflow validates release readiness with typecheck, docs, build, tests,
-snapshot packing, publish dry-run, and consumer package checks. It does not publish to npm
-or create a GitHub Release.
+The `Release Gate` workflow (`.github/workflows/release-gate.yml`) validates release readiness
+with typecheck, docs, build, tests, snapshot packing, publish dry-run, and consumer package
+checks. It does not publish to npm or create a GitHub Release.
+
+## GitHub Releases
+
+GitHub Releases document alpha milestones for contributors and early adopters. Publishing a
+release on GitHub is a manual step after the Release Gate passes. See
+[`docs/release/v0.2.1-alpha.0.md`](./release/v0.2.1-alpha.0.md) for the first alpha notes.
 
 ## Release Notes
 
