@@ -80,8 +80,10 @@ jobs:
           name: testnet-smoke-artifacts
           path: |
             smoke-ci-out/
-            smoke-app/caatinga.artifacts.json
-            smoke-app-retry/caatinga.artifacts.json
+            smoke-app-counter/caatinga.artifacts.json
+            smoke-app-marketplace/caatinga.artifacts.json
+            smoke-app-retry-counter/caatinga.artifacts.json
+            smoke-app-retry-marketplace/caatinga.artifacts.json
           if-no-files-found: ignore
 
       - name: Remove Stellar CLI config
