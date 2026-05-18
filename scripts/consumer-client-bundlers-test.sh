@@ -21,6 +21,10 @@ run_fixture() {
   cd "$tmp"
   npm install "${CORE_TGZ[0]}" "${CLIENT_TGZ[0]}"
   npm run build
+  if grep -r 'execa' "$tmp/dist" >/dev/null 2>&1; then
+    echo "execa leaked into client bundler output ($name)" >&2
+    exit 1
+  fi
   cd "$ROOT_DIR"
   rm -rf "$tmp"
 }

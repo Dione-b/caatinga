@@ -55,4 +55,4 @@ The official template documents both paths:
 
 The template does not generate React hooks or `caatinga generate --interop` output in alpha.
 
-Browser-facing templates must alias `@caatinga/core` to a browser-safe shim (see `react-vite-counter/vite.config.ts`). After `@caatinga/core/browser` ships, prefer that entry over local duplicates.
+Browser-facing templates should import errors and artifact types from `@caatinga/core/browser` (see `react-vite-counter/src/caatinga.ts`). Keep the full `@caatinga/core` entry for Node-only config (`caatinga.config.ts`, CLI workflows).

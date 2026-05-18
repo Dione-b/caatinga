@@ -118,6 +118,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/contracts/resolve-deploy-args.test.ts",
     trigger: "resolveDeployArgs("
   },
+  [CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND]: {
+    file: "packages/core/src/contracts/verify-dependency-contract.test.ts",
+    trigger: "verifyDependencyContract("
+  },
   [CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID]: {
     file: "packages/core/src/contracts/resolve-deploy-args.test.ts",
     trigger: "resolveDeployArgs("

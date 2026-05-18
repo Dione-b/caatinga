@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import { buildXdr } from "./build-xdr.js";
 
 const rpcUrl = "https://soroban-testnet.stellar.org";

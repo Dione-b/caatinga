@@ -23,16 +23,22 @@ With `--network`, doctor also compares every contract in `caatinga.config.ts` ag
 deployed, or `✗` with a suggested `caatinga deploy` command when missing. If any contract is
 missing, doctor exits with code `1` and `CAATINGA_DOCTOR_PARTIAL_DEPLOY`.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps]`
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first
 when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
 contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
+Pass `--verify-deps` to confirm each dependency's contract ID exists on-chain (via
+`stellar contract info interface`) before resolving deploy arguments.
 
 When a contract already has a `contractId` in `caatinga.artifacts.json` for the selected network,
 Caatinga prints `[skipped]` and does not call Stellar CLI unless `--force` is set. Newly deployed
 contracts are labeled `[deployed]` with their contract IDs.
+
+Before deploy, Caatinga compares the WASM file mtime with files under `contracts/<name>/src/` (best
+effort). If sources look newer than the WASM, it prints a **warning** and continues deploy. Use
+`--no-stale-check` to skip this check.
 
 ## `caatinga generate <contract> [--network testnet]`
 

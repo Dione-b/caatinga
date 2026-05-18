@@ -33,4 +33,4 @@ The checked-in `src/contracts/generated/counter.ts` is a small stand-in so the e
 npx caatinga generate counter --network testnet
 ```
 
-`vite.config.ts` aliases the Node-oriented `@caatinga/core` package entry to a browser error shim. That keeps this example focused on the current client contract while the package export split is still alpha.
+Browser code imports artifact types from `@caatinga/core/browser`, the package entry that excludes Node-only modules such as `execa`.

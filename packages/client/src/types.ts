@@ -1,4 +1,4 @@
-import type { CaatingaArtifacts } from "@caatinga/core";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 
 export interface CaatingaNetwork {
   name: string;

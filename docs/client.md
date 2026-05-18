@@ -37,6 +37,8 @@ Not included:
 pnpm add @caatinga/client @stellar/freighter-api
 ```
 
+`@caatinga/client` depends on `@caatinga/core` and imports only the browser-safe subpath `@caatinga/core/browser` (errors and artifact types). That entry excludes Node-only modules such as `execa`, so Vite and webpack bundles do not pull in the CLI shell layer. Application code that needs the same types in the browser should import from `@caatinga/core/browser` rather than the root `@caatinga/core` package entry.
+
 ## Counter Example
 
 ```ts

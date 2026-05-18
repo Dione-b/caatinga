@@ -4,6 +4,7 @@ import { resolveNetwork, type ResolvedNetwork } from "../networks/resolve-networ
 import { deployContract } from "./deploy-contract.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveDeployOrder } from "./resolve-deploy-order.js";
+import { verifyDependencyContracts } from "./verify-dependency-contract.js";
 
 export type SkippedContract = {
   name: string;
@@ -12,10 +13,16 @@ export type SkippedContract = {
   reason: "already-deployed";
 };
 
+export type StaleWasmWarning = {
+  contract: string;
+  message: string;
+};
+
 export type DeployContractGraphResult = {
   network: ResolvedNetwork;
   deployedContracts: Array<{ name: string; contractId: string }>;
   skippedContracts: SkippedContract[];
+  staleWasmWarnings: StaleWasmWarning[];
 };
 
 export async function deployContractGraph(options: {
@@ -27,6 +34,8 @@ export async function deployContractGraph(options: {
   includeDependencies: boolean;
   force: boolean;
   allowUntestedStellarCli?: boolean;
+  checkStaleWasm?: boolean;
+  verifyDeps?: boolean;
 }): Promise<DeployContractGraphResult> {
   const cwd = options.cwd ?? process.cwd();
   const network = resolveNetwork(options.config, options.networkName);
@@ -37,11 +46,23 @@ export async function deployContractGraph(options: {
   });
   const deployedContracts: Array<{ name: string; contractId: string }> = [];
   const skippedContracts: SkippedContract[] = [];
+  const staleWasmWarnings: StaleWasmWarning[] = [];
 
   for (const contractName of order) {
     const artifacts = await readArtifacts(cwd);
     const existing = artifacts.networks[network.name]?.contracts[contractName];
     const contractConfig = options.config.contracts[contractName];
+
+    if (options.verifyDeps && contractConfig.dependsOn.length > 0) {
+      await verifyDependencyContracts({
+        dependencies: contractConfig.dependsOn,
+        artifacts,
+        network,
+        cwd,
+        allowUntestedStellarCli: options.allowUntestedStellarCli
+      });
+    }
+
     const resolvedDeployArgs = resolveDeployArgs({
       deployArgs: contractConfig.deployArgs,
       artifacts,
@@ -66,9 +87,17 @@ export async function deployContractGraph(options: {
       cwd,
       allowUntestedStellarCli: options.allowUntestedStellarCli,
       force: options.force,
+      checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
       dependencies: contractConfig.dependsOn
     });
+
+    if (result.staleWasmWarning) {
+      staleWasmWarnings.push({
+        contract: contractName,
+        message: result.staleWasmWarning
+      });
+    }
 
     if (result.skipped) {
       skippedContracts.push({
@@ -85,6 +114,7 @@ export async function deployContractGraph(options: {
   return {
     network,
     deployedContracts,
-    skippedContracts
+    skippedContracts,
+    staleWasmWarnings
   };
 }

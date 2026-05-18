@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
-import { CaatingaError } from "../caatinga-core-browser.js";
+import { CaatingaError } from "@caatinga/core/browser";
 
 function formatCaatingaError(error: unknown): string {
   if (error instanceof CaatingaError) {

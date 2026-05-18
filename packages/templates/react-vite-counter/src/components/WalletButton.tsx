@@ -1,6 +1,6 @@
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
 import { useState } from "react";
-import { CaatingaError } from "../caatinga-core-browser.js";
+import { CaatingaError } from "@caatinga/core/browser";
 
 function formatWalletError(error: unknown): string {
   if (error instanceof CaatingaError) {

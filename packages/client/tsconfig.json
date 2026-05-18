@@ -4,7 +4,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "@caatinga/core": ["../core/dist/index.d.ts"]
+      "@caatinga/core": ["../core/dist/index.d.ts"],
+      "@caatinga/core/browser": ["../core/dist/browser.d.ts"]
     }
   },
   "include": ["src/**/*.ts"]

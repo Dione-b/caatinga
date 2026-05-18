@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core";
+import { CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core/browser";
 import { createCaatingaClient } from "./create-caatinga-client.js";
 
 const artifacts: CaatingaArtifacts = {

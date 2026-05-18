@@ -1,6 +1,6 @@
 import { createCaatingaClient } from "@caatinga/client";
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
-import type { CaatingaArtifacts } from "@caatinga/core";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter.js";
 
 const artifacts: CaatingaArtifacts = {

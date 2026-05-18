@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import { resolveContractId } from "../artifacts/resolve-contract-id.js";
 import { createDefaultBindingAdapter } from "../bindings/default-binding-adapter.js";
 import { buildXdr as buildTransactionXdr } from "../xdr/build-xdr.js";

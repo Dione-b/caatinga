@@ -3,8 +3,15 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@caatinga/core": path.resolve(__dirname, "../core/dist/index.js")
-    }
+    alias: [
+      {
+        find: "@caatinga/core/browser",
+        replacement: path.resolve(__dirname, "../core/dist/browser.js")
+      },
+      {
+        find: "@caatinga/core",
+        replacement: path.resolve(__dirname, "../core/dist/index.js")
+      }
+    ]
   }
 });
