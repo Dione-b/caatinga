@@ -9,6 +9,8 @@ NPM_CACHE_DIR="$TMP_DIR/.npm-cache"
 NPM_USERCONFIG="$TMP_DIR/.npmrc"
 RESOLVE_ABS_PATH_CMD='import path from "node:path"; process.stdout.write(path.resolve(process.argv[1]));'
 
+source "$ROOT_DIR/scripts/lib/archive-contains-path.sh"
+
 cleanup() {
   rm -rf "$ROOT_DIR/packages/cli/templates"
   rm -rf "$TMP_DIR"
@@ -92,7 +94,7 @@ if [[ ${#_kcli[@]} -ne 1 ]]; then
   exit 1
 fi
 
-if ! tar -tzf "${_kcli[0]}" | grep -q '^package/templates/react-vite-counter/caatinga.template.json$'; then
+if ! archive_contains_path "${_kcli[0]}" "package/templates/react-vite-counter/caatinga.template.json"; then
   echo "CLI tarball is missing bundled templates: ${_kcli[0]}" >&2
   exit 1
 fi

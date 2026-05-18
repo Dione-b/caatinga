@@ -11,6 +11,7 @@ CHANGESET_BACKUP_READY=0
 CHANGESET_EXISTED=0
 SNAPSHOT_CHANGESET_FILE=""
 TEMPLATES_DIR="$ROOT_DIR/packages/templates"
+source "$ROOT_DIR/scripts/lib/archive-contains-path.sh"
 SNAPSHOT_RESTORE_FILES=(
   "$ROOT_DIR/packages/core/package.json"
   "$ROOT_DIR/packages/client/package.json"
@@ -167,21 +168,19 @@ if [[ ${#cli_tarball[@]} -ne 1 ]]; then
   exit 1
 fi
 
-cli_template_path="$(tar -tzf "${cli_tarball[0]}" | grep '^package/templates/react-vite-counter/caatinga.template.json$' || true)"
-if [[ -z "$cli_template_path" ]]; then
+if ! archive_contains_path "${cli_tarball[0]}" "package/templates/react-vite-counter/caatinga.template.json"; then
   echo "CLI tarball is missing bundled templates: ${cli_tarball[0]}" >&2
   exit 1
 fi
 
-echo "CLI template evidence: $cli_template_path"
+echo "CLI template evidence: package/templates/react-vite-counter/caatinga.template.json"
 
-cli_template_package_json_path="$(tar -tzf "${cli_tarball[0]}" | grep '^package/templates/react-vite-counter/package.json$' || true)"
-if [[ -z "$cli_template_package_json_path" ]]; then
+if ! archive_contains_path "${cli_tarball[0]}" "package/templates/react-vite-counter/package.json"; then
   echo "CLI tarball is missing bundled template package.json: ${cli_tarball[0]}" >&2
   exit 1
 fi
 
-echo "CLI template package evidence: $cli_template_package_json_path"
+echo "CLI template package evidence: package/templates/react-vite-counter/package.json"
 
 packed_core_version="$(tar -xOf "${core_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_client_version="$(tar -xOf "${client_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
