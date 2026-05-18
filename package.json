@@ -26,6 +26,7 @@
     "@types/node": "^22.10.2",
     "knip": "5",
     "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "yaml": "^2.7.0"
   }
 }

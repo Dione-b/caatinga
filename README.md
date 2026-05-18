@@ -14,6 +14,7 @@
 > **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
 > and exported package paths may change before `v1.0.0`. Pin to an exact version and review
 > the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> See the [v0.2.1-alpha.0](https://github.com/Dione-b/caatinga/releases/tag/v0.2.1-alpha.0) GitHub Release for the current alpha milestone.
 
 Caatinga reduces the friction of building Stellar/Soroban dApps by standardizing contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration.
 
