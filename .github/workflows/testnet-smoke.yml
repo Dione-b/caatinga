@@ -26,6 +26,11 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+        with:
+          targets: wasm32v1-none
+
       - name: Install Stellar CLI
         uses: stellar/stellar-cli@v25.2.0
 
