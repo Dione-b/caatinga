@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import chalk from "chalk";
 
 const NODE_MIN_MAJOR = 20;
@@ -15,29 +14,11 @@ function checkNodeVersion(): string | null {
   return null;
 }
 
-function checkStellarCli(): string | null {
-  try {
-    execSync("stellar --version", { stdio: "pipe" });
-    return null;
-  } catch {
-    return (
-      "Stellar CLI was not found on PATH.\n" +
-      "  Install it with Cargo:\n" +
-      "    cargo install --locked stellar-cli --version 25.2.0\n" +
-      "  Or follow the official guide:\n" +
-      "    https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli"
-    );
-  }
-}
-
 export function runPreflight(): PreflightResult {
   const failures: string[] = [];
 
   const nodeFailure = checkNodeVersion();
   if (nodeFailure) failures.push(nodeFailure);
-
-  const stellarFailure = checkStellarCli();
-  if (stellarFailure) failures.push(stellarFailure);
 
   if (failures.length > 0) return { ok: false, failures };
   return { ok: true };
