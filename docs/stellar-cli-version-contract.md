@@ -30,7 +30,7 @@ Run these only on a developer machine when you accept compatibility risk:
 - `caatinga build counter --allow-untested-stellar-cli`
 - `caatinga deploy counter -s <identity> --allow-untested-stellar-cli`
 - `caatinga generate counter --allow-untested-stellar-cli`
-- `caatinga invoke counter.increment -s <identity> --allow-untested-stellar-cli` (replace `<identity>` with your Stellar CLI identity alias or public account address)
+- `caatinga invoke counter.increment -s <identity> --allow-untested-stellar-cli` (replace `<identity>` with your local Stellar CLI identity alias)
 
 ## Upgrade Process
 

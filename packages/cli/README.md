@@ -45,6 +45,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | Command | What it does |
 | --- | --- |
 | `caatinga init <projectName>` | Create a project from a bundled template and write `caatinga.artifacts.json` |
+| `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
 | `caatinga build [contract]` | Compile contract WASM through Stellar CLI (default contract: `counter`) |
 | `caatinga deploy [contract]` | Deploy one contract or the full configured graph; record IDs in artifacts |
 | `caatinga generate <contract>` | Generate TypeScript bindings from a deployed contract ID |
@@ -62,6 +63,12 @@ The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
 
 - `[contract]` defaults to `counter` when omitted
 - `--allow-untested-stellar-cli` allows a Stellar CLI newer than Caatinga's tested maximum (local only)
+
+### `doctor`
+
+- `-n, --network <network>` validates that the network exists in `caatinga.config.ts`
+- `-s, --source <identity>` validates that the local Stellar CLI identity exists
+- exits `0` when all diagnostics pass and non-zero when a blocking diagnostic fails
 
 ### `deploy`
 
@@ -84,7 +91,7 @@ Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deplo
 
 ## Supported inputs
 
-- `--source` accepts a Stellar CLI identity alias that can sign transactions; public `G...` addresses and secret keys are rejected
+- `--source` accepts a local Stellar CLI identity alias that can sign transactions; public `G...` addresses and secret keys are rejected
 - `--network` must match a network defined in `caatinga.config.ts`
 - Project commands require `caatinga.config.ts` in the working directory
 

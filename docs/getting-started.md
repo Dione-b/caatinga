@@ -36,7 +36,7 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-Use a Stellar CLI identity alias or a public `G...` account for `--source`. Caatinga rejects likely secret keys and seed phrases.
+Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
 ## Browser client flow
 

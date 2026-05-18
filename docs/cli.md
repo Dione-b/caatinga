@@ -12,6 +12,10 @@ Creates a project from a bundled template and writes `caatinga.artifacts.json`.
 
 Builds the configured contract with `stellar contract build`.
 
+## `caatinga doctor [--network testnet] [--source alice]`
+
+Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI, Rust, `wasm32v1-none`, `caatinga.config.ts`, `caatinga.artifacts.json`, an optional configured network, and an optional local Stellar CLI identity.
+
 ## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
@@ -28,9 +32,9 @@ Use `--allow-untested-stellar-cli` only for local experiments. CI and release wo
 
 ## Current limits
 
-- `--source` accepts a Stellar CLI identity alias or public account address, not a secret key.
+- `--source` must be a local Stellar CLI identity alias that can sign transactions. Public `G...` addresses, secret keys, and seed phrases are rejected.
 - `caatinga dev` is reserved and hidden in pre-v1 builds. Use your frontend dev server (for example Vite) alongside `caatinga build`, `deploy`, `generate`, and `invoke`.
-- `caatinga doctor`, CLI XDR commands, and `caatinga generate --interop` are not implemented yet.
+- CLI XDR commands and `caatinga generate --interop` are not implemented yet.
 
 ## Error codes
 
