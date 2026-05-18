@@ -16,6 +16,9 @@ CAATINGA_VERSION_FILE="$ARTIFACT_DIR/${APP_NAME}-caatinga-version.txt"
 STELLAR_VERSION_FILE="$ARTIFACT_DIR/${APP_NAME}-stellar-version.txt"
 COUNTER_APP="${APP_NAME}-counter"
 MARKETPLACE_APP="${APP_NAME}-marketplace"
+LOCAL_CORE_DEP="file:${ROOT_DIR}/packages/core"
+LOCAL_CLIENT_DEP="file:${ROOT_DIR}/packages/client"
+LOCAL_CLI_DEP="file:${ROOT_DIR}/packages/cli"
 
 mkdir -p "$ARTIFACT_DIR"
 : > "$LOG_FILE"
@@ -53,6 +56,33 @@ run_step() {
   if [[ "$ec" -ne 0 ]]; then
     classify_and_exit "$ec" "$title"
   fi
+}
+
+patch_local_caatinga_dependencies() {
+  node --input-type=module -e "
+import { readFileSync, writeFileSync } from 'node:fs';
+const packageJsonPath = process.argv[1];
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+
+for (const [section, deps] of Object.entries({
+  dependencies: {
+    '@caatinga/core': process.env.LOCAL_CORE_DEP,
+    '@caatinga/client': process.env.LOCAL_CLIENT_DEP
+  },
+  devDependencies: {
+    '@caatinga/cli': process.env.LOCAL_CLI_DEP
+  }
+})) {
+  if (!packageJson[section]) continue;
+  for (const [name, value] of Object.entries(deps)) {
+    if (Object.prototype.hasOwnProperty.call(packageJson[section], name)) {
+      packageJson[section][name] = value;
+    }
+  }
+}
+
+writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+" "$1/package.json"
 }
 
 log "=== caatinga-version ==="
@@ -163,6 +193,8 @@ rm -rf "$ROOT_DIR/$COUNTER_APP" "$ROOT_DIR/$MARKETPLACE_APP"
 
 run_step "init-counter" "$CAATINGA_BIN" init "$COUNTER_APP" --template react-vite-counter
 cd "$ROOT_DIR/$COUNTER_APP"
+patch_local_caatinga_dependencies "$PWD"
+run_step "install-counter-deps" npm install --no-audit --fund=false
 
 run_step "build-counter" "$CAATINGA_BIN" build counter
 run_step "deploy-counter" "$CAATINGA_BIN" deploy counter --network testnet --source "$CI_IDENTITY"
@@ -192,6 +224,8 @@ cd "$ROOT_DIR"
 
 run_step "init-marketplace" "$CAATINGA_BIN" init "$MARKETPLACE_APP" --template marketplace-with-token
 cd "$ROOT_DIR/$MARKETPLACE_APP"
+patch_local_caatinga_dependencies "$PWD"
+run_step "install-marketplace-deps" npm install --no-audit --fund=false
 
 run_step "build-marketplace-token" "$CAATINGA_BIN" build token
 run_step "build-marketplace-contract" "$CAATINGA_BIN" build marketplace
