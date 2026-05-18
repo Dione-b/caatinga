@@ -2,6 +2,8 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
+During alpha, install published packages from the npm **`next`** dist-tag (release-gate validated). Pin `@next` or an exact version in apps; see [Release process](./release.md).
+
 ## Prerequisites
 
 - Node.js 20+
@@ -17,6 +19,22 @@ rustup target add wasm32v1-none
 stellar --version
 ```
 
+## Install from npm
+
+```bash
+npm install -g @caatinga/cli@next
+```
+
+Confirm the resolved versions:
+
+```bash
+npm view @caatinga/cli@next version
+npm view @caatinga/core@next version
+npm view @caatinga/client@next version
+```
+
+Without a global CLI install, use `npx caatinga@next` in the commands below.
+
 ## From the repository
 
 ```bash
@@ -27,6 +45,8 @@ pnpm --filter @caatinga/cli dev init my-dapp
 
 ## Generated app flow
 
+After `caatinga init` (global `@next` CLI) or `npx caatinga@next init`:
+
 ```bash
 cd my-dapp
 npm install
@@ -36,11 +56,19 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
+If the CLI is not installed globally, prefix each command with `npx caatinga@next` instead of `npx caatinga`.
+
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
 ## Browser client flow
 
-After `generate`, register the generated bindings with `@caatinga/client`:
+After `generate`, install the client packages from `next` (match the CLI version when possible):
+
+```bash
+npm install @caatinga/client@next @caatinga/core@next
+```
+
+Register the generated bindings with `@caatinga/client`:
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";

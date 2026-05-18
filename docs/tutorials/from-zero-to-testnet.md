@@ -2,16 +2,26 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
+During alpha, use the npm **`next`** dist-tag for `@caatinga/cli`, `@caatinga/core`, and `@caatinga/client`. It tracks the latest release-gate validated build.
+
 ## Prerequisites
 
 Install Node.js 20+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 cargo install --locked stellar-cli --version 25.2.0
 rustup target add wasm32v1-none
 stellar --version
 rustc --version
+```
+
+Confirm the published `next` versions:
+
+```bash
+npm view @caatinga/cli@next version
+npm view @caatinga/core@next version
+npm view @caatinga/client@next version
 ```
 
 Create and fund a local Stellar CLI identity:
@@ -29,6 +39,8 @@ caatinga init my-dapp
 cd my-dapp
 npm install
 ```
+
+Without a global CLI install, run `npx caatinga@next init my-dapp` instead of `caatinga init`.
 
 The default template creates:
 
@@ -91,7 +103,13 @@ npx caatinga deploy counter --network testnet --source alice --force
 
 ## Use the Contract in a Client
 
-After generation, browser code can compose artifacts, generated bindings, network config, and a wallet adapter:
+After generation, install the browser packages from `next`:
+
+```bash
+npm install @caatinga/client@next @caatinga/core@next
+```
+
+Browser code can compose artifacts, generated bindings, network config, and a wallet adapter:
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
@@ -121,6 +139,7 @@ await client.contract("counter").invoke("increment");
 - `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0-25.2.0.
 - `CAATINGA_UNTESTED_CLI_VERSION`: use a tested Stellar CLI version, or pass `--allow-untested-stellar-cli` only for local experiments.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.
+- `CAATINGA_ARTIFACT_NOT_FOUND` after build: ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
 - `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.
 

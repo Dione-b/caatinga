@@ -5,16 +5,17 @@
 <p>Developer toolkit for Stellar/Soroban dApps.</p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
-[![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli)](https://www.npmjs.com/package/@caatinga/cli)
+[![npm](https://img.shields.io/npm/v/@caatinga/cli/next?label=%40caatinga%2Fcli%40next)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#)
 
 </div>
 
 > **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
-> and exported package paths may change before `v1.0.0`. Pin to an exact version and review
+> and exported package paths may change before `v1.0.0`. Install from the npm **`next`** dist-tag
+> (the release-gate validated channel). Pin `@next` or an exact version in apps; review
 > the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
-> See the [v0.2.1-alpha.0](https://github.com/Dione-b/caatinga/releases/tag/v0.2.1-alpha.0) GitHub Release for the current alpha milestone.
+> See [GitHub Releases](https://github.com/Dione-b/caatinga/releases) and [Release process](./docs/release.md).
 
 Caatinga reduces the friction of building Stellar/Soroban dApps by standardizing contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration.
 
@@ -62,9 +63,22 @@ for local experiments. Release and CI gates must not use that override.
 
 ## Install
 
+During alpha, prefer the **`next`** dist-tag on all published packages (`@caatinga/cli`,
+`@caatinga/core`, `@caatinga/client`). It tracks the latest release-gate validated build.
+
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 ```
+
+Confirm the resolved version:
+
+```bash
+npm view @caatinga/cli@next version
+npm view @caatinga/core@next version
+npm view @caatinga/client@next version
+```
+
+Without a global install, prefix commands with `npx caatinga@next` (see Quick Start).
 
 ## Quick Start
 
@@ -78,6 +92,8 @@ npx caatinga deploy counter --network testnet --source alice
 npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
+
+If you did not install the CLI globally, use `npx caatinga@next` instead of `caatinga` / `npx caatinga`.
 
 `deploy` writes the contract ID to `caatinga.artifacts.json`. `generate` creates TypeScript
 bindings under `contracts/generated/`. Run `npx caatinga doctor --network testnet --source alice`
@@ -114,7 +130,12 @@ After `init`, you typically work with:
 
 ## Browser Client
 
-Use `@caatinga/client` with generated bindings, `caatinga.artifacts.json`, and a wallet adapter (Freighter):
+Use `@caatinga/client@next` (or the same version as your CLI) with generated bindings,
+`caatinga.artifacts.json`, and a wallet adapter (Freighter):
+
+```bash
+npm install @caatinga/client@next @caatinga/core@next
+```
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
