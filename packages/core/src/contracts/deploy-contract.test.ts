@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -308,6 +308,68 @@ describe("deployContract", () => {
     expect(result.skipped).toBe(true);
     expect(result.contractId).toBe(CONTRACT_ID);
     expect(runCommand).not.toHaveBeenCalledWith("stellar", expect.arrayContaining(["contract", "deploy"]));
+  });
+
+  it("should_return_stale_wasm_warning_when_sources_are_newer_than_wasm", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-stale-"));
+    const contractDir = path.join(tmpDir, "contracts", "counter");
+    const srcDir = path.join(contractDir, "src");
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(srcDir, { recursive: true });
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeFile(path.join(srcDir, "lib.rs"), "pub fn increment() {}", "utf8");
+
+    const wasmMtime = new Date("2020-01-01T00:00:00.000Z");
+    const sourceMtime = new Date("2026-05-18T00:00:00.000Z");
+    await utimes(wasmPath, wasmMtime, wasmMtime);
+    await utimes(path.join(srcDir, "lib.rs"), sourceMtime, sourceMtime);
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const result = await deployContract({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir
+    });
+
+    expect(result.staleWasmWarning).toMatch(/may be stale/i);
+    expect(result.contractId).toBe(CONTRACT_ID);
+    expect(runCommand).toHaveBeenCalledWith(
+      "stellar",
+      expect.arrayContaining(["contract", "deploy"]),
+      expect.any(Object)
+    );
+  });
+
+  it("should_not_return_stale_wasm_warning_when_checkStaleWasm_is_false", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-no-stale-"));
+    const contractDir = path.join(tmpDir, "contracts", "counter");
+    const srcDir = path.join(contractDir, "src");
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(srcDir, { recursive: true });
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeFile(path.join(srcDir, "lib.rs"), "pub fn increment() {}", "utf8");
+
+    const wasmMtime = new Date("2020-01-01T00:00:00.000Z");
+    const sourceMtime = new Date("2026-05-18T00:00:00.000Z");
+    await utimes(wasmPath, wasmMtime, wasmMtime);
+    await utimes(path.join(srcDir, "lib.rs"), sourceMtime, sourceMtime);
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const result = await deployContract({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+      checkStaleWasm: false
+    });
+
+    expect(result.staleWasmWarning).toBeUndefined();
+    expect(result.contractId).toBe(CONTRACT_ID);
   });
 
   it("should_throw_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED_when_resolved_args_still_contain_placeholders", async () => {

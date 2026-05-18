@@ -20,6 +20,8 @@ See [Stellar CLI Version Contract](./stellar-cli-version-contract.md) for the su
 
 When adding parser behavior:
 
+CI runs `pnpm check:fixtures` (`scripts/check-fixture-references.sh`) to fail on orphaned files under `packages/core/test/fixtures/stellar-cli/`.
+
 1. Add the raw CLI output fixture.
 2. Add a parser test that reads the fixture.
 3. Include at least one failure fixture.

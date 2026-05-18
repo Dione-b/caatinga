@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core";
+import { CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core/browser";
 import type { CaatingaClientConfig } from "../types.js";
 import { createCaatingaClient } from "./create-caatinga-client.js";
 
@@ -121,6 +121,25 @@ describe("createCaatingaClient", () => {
       preparedXdr: "AAAA_UNSIGNED"
     });
     expect(config.wallet.signTransaction).not.toHaveBeenCalled();
+  });
+
+  it("should_reject_with_WALLET_TIMEOUT_when_sign_never_resolves", async () => {
+    vi.useFakeTimers();
+    const config = createClientConfig({
+      walletTimeout: 50,
+      wallet: {
+        getPublicKey: vi.fn(async () => "GPUBLIC"),
+        signTransaction: vi.fn(() => new Promise(() => {}))
+      }
+    });
+    const client = createCaatingaClient(config);
+    const promise = client.contract("counter").invoke("increment");
+    const assertion = expect(promise).rejects.toMatchObject({
+      code: CaatingaErrorCode.WALLET_TIMEOUT
+    });
+    await vi.advanceTimersByTimeAsync(50);
+    await assertion;
+    vi.useRealTimers();
   });
 
   it("maps wallet signing failures to CAATINGA_XDR_SIGN_FAILED", async () => {

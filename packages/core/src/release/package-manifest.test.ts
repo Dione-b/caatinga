@@ -22,6 +22,14 @@ describe("publish package manifests", () => {
         import: "./dist/index.js",
         require: "./dist/index.cjs"
       });
+      if (packageName === "core") {
+        expect(packageJson.exports["./browser"]).toEqual({
+          types: "./dist/browser.d.ts",
+          import: "./dist/browser.js",
+          require: "./dist/browser.cjs"
+        });
+        expect(packageJson.scripts.build).toContain("src/browser.ts");
+      }
       expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "README.md", "LICENSE"]));
       expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);
 

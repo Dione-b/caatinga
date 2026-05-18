@@ -10,6 +10,15 @@
     },
     "typecheck": {
       "dependsOn": ["^build"]
+    },
+    "@caatinga/client#typecheck": {
+      "dependsOn": ["@caatinga/core#build"]
+    },
+    "@caatinga/cli#typecheck": {
+      "dependsOn": ["@caatinga/core#build"]
+    },
+    "@caatinga/client#build": {
+      "dependsOn": ["@caatinga/core#build", "^build"]
     }
   }
 }

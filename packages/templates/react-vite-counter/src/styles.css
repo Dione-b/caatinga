@@ -72,6 +72,27 @@ button:hover {
   text-transform: uppercase;
 }
 
+.wallet-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.wallet-error,
+.counter-error {
+  margin: 0;
+  max-width: min(360px, 100%);
+  color: #8b1e1e;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.counter-error {
+  margin-top: 16px;
+}
+
 .wallet-button,
 .network-pill {
   display: inline-flex;

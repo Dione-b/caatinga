@@ -1,0 +1,10 @@
+{
+  "project": "__PROJECT_NAME__",
+  "version": 1,
+  "networks": {
+    "testnet": {
+      "contracts": {},
+      "dependencyGraph": {}
+    }
+  }
+}

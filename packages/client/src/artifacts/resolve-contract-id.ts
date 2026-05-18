@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode, type CaatingaArtifacts } from "@caatinga/core/browser";
 
 export function resolveContractId(input: {
   artifacts: CaatingaArtifacts;

@@ -46,3 +46,12 @@ changes or public error-code changes.
 
 See the operator checklist in [`release/publish-checklist.md`](./release/publish-checklist.md)
 and the stable release contract in [`release/v1.0.0.md`](./release/v1.0.0.md).
+
+## Package changelogs
+
+Each published package maintains its own Changesets-generated changelog under
+`packages/cli/CHANGELOG.md`, `packages/core/CHANGELOG.md`, and `packages/client/CHANGELOG.md`.
+Those files include a **Breaking changes policy** header that links to the v1 public API contract
+in [`release/v1.0.0.md`](./release/v1.0.0.md) and the `CAATINGA_*` error reference in
+[`errors.md`](./errors.md). There is no root `CHANGELOG.md`; use the package changelog for the
+package you depend on.

@@ -54,3 +54,5 @@ The official template documents both paths:
 2. Browser/client: generated bindings + `caatinga.artifacts.json` + `@caatinga/client` + Freighter adapter
 
 The template does not generate React hooks or `caatinga generate --interop` output in alpha.
+
+Browser-facing templates should import errors and artifact types from `@caatinga/core/browser` (see `react-vite-counter/src/caatinga.ts`). Keep the full `@caatinga/core` entry for Node-only config (`caatinga.config.ts`, CLI workflows).

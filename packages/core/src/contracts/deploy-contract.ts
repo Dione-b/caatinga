@@ -14,7 +14,12 @@ import { buildDependencyGraph } from "./dependency-graph.js";
 import { resolveDeployArgs, type DeployArgValue } from "./resolve-deploy-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
-import { assertWasmExists, hashWasm } from "./wasm.js";
+import {
+  assertWasmExists,
+  formatStaleWasmWarning,
+  hashWasm,
+  isWasmOlderThanSources
+} from "./wasm.js";
 
 export type DeployContractOptions = {
   config: CaatingaConfig;
@@ -24,6 +29,7 @@ export type DeployContractOptions = {
   cwd?: string;
   allowUntestedStellarCli?: boolean;
   force?: boolean;
+  checkStaleWasm?: boolean;
   resolvedDeployArgs?: Record<string, DeployArgValue>;
   dependencies?: string[];
 };
@@ -59,6 +65,17 @@ export async function deployContract(options: DeployContractOptions) {
   });
   await assertWasmExists(contract.wasmPath);
 
+  let staleWasmWarning: string | undefined;
+  if (options.checkStaleWasm !== false) {
+    const stale = await isWasmOlderThanSources({
+      wasmPath: contract.wasmPath,
+      contractPath: contract.sourcePath
+    });
+    if (stale) {
+      staleWasmWarning = formatStaleWasmWarning(contract.name);
+    }
+  }
+
   const artifactsBefore = await readArtifacts(cwd);
   const existing = artifactsBefore.networks[network.name]?.contracts[contract.name];
   if (existing?.contractId && !options.force) {
@@ -68,7 +85,8 @@ export async function deployContract(options: DeployContractOptions) {
       contractId: existing.contractId,
       artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
       output: "",
-      skipped: true as const
+      skipped: true as const,
+      staleWasmWarning
     };
   }
 
@@ -173,6 +191,7 @@ export async function deployContract(options: DeployContractOptions) {
     contractId,
     artifactsPath,
     output,
-    skipped: false as const
+    skipped: false as const,
+    staleWasmWarning
   };
 }

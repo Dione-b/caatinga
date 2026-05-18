@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import type { CaatingaBindingAdapter } from "../types.js";
 
 interface BindingWithClient {

@@ -203,6 +203,12 @@ writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 
 npm install --no-audit --fund=false --prefer-offline
 npm run build
+
+if ! grep -r 'createCaatingaClient' dist/ >/dev/null 2>&1; then
+  echo "Bundled template dist missing createCaatingaClient" >&2
+  exit 1
+fi
+
 cd "$TMP_DIR"
 
 "$CAATINGA_BIN" init market-app --template marketplace-with-token

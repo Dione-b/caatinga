@@ -118,6 +118,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/contracts/resolve-deploy-args.test.ts",
     trigger: "resolveDeployArgs("
   },
+  [CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND]: {
+    file: "packages/core/src/contracts/verify-dependency-contract.test.ts",
+    trigger: "verifyDependencyContract("
+  },
   [CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID]: {
     file: "packages/core/src/contracts/resolve-deploy-args.test.ts",
     trigger: "resolveDeployArgs("
@@ -158,7 +162,23 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/client/caatinga-contract-client.test.ts",
     trigger: "client.contract(\"counter\").buildXdr("
   },
+  [CaatingaErrorCode.WALLET_TIMEOUT]: {
+    file: "packages/client/src/client/create-caatinga-client.test.ts",
+    trigger: "client.contract(\"counter\").invoke("
+  },
   [CaatingaErrorCode.SOURCE_ACCOUNT_REQUIRED]: {
+    file: "packages/core/src/contracts/source-account.test.ts",
+    trigger: "assertSafeSourceAccount("
+  },
+  [CaatingaErrorCode.SOURCE_IS_SECRET_KEY]: {
+    file: "packages/core/src/contracts/source-account.test.ts",
+    trigger: "assertSafeSourceAccount("
+  },
+  [CaatingaErrorCode.SOURCE_IS_SEED_PHRASE]: {
+    file: "packages/core/src/contracts/source-account.test.ts",
+    trigger: "assertSafeSourceAccount("
+  },
+  [CaatingaErrorCode.SOURCE_IS_PUBLIC_KEY]: {
     file: "packages/core/src/contracts/source-account.test.ts",
     trigger: "assertSafeSourceAccount("
   },
@@ -185,6 +205,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
   [CaatingaErrorCode.TEMPLATE_INCOMPATIBLE]: {
     file: "packages/core/src/templates/create-project-from-template.test.ts",
     trigger: "createProjectFromTemplate("
+  },
+  [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
+    file: "packages/cli/src/commands/doctor-deploy-coverage.test.ts",
+    trigger: "reportDeployCoverage("
   }
 };
 
