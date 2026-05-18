@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 0.2.2
+
+### Patch Changes
+
+- Fix Soroban WASM artifact resolution for `wasm32v1-none` builds. Official templates now ship the current target path, legacy `wasm32-unknown-unknown` config paths resolve automatically after build and deploy, and CI blocks reintroducing the deprecated target in bundled templates.
+
 Public API contract and `CAATINGA_*` error code stability are documented in
 [`docs/release/v1.0.0.md`](../../docs/release/v1.0.0.md) and [`docs/errors.md`](../../docs/errors.md).
 Consult those documents when upgrading across minor versions during the `0.x` phase.

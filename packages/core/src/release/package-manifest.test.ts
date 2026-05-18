@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 const packages = ["core", "client"];
 const repoRoot = join(__dirname, "../../../..");
 const monorepoOnlyDependencyPattern = /(?:workspace|link|file):/;
+const coreVersion = JSON.parse(
+  readFileSync(join(repoRoot, "packages/core/package.json"), "utf8")
+).version as string;
+const coreVersionRange = `^${coreVersion}`;
 
 describe("publish package manifests", () => {
   for (const packageName of packages) {
@@ -34,7 +38,7 @@ describe("publish package manifests", () => {
       expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);
 
       if (packageName === "client") {
-        expect(packageJson.dependencies["@caatinga/core"]).toBe("^0.2.1");
+        expect(packageJson.dependencies["@caatinga/core"]).toBe(coreVersionRange);
       }
     });
   }
@@ -52,7 +56,7 @@ describe("publish package manifests", () => {
       }
     });
     expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "templates", "README.md", "LICENSE"]));
-    expect(packageJson.dependencies["@caatinga/core"]).toBe("^0.2.1");
+    expect(packageJson.dependencies["@caatinga/core"]).toBe(coreVersionRange);
     expect(packageJson.scripts.build).toContain("tsup src/index.ts");
     expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);
   });

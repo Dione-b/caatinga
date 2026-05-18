@@ -53,6 +53,10 @@ describe("createProgram", () => {
 
     expect(packageJson.name).toBe("absolute-path-app");
     expect(artifacts.project).toBe("absolute-path-app");
+
+    const config = await readFile(path.join(targetDir, "caatinga.config.ts"), "utf8");
+    expect(config).toContain("target/wasm32v1-none/release/counter.wasm");
+    expect(config).not.toContain("wasm32-unknown-unknown");
   });
 
   it("prints the template default contract in init next steps", async () => {

@@ -66,7 +66,7 @@ importers:
   packages/cli:
     dependencies:
       '@caatinga/core':
-        specifier: ^0.2.1
+        specifier: ^0.2.2
         version: link:../core
       chalk:
         specifier: ^5.4.1
@@ -91,7 +91,7 @@ importers:
   packages/client:
     dependencies:
       '@caatinga/core':
-        specifier: ^0.2.1
+        specifier: ^0.2.2
         version: link:../core
       '@stellar/freighter-api':
         specifier: ^4.0.0
@@ -224,7 +224,7 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@caatinga/core@0.2.1':
+  '@caatinga/core@0.2.2':
     resolution: {directory: packages/core, type: directory}
     engines: {node: '>=20'}
 
@@ -2144,7 +2144,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@caatinga/core@0.2.1':
+  '@caatinga/core@0.2.2':
     dependencies:
       execa: 9.6.1
       jiti: 2.7.0

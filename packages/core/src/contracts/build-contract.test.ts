@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -148,6 +148,52 @@ describe("buildContract", () => {
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.BUILD_FAILED
     });
+  });
+
+  it("should_resolve_legacy_wasm_target_path_after_stellar_build", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
+    const sourceDir = path.join(tmpDir, "contracts", "counter");
+    const legacyWasmPath = path.join(
+      tmpDir,
+      "contracts",
+      "counter",
+      "target",
+      "wasm32-unknown-unknown",
+      "release",
+      "counter.wasm"
+    );
+    const currentWasmPath = path.join(
+      tmpDir,
+      "contracts",
+      "counter",
+      "target",
+      "wasm32v1-none",
+      "release",
+      "counter.wasm"
+    );
+    const config: CaatingaConfig = {
+      ...baseConfig,
+      contracts: {
+        counter: {
+          ...baseConfig.contracts.counter,
+          path: "./contracts/counter",
+          wasm: "./contracts/counter/target/wasm32-unknown-unknown/release/counter.wasm"
+        }
+      }
+    };
+
+    await mkdir(sourceDir, { recursive: true });
+    await mkdir(path.dirname(currentWasmPath), { recursive: true });
+    await writeFile(currentWasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
+
+    const result = await buildContract({
+      config,
+      contractName: "counter",
+      cwd: tmpDir
+    });
+
+    expect(result.contract.wasmPath).toBe(currentWasmPath);
+    await expect(access(legacyWasmPath)).rejects.toBeDefined();
   });
 
   it("does not mask Stellar CLI version errors from the preflight check", async () => {
