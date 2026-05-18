@@ -7,8 +7,11 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
 [![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli)](https://www.npmjs.com/package/@caatinga/cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#)
 
 </div>
+
+> **⚠️ Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`), and exported package paths may change without notice before `v1.0.0`. Pin to an exact version and review the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 ## Install
 

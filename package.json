@@ -11,13 +11,14 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "knip": "knip --no-config-hints",
+    "check:versions": "bash scripts/check-version-alignment.sh",
     "changeset": "changeset",
     "pack:packages": "( cd packages/core && pnpm pack --pack-destination ../../packed ) && ( cd packages/client && pnpm pack --pack-destination ../../packed ) && ( cd packages/cli && pnpm pack --pack-destination ../../packed )",
     "test:consumer": "bash scripts/consumer-isolation-test.sh",
     "test:consumer:client-bundlers": "bash scripts/consumer-client-bundlers-test.sh",
     "ci:snapshot-pack": "bash scripts/ci-snapshot-pack.sh",
     "publish:dry-run": "pnpm publish -r --access public --dry-run --no-git-checks --tag next",
-    "ci:publish-matrix": "bash scripts/check-ci-stellar-pin.sh && pnpm build && pnpm test && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
+    "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && pnpm build && pnpm test && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
