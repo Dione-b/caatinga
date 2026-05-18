@@ -48,6 +48,7 @@
   "scripts": {
     "build": "tsup src/index.ts src/freighter.ts --format esm,cjs --dts",
     "test": "vitest run --pool=threads",
+    "pretypecheck": "pnpm --filter @caatinga/core run build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
