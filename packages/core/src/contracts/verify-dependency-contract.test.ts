@@ -29,7 +29,7 @@ function createTokenArtifact(contractId: string): CaatingaArtifacts["networks"][
     wasmHash: "a".repeat(64),
     deployedAt: "2026-05-12T00:00:00.000Z",
     sourcePath: "./contracts/token",
-    wasmPath: "./contracts/token/target/wasm32-unknown-unknown/release/token.wasm",
+    wasmPath: "./contracts/token/target/wasm32v1-none/release/token.wasm",
     dependencies: [],
     resolvedDeployArgs: {}
   };

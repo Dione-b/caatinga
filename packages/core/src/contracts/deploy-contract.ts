@@ -15,10 +15,10 @@ import { resolveDeployArgs, type DeployArgValue } from "./resolve-deploy-args.js
 import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
 import {
-  assertWasmExists,
   formatStaleWasmWarning,
   hashWasm,
-  isWasmOlderThanSources
+  isWasmOlderThanSources,
+  resolveWasmArtifactPath
 } from "./wasm.js";
 
 export type DeployContractOptions = {
@@ -63,12 +63,16 @@ export async function deployContract(options: DeployContractOptions) {
   await checkBinary("stellar", "Install Stellar CLI before running caatinga deploy.", {
     allowUntestedStellarCli: options.allowUntestedStellarCli
   });
-  await assertWasmExists(contract.wasmPath);
+  const wasmPath = await resolveWasmArtifactPath(contract.wasmPath);
+  const contractWithWasm = {
+    ...contract,
+    wasmPath
+  };
 
   let staleWasmWarning: string | undefined;
   if (options.checkStaleWasm !== false) {
     const stale = await isWasmOlderThanSources({
-      wasmPath: contract.wasmPath,
+      wasmPath,
       contractPath: contract.sourcePath
     });
     if (stale) {
@@ -80,7 +84,7 @@ export async function deployContract(options: DeployContractOptions) {
   const existing = artifactsBefore.networks[network.name]?.contracts[contract.name];
   if (existing?.contractId && !options.force) {
     return {
-      contract,
+      contract: contractWithWasm,
       network,
       contractId: existing.contractId,
       artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
@@ -122,7 +126,7 @@ export async function deployContract(options: DeployContractOptions) {
     "contract",
     "deploy",
     "--wasm",
-    contract.wasmPath,
+    wasmPath,
     "--source-account",
     source,
     ...buildStellarNetworkArgs(network),
@@ -164,7 +168,7 @@ export async function deployContract(options: DeployContractOptions) {
       `Contract ID: ${contractId}`
     ].filter(Boolean).join("\n");
   }
-  const wasmHash = await hashWasm(contract.wasmPath);
+  const wasmHash = await hashWasm(wasmPath);
   const dependencyGraph = buildDependencyGraph(options.config.contracts);
   const dependencies = options.dependencies ?? contract.config.dependsOn;
 
@@ -186,7 +190,7 @@ export async function deployContract(options: DeployContractOptions) {
   const artifactsPath = await writeArtifacts(nextArtifacts, cwd);
 
   return {
-    contract,
+    contract: contractWithWasm,
     network,
     contractId,
     artifactsPath,

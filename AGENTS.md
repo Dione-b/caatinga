@@ -61,6 +61,7 @@ Before committing changes that touch tooling, dependencies, or CI, verify that v
   on duplicate sources.
 - **Node.js**: Workflows use Node 20; keep `engines` and any `.nvmrc` / `node-version` inputs aligned with that baseline.
 - **Lockfile**: After dependency or `packageManager` changes, run `pnpm install` and commit `pnpm-lock.yaml` so CI `--frozen-lockfile` installs match.
+- **Workspace linking**: Root `.npmrc` sets `prefer-workspace-packages=true` and `link-workspace-packages=true` so local `@caatinga/*` packages resolve from the monorepo before npm (needed when a version bump is not yet published).
 - **Workspace packages**: When bumping published versions or internal `workspace:*` ranges, update all affected `package.json` files in the same change.
 
 When in doubt, grep for version pins (`packageManager`, `version:`, `node-version`, `engines`) before pushing.

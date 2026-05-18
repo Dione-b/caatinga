@@ -3,7 +3,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { resolveContract } from "./resolve-contract.js";
-import { assertWasmExists } from "./wasm.js";
+import { resolveWasmArtifactPath } from "./wasm.js";
 
 export type BuildContractOptions = {
   config: CaatingaConfig;
@@ -73,10 +73,13 @@ export async function buildContract(options: BuildContractOptions) {
     throw error;
   }
 
-  await assertWasmExists(contract.wasmPath);
+  const wasmPath = await resolveWasmArtifactPath(contract.wasmPath);
 
   return {
-    contract,
+    contract: {
+      ...contract,
+      wasmPath
+    },
     output: result.all || result.stdout
   };
 }

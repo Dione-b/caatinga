@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CAATINGA_CORE_VERSION } from "../version.js";
 import {
@@ -23,7 +25,11 @@ describe("isCoreVersionCompatible", () => {
   });
 
   it("uses the centralized core version by default", () => {
-    expect(CAATINGA_CORE_VERSION).toBe("0.2.1");
+    const corePackageVersion = JSON.parse(
+      readFileSync(join(__dirname, "../../package.json"), "utf8")
+    ).version as string;
+
+    expect(CAATINGA_CORE_VERSION).toBe(corePackageVersion);
     expect(isCoreVersionCompatible(defaultCompatibleCoreRange())).toBe(true);
   });
 });
