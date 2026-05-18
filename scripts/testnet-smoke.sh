@@ -19,6 +19,7 @@ MARKETPLACE_APP="${APP_NAME}-marketplace"
 LOCAL_CORE_DEP="file:${ROOT_DIR}/packages/core"
 LOCAL_CLIENT_DEP="file:${ROOT_DIR}/packages/client"
 LOCAL_CLI_DEP="file:${ROOT_DIR}/packages/cli"
+export LOCAL_CORE_DEP LOCAL_CLIENT_DEP LOCAL_CLI_DEP
 
 mkdir -p "$ARTIFACT_DIR"
 : > "$LOG_FILE"
