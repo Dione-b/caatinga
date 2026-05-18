@@ -27,10 +27,15 @@ export { checkBinary } from "./shell/check-binary.js";
 export { parseContractId } from "./stellar-cli/parse-contract-id.js";
 export * from "./stellar-cli/version.js";
 
+export { validateSourceShape } from "./contracts/validate-source-shape.js";
 export { resolveContract, type ResolvedContract } from "./contracts/resolve-contract.js";
 export { buildContract, type BuildContractOptions } from "./contracts/build-contract.js";
 export { deployContract, type DeployContractOptions } from "./contracts/deploy-contract.js";
-export { deployContractGraph } from "./contracts/deploy-contract-graph.js";
+export {
+  deployContractGraph,
+  type DeployContractGraphResult,
+  type SkippedContract
+} from "./contracts/deploy-contract-graph.js";
 export { buildDependencyGraph } from "./contracts/dependency-graph.js";
 export { resolveDeployOrder } from "./contracts/resolve-deploy-order.js";
 export { resolveDeployArgs, type DeployArgValue } from "./contracts/resolve-deploy-args.js";

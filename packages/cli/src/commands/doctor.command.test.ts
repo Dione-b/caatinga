@@ -7,17 +7,17 @@ describe("sourceDiagnostic", () => {
 
     expect(diagnostic).toEqual(expect.objectContaining({
       ok: false,
-      label: expect.stringContaining("unsafe"),
+      label: expect.stringContaining("CAATINGA_SOURCE_IS_PUBLIC_KEY"),
       fix: expect.stringContaining("Stellar CLI identity")
     }));
   });
 
   it("rejects a secret-shaped source without asking Stellar CLI to resolve it", async () => {
-    const diagnostic = await sourceDiagnostic("SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    const diagnostic = await sourceDiagnostic("SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
     expect(diagnostic).toEqual(expect.objectContaining({
       ok: false,
-      label: expect.stringContaining("unsafe"),
+      label: expect.stringContaining("CAATINGA_SOURCE_IS_SECRET_KEY"),
       fix: expect.stringContaining("identity alias")
     }));
   });
@@ -27,7 +27,7 @@ describe("sourceDiagnostic", () => {
 
     expect(diagnostic).toEqual(expect.objectContaining({
       ok: false,
-      label: expect.stringContaining("unsafe"),
+      label: expect.stringContaining("CAATINGA_SOURCE_IS_SEED_PHRASE"),
       fix: expect.stringContaining("identity alias")
     }));
   });

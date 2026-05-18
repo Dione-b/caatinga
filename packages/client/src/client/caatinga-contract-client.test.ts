@@ -51,6 +51,28 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         }
       };
     }
+
+    failingPrepare() {
+      return {
+        toXDR() {
+          return "AAAA_UNSIGNED";
+        },
+        prepare() {
+          return Promise.reject(new Error("simulation failed"));
+        }
+      };
+    }
+
+    failingSubmit() {
+      return {
+        toXDR() {
+          return "AAAA_UNSIGNED";
+        },
+        async signAndSend() {
+          throw new Error("rpc rejected");
+        }
+      };
+    }
   }
 
   return {
@@ -109,6 +131,52 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").invoke("badSubmit")).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_RESULT_FAILED
+    });
+  });
+
+  it("should_include_rpcUrl_in_hint_when_prepare_fails_on_buildXdr", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").buildXdr("failingPrepare")).rejects.toMatchObject({
+      code: CaatingaErrorCode.XDR_PREPARE_FAILED,
+      hint: expect.stringContaining("https://rpc.example")
+    });
+  });
+
+  it("should_include_rpcUrl_in_hint_when_submit_fails_on_invoke", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").invoke("failingSubmit")).rejects.toMatchObject({
+      code: CaatingaErrorCode.XDR_SUBMIT_FAILED,
+      hint: expect.stringContaining("https://rpc.example")
+    });
+  });
+
+  it("should_throw_XDR_SIGN_FAILED_when_signTransaction_returns_empty_string", async () => {
+    const config = createClientConfig({
+      wallet: {
+        getPublicKey: vi.fn(async () => "GPUBLIC"),
+        signTransaction: vi.fn(async () => "")
+      }
+    });
+
+    await expect(createCaatingaClient(config).contract("counter").invoke("increment")).rejects.toMatchObject({
+      code: CaatingaErrorCode.XDR_SIGN_FAILED,
+      hint: expect.stringContaining("empty")
+    });
+  });
+
+  it("should_throw_XDR_SIGN_FAILED_when_signTransaction_returns_undefined", async () => {
+    const config = createClientConfig({
+      wallet: {
+        getPublicKey: vi.fn(async () => "GPUBLIC"),
+        signTransaction: vi.fn(async () => undefined as unknown as string)
+      }
+    });
+
+    await expect(createCaatingaClient(config).contract("counter").invoke("increment")).rejects.toMatchObject({
+      code: CaatingaErrorCode.XDR_SIGN_FAILED,
+      hint: expect.stringContaining("empty")
     });
   });
 });

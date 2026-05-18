@@ -42,9 +42,13 @@ export function registerDeployCommand(program: Command): void {
       logger.success("Deploy complete");
       logger.info("");
       logger.info(`Network: ${result.network.name}`);
+      for (const skipped of result.skippedContracts) {
+        logger.info(`[skipped] ${skipped.name} — already deployed on ${result.network.name}`);
+        logger.info(`  Contract ID: ${skipped.contractId}`);
+      }
       for (const contract of result.deployedContracts) {
-        logger.info(`Contract: ${contract.name}`);
-        logger.info(`Contract ID: ${contract.contractId}`);
+        logger.info(`[deployed] ${contract.name}`);
+        logger.info(`  Contract ID: ${contract.contractId}`);
       }
       logger.info("Artifacts updated: caatinga.artifacts.json");
     }));

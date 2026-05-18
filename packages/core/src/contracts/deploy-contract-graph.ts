@@ -1,9 +1,22 @@
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
-import { resolveNetwork } from "../networks/resolve-network.js";
+import { resolveNetwork, type ResolvedNetwork } from "../networks/resolve-network.js";
 import { deployContract } from "./deploy-contract.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveDeployOrder } from "./resolve-deploy-order.js";
+
+export type SkippedContract = {
+  name: string;
+  contractId: string;
+  network: string;
+  reason: "already-deployed";
+};
+
+export type DeployContractGraphResult = {
+  network: ResolvedNetwork;
+  deployedContracts: Array<{ name: string; contractId: string }>;
+  skippedContracts: SkippedContract[];
+};
 
 export async function deployContractGraph(options: {
   config: CaatingaConfig;
@@ -14,7 +27,7 @@ export async function deployContractGraph(options: {
   includeDependencies: boolean;
   force: boolean;
   allowUntestedStellarCli?: boolean;
-}) {
+}): Promise<DeployContractGraphResult> {
   const cwd = options.cwd ?? process.cwd();
   const network = resolveNetwork(options.config, options.networkName);
   const order = resolveDeployOrder({
@@ -23,6 +36,7 @@ export async function deployContractGraph(options: {
     includeDependencies: options.includeDependencies
   });
   const deployedContracts: Array<{ name: string; contractId: string }> = [];
+  const skippedContracts: SkippedContract[] = [];
 
   for (const contractName of order) {
     const artifacts = await readArtifacts(cwd);
@@ -35,7 +49,12 @@ export async function deployContractGraph(options: {
     });
 
     if (existing?.contractId && !options.force) {
-      deployedContracts.push({ name: contractName, contractId: existing.contractId });
+      skippedContracts.push({
+        name: contractName,
+        contractId: existing.contractId,
+        network: network.name,
+        reason: "already-deployed"
+      });
       continue;
     }
 
@@ -51,11 +70,21 @@ export async function deployContractGraph(options: {
       dependencies: contractConfig.dependsOn
     });
 
-    deployedContracts.push({ name: contractName, contractId: result.contractId });
+    if (result.skipped) {
+      skippedContracts.push({
+        name: contractName,
+        contractId: result.contractId,
+        network: network.name,
+        reason: "already-deployed"
+      });
+    } else {
+      deployedContracts.push({ name: contractName, contractId: result.contractId });
+    }
   }
 
   return {
     network,
-    deployedContracts
+    deployedContracts,
+    skippedContracts
   };
 }

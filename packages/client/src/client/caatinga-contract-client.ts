@@ -39,6 +39,7 @@ export class CaatingaContractClient {
       method,
       contractId,
       transaction,
+      rpcUrl: this.config.network.rpcUrl,
       debug: debugRaw
     });
   }
@@ -55,16 +56,23 @@ export class CaatingaContractClient {
       method,
       contractId,
       transaction,
+      rpcUrl: this.config.network.rpcUrl,
       debug: debugRaw
     });
 
     let signedXdr: string;
     try {
-      signedXdr = await this.config.wallet.signTransaction({
-        xdr: xdr.preparedXdr,
-        networkPassphrase: this.config.network.networkPassphrase
-      });
+      signedXdr = await this.withWalletTimeout("signTransaction", () =>
+        this.config.wallet.signTransaction({
+          xdr: xdr.preparedXdr,
+          networkPassphrase: this.config.network.networkPassphrase
+        })
+      );
     } catch (error) {
+      if (error instanceof CaatingaError) {
+        throw error;
+      }
+
       throw new CaatingaError(
         `Failed to sign XDR for "${this.contractName}.${method}".`,
         CaatingaErrorCode.XDR_SIGN_FAILED,
@@ -73,7 +81,22 @@ export class CaatingaContractClient {
       );
     }
 
-    const raw = await submitTransaction(transaction, signedXdr, this.contractName, method);
+    if (typeof signedXdr !== "string" || signedXdr.trim().length === 0) {
+      throw new CaatingaError(
+        `Failed to sign XDR for "${this.contractName}.${method}".`,
+        CaatingaErrorCode.XDR_SIGN_FAILED,
+        "Wallet returned an empty or invalid signed XDR. The user may have dismissed the signing prompt.",
+        signedXdr
+      );
+    }
+
+    const raw = await submitTransaction(
+      transaction,
+      signedXdr,
+      this.contractName,
+      method,
+      this.config.network.rpcUrl
+    );
     const normalized = normalizeSubmitResult<T>(raw);
 
     return {
@@ -106,7 +129,9 @@ export class CaatingaContractClient {
 
     let publicKey: string;
     try {
-      publicKey = await this.config.wallet.getPublicKey();
+      publicKey = await this.withWalletTimeout("getPublicKey", () =>
+        this.config.wallet.getPublicKey()
+      );
     } catch (error) {
       if (error instanceof CaatingaError) {
         throw error;
@@ -128,6 +153,44 @@ export class CaatingaContractClient {
     const transaction = await this.bindingAdapter.callMethod({ client, method, args });
 
     return { contractId, transaction };
+  }
+
+  private withWalletTimeout<T>(label: string, fn: () => Promise<T>): Promise<T> {
+    const timeoutMs = this.config.walletTimeout;
+    if (timeoutMs === undefined || timeoutMs <= 0) {
+      return fn();
+    }
+
+    let timedOut = false;
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        timedOut = true;
+        reject(
+          new CaatingaError(
+            `Wallet "${label}" timed out after ${timeoutMs}ms.`,
+            CaatingaErrorCode.WALLET_TIMEOUT,
+            "Ensure the wallet adapter rejects on user dismissal, or increase walletTimeout."
+          )
+        );
+      }, timeoutMs);
+
+      fn().then(
+        (value) => {
+          if (timedOut) {
+            return;
+          }
+          clearTimeout(timer);
+          resolve(value);
+        },
+        (error) => {
+          if (timedOut) {
+            return;
+          }
+          clearTimeout(timer);
+          reject(error);
+        }
+      );
+    });
   }
 }
 
@@ -170,7 +233,8 @@ async function submitTransaction(
   transaction: unknown,
   signedXdr: string,
   contractName: string,
-  method: string
+  method: string,
+  rpcUrl: string
 ): Promise<unknown> {
   const candidate = transaction as SubmitTransactionLike;
   const submit = candidate.signAndSend ?? candidate.send;
@@ -195,7 +259,7 @@ async function submitTransaction(
     throw new CaatingaError(
       `Failed to submit XDR for "${contractName}.${method}".`,
       CaatingaErrorCode.XDR_SUBMIT_FAILED,
-      "Check wallet signature and RPC connectivity.",
+      `RPC: ${rpcUrl}. Check wallet signature and RPC connectivity.`,
       error
     );
   }

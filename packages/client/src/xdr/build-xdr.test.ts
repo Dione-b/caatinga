@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import { buildXdr } from "./build-xdr.js";
 
+const rpcUrl = "https://soroban-testnet.stellar.org";
+
 describe("buildXdr", () => {
   it("should_map_prepare_rejection_to_XDR_PREPARE_FAILED_when_prepare_is_async", async () => {
     await expect(
@@ -9,6 +11,7 @@ describe("buildXdr", () => {
         contractName: "counter",
         method: "increment",
         contractId: "CID",
+        rpcUrl,
         transaction: {
           toXDR() {
             return "AAAA_UNSIGNED";
@@ -19,7 +22,8 @@ describe("buildXdr", () => {
         }
       })
     ).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_PREPARE_FAILED
+      code: CaatingaErrorCode.XDR_PREPARE_FAILED,
+      hint: expect.stringContaining(rpcUrl)
     });
   });
 
@@ -31,6 +35,7 @@ describe("buildXdr", () => {
         contractName: "counter",
         method: "increment",
         contractId: "CID",
+        rpcUrl,
         transaction: {
           toXDR() {
             return "AAAA_UNSIGNED";

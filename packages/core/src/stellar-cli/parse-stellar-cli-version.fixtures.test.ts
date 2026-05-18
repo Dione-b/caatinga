@@ -17,6 +17,11 @@ describe("parseStellarCliVersion (checked-in fixtures)", () => {
     expect(parseStellarCliVersion(output)).toBe("22.0.0");
   });
 
+  it("should_parse_semver_from_v22_0_1_version_fixture", async () => {
+    const output = await readFixture("v22.0.1/version.v22.0.1.fixture.txt");
+    expect(parseStellarCliVersion(output)).toBe("22.0.1");
+  });
+
   it("should_parse_semver_from_v24_0_0_version_fixture", async () => {
     const output = await readFixture("v24.0.0/version.v24.0.0.fixture.txt");
     expect(parseStellarCliVersion(output)).toBe("24.0.0");

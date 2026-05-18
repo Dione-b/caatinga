@@ -144,7 +144,7 @@ console.log(tx.preparedXdr);
 
 `buildXdr()` creates the generated binding client, so it may call `wallet.getPublicKey()`. It does not call `wallet.signTransaction()`.
 
-## Wallet Adapter
+## Implementing a wallet adapter
 
 ```ts
 export interface CaatingaWalletAdapter {
@@ -156,6 +156,12 @@ export interface CaatingaWalletAdapter {
   }): Promise<string>;
 }
 ```
+
+Contract:
+
+- **Reject on dismissal:** `getPublicKey` and `signTransaction` must reject when the user cancels or dismisses the wallet UI. Do not leave the promise pending indefinitely.
+- **Adapter timeouts:** Your adapter may apply its own timeout before rejecting.
+- **Caatinga timeout:** Caatinga does not impose a default timeout. Pass optional `walletTimeout` (milliseconds) on `CaatingaClientConfig` to cap `getPublicKey` and `signTransaction`; when exceeded, the client throws `CAATINGA_WALLET_TIMEOUT`.
 
 The Freighter adapter is exported from:
 
@@ -183,6 +189,7 @@ Client failures use public `CAATINGA_*` codes. The most common are:
 - `CAATINGA_BINDING_CLIENT_NOT_FOUND`
 - `CAATINGA_BINDING_METHOD_NOT_FOUND`
 - `CAATINGA_WALLET_NOT_CONNECTED`
+- `CAATINGA_WALLET_TIMEOUT`
 - `CAATINGA_XDR_BUILD_FAILED`
 - `CAATINGA_XDR_PREPARE_FAILED`
 - `CAATINGA_XDR_SIGN_FAILED`

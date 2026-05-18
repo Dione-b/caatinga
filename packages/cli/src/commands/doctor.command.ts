@@ -8,8 +8,10 @@ import {
   parseStellarCliVersion,
   readArtifacts,
   resolveNetwork,
-  runCommand
+  runCommand,
+  validateSourceShape
 } from "@caatinga/core";
+import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -27,19 +29,6 @@ type Diagnostic = {
 
 const NODE_MIN_MAJOR = 20;
 const WASM_TARGET = "wasm32v1-none";
-const PUBLIC_ACCOUNT_PATTERN = /^G[A-Z2-7]{55}$/;
-
-function validateSourceShape(source: string): CaatingaError | undefined {
-  if (source.startsWith("S") || source.trim().includes(" ") || PUBLIC_ACCOUNT_PATTERN.test(source)) {
-    return new CaatingaError(
-      "Refusing to accept a likely public address, secret key, or seed phrase as --source.",
-      CaatingaErrorCode.UNSAFE_SOURCE_ACCOUNT,
-      "--source must be a local Stellar CLI identity alias."
-    );
-  }
-
-  return undefined;
-}
 
 function nodeDiagnostic(): Diagnostic {
   const version = process.versions.node;
@@ -164,7 +153,7 @@ export async function sourceDiagnostic(source: string | undefined): Promise<Diag
   if (unsafeSource) {
     return {
       ok: false,
-      label: `source identity ${source} is unsafe`,
+      label: `source identity ${source} rejected (${unsafeSource.code})`,
       fix: unsafeSource.hint
     };
   }
@@ -196,6 +185,37 @@ function printFixes(diagnostics: Diagnostic[]): void {
   }
 }
 
+function printDeployCoverageLine(line: DeployCoverageLine): void {
+  if (line.ok) {
+    logger.info(`✓ ${line.name} — ${line.contractId}`);
+    return;
+  }
+
+  logger.info(`✗ ${line.name}`);
+  if (line.fix) logger.info(`  ${line.fix}`);
+}
+
+export async function reportDeployCoverage(networkName: string): Promise<boolean> {
+  const coverage = await evaluateDeployCoverage({ networkName });
+
+  logger.info("");
+  logger.info(`Deploy coverage (${networkName}):`);
+  for (const line of coverage.lines) {
+    printDeployCoverageLine(line);
+  }
+
+  if (!coverage.complete) {
+    const missing = coverage.lines.filter((line) => !line.ok).map((line) => line.name);
+    throw new CaatingaError(
+      `Not all configured contracts are deployed on ${networkName}.`,
+      CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY,
+      `Deploy missing contracts: ${missing.join(", ")}. See the commands above.`
+    );
+  }
+
+  return true;
+}
+
 export function registerDoctorCommand(program: Command): void {
   program
     .command("doctor")
@@ -224,7 +244,17 @@ export function registerDoctorCommand(program: Command): void {
 
       printFixes(diagnostics);
 
-      const ready = diagnostics.every((diagnostic) => diagnostic.ok);
+      let ready = diagnostics.every((diagnostic) => diagnostic.ok);
+
+      if (options.network && ready) {
+        try {
+          await reportDeployCoverage(options.network);
+        } catch (error) {
+          ready = false;
+          throw error;
+        }
+      }
+
       logger.info("");
       logger.info(`Status: ${ready ? "ready" : "blocked"}`);
 

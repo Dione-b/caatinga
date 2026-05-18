@@ -6,6 +6,13 @@ export interface CaatingaNetwork {
   networkPassphrase: string;
 }
 
+/**
+ * Wallet integration for browser-side signing.
+ *
+ * Implementations must reject the returned promise when the user dismisses or
+ * cancels signing (do not leave the promise pending indefinitely). Adapters may
+ * apply their own timeout. Caatinga optionally enforces {@link CaatingaClientConfig.walletTimeout}.
+ */
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
   signTransaction(input: {
@@ -23,6 +30,8 @@ export interface CaatingaClientConfig {
   network: CaatingaNetwork;
   artifacts: CaatingaArtifacts;
   wallet: CaatingaWalletAdapter;
+  /** Optional timeout (ms) for wallet `getPublicKey` and `signTransaction`. No default when omitted. */
+  walletTimeout?: number;
   contracts: Record<string, CaatingaContractRegistration>;
 }
 
