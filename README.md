@@ -113,14 +113,14 @@ After `init`, you typically work with:
 
 ## CLI Commands
 
-| Command | What it does |
-|---|---|
-| `caatinga init <dir>` | Create a project from a template |
-| `caatinga doctor [--network <name>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
-| `caatinga build [contract]` | Compile contract WASM (default: `counter`) |
-| `caatinga deploy [contract] --source <identity> --network <name>` | Deploy and save `contractId` to artifacts |
-| `caatinga generate <contract> --network <name>` | Generate TS bindings from a deployed contract |
-| `caatinga invoke <contract.method> --source <identity> --network <name>` | Call a contract method |
+| Command                                                                  | What it does                                                                               |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `caatinga init <dir>`                                                    | Create a project from a template                                                           |
+| `caatinga doctor [--network <name>] [--source <identity>]`               | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
+| `caatinga build [contract]`                                              | Compile contract WASM (default: `counter`)                                                 |
+| `caatinga deploy [contract] --source <identity> --network <name>`        | Deploy and save `contractId` to artifacts                                                  |
+| `caatinga generate <contract> --network <name>`                          | Generate TS bindings from a deployed contract                                              |
+| `caatinga invoke <contract.method> --source <identity> --network <name>` | Call a contract method                                                                     |
 
 **Common flags**
 
