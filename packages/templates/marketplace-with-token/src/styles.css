@@ -1,0 +1,157 @@
+:root {
+  color: #142322;
+  background:
+    radial-gradient(circle at top, rgba(255, 208, 118, 0.22), transparent 32%),
+    linear-gradient(180deg, #f7f1e4 0%, #efe7d2 100%);
+  font-family:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgba(20, 35, 34, 0.08);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.app-shell {
+  width: min(960px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.hero,
+.panel {
+  border: 1px solid rgba(20, 35, 34, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 252, 245, 0.86);
+  box-shadow: 0 18px 60px rgba(20, 35, 34, 0.08);
+}
+
+.hero {
+  margin-bottom: 20px;
+  padding: clamp(24px, 5vw, 48px);
+}
+
+.panel {
+  margin-bottom: 20px;
+  padding: 24px;
+}
+
+.hero h1,
+.panel h2,
+.graph-card h3 {
+  margin: 0;
+}
+
+.hero h1 {
+  font-size: clamp(2.4rem, 8vw, 4.6rem);
+  line-height: 0.95;
+  max-width: 10ch;
+}
+
+.lede {
+  max-width: 60ch;
+  margin: 16px 0 0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #7c5a16;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.network-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #173f3a;
+  color: #fff8ec;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.graph {
+  display: grid;
+  gap: 16px;
+}
+
+.graph-card {
+  position: relative;
+  padding: 18px;
+  border-radius: 18px;
+  background: #fffdfa;
+  border: 1px solid rgba(20, 35, 34, 0.1);
+}
+
+.graph-card--dependent::before {
+  content: "dependsOn token";
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(124, 90, 22, 0.12);
+  color: #7c5a16;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.graph-card__label {
+  margin: 0 0 6px;
+  color: #5d6766;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.steps {
+  margin: 16px 0 0;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+}
+
+@media (min-width: 700px) {
+  .graph {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .panel__header {
+    flex-direction: column;
+  }
+}

@@ -17,14 +17,16 @@ npm install
 caatinga build counter
 
 # 2. Deploy to testnet (requires a Stellar CLI identity)
-caatinga deploy counter --network testnet --source <identity-or-G-address>
+caatinga deploy counter --network testnet --source <identity>
 
 # 3. Generate TypeScript bindings from the deployed contract
 caatinga generate counter --network testnet
 
 # 4. Invoke the increment method
-caatinga invoke counter.increment --network testnet --source <identity-or-G-address>
+caatinga invoke counter.increment --network testnet --source <identity>
 ```
+
+`--source` must be a local Stellar CLI identity that can sign, for example `alice`; public `G...` addresses are rejected for deploy/invoke.
 
 ## Browser Client
 

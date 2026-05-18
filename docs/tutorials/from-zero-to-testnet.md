@@ -1,0 +1,126 @@
+# From Zero to Testnet
+
+This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
+
+## Prerequisites
+
+Install Node.js 20+ and Rust first. Then install the supported Stellar CLI and Wasm target:
+
+```bash
+npm install -g @caatinga/cli
+cargo install --locked stellar-cli --version 25.2.0
+rustup target add wasm32v1-none
+stellar --version
+rustc --version
+```
+
+Create and fund a local Stellar CLI identity:
+
+```bash
+stellar keys generate alice --fund --network testnet
+```
+
+`--source` must be a local Stellar CLI identity, not a public `G...` address. Caatinga rejects public addresses for deploy/invoke because those operations need a signer.
+
+## Create the Project
+
+```bash
+caatinga init my-dapp
+cd my-dapp
+npm install
+```
+
+The default template creates:
+
+- `caatinga.config.ts` with contracts, output paths, and networks.
+- `caatinga.artifacts.json` for per-network deployed contract IDs.
+- `contracts/` with Rust Soroban contract source.
+- `src/` with frontend/client code.
+
+## Verify the Environment
+
+```bash
+npx caatinga doctor --network testnet --source alice
+```
+
+Expected shape:
+
+```txt
+Caatinga Doctor
+
+✓ Node.js 20.11.0
+✓ Stellar CLI 25.2.0
+✓ Rust 1.84.0
+✓ wasm32v1-none target installed
+✓ caatinga.config.ts found
+✓ caatinga.artifacts.json found
+✓ network testnet found
+✓ source identity alice found
+
+Status: ready
+```
+
+If Stellar CLI is missing, install it:
+
+```bash
+cargo install --locked stellar-cli --version 25.2.0
+```
+
+If the Wasm target is missing, install it:
+
+```bash
+rustup target add wasm32v1-none
+```
+
+## Build, Deploy, Generate, Invoke
+
+```bash
+npx caatinga build counter
+npx caatinga deploy counter --network testnet --source alice
+npx caatinga generate counter --network testnet
+npx caatinga invoke counter.increment --network testnet --source alice
+```
+
+`deploy` saves the deployed `contractId` under the selected network in `caatinga.artifacts.json`. `generate` reads that artifact and writes TypeScript bindings under the generated bindings directory configured in `caatinga.config.ts`.
+
+To redeploy even when an artifact already contains a contract ID:
+
+```bash
+npx caatinga deploy counter --network testnet --source alice --force
+```
+
+## Use the Contract in a Client
+
+After generation, browser code can compose artifacts, generated bindings, network config, and a wallet adapter:
+
+```ts
+import { createCaatingaClient } from "@caatinga/client";
+import { freighterWalletAdapter } from "@caatinga/client/freighter";
+import * as Counter from "./contracts/generated/counter";
+import artifacts from "../caatinga.artifacts.json";
+
+const client = createCaatingaClient({
+  network: {
+    name: "testnet",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015"
+  },
+  artifacts,
+  wallet: freighterWalletAdapter,
+  contracts: {
+    counter: { binding: Counter }
+  }
+});
+
+await client.contract("counter").invoke("increment");
+```
+
+## Troubleshooting
+
+- `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
+- `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0-25.2.0.
+- `CAATINGA_UNTESTED_CLI_VERSION`: use a tested Stellar CLI version, or pass `--allow-untested-stellar-cli` only for local experiments.
+- `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.
+- `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
+- `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.
+

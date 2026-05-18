@@ -115,7 +115,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 npm run dev
 ```
 
-Use a Stellar CLI identity alias or public account address for `--source`; do not pass seed phrases or secret keys.
+Use a local Stellar CLI identity alias for `--source`; public account addresses, seed phrases, and secret keys are rejected for signing operations.
 
 ## Client Smoke Path
 
@@ -206,9 +206,9 @@ Internal alpha release for Caatinga.
 ```bash
 caatinga init <projectName>
 caatinga build counter
-caatinga deploy counter --network testnet --source <identity-or-G-address>
+caatinga deploy counter --network testnet --source <identity>
 caatinga generate counter --network testnet
-caatinga invoke counter.increment --network testnet --source <identity-or-G-address>
+caatinga invoke counter.increment --network testnet --source <identity>
 ```
 
 ## Client Alpha Flow

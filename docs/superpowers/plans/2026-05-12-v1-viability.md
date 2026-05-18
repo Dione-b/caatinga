@@ -1926,7 +1926,7 @@ program
   .description("Deploy one or all configured Soroban contracts")
   .argument("[contract]", "Contract name")
   .option("-n, --network <network>", "Configured network name")
-  .requiredOption("-s, --source <source>", "Stellar CLI identity alias or public account address")
+  .requiredOption("-s, --source <source>", "Stellar CLI identity alias")
   .option("--force", "Redeploy contracts even if artifacts already contain contract IDs")
   .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
   .option("--allow-untested-stellar-cli", "Allow local use of a Stellar CLI version newer than Caatinga's tested maximum")

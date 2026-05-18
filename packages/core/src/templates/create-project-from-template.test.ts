@@ -158,11 +158,25 @@ describe("createProjectFromTemplate", () => {
     const manifest = JSON.parse(await readFile(path.join(templatePath, "caatinga.template.json"), "utf8"));
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
     const mainSource = await readFile(path.join(templatePath, "src/main.ts"), "utf8");
+    const appSource = await readFile(path.join(templatePath, "src/App.tsx"), "utf8");
+    const marketplaceSource = await readFile(path.join(templatePath, "contracts/marketplace/src/lib.rs"), "utf8");
+    const packageJson = await readPackageJson<{
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      scripts?: Record<string, string>;
+    }>(path.join(templatePath, "package.json"));
 
     expect(manifest.name).toBe("marketplace-with-token");
     expect(config).toContain("dependsOn: [\"token\"]");
     expect(config).toContain("tokenContractId: \"${contracts.token.contractId}\"");
     expect(mainSource).not.toContain("placeholder");
+    expect(appSource).toContain("__constructor");
+    expect(packageJson.dependencies?.["@caatinga/client"]).toEqual(expect.any(String));
+    expect(packageJson.dependencies?.react).toEqual(expect.any(String));
+    expect(packageJson.dependencies?.vite).toEqual(expect.any(String));
+    expect(packageJson.scripts?.build).toContain("vite build");
+    expect(marketplaceSource).toContain("pub fn __constructor");
+    expect(marketplaceSource).toContain("pub fn token_contract_id");
     await expect(readFile(path.join(templatePath, "contracts/token/src/lib.rs"), "utf8")).resolves.toBeTruthy();
     await expect(readFile(path.join(templatePath, "contracts/marketplace/src/lib.rs"), "utf8")).resolves.toBeTruthy();
   });
@@ -198,6 +212,7 @@ describe("createProjectFromTemplate", () => {
       {
         template: "marketplace-with-token",
         expected: {
+          "@caatinga/client": expectedInternalDependencies["@caatinga/client"],
           "@caatinga/core": expectedInternalDependencies["@caatinga/core"],
           "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
         }
@@ -235,5 +250,19 @@ describe("createProjectFromTemplate", () => {
     expect(config).toContain("target/wasm32v1-none/release/counter.wasm");
     expect(cargoToml).toContain('soroban-sdk = "22.0.1"');
     expect(cargoToml).toContain('soroban-sdk = { version = "22.0.1", features = ["testutils"] }');
+  });
+
+  it("ships lockfiles for official Rust contracts so smoke builds stay reproducible", async () => {
+    const templateContracts = [
+      "../../../templates/react-vite-counter/contracts/counter/Cargo.lock",
+      "../../../templates/marketplace-with-token/contracts/token/Cargo.lock",
+      "../../../templates/marketplace-with-token/contracts/marketplace/Cargo.lock"
+    ];
+
+    await Promise.all(templateContracts.map(async templateContractLockPath => {
+      await expect(
+        readFile(path.resolve(__dirname, templateContractLockPath), "utf8")
+      ).resolves.toContain("[[package]]");
+    }));
   });
 });

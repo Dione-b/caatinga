@@ -29,7 +29,9 @@ export default defineConfig({
 
 ## Artifacts
 
-Artifacts are network-scoped in schema `version: 1` so `counter` can have different contract IDs on testnet and mainnet. Environments are intentionally not modeled yet; a future artifact schema can distinguish `dev -> testnet`, `staging -> testnet`, and `production -> mainnet`.
+Artifacts are network-scoped in schema `version: 1` so `counter` can have different contract IDs
+on testnet and mainnet. Environments are intentionally not modeled yet; a future artifact schema
+can distinguish `dev -> testnet`, `staging -> testnet`, and `production -> mainnet`.
 
 Current shape (optional fields omitted when empty):
 

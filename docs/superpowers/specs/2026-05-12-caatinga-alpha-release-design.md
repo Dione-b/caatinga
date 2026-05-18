@@ -95,9 +95,9 @@ The alpha supports:
 ```txt
 caatinga init <projectName>
 caatinga build [contract]
-caatinga deploy <contract> --network <network> --source <identity-or-G-address>
+caatinga deploy <contract> --network <network> --source <identity>
 caatinga generate <contract> --network <network>
-caatinga invoke <contract.method> --network <network> --source <identity-or-G-address> [args...]
+caatinga invoke <contract.method> --network <network> --source <identity> [args...]
 ```
 
 ### Supported Client Surface

@@ -13,7 +13,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 npm run dev
 ```
 
-Use a Stellar CLI identity alias or public account address for `--source`; do not pass seed phrases or secret keys.
+Use a local Stellar CLI identity alias for `--source`; public `G...` addresses, seed phrases, and secret keys are rejected for signing operations.
 
 ## Client Smoke Path
 

@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createProgram } from "./program.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -23,7 +23,7 @@ describe("createProgram", () => {
     const commandNames = createProgram().commands.map((command) => command.name());
 
     expect(commandNames).toEqual(
-      expect.arrayContaining(["init", "dev", "build", "deploy", "generate", "invoke"])
+      expect.arrayContaining(["init", "dev", "doctor", "build", "deploy", "generate", "invoke"])
     );
   });
 
@@ -53,5 +53,27 @@ describe("createProgram", () => {
 
     expect(packageJson.name).toBe("absolute-path-app");
     expect(artifacts.project).toBe("absolute-path-app");
+  });
+
+  it("prints the template default contract in init next steps", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-cli-init-"));
+    process.env.CAATINGA_TEMPLATES_DIR = path.resolve(__dirname, "../../templates");
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createProgram()
+        .exitOverride()
+        .parseAsync([
+          "node",
+          "caatinga",
+          "init",
+          path.join(tmpDir, "market-app"),
+          "--template",
+          "marketplace-with-token"
+        ]);
+      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build marketplace");
+    } finally {
+      logSpy.mockRestore();
+    }
   });
 });

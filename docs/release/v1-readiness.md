@@ -14,7 +14,7 @@
 ## Track B — Stable Release (`v1.0.0` / `latest`)
 
 - live testnet smoke workflow configured with CI secrets; three consecutive green scheduled runs per [observability plan](./v1.0.0.md#observability-plan)
-- Testnet smoke CI expects `CAATINGA_CI_IDENTITY_ALIAS` to name a Stellar CLI identity alias available in the restored Stellar CLI config. The workflow restores that config from the `CAATINGA_CI_STELLAR_CONFIG_B64` GitHub secret into `$HOME/.config/stellar/config.toml`. Do not commit secret keys. Rotate the identity if the secret is exposed.
+- Testnet smoke CI expects `CAATINGA_CI_IDENTITY_ALIAS` to name a Stellar CLI identity alias available after restoring `CAATINGA_CI_STELLAR_CONFIG_B64`. On May 18, 2026 we aligned the workflow with Stellar CLI `25.2.0`: the secret may still be a legacy base64 `config.toml`, but the preferred format is a base64 tar archive containing `.config/stellar/config.toml` plus `.config/soroban/identity/<alias>.toml`. Do not commit secret keys. Rotate the identity if the secret is exposed.
 - all five v1 specs implemented and accepted, as listed in [`docs/superpowers/specs/00-v1-viability-index.md`](../superpowers/specs/00-v1-viability-index.md)
 - three consecutive successful scheduled smoke runs, verified with the procedure in [`docs/release/v1.0.0.md`](./v1.0.0.md#observability-plan)
 - no unretried smoke failure in the last 7 days, verified with the procedure in [`docs/release/v1.0.0.md`](./v1.0.0.md#observability-plan)

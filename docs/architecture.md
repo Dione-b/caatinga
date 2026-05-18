@@ -30,12 +30,12 @@ Until (2) is real in the product, treat single-contract demos as necessary but n
 
 ## Package boundaries (monorepo)
 
-- **`@caatinga/cli`:** argument parsing, terminal UX, delegation to core—no subprocess orchestration except through core APIs.
+- **`@caatinga/cli`:** argument parsing, terminal UX, `doctor` diagnostics, delegation to core—no subprocess orchestration except through core APIs.
 - **`@caatinga/core`:** load `caatinga.config.ts`, validate schemas, resolve networks/contracts, read/write `caatinga.artifacts.json`, run Stellar CLI and related tools via a **single shell layer** (`run-command.ts`). **All `execa` usage stays here.**
 - **`@caatinga/client`:** thin client/browser interop over generated bindings, artifacts, wallet adapters, `invoke()`, `buildXdr()`, and explicit XDR/raw debug output. It does not own signing keys or serialize SCVal manually.
 - **`packages/templates`:** official templates consumed by `caatinga init` and validated through `caatinga.template.json` before copy.
 
-Deferred unless explicitly rescoped: `caatinga doctor`, CLI XDR commands, `caatinga generate --interop`, full `@caatinga/react` SDK surface, plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
+Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full `@caatinga/react` SDK surface, plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
 
 ## Meta-framework boundary: orchestrate workflow, not mental model
 
@@ -97,7 +97,7 @@ Alpha starts with **`@caatinga/client`**, not React hooks. The client composes g
 
 ## DX beyond CLI
 
-Prefer **`caatinga doctor`** later (bins, config/artifact sanity, optional staleness hints) before investing in VS Code/LSP. Doctor is intentionally outside the alpha release.
+Prefer **`caatinga doctor`** (bins, config/artifact sanity, network/source checks, optional staleness hints later) before investing in VS Code/LSP.
 
 ## Errors as public API
 

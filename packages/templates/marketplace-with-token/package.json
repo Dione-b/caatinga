@@ -4,14 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "caatinga:build": "caatinga build token && caatinga build marketplace",
-    "caatinga:deploy": "caatinga deploy --network testnet"
+    "caatinga:deploy": "caatinga deploy --network testnet",
+    "caatinga:generate": "caatinga generate token && caatinga generate marketplace"
   },
   "dependencies": {
-    "@caatinga/core": "^0.2.1"
+    "@caatinga/client": "^0.2.1",
+    "@caatinga/core": "^0.2.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^6.0.6"
   },
   "devDependencies": {
     "@caatinga/cli": "^0.2.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"
   }
 }

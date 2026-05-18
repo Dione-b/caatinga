@@ -9,6 +9,8 @@ NPM_CACHE_DIR="$TMP_DIR/.npm-cache"
 NPM_USERCONFIG="$TMP_DIR/.npmrc"
 RESOLVE_ABS_PATH_CMD='import path from "node:path"; process.stdout.write(path.resolve(process.argv[1]));'
 
+source "$ROOT_DIR/scripts/lib/archive-contains-path.sh"
+
 cleanup() {
   rm -rf "$ROOT_DIR/packages/cli/templates"
   rm -rf "$TMP_DIR"
@@ -92,7 +94,7 @@ if [[ ${#_kcli[@]} -ne 1 ]]; then
   exit 1
 fi
 
-if ! tar -tzf "${_kcli[0]}" | grep -q '^package/templates/react-vite-counter/caatinga.template.json$'; then
+if ! archive_contains_path "${_kcli[0]}" "package/templates/react-vite-counter/caatinga.template.json"; then
   echo "CLI tarball is missing bundled templates: ${_kcli[0]}" >&2
   exit 1
 fi
@@ -184,6 +186,33 @@ cd test-app
 export CAATINGA_PATCH_CORE="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kcore[0]}")"
 export CAATINGA_PATCH_CLIENT="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kclient[0]}")"
 export CAATINGA_PATCH_CLI="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kcli[0]}")"
+
+node --input-type=module -e "
+import { readFileSync, writeFileSync } from \"node:fs\";
+const pj = JSON.parse(readFileSync(\"package.json\", \"utf8\"));
+pj.dependencies[\"@caatinga/core\"] = process.env.CAATINGA_PATCH_CORE;
+pj.dependencies[\"@caatinga/client\"] = process.env.CAATINGA_PATCH_CLIENT;
+if (pj.devDependencies && Object.prototype.hasOwnProperty.call(pj.devDependencies, \"@caatinga/cli\")) {
+  pj.devDependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@caatinga/cli\")) {
+  pj.dependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
+"
+
+npm install --no-audit --fund=false --prefer-offline
+npm run build
+cd "$TMP_DIR"
+
+"$CAATINGA_BIN" init market-app --template marketplace-with-token
+test -f market-app/caatinga.config.ts
+test -f market-app/caatinga.artifacts.json
+test -f market-app/src/App.tsx
+test -f market-app/contracts/token/src/lib.rs
+test -f market-app/contracts/marketplace/src/lib.rs
+
+cd market-app
 
 node --input-type=module -e "
 import { readFileSync, writeFileSync } from \"node:fs\";
