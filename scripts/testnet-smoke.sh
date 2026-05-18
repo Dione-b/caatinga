@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export PATH="$ROOT_DIR/node_modules/.bin:$PATH"
 CORE_INDEX="${ROOT_DIR}/packages/core/dist/index.js"
+CAATINGA_BIN="${ROOT_DIR}/packages/cli/dist/index.js"
 
 : "${CAATINGA_CI_IDENTITY_ALIAS:?Set CAATINGA_CI_IDENTITY_ALIAS to a Stellar CLI identity alias provisioned in the runner config.}"
 CI_IDENTITY="$CAATINGA_CI_IDENTITY_ALIAS"
@@ -56,7 +57,7 @@ run_step() {
 
 log "=== caatinga-version ==="
 set +e
-caatinga --version 2>&1 | tee "$CAATINGA_VERSION_FILE" | tee -a "$LOG_FILE"
+"$CAATINGA_BIN" --version 2>&1 | tee "$CAATINGA_VERSION_FILE" | tee -a "$LOG_FILE"
 ec_kv=${PIPESTATUS[0]}
 set -e
 if [[ "$ec_kv" -ne 0 ]]; then
@@ -139,7 +140,7 @@ process.stdout.write(artifacts.networks.testnet.contracts.token.contractId);
   local invoke_out
   invoke_out="$(mktemp)"
   set +e
-  caatinga invoke marketplace.token_contract_id --network testnet --source "$CI_IDENTITY" 2>&1 | tee "$invoke_out" | tee -a "$LOG_FILE"
+  "$CAATINGA_BIN" invoke marketplace.token_contract_id --network testnet --source "$CI_IDENTITY" 2>&1 | tee "$invoke_out" | tee -a "$LOG_FILE"
   local ec=${PIPESTATUS[0]}
   set -e
   if [[ "$ec" -ne 0 ]]; then
@@ -160,22 +161,22 @@ process.stdout.write(artifacts.networks.testnet.contracts.token.contractId);
 
 rm -rf "$ROOT_DIR/$COUNTER_APP" "$ROOT_DIR/$MARKETPLACE_APP"
 
-run_step "init-counter" caatinga init "$COUNTER_APP" --template react-vite-counter
+run_step "init-counter" "$CAATINGA_BIN" init "$COUNTER_APP" --template react-vite-counter
 cd "$ROOT_DIR/$COUNTER_APP"
 
-run_step "build-counter" caatinga build counter
-run_step "deploy-counter" caatinga deploy counter --network testnet --source "$CI_IDENTITY"
+run_step "build-counter" "$CAATINGA_BIN" build counter
+run_step "deploy-counter" "$CAATINGA_BIN" deploy counter --network testnet --source "$CI_IDENTITY"
 
 run_step "artifacts-exists-counter" test -f caatinga.artifacts.json
 
 assert_counter_artifacts_contract_id
 
-run_step "generate-counter" caatinga generate counter --network testnet
+run_step "generate-counter" "$CAATINGA_BIN" generate counter --network testnet
 run_step "generated-bindings-exists-counter" test -d src/contracts/generated
 
 INVOKE_OUT="$(mktemp)"
 set +e
-caatinga invoke counter.increment --network testnet --source "$CI_IDENTITY" 2>&1 | tee "$INVOKE_OUT" | tee -a "$LOG_FILE"
+"$CAATINGA_BIN" invoke counter.increment --network testnet --source "$CI_IDENTITY" 2>&1 | tee "$INVOKE_OUT" | tee -a "$LOG_FILE"
 INV_EC=${PIPESTATUS[0]}
 set -e
 if [[ "$INV_EC" -ne 0 ]]; then
@@ -189,18 +190,18 @@ rm -f "$INVOKE_OUT"
 
 cd "$ROOT_DIR"
 
-run_step "init-marketplace" caatinga init "$MARKETPLACE_APP" --template marketplace-with-token
+run_step "init-marketplace" "$CAATINGA_BIN" init "$MARKETPLACE_APP" --template marketplace-with-token
 cd "$ROOT_DIR/$MARKETPLACE_APP"
 
-run_step "build-marketplace-token" caatinga build token
-run_step "build-marketplace-contract" caatinga build marketplace
-run_step "deploy-marketplace-graph" caatinga deploy --network testnet --source "$CI_IDENTITY"
+run_step "build-marketplace-token" "$CAATINGA_BIN" build token
+run_step "build-marketplace-contract" "$CAATINGA_BIN" build marketplace
+run_step "deploy-marketplace-graph" "$CAATINGA_BIN" deploy --network testnet --source "$CI_IDENTITY"
 
 run_step "artifacts-exists-marketplace" test -f caatinga.artifacts.json
 assert_marketplace_artifacts
 
-run_step "generate-marketplace-token" caatinga generate token --network testnet
-run_step "generate-marketplace-contract" caatinga generate marketplace --network testnet
+run_step "generate-marketplace-token" "$CAATINGA_BIN" generate token --network testnet
+run_step "generate-marketplace-contract" "$CAATINGA_BIN" generate marketplace --network testnet
 run_step "generated-bindings-exists-marketplace" test -d src/contracts/generated
 
 assert_marketplace_token_id_invoke
