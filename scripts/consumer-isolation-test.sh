@@ -202,3 +202,30 @@ writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 npm install --no-audit --fund=false --prefer-offline
 npm run build
 cd "$TMP_DIR"
+
+"$CAATINGA_BIN" init market-app --template marketplace-with-token
+test -f market-app/caatinga.config.ts
+test -f market-app/caatinga.artifacts.json
+test -f market-app/src/App.tsx
+test -f market-app/contracts/token/src/lib.rs
+test -f market-app/contracts/marketplace/src/lib.rs
+
+cd market-app
+
+node --input-type=module -e "
+import { readFileSync, writeFileSync } from \"node:fs\";
+const pj = JSON.parse(readFileSync(\"package.json\", \"utf8\"));
+pj.dependencies[\"@caatinga/core\"] = process.env.CAATINGA_PATCH_CORE;
+pj.dependencies[\"@caatinga/client\"] = process.env.CAATINGA_PATCH_CLIENT;
+if (pj.devDependencies && Object.prototype.hasOwnProperty.call(pj.devDependencies, \"@caatinga/cli\")) {
+  pj.devDependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@caatinga/cli\")) {
+  pj.dependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
+"
+
+npm install --no-audit --fund=false --prefer-offline
+npm run build
+cd "$TMP_DIR"

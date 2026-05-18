@@ -134,6 +134,18 @@ describe("deployContract", () => {
       dependencies: ["token"]
     });
 
+    expect(runCommand).toHaveBeenCalledWith(
+      "stellar",
+      expect.arrayContaining([
+        "contract",
+        "deploy",
+        "--",
+        "--token_contract_id",
+        "CTOKENCONTRACTID"
+      ]),
+      expect.any(Object)
+    );
+
     const saved = JSON.parse(await readFile(path.join(tmpDir, "caatinga.artifacts.json"), "utf8"));
     expect(saved.networks.testnet.contracts.marketplace).toMatchObject({
       contractId: CONTRACT_ID,

@@ -32,6 +32,11 @@ export function registerInitCommand(program: Command): void {
       logger.info("Next steps:");
       logger.info(`  cd ${projectDirectory}`);
       logger.info("  npm install");
-      logger.info("  npx caatinga build counter");
+      const defaultContract = result.template.contracts.default;
+      logger.info(
+        defaultContract
+          ? `  npx caatinga build ${defaultContract}`
+          : "  npx caatinga build"
+      );
     }));
 }
