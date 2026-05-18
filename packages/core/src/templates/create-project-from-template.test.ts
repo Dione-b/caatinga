@@ -251,4 +251,18 @@ describe("createProjectFromTemplate", () => {
     expect(cargoToml).toContain('soroban-sdk = "22.0.1"');
     expect(cargoToml).toContain('soroban-sdk = { version = "22.0.1", features = ["testutils"] }');
   });
+
+  it("ships lockfiles for official Rust contracts so smoke builds stay reproducible", async () => {
+    const templateContracts = [
+      "../../../templates/react-vite-counter/contracts/counter/Cargo.lock",
+      "../../../templates/marketplace-with-token/contracts/token/Cargo.lock",
+      "../../../templates/marketplace-with-token/contracts/marketplace/Cargo.lock"
+    ];
+
+    await Promise.all(templateContracts.map(async templateContractLockPath => {
+      await expect(
+        readFile(path.resolve(__dirname, templateContractLockPath), "utf8")
+      ).resolves.toContain("[[package]]");
+    }));
+  });
 });
