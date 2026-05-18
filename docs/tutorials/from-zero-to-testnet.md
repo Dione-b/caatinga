@@ -121,13 +121,13 @@ const client = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet: freighterWalletAdapter,
   contracts: {
-    counter: { binding: Counter }
-  }
+    counter: { binding: Counter },
+  },
 });
 
 await client.contract("counter").invoke("increment");
@@ -142,4 +142,3 @@ await client.contract("counter").invoke("increment");
 - `CAATINGA_ARTIFACT_NOT_FOUND` after build: ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
 - `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.
-

@@ -4,9 +4,9 @@
 
 ## Semver Rules
 
-- Adding a new CAATINGA_* code: minor change
-- Removing a CAATINGA_* code: major change
-- Renaming a CAATINGA_* code: major change
+- Adding a new CAATINGA\_\* code: minor change
+- Removing a CAATINGA\_\* code: major change
+- Renaming a CAATINGA\_\* code: major change
 - Changing the meaning of a code: major change
 - Changing message text only: patch change
 

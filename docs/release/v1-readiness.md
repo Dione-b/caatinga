@@ -23,6 +23,7 @@
 ## Verification Log
 
 2026-05-17 operational stability gate:
+
 - `pnpm typecheck`: pass via `rtk proxy pnpm typecheck` (the `rtk pnpm typecheck` wrapper printed `TypeScript: No errors found` but exited 1)
 - `pnpm build`: pass
 - `pnpm test`: pass
