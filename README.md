@@ -11,7 +11,9 @@
 
 </div>
 
-> **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`), and exported package paths may change before `v1.0.0`. Pin to an exact version and review the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
+> and exported package paths may change before `v1.0.0`. Pin to an exact version and review
+> the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 Caatinga reduces the friction of building Stellar/Soroban dApps by standardizing contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration.
 
@@ -52,7 +54,10 @@ rustup target add wasm32v1-none
 stellar keys generate alice --fund --network testnet
 ```
 
-Caatinga supports Stellar CLI 23.0.0 through 25.2.0. Versions below 23.0.0 fail with `CAATINGA_UNSUPPORTED_CLI_VERSION`. Versions above 25.2.0 fail with `CAATINGA_UNTESTED_CLI_VERSION` unless `--allow-untested-stellar-cli` is explicitly used for local experiments. Release and CI gates must not use that override.
+Caatinga supports Stellar CLI 23.0.0 through 25.2.0. Versions below 23.0.0 fail with
+`CAATINGA_UNSUPPORTED_CLI_VERSION`. Versions above 25.2.0 fail with
+`CAATINGA_UNTESTED_CLI_VERSION` unless `--allow-untested-stellar-cli` is explicitly used
+for local experiments. Release and CI gates must not use that override.
 
 ## Install
 
@@ -73,7 +78,9 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`deploy` writes the contract ID to `caatinga.artifacts.json`. `generate` creates TypeScript bindings under `contracts/generated/`. Run `npx caatinga doctor --network testnet --source alice` when setup fails before build/deploy/generate/invoke.
+`deploy` writes the contract ID to `caatinga.artifacts.json`. `generate` creates TypeScript
+bindings under `contracts/generated/`. Run `npx caatinga doctor --network testnet --source alice`
+when setup fails before build/deploy/generate/invoke.
 
 For the complete zero-to-testnet path, see [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md).
 
@@ -136,7 +143,13 @@ Public CLI and client errors use stable `CAATINGA_*` codes and actionable fix gu
 
 ## Roadmap
 
-The current status is alpha. The roadmap prioritizes CLI stability, docs, error contracts, consumer examples, and release automation before v1. See [ROADMAP.md](./ROADMAP.md).
+The current status is alpha. The roadmap prioritizes CLI stability, docs, error contracts,
+consumer examples, and release automation before v1. See [ROADMAP.md](./ROADMAP.md).
+
+The GitHub Actions workflow named `Release Gate` validates release readiness with typecheck,
+docs, build, tests, snapshot packing, publish dry-run, and consumer checks. It does not publish
+packages or create GitHub Releases yet; those steps remain manual until real release automation
+is implemented.
 
 ## Contributing
 
@@ -150,6 +163,7 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md), [Architecture](./docs/architecture.md
 - [Config](./docs/config.md)
 - [Client](./docs/client.md)
 - [Errors](./docs/errors.md)
+- [Release process](./docs/release.md)
 
 ## Develop this repo
 

@@ -14,11 +14,16 @@ Builds the configured contract with `stellar contract build`.
 
 ## `caatinga doctor [--network testnet] [--source alice]`
 
-Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI, Rust, `wasm32v1-none`, `caatinga.config.ts`, `caatinga.artifacts.json`, an optional configured network, and an optional local Stellar CLI identity.
+Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI,
+Rust, `wasm32v1-none`, `caatinga.config.ts`, `caatinga.artifacts.json`, an optional configured
+network, and an optional local Stellar CLI identity.
 
 ## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps]`
 
-Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
+Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
+CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first
+when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
+contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
 
 ## `caatinga generate <contract> [--network testnet]`
 

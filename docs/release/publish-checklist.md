@@ -3,13 +3,18 @@
 ## Before `next`
 
 - verify package READMEs are current for `@caatinga/cli`, `@caatinga/client`, and `@caatinga/core`
-- verify `.github/workflows/release.yml` is aligned with the pre-v1 dist-tag policy
+- verify `.github/workflows/release-gate.yml` passed for the intended tag or release candidate
 - run `pnpm typecheck`
 - run `pnpm build`
 - run `pnpm test`
 - run `pnpm test:consumer`
 - run `pnpm test:consumer:client-bundlers`
 - run `pnpm ci:publish-matrix`
+
+The release gate does not publish to npm and does not create a GitHub Release. It validates
+typecheck, docs, build, tests, snapshot packing, publish dry-run, and consumer package checks.
+Actual npm publishing and GitHub Release creation remain operator-controlled until the release
+automation contract is deliberately implemented.
 
 ```bash
 pnpm typecheck

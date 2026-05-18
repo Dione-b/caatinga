@@ -1,4 +1,4 @@
-name: Release
+name: Release Gate
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 jobs:
-  release:
+  release-gate:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,9 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Docs check
+        run: pnpm docs:check
 
       - name: Build
         run: pnpm build

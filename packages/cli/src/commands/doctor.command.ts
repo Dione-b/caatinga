@@ -3,6 +3,7 @@ import { Command } from "commander";
 import {
   assertSupportedStellarCliVersion,
   CaatingaError,
+  CaatingaErrorCode,
   loadConfig,
   parseStellarCliVersion,
   readArtifacts,
@@ -26,6 +27,19 @@ type Diagnostic = {
 
 const NODE_MIN_MAJOR = 20;
 const WASM_TARGET = "wasm32v1-none";
+const PUBLIC_ACCOUNT_PATTERN = /^G[A-Z2-7]{55}$/;
+
+function validateSourceShape(source: string): CaatingaError | undefined {
+  if (source.startsWith("S") || source.trim().includes(" ") || PUBLIC_ACCOUNT_PATTERN.test(source)) {
+    return new CaatingaError(
+      "Refusing to accept a likely public address, secret key, or seed phrase as --source.",
+      CaatingaErrorCode.UNSAFE_SOURCE_ACCOUNT,
+      "--source must be a local Stellar CLI identity alias."
+    );
+  }
+
+  return undefined;
+}
 
 function nodeDiagnostic(): Diagnostic {
   const version = process.versions.node;
@@ -143,14 +157,15 @@ async function networkDiagnostic(networkName: string | undefined): Promise<Diagn
   }
 }
 
-async function sourceDiagnostic(source: string | undefined): Promise<Diagnostic | undefined> {
+export async function sourceDiagnostic(source: string | undefined): Promise<Diagnostic | undefined> {
   if (!source) return undefined;
 
-  if (source.startsWith("G")) {
+  const unsafeSource = validateSourceShape(source);
+  if (unsafeSource) {
     return {
       ok: false,
-      label: `source identity ${source} is a public address`,
-      fix: "--source must be a local Stellar CLI identity, not a public G... address."
+      label: `source identity ${source} is unsafe`,
+      fix: unsafeSource.hint
     };
   }
 

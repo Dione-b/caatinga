@@ -2,7 +2,12 @@
 
 ## Project Structure & Module Organization
 
-Caatinga is a pnpm workspace managed by Turbo. Main packages live under `packages/`: `core` contains config, templates, shell orchestration, networks, and errors; `client` contains browser/Node contract-client helpers and wallet adapters; `cli` contains the `caatinga` command and handlers. Reusable templates live in `packages/templates/`. Docs and ADRs live in `docs/`. Consumer and packaging checks live in `scripts/`, with sample apps under `examples/`.
+Caatinga is a pnpm workspace managed by Turbo. Main packages live under `packages/`:
+`core` contains config, templates, shell orchestration, networks, and errors; `client`
+contains browser/Node contract-client helpers and wallet adapters; `cli` contains the
+`caatinga` command and handlers. Reusable templates live in `packages/templates/`.
+Docs and ADRs live in `docs/`. Consumer and packaging checks live in `scripts/`, with
+sample apps under `examples/`.
 
 Tests are colocated with source files and use `*.test.ts`, for example `packages/core/src/config/load-config.test.ts`.
 
@@ -22,25 +27,38 @@ For package-specific work, use filters, for example `pnpm --filter @caatinga/cor
 
 ## Coding Style & Naming Conventions
 
-This repository is TypeScript ESM-first with strict compiler settings. Keep code explicit, typed, and small. Prefer named exports for reusable library APIs. Use kebab-case for command and utility files (`load-config.ts`, `init.command.ts`) and PascalCase only for classes/types that require it (`CaatingaError.ts`). Preserve public error codes and package exports as compatibility contracts.
+This repository is TypeScript ESM-first with strict compiler settings. Keep code explicit,
+typed, and small. Prefer named exports for reusable library APIs. Use kebab-case for command
+and utility files (`load-config.ts`, `init.command.ts`) and PascalCase only for classes/types
+that require it (`CaatingaError.ts`). Preserve public error codes and package exports as
+compatibility contracts.
 
 No formatter config is currently committed; follow the existing two-space JSON style and conventional TypeScript formatting in nearby files.
 
 ## Testing Guidelines
 
-Vitest is the test framework. Add or update colocated `*.test.ts` files for behavior changes, especially error paths, manifests, CLI behavior, config parsing, and template compatibility. Run `pnpm test` and `pnpm typecheck` before submitting. For release-impacting changes, run `pnpm ci:publish-matrix` when feasible.
+Vitest is the test framework. Add or update colocated `*.test.ts` files for behavior changes,
+especially error paths, manifests, CLI behavior, config parsing, and template compatibility.
+Run `pnpm test` and `pnpm typecheck` before submitting. For release-impacting changes, run
+`pnpm ci:publish-matrix` when feasible.
 
 ## Commit & Pull Request Guidelines
 
 Recent history uses Conventional Commits: `fix:`, `fix(core):`, `docs:`, `test:`, and `chore:`. Keep commits scoped and imperative, for example `fix(cli): bundle templates during build`.
 
-Pull requests should include motivation, behavior, tests, and release impact. Link issues or specs. For publish/version changes, keep each package `package.json` aligned with intended published versions and internal ranges, then update and commit `pnpm-lock.yaml`; CI uses frozen lockfile installs.
+Pull requests should include motivation, behavior, tests, and release impact. Link issues or
+specs. For publish/version changes, keep each package `package.json` aligned with intended
+published versions and internal ranges, then update and commit `pnpm-lock.yaml`; CI uses
+frozen lockfile installs.
 
 ### Version alignment before commit
 
 Before committing changes that touch tooling, dependencies, or CI, verify that versions stay consistent across the repo. Mismatches often pass locally but fail in GitHub Actions.
 
-- **pnpm**: Root `package.json` declares the canonical version in `packageManager` (currently `pnpm@9.15.4`). Do not also pin a different pnpm version in `.github/workflows/*` (for example `pnpm/action-setup` with `version: 9`); `pnpm/action-setup@v4` reads `packageManager` and errors on duplicate sources.
+- **pnpm**: Root `package.json` declares the canonical version in `packageManager` (currently
+  `pnpm@9.15.4`). Do not also pin a different pnpm version in `.github/workflows/*` (for example
+  `pnpm/action-setup` with `version: 9`); `pnpm/action-setup@v4` reads `packageManager` and errors
+  on duplicate sources.
 - **Node.js**: Workflows use Node 20; keep `engines` and any `.nvmrc` / `node-version` inputs aligned with that baseline.
 - **Lockfile**: After dependency or `packageManager` changes, run `pnpm install` and commit `pnpm-lock.yaml` so CI `--frozen-lockfile` installs match.
 - **Workspace packages**: When bumping published versions or internal `workspace:*` ranges, update all affected `package.json` files in the same change.
@@ -49,4 +67,6 @@ When in doubt, grep for version pins (`packageManager`, `version:`, `node-versio
 
 ## Security & Configuration Tips
 
-Do not commit secrets, wallet keys, private artifacts, or local `.env` files. Treat `caatinga.artifacts.json`, template manifests, exported package paths, and documented error codes as public contracts; changing them requires a compatibility note and rollback plan.
+Do not commit secrets, wallet keys, private artifacts, or local `.env` files. Treat
+`caatinga.artifacts.json`, template manifests, exported package paths, and documented error
+codes as public contracts; changing them requires a compatibility note and rollback plan.
