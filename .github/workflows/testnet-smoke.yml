@@ -37,12 +37,13 @@ jobs:
       - name: Restore Stellar CLI config
         env:
           CAATINGA_CI_STELLAR_CONFIG_B64: ${{ secrets.CAATINGA_CI_STELLAR_CONFIG_B64 }}
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
         run: |
           set -euo pipefail
           test -n "$CAATINGA_CI_STELLAR_CONFIG_B64"
-          mkdir -p "$HOME/.config/stellar"
-          printf "%s" "$CAATINGA_CI_STELLAR_CONFIG_B64" | base64 --decode > "$HOME/.config/stellar/config.toml"
-          chmod 600 "$HOME/.config/stellar/config.toml"
+          test -n "$CAATINGA_CI_IDENTITY_ALIAS"
+          bash scripts/restore-stellar-ci-config.sh
+          stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS" >/dev/null
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -93,4 +94,6 @@ jobs:
 
       - name: Remove Stellar CLI config
         if: always()
-        run: rm -f "$HOME/.config/stellar/config.toml"
+        run: |
+          rm -f "$HOME/.config/stellar/config.toml"
+          rm -rf "$HOME/.config/soroban/identity"
