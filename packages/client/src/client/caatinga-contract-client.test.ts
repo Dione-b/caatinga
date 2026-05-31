@@ -179,4 +179,93 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
       hint: expect.stringContaining("empty")
     });
   });
+
+  it("should_submit_with_stellar_sdk_signAndSend_signTransaction_callback", async () => {
+    const signAndSend = vi.fn(async (input: {
+      signTransaction: (
+        xdr: string,
+        opts?: { networkPassphrase?: string; address?: string }
+      ) => Promise<{ signedTxXdr: string }>;
+    }) => {
+      const signed = await input.signTransaction("AAAA_PREPARED", {
+        networkPassphrase: "Test SDF Network ; September 2015",
+        address: "GPUBLIC"
+      });
+      return { txHash: `hash:${signed.signedTxXdr}`, result: 7 };
+    });
+
+    class Client {
+      increment() {
+        return {
+          toXDR() {
+            return "AAAA_PREPARED";
+          },
+          signAndSend
+        };
+      }
+    }
+
+    const config = createClientConfig({
+      contracts: {
+        counter: {
+          binding: { Client }
+        }
+      }
+    });
+
+    const result = await createCaatingaClient(config).contract("counter").invoke("increment", {
+      debugXdr: true
+    });
+
+    expect(signAndSend).toHaveBeenCalledWith(expect.objectContaining({
+      signTransaction: expect.any(Function)
+    }));
+    expect(config.wallet.signTransaction).toHaveBeenCalledWith({
+      xdr: "AAAA_PREPARED",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    });
+    expect(result).toMatchObject({
+      status: "confirmed",
+      transactionHash: "hash:AAAA_SIGNED",
+      result: 7,
+      xdr: {
+        unsigned: "AAAA_PREPARED",
+        prepared: "AAAA_PREPARED",
+        signed: "AAAA_SIGNED"
+      }
+    });
+  });
+
+  it("should_fallback_to_send_when_signAndSend_is_not_available", async () => {
+    const send = vi.fn(async () => ({ txHash: "hash:send", result: 3 }));
+
+    class Client {
+      increment() {
+        return {
+          toXDR() {
+            return "AAAA_PREPARED";
+          },
+          send
+        };
+      }
+    }
+
+    const config = createClientConfig({
+      contracts: {
+        counter: {
+          binding: { Client }
+        }
+      }
+    });
+
+    const result = await createCaatingaClient(config).contract("counter").invoke("increment");
+
+    expect(config.wallet.signTransaction).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith();
+    expect(result).toMatchObject({
+      status: "confirmed",
+      transactionHash: "hash:send",
+      result: 3
+    });
+  });
 });
