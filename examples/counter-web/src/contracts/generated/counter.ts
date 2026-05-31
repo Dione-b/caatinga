@@ -3,6 +3,11 @@ type TransactionResult = {
   result?: unknown;
 };
 
+type SignTransaction = (
+  xdr: string,
+  opts?: { networkPassphrase?: string; address?: string }
+) => Promise<{ signedTxXdr: string }> | { signedTxXdr: string };
+
 class ExampleTransaction {
   constructor(
     private readonly method: string,
@@ -17,9 +22,13 @@ class ExampleTransaction {
     return this;
   }
 
-  async signAndSend(): Promise<TransactionResult> {
+  async signAndSend(input?: { signTransaction?: SignTransaction }): Promise<TransactionResult> {
+    const signed = input?.signTransaction
+      ? await input.signTransaction(this.toXDR())
+      : { signedTxXdr: this.toXDR() };
+
     return {
-      txHash: "example-transaction-hash",
+      txHash: `example-transaction-hash:${signed.signedTxXdr}`,
       result: this.result
     };
   }
