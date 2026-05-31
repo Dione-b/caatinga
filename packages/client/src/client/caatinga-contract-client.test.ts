@@ -236,6 +236,48 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     });
   });
 
+  it("should_normalize_nested_stellar_sdk_send_transaction_response_hash", async () => {
+    const signAndSend = vi.fn(async (input: {
+      signTransaction: (
+        xdr: string,
+        opts?: { networkPassphrase?: string; address?: string }
+      ) => Promise<{ signedTxXdr: string }>;
+    }) => {
+      await input.signTransaction("AAAA_PREPARED", {
+        networkPassphrase: "Test SDF Network ; September 2015",
+        address: "GPUBLIC"
+      });
+      return { sendTransactionResponse: { hash: "hash:nested" }, result: 9 };
+    });
+
+    class Client {
+      increment() {
+        return {
+          toXDR() {
+            return "AAAA_PREPARED";
+          },
+          signAndSend
+        };
+      }
+    }
+
+    const config = createClientConfig({
+      contracts: {
+        counter: {
+          binding: { Client }
+        }
+      }
+    });
+
+    const result = await createCaatingaClient(config).contract("counter").invoke("increment");
+
+    expect(result).toMatchObject({
+      status: "confirmed",
+      transactionHash: "hash:nested",
+      result: 9
+    });
+  });
+
   it("should_fallback_to_send_when_signAndSend_is_not_available", async () => {
     const send = vi.fn(async () => ({ txHash: "hash:send", result: 3 }));
 
