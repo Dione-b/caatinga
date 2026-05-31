@@ -186,9 +186,12 @@ The default binding adapter expects generated bindings to:
 2. accept `contractId`, `publicKey`, `rpcUrl`, and `networkPassphrase`
 3. expose contract methods on the client instance
 4. return a transaction-like object with `toXDR()`
-5. expose `signAndSend()` or `send()` for signed submission
+5. optionally expose `prepare()`
+6. expose `signAndSend({ signTransaction })`, where `signTransaction` returns `{ signedTxXdr }`
 
-If Stellar CLI changes this generated shape, the compatibility fix belongs in the binding adapter, not in application code.
+Caatinga adapts `CaatingaWalletAdapter.signTransaction({ xdr, networkPassphrase })` into generated transaction `signTransaction(xdr, opts)`, and does not parse XDR or serialize Soroban values.
+
+If Stellar CLI changes this generated shape, the compatibility fix belongs in the binding adapter/client integration layer, not in application code.
 
 ## Failure behavior
 
