@@ -35,8 +35,17 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         toXDR() {
           return "AAAA_UNSIGNED";
         },
-        async signAndSend(input: { signedXdr: string }) {
-          return { txHash: `hash:${input.signedXdr}`, result: 1 };
+        async signAndSend(input: {
+          signTransaction: (
+            xdr: string,
+            opts?: { networkPassphrase?: string; address?: string }
+          ) => Promise<{ signedTxXdr: string }>;
+        }) {
+          const signed = await input.signTransaction("AAAA_UNSIGNED", {
+            networkPassphrase: "Test SDF Network ; September 2015",
+            address: "GPUBLIC"
+          });
+          return { txHash: `hash:${signed.signedTxXdr}`, result: 1 };
         }
       };
     }
@@ -164,6 +173,10 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
       code: CaatingaErrorCode.XDR_SIGN_FAILED,
       hint: expect.stringContaining("empty")
     });
+    expect(config.wallet.signTransaction).toHaveBeenCalledWith({
+      xdr: "AAAA_UNSIGNED",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    });
   });
 
   it("should_throw_XDR_SIGN_FAILED_when_signTransaction_returns_undefined", async () => {
@@ -177,6 +190,10 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     await expect(createCaatingaClient(config).contract("counter").invoke("increment")).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_SIGN_FAILED,
       hint: expect.stringContaining("empty")
+    });
+    expect(config.wallet.signTransaction).toHaveBeenCalledWith({
+      xdr: "AAAA_UNSIGNED",
+      networkPassphrase: "Test SDF Network ; September 2015"
     });
   });
 
