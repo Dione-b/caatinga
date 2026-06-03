@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 0.2.3
+
+### Patch Changes
+
+- Add first-class read-only contract calls with `contract(name).simulate()` and `contract(name).read()`, plus the `CAATINGA_READ_RESULT_MISSING` error code for simulated calls without a usable result.
+- Add the optional `@caatinga/client/stellar-wallets-kit` adapter subpath and update counter examples/templates to read on-chain counter state instead of relying on local state.
+- Updated dependencies
+  - @caatinga/core@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes

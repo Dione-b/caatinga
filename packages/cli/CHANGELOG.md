@@ -1,5 +1,13 @@
 ## Breaking changes policy
 
+## 0.2.3
+
+### Patch Changes
+
+- Bundle updated official templates that use Stellar Wallets Kit wiring and on-chain counter reads through `@caatinga/client`.
+- Updated dependencies
+  - @caatinga/core@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes
