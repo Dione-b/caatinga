@@ -1,14 +1,5 @@
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
-import { useState } from "react";
-import { CaatingaError } from "@caatinga/core/browser";
-
-function formatWalletError(error: unknown): string {
-  if (error instanceof CaatingaError) {
-    return `[${error.code}] ${error.message}`;
-  }
-
-  return error instanceof Error ? error.message : String(error);
-}
+import { WalletNetwork, WalletType } from "../wallet.js";
+import { useStellarWallet } from "../hooks/useStellarWallet.js";
 
 function shortenAddress(address: string): string {
   if (address.length <= 12) {
@@ -19,41 +10,54 @@ function shortenAddress(address: string): string {
 }
 
 export function WalletButton() {
-  const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  async function connect() {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const key = await freighterWalletAdapter.getPublicKey();
-      setPublicKey(key);
-    } catch (caught) {
-      setPublicKey(null);
-      setError(formatWalletError(caught));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function disconnect() {
-    setPublicKey(null);
-    setError(null);
-  }
+  const {
+    publicKey,
+    selectedWallet,
+    network,
+    loading,
+    error,
+    selectWallet,
+    selectNetwork,
+    connect,
+    disconnect
+  } = useStellarWallet();
 
   return (
     <div className="wallet-shell">
+      <div className="wallet-controls">
+        <label>
+          <span>Wallet</span>
+          <select
+            value={selectedWallet}
+            onChange={(event) => void selectWallet(event.target.value as WalletType)}
+          >
+            <option value={WalletType.XBULL}>xBull</option>
+            <option value={WalletType.FREIGHTER}>Freighter</option>
+            <option value={WalletType.ALBEDO}>Albedo</option>
+            <option value={WalletType.RABET}>Rabet</option>
+            <option value={WalletType.WALLET_CONNECT}>WalletConnect</option>
+          </select>
+        </label>
+        <label>
+          <span>Network</span>
+          <select
+            value={network}
+            onChange={(event) => void selectNetwork(event.target.value as WalletNetwork)}
+          >
+            <option value={WalletNetwork.TESTNET}>Testnet</option>
+            <option value={WalletNetwork.PUBLIC}>Public</option>
+          </select>
+        </label>
+      </div>
       <button
         className="wallet-button"
         type="button"
-        onClick={publicKey ? disconnect : connect}
+        onClick={publicKey ? disconnect : () => void connect()}
         disabled={loading}
         aria-live="polite"
       >
         <span className={publicKey ? "status-dot status-dot--on" : "status-dot"} />
-        {loading ? "Connecting…" : publicKey ? shortenAddress(publicKey) : "Connect"}
+        {loading ? "Connecting..." : publicKey ? shortenAddress(publicKey) : "Connect"}
       </button>
       {error ? (
         <p className="wallet-error" role="alert">

@@ -1,6 +1,6 @@
 # Counter Web Example
 
-Vite + React + TypeScript example for `@caatinga/client`, generated bindings, artifacts, and the Freighter wallet adapter.
+Vite + React + TypeScript example for `@caatinga/client`, generated bindings, artifacts, and the Stellar Wallets Kit adapter.
 
 ## Setup
 
@@ -47,15 +47,18 @@ In the monorepo:
 pnpm --filter counter-web dev
 ```
 
+Copy `.env.example` to `.env` and set `VITE_WALLETCONNECT_PROJECT_ID` before using WalletConnect.
+
 ## What this shows
 
-- Connect a Freighter wallet.
+- Select xBull, Albedo, Freighter, Rabet, or WalletConnect.
+- Switch between testnet and public wallet networks.
 - Display the public address.
 - Load contract artifacts.
 - Register generated counter bindings.
 - Instantiate `@caatinga/client`.
 - Call `counter.increment`.
-- Call `counter.get`.
+- Read `counter.get` through `client.contract("counter").read("get")`.
 - Display loading and `CAATINGA_*` errors.
 
 Browser code imports artifact types from `@caatinga/core/browser`, the package entry that excludes Node-only modules such as `execa`.

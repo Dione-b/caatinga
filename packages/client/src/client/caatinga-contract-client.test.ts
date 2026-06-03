@@ -50,6 +50,37 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
       };
     }
 
+    get(args?: { fallback?: number }) {
+      return {
+        toXDR() {
+          return "AAAA_GET_UNSIGNED";
+        },
+        async prepare() {
+          return {
+            result: args?.fallback ?? 42,
+            toXDR() {
+              return "AAAA_GET_PREPARED";
+            }
+          };
+        }
+      };
+    }
+
+    noResult() {
+      return {
+        toXDR() {
+          return "AAAA_NO_RESULT_UNSIGNED";
+        },
+        async prepare() {
+          return {
+            toXDR() {
+              return "AAAA_NO_RESULT_PREPARED";
+            }
+          };
+        }
+      };
+    }
+
     badSubmit() {
       return {
         toXDR() {
@@ -132,6 +163,101 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
       code: CaatingaErrorCode.WALLET_NOT_CONNECTED
+    });
+  });
+
+  it("should_simulate_read_only_contract_method_and_return_metadata", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    const result = await client.contract("counter").simulate<number>("get");
+
+    expect(result).toEqual({
+      status: "simulated",
+      contract: "counter",
+      method: "get",
+      contractId: "CCOUNTER000000000000000000000000000000000000000000000000",
+      result: 42
+    });
+  });
+
+  it("should_return_only_result_from_read_convenience_api", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").read<number>("get")).resolves.toBe(42);
+  });
+
+  it("should_forward_read_args_and_include_raw_when_debugRaw_is_enabled", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    const result = await client.contract("counter").simulate<number>(
+      "get",
+      { fallback: 7 },
+      { debugRaw: true }
+    );
+
+    expect(result).toMatchObject({
+      status: "simulated",
+      result: 7,
+      raw: {
+        result: 7
+      }
+    });
+  });
+
+  it("should_map_wallet_getPublicKey_rejection_to_WALLET_NOT_CONNECTED_on_simulate", async () => {
+    const config = createClientConfig({
+      wallet: {
+        getPublicKey: vi.fn(async () => {
+          throw new Error("no wallet");
+        }),
+        signTransaction: vi.fn(async () => "AAAA_SIGNED")
+      }
+    });
+    const client = createCaatingaClient(config);
+
+    await expect(client.contract("counter").simulate("get")).rejects.toMatchObject({
+      code: CaatingaErrorCode.WALLET_NOT_CONNECTED
+    });
+  });
+
+  it("should_map_missing_contract_artifact_to_CONTRACT_ARTIFACT_NOT_FOUND_on_simulate", async () => {
+    const config = createClientConfig({
+      artifacts: {
+        project: "counter-app",
+        version: 1,
+        networks: {}
+      }
+    });
+    const client = createCaatingaClient(config);
+
+    await expect(client.contract("counter").simulate("get")).rejects.toMatchObject({
+      code: CaatingaErrorCode.CONTRACT_ARTIFACT_NOT_FOUND
+    });
+  });
+
+  it("should_map_missing_binding_method_to_BINDING_METHOD_NOT_FOUND_on_simulate", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").simulate("missing")).rejects.toMatchObject({
+      code: CaatingaErrorCode.BINDING_METHOD_NOT_FOUND
+    });
+  });
+
+  it("should_map_prepare_failure_to_XDR_PREPARE_FAILED_on_simulate", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").simulate("failingPrepare")).rejects.toMatchObject({
+      code: CaatingaErrorCode.XDR_PREPARE_FAILED,
+      hint: expect.stringContaining("https://rpc.example")
+    });
+  });
+
+  it("should_throw_READ_RESULT_MISSING_when_simulation_has_no_result", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").simulate("noResult")).rejects.toMatchObject({
+      code: CaatingaErrorCode.READ_RESULT_MISSING,
+      hint: expect.stringContaining("counter.noResult")
     });
   });
 

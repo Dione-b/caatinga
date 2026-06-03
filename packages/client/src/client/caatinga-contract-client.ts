@@ -8,6 +8,8 @@ import type {
   CaatingaContractRegistration,
   CaatingaInvokeOptions,
   CaatingaInvokeResult,
+  CaatingaReadOptions,
+  CaatingaReadResult,
   CaatingaXdrBuildResult
 } from "../types.js";
 
@@ -21,6 +23,10 @@ interface SubmitTransactionLike {
     input?: { signTransaction?: StellarSdkSignTransaction }
   ) => Promise<unknown> | unknown;
   send?: () => Promise<unknown> | unknown;
+}
+
+interface SimulateTransactionLike {
+  prepare?: () => Promise<unknown> | unknown;
 }
 
 export class CaatingaContractClient {
@@ -142,6 +148,40 @@ export class CaatingaContractClient {
     };
   }
 
+  async simulate<T = unknown>(
+    method: string,
+    argsOrOptions?: Record<string, unknown> | CaatingaReadOptions,
+    maybeOptions?: CaatingaReadOptions
+  ): Promise<CaatingaReadResult<T>> {
+    const { args, debugRaw } = splitReadArgsAndOptions(argsOrOptions, maybeOptions);
+    const { contractId, transaction } = await this.createTransaction(method, args);
+    const raw = await prepareReadTransaction(
+      transaction,
+      this.contractName,
+      method,
+      this.config.network.rpcUrl
+    );
+    const result = readSimulationResult<T>(raw, this.contractName, method);
+
+    return {
+      status: "simulated",
+      contract: this.contractName,
+      method,
+      contractId,
+      result,
+      ...(debugRaw ? { raw } : {})
+    };
+  }
+
+  async read<T = unknown>(
+    method: string,
+    argsOrOptions?: Record<string, unknown> | CaatingaReadOptions,
+    maybeOptions?: CaatingaReadOptions
+  ): Promise<T> {
+    const result = await this.simulate<T>(method, argsOrOptions, maybeOptions);
+    return result.result;
+  }
+
   private async createTransaction(method: string, args?: Record<string, unknown>) {
     const contractId = resolveContractId({
       artifacts: this.config.artifacts,
@@ -252,6 +292,29 @@ function splitInvokeArgsAndOptions(
   };
 }
 
+function splitReadArgsAndOptions(
+  argsOrOptions?: Record<string, unknown> | CaatingaReadOptions,
+  maybeOptions?: CaatingaReadOptions
+) {
+  const looksLikeOptions =
+    argsOrOptions !== undefined &&
+    "debugRaw" in argsOrOptions &&
+    maybeOptions === undefined;
+
+  if (looksLikeOptions) {
+    const options = argsOrOptions as CaatingaReadOptions;
+    return {
+      args: undefined,
+      debugRaw: options.debugRaw ?? false
+    };
+  }
+
+  return {
+    args: argsOrOptions as Record<string, unknown> | undefined,
+    debugRaw: maybeOptions?.debugRaw ?? false
+  };
+}
+
 async function submitTransaction(
   transaction: unknown,
   signTransaction: StellarSdkSignTransaction,
@@ -303,6 +366,49 @@ async function submitTransaction(
     `Binding transaction for "${contractName}.${method}" cannot be submitted.`,
     CaatingaErrorCode.XDR_SUBMIT_FAILED,
     "Regenerate bindings or provide a compatible binding adapter."
+  );
+}
+
+async function prepareReadTransaction(
+  transaction: unknown,
+  contractName: string,
+  method: string,
+  rpcUrl: string
+): Promise<unknown> {
+  const candidate = transaction as SimulateTransactionLike;
+
+  if (typeof candidate.prepare !== "function") {
+    return transaction;
+  }
+
+  try {
+    return await candidate.prepare.call(transaction);
+  } catch (error) {
+    if (error instanceof CaatingaError) {
+      throw error;
+    }
+
+    throw new CaatingaError(
+      `Failed to prepare XDR for "${contractName}.${method}".`,
+      CaatingaErrorCode.XDR_PREPARE_FAILED,
+      `RPC: ${rpcUrl}. Check connectivity, simulation errors, and binding compatibility.`,
+      error
+    );
+  }
+}
+
+function readSimulationResult<T>(raw: unknown, contractName: string, method: string): T {
+  if (raw !== null && typeof raw === "object" && "result" in raw) {
+    const result = (raw as { result?: T }).result;
+    if (result !== undefined) {
+      return result;
+    }
+  }
+
+  throw new CaatingaError(
+    `Simulation for "${contractName}.${method}" did not return a result.`,
+    CaatingaErrorCode.READ_RESULT_MISSING,
+    `Expected "${contractName}.${method}" to expose a simulation result. Use debugRaw to inspect the generated binding output.`
   );
 }
 

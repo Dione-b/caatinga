@@ -48,6 +48,10 @@ export interface CaatingaInvokeOptions {
   debugRaw?: boolean;
 }
 
+export interface CaatingaReadOptions {
+  debugRaw?: boolean;
+}
+
 export interface CaatingaInvokeResult<T = unknown> {
   status: CaatingaInvokeStatus;
   contract: string;
@@ -60,6 +64,15 @@ export interface CaatingaInvokeResult<T = unknown> {
     prepared?: string;
     signed?: string;
   };
+  raw?: unknown;
+}
+
+export interface CaatingaReadResult<T = unknown> {
+  status: "simulated";
+  contract: string;
+  method: string;
+  contractId: string;
+  result: T;
   raw?: unknown;
 }
 

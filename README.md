@@ -154,7 +154,9 @@ const client = createCaatingaClient({
   contracts: { counter: { binding: Counter } },
 });
 
-await client.contract("counter").invoke("increment");
+const before = await client.contract("counter").read<number>("get");
+const increment = await client.contract("counter").invoke<number>("increment");
+const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
 
 See [Client](./docs/client.md) and [examples/counter-web](./examples/counter-web) for a fuller browser integration sketch.

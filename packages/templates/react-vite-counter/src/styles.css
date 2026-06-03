@@ -79,6 +79,33 @@ button:hover {
   gap: 8px;
 }
 
+.wallet-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.wallet-controls label {
+  display: grid;
+  gap: 4px;
+  color: #45515a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.wallet-controls select {
+  min-height: 36px;
+  border: 1px solid #d9d5ca;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #20232a;
+  font: inherit;
+  font-size: 0.86rem;
+  text-transform: none;
+}
+
 .wallet-error,
 .counter-error {
   margin: 0;
@@ -169,6 +196,9 @@ button:hover {
   }
 
   .wallet-button,
+  .wallet-controls,
+  .wallet-controls label,
+  .wallet-controls select,
   .counter-actions button {
     width: 100%;
     justify-content: center;

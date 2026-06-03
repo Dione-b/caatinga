@@ -158,6 +158,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/client/caatinga-contract-client.test.ts",
     trigger: "client.contract(\"counter\").invoke("
   },
+  [CaatingaErrorCode.READ_RESULT_MISSING]: {
+    file: "packages/client/src/client/caatinga-contract-client.test.ts",
+    trigger: "client.contract(\"counter\").simulate("
+  },
   [CaatingaErrorCode.WALLET_NOT_CONNECTED]: {
     file: "packages/client/src/client/caatinga-contract-client.test.ts",
     trigger: "client.contract(\"counter\").buildXdr("

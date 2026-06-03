@@ -65,16 +65,18 @@ Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, 
 After `generate`, install the client packages from `next` (match the CLI version when possible):
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next
+npm install @caatinga/client@next @caatinga/core@next github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
 ```
 
 Register the generated bindings with `@caatinga/client`:
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
+
+const wallet = createStellarWalletsKitAdapter();
 
 const client = createCaatingaClient({
   network: {
@@ -83,15 +85,17 @@ const client = createCaatingaClient({
     networkPassphrase: "Test SDF Network ; September 2015"
   },
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet,
   contracts: {
     counter: { binding: Counter }
   }
 });
 
-const result = await client.contract("counter").invoke("increment", {
+const before = await client.contract("counter").read<number>("get");
+const increment = await client.contract("counter").invoke<number>("increment", {
   debugXdr: true
 });
+const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
 
 Use `buildXdr()` when you need unsigned/prepared XDR without wallet signing.
