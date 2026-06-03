@@ -43,6 +43,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepack": "pnpm build",
     "build": "tsup src/index.ts --format esm --dts --clean && rm -rf ./templates && cp -r ../templates ./templates",
     "dev": "tsx src/index.ts",
     "test": "vitest run --pool=threads",

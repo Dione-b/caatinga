@@ -94,10 +94,23 @@ if [[ ${#_kcli[@]} -ne 1 ]]; then
   exit 1
 fi
 
-if ! archive_contains_path "${_kcli[0]}" "package/templates/react-vite-counter/caatinga.template.json"; then
-  echo "CLI tarball is missing bundled templates: ${_kcli[0]}" >&2
+ROOT_TEMPLATES_DIR="$ROOT_DIR/packages/templates"
+if [[ ! -d "$ROOT_TEMPLATES_DIR" ]]; then
+  echo "Expected templates directory at $ROOT_TEMPLATES_DIR" >&2
   exit 1
 fi
+
+for template_name in "$ROOT_TEMPLATES_DIR"/*; do
+  if [[ ! -d "$template_name" ]]; then
+    continue
+  fi
+  template_name="$(basename "$template_name")"
+
+  if ! archive_contains_path "${_kcli[0]}" "package/templates/${template_name}/caatinga.template.json"; then
+    echo "CLI tarball is missing bundled template manifest: package/templates/${template_name}/caatinga.template.json in ${_kcli[0]}" >&2
+    exit 1
+  fi
+done
 
 _read_template_range() {
   local section="$1"
