@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 0.2.3
+
+### Patch Changes
+
+- Add `CAATINGA_READ_RESULT_MISSING` to the public error-code surface for browser client read/simulate calls that complete simulation without returning a usable result.
+- Update official template compatibility ranges for core `0.2.3`.
+
 ## 0.2.2
 
 ### Patch Changes

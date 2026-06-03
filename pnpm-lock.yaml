@@ -69,7 +69,7 @@ importers:
   packages/cli:
     dependencies:
       '@caatinga/core':
-        specifier: ^0.2.2
+        specifier: ^0.2.3
         version: link:../core
       chalk:
         specifier: ^5.4.1
@@ -94,7 +94,7 @@ importers:
   packages/client:
     dependencies:
       '@caatinga/core':
-        specifier: ^0.2.2
+        specifier: ^0.2.3
         version: link:../core
       '@stellar/freighter-api':
         specifier: ^4.0.0
