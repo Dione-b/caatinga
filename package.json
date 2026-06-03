@@ -1,6 +1,6 @@
 {
   "name": "caatinga",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.4",
@@ -30,5 +30,9 @@
     "turbo": "^2.3.3",
     "typescript": "^5.7.2",
     "yaml": "^2.7.0"
+  },
+  "dependencies": {
+    "@caatinga/client": "^0.2.3",
+    "@caatinga/core": "^0.2.2"
   }
 }
