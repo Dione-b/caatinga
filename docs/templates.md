@@ -42,7 +42,7 @@ Generated projects include:
 - `caatinga.config.ts`
 - `caatinga.artifacts.json`
 - Vite and TypeScript config
-- dependencies for generated bindings, `@caatinga/client`, and Freighter smoke wiring
+- dependencies for generated bindings, `@caatinga/client`, and Stellar Wallets Kit smoke wiring
 
 Set `CAATINGA_TEMPLATES_DIR` during local development to point the CLI at a custom templates directory.
 
@@ -51,8 +51,8 @@ Set `CAATINGA_TEMPLATES_DIR` during local development to point the CLI at a cust
 The official template documents both paths:
 
 1. CLI: `build -> deploy -> generate -> invoke`
-2. Browser/client: generated bindings + `caatinga.artifacts.json` + `@caatinga/client` + Freighter adapter
+2. Browser/client: generated bindings + `caatinga.artifacts.json` + `@caatinga/client` + Stellar Wallets Kit adapter
 
-The template does not generate React hooks or `caatinga generate --interop` output in alpha.
+The template includes wallet UI state for the generated app, but does not generate `caatinga generate --interop` output in alpha.
 
 Browser-facing templates should import errors and artifact types from `@caatinga/core/browser` (see `react-vite-counter/src/caatinga.ts`). Keep the full `@caatinga/core` entry for Node-only config (`caatinga.config.ts`, CLI workflows).

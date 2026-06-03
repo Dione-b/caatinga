@@ -19,6 +19,16 @@ import { freighterWalletAdapter } from "@caatinga/client/freighter";
 
 The `@caatinga/client/freighter` subpath is optional and only needed when you want the bundled Freighter adapter.
 
+For multi-wallet support, add Stellar Wallets Kit:
+
+```bash
+pnpm add github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+```
+
+```ts
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+```
+
 ## What It Solves
 
 `@caatinga/client` is the supported browser and Node integration layer for invoking generated Soroban bindings with Caatinga artifacts, network configuration, and a wallet adapter.
@@ -49,16 +59,21 @@ Supported type-only root exports:
 - `CaatingaInvokeResult`
 - `CaatingaInvokeStatus`
 - `CaatingaNetwork`
+- `CaatingaReadOptions`
+- `CaatingaReadResult`
 - `CaatingaWalletAdapter`
 - `CaatingaXdrBuildResult`
 
 Supported subpath export:
 
 - `@caatinga/client/freighter` -> `freighterWalletAdapter` (optional)
+- `@caatinga/client/stellar-wallets-kit` -> `createStellarWalletsKitAdapter` (optional)
 
 Primary flow:
 
 - `createCaatingaClient(...)`
+- `client.contract(name).read(method, args?)`
+- `client.contract(name).simulate(method, args?)`
 - `client.contract(name).invoke(method, args?)`
 - `client.contract(name).buildXdr(method, args?)`
 
@@ -66,9 +81,11 @@ Primary flow:
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
+
+const wallet = createStellarWalletsKitAdapter();
 
 const client = createCaatingaClient({
   network: {
@@ -77,7 +94,7 @@ const client = createCaatingaClient({
     networkPassphrase: "Test SDF Network ; September 2015"
   },
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet,
   contracts: {
     counter: {
       binding: Counter
@@ -85,7 +102,9 @@ const client = createCaatingaClient({
   }
 });
 
-const result = await client.contract("counter").invoke("increment");
+const before = await client.contract("counter").read<number>("get");
+const increment = await client.contract("counter").invoke<number>("increment");
+const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
 
 ## Wallet Adapter Contract

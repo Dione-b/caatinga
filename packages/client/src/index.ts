@@ -6,6 +6,8 @@ export type {
   CaatingaInvokeResult,
   CaatingaInvokeStatus,
   CaatingaNetwork,
+  CaatingaReadOptions,
+  CaatingaReadResult,
   CaatingaWalletAdapter,
   CaatingaXdrBuildResult
 } from "./types.js";

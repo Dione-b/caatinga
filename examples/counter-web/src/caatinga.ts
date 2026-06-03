@@ -1,7 +1,7 @@
 import { createCaatingaClient } from "@caatinga/client";
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
 import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter.js";
+import { stellarWalletAdapter } from "./wallet.js";
 
 const artifacts: CaatingaArtifacts = {
   version: 1,
@@ -33,7 +33,7 @@ export const caatinga = createCaatingaClient({
     networkPassphrase: "Test SDF Network ; September 2015"
   },
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet: stellarWalletAdapter,
   contracts: {
     counter: {
       binding: Counter

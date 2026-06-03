@@ -16,7 +16,10 @@ Included in alpha:
 - artifact-based `contractId` lookup
 - generated binding registration
 - `CaatingaWalletAdapter`
-- Freighter adapter
+- Stellar Wallets Kit adapter
+- Freighter adapter compatibility subpath
+- `read()`
+- `simulate()`
 - `invoke()`
 - `buildXdr()`
 - explicit `debugXdr` and `debugRaw`
@@ -34,7 +37,7 @@ Not included:
 ## Install
 
 ```bash
-pnpm add @caatinga/client @stellar/freighter-api
+pnpm add @caatinga/client github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
 ```
 
 `@caatinga/client` depends on `@caatinga/core` and imports only the browser-safe subpath
@@ -48,9 +51,11 @@ rather than the root `@caatinga/core` package entry.
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
+
+const wallet = createStellarWalletsKitAdapter();
 
 const client = createCaatingaClient({
   network: {
@@ -59,7 +64,7 @@ const client = createCaatingaClient({
     networkPassphrase: "Test SDF Network ; September 2015"
   },
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet,
   contracts: {
     counter: {
       binding: Counter
@@ -67,7 +72,9 @@ const client = createCaatingaClient({
   }
 });
 
-const result = await client.contract("counter").invoke("increment");
+const before = await client.contract("counter").read<number>("get");
+const increment = await client.contract("counter").invoke<number>("increment");
+const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
 
 Minimal successful result:
@@ -94,7 +101,7 @@ To override artifacts:
 const client = createCaatingaClient({
   network,
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet,
   contracts: {
     counter: {
       binding: Counter,
@@ -114,6 +121,31 @@ await client.contract("token").invoke("transfer", {
   amount: 100n
 });
 ```
+
+## Read and Simulate
+
+Use `read()` for read-only contract methods when the UI only needs the returned value:
+
+```ts
+const value = await client.contract("counter").read<number>("get");
+```
+
+Use `simulate()` when the UI or diagnostics need metadata:
+
+```ts
+const result = await client.contract("counter").simulate<number>("get", {
+  debugRaw: true
+});
+
+console.log(result.status);
+console.log(result.contractId);
+console.log(result.result);
+console.log(result.raw);
+```
+
+`simulate()` prepares the generated binding transaction and returns the parsed binding result. It calls
+`wallet.getPublicKey()` to build the generated client, but it does not call `wallet.signTransaction()`.
+If the simulated method does not expose a result, the client throws `CAATINGA_READ_RESULT_MISSING`.
 
 ## XDR Debug
 
@@ -172,7 +204,13 @@ Contract:
   (milliseconds) on `CaatingaClientConfig` to cap `getPublicKey` and `signTransaction`; when exceeded,
   the client throws `CAATINGA_WALLET_TIMEOUT`.
 
-The Freighter adapter is exported from:
+The Stellar Wallets Kit adapter is exported from:
+
+```ts
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+```
+
+The Freighter adapter remains available for compatibility:
 
 ```ts
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
@@ -186,9 +224,12 @@ The default binding adapter expects generated bindings to:
 2. accept `contractId`, `publicKey`, `rpcUrl`, and `networkPassphrase`
 3. expose contract methods on the client instance
 4. return a transaction-like object with `toXDR()`
-5. expose `signAndSend()` or `send()` for signed submission
+5. optionally expose `prepare()`
+6. expose `signAndSend({ signTransaction })`, where `signTransaction` returns `{ signedTxXdr }`
 
-If Stellar CLI changes this generated shape, the compatibility fix belongs in the binding adapter, not in application code.
+Caatinga adapts `CaatingaWalletAdapter.signTransaction({ xdr, networkPassphrase })` into generated transaction `signTransaction(xdr, opts)`, and does not parse XDR or serialize Soroban values.
+
+If Stellar CLI changes this generated shape, the compatibility fix belongs in the binding adapter/client integration layer, not in application code.
 
 ## Failure behavior
 

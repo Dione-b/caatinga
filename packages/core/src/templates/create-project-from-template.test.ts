@@ -239,7 +239,9 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
     }>(templatePackageJsonPath);
 
-    expect(packageJson.dependencies?.["@stellar/freighter-api"]).toBe("^4.0.0");
+    expect(packageJson.dependencies?.["stellar-wallets-kit"]).toBe(
+      "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7"
+    );
   });
 
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {

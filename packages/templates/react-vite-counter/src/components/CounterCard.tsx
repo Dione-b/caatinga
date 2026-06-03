@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
 import { CaatingaError } from "@caatinga/core/browser";
 
@@ -11,28 +11,44 @@ function formatCaatingaError(error: unknown): string {
 }
 
 export function CounterCard() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const formattedCount = useMemo(() => new Intl.NumberFormat().format(count), [count]);
+  const formattedCount = useMemo(
+    () => (count === null ? "Unknown" : new Intl.NumberFormat().format(count)),
+    [count]
+  );
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const nextCount = await caatingaClient.contract("counter").read<number>("get");
+      setCount(nextCount);
+    } catch (caught) {
+      setError(formatCaatingaError(caught));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   async function increment() {
     setLoading(true);
     setError(null);
 
     try {
-      await caatingaClient.contract("counter").invoke("increment");
-      setCount((value) => value + 1);
+      const result = await caatingaClient.contract("counter").invoke<number>("increment");
+      if (typeof result.result === "number") {
+        setCount(result.result);
+      } else {
+        await refresh();
+      }
     } catch (caught) {
       setError(formatCaatingaError(caught));
     } finally {
       setLoading(false);
     }
-  }
-
-  function reset() {
-    setCount(0);
-    setError(null);
   }
 
   return (
@@ -51,8 +67,8 @@ export function CounterCard() {
         <button type="button" onClick={increment} disabled={loading}>
           {loading ? "Incrementing…" : "Increment"}
         </button>
-        <button className="secondary-button" type="button" onClick={reset} disabled={loading}>
-          Reset
+        <button className="secondary-button" type="button" onClick={refresh} disabled={loading}>
+          Refresh
         </button>
       </div>
 

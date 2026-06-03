@@ -72,6 +72,24 @@ describe("publish package manifests", () => {
     });
   });
 
+  it("client exposes stellar-wallets-kit subpath", () => {
+    const packageJson = JSON.parse(
+      readFileSync(join(repoRoot, "packages/client/package.json"), "utf8")
+    );
+    expect(packageJson.exports["./stellar-wallets-kit"]).toEqual({
+      types: "./dist/stellar-wallets-kit.d.ts",
+      import: "./dist/stellar-wallets-kit.js",
+      require: "./dist/stellar-wallets-kit.cjs"
+    });
+    expect(packageJson.scripts.build).toContain("src/stellar-wallets-kit.ts");
+    expect(packageJson.peerDependencies["stellar-wallets-kit"]).toBe(
+      "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7"
+    );
+    expect(packageJson.peerDependenciesMeta["stellar-wallets-kit"]).toEqual({
+      optional: true
+    });
+  });
+
   it("publish dry-run uses the pre-v1 next dist-tag", () => {
     const packageJson = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
     expect(packageJson.scripts["publish:dry-run"]).toContain("--tag next");

@@ -38,6 +38,11 @@
       "types": "./dist/freighter.d.ts",
       "import": "./dist/freighter.js",
       "require": "./dist/freighter.cjs"
+    },
+    "./stellar-wallets-kit": {
+      "types": "./dist/stellar-wallets-kit.d.ts",
+      "import": "./dist/stellar-wallets-kit.js",
+      "require": "./dist/stellar-wallets-kit.cjs"
     }
   },
   "files": [
@@ -46,7 +51,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/freighter.ts --format esm,cjs --dts",
+    "build": "tsup src/index.ts src/freighter.ts src/stellar-wallets-kit.ts --format esm,cjs --dts",
     "test": "vitest run --pool=threads",
     "pretypecheck": "pnpm --filter @caatinga/core run build",
     "typecheck": "tsc --noEmit"
@@ -56,14 +61,19 @@
   },
   "devDependencies": {
     "tsup": "^8.3.5",
+    "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "@stellar/freighter-api": "^4.0.0"
+    "@stellar/freighter-api": "^4.0.0",
+    "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7"
   },
   "peerDependenciesMeta": {
     "@stellar/freighter-api": {
+      "optional": true
+    },
+    "stellar-wallets-kit": {
       "optional": true
     }
   }
