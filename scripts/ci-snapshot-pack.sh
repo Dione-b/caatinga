@@ -168,19 +168,26 @@ if [[ ${#cli_tarball[@]} -ne 1 ]]; then
   exit 1
 fi
 
-if ! archive_contains_path "${cli_tarball[0]}" "package/templates/react-vite-counter/caatinga.template.json"; then
-  echo "CLI tarball is missing bundled templates: ${cli_tarball[0]}" >&2
-  exit 1
-fi
+for template_name in "$TEMPLATES_DIR"/*; do
+  if [[ ! -d "$template_name" ]]; then
+    continue
+  fi
+  template_name="$(basename "$template_name")"
 
-echo "CLI template evidence: package/templates/react-vite-counter/caatinga.template.json"
+  if ! archive_contains_path "${cli_tarball[0]}" "package/templates/${template_name}/caatinga.template.json"; then
+    echo "CLI tarball is missing bundled template manifest: package/templates/${template_name}/caatinga.template.json in ${cli_tarball[0]}" >&2
+    exit 1
+  fi
 
-if ! archive_contains_path "${cli_tarball[0]}" "package/templates/react-vite-counter/package.json"; then
-  echo "CLI tarball is missing bundled template package.json: ${cli_tarball[0]}" >&2
-  exit 1
-fi
+  echo "CLI template evidence: package/templates/${template_name}/caatinga.template.json"
 
-echo "CLI template package evidence: package/templates/react-vite-counter/package.json"
+  if ! archive_contains_path "${cli_tarball[0]}" "package/templates/${template_name}/package.json"; then
+    echo "CLI tarball is missing bundled template package.json: package/templates/${template_name}/package.json in ${cli_tarball[0]}" >&2
+    exit 1
+  fi
+
+  echo "CLI template package evidence: package/templates/${template_name}/package.json"
+done
 
 packed_core_version="$(tar -xOf "${core_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_client_version="$(tar -xOf "${client_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
