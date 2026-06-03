@@ -60,4 +60,11 @@ describe("resolveTemplateDir", () => {
       stderrSpy.mockRestore();
     }
   });
+
+  it("mentions the pnpm build prerequisite in the error hint", async () => {
+    await expect(resolveTemplateDir("__caatinga_nonexistent_template__")).rejects.toMatchObject({
+      code: CaatingaErrorCode.TEMPLATE_NOT_FOUND,
+      hint: expect.stringContaining("pnpm build")
+    });
+  });
 });
