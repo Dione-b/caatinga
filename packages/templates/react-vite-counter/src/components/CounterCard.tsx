@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
 import { CaatingaError } from "@caatinga/core/browser";
 
@@ -15,7 +15,7 @@ export function CounterCard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formattedCount = useMemo(
-    () => (count === null ? "Unknown" : new Intl.NumberFormat().format(count)),
+    () => (count === null ? "Not loaded" : new Intl.NumberFormat().format(count)),
     [count]
   );
 
@@ -32,6 +32,10 @@ export function CounterCard() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   async function increment() {
     setLoading(true);

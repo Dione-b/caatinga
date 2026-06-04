@@ -16,7 +16,11 @@ export {
   type ContractArtifact
 } from "./artifacts/artifact.schema.js";
 export { readArtifacts } from "./artifacts/read-artifacts.js";
-export { writeArtifacts, createInitialArtifacts } from "./artifacts/write-artifacts.js";
+export {
+  writeArtifacts,
+  createInitialArtifacts,
+  type CreateInitialArtifactsOptions
+} from "./artifacts/write-artifacts.js";
 export { updateArtifact } from "./artifacts/update-artifact.js";
 
 export { WELL_KNOWN_NETWORKS } from "./networks/networks.js";

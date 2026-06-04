@@ -38,7 +38,7 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`deploy` writes contract IDs to `caatinga.artifacts.json`. `generate` creates TypeScript bindings under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`).
+`build` only compiles the WASM file. `deploy` writes contract IDs to `caatinga.artifacts.json`, and the frontend/client flow needs those IDs before it can resolve a contract. `generate` creates TypeScript bindings under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`).
 
 ## Commands
 
@@ -63,6 +63,7 @@ The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
 
 - `[contract]` defaults to `counter` when omitted
 - `--allow-untested-stellar-cli` allows a Stellar CLI newer than Caatinga's tested maximum (local only)
+- prints a deploy reminder when the default network lacks a `contractId` in `caatinga.artifacts.json`; this warning does not fail the build
 
 ### `doctor`
 

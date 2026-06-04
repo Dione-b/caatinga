@@ -32,6 +32,25 @@ describe("writeArtifacts and readArtifacts", () => {
     expect(JSON.parse(raw).version).toBe(1);
   });
 
+  it("should_create_initial_artifacts_with_network_scaffold", () => {
+    const initial = createInitialArtifacts("app", { networks: ["testnet", "mainnet"] });
+
+    expect(initial).toEqual({
+      project: "app",
+      version: 1,
+      networks: {
+        testnet: {
+          contracts: {},
+          dependencyGraph: {}
+        },
+        mainnet: {
+          contracts: {},
+          dependencyGraph: {}
+        }
+      }
+    });
+  });
+
   it("should_throw_CAATINGA_ARTIFACT_NOT_FOUND_when_file_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({

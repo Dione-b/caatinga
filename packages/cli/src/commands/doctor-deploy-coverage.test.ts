@@ -111,7 +111,7 @@ describe("evaluateDeployCoverage", () => {
       {
         name: "marketplace",
         ok: false,
-        fix: "Run: caatinga deploy marketplace --network testnet"
+        fix: "Run: caatinga deploy marketplace --network testnet --source <identity>"
       }
     ]);
   });

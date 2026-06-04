@@ -9,10 +9,27 @@ export async function writeArtifacts(artifacts: CaatingaArtifacts, cwd = process
   return artifactsPath;
 }
 
-export function createInitialArtifacts(project: string): CaatingaArtifacts {
+export type CreateInitialArtifactsOptions = {
+  networks?: string[];
+};
+
+export function createInitialArtifacts(
+  project: string,
+  options: CreateInitialArtifactsOptions = {}
+): CaatingaArtifacts {
+  const networks = Object.fromEntries(
+    Array.from(new Set(options.networks ?? [])).map((network) => [
+      network,
+      {
+        contracts: {},
+        dependencyGraph: {}
+      }
+    ])
+  );
+
   return {
     project,
     version: 1,
-    networks: {}
+    networks
   };
 }
