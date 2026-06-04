@@ -45,8 +45,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
       '@creit.tech/xbull-wallet-connect':
-        specifier: github:Creit-Tech/xBull-Wallet-Connect
-        version: https://codeload.github.com/Creit-Tech/xBull-Wallet-Connect/tar.gz/dc6bceaabec7cb5e7a84ca72e865c28da12ed838
+        specifier: ^0.4.0
+        version: 0.4.0
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@6.4.2(@types/node@22.19.19)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
@@ -297,6 +297,10 @@ packages:
 
   '@changesets/write@0.4.0':
     resolution: {integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==}
+
+  '@creit.tech/xbull-wallet-connect@0.4.0':
+    resolution: {integrity: sha512-LrCUIqUz50SkZ4mv2hTqSmwews8CNRYVoZ9+VjLsK/1U8PByzXTxv1vZyenj6avRTG86ifpoeihz7D3D5YIDrQ==}
+    engines: {node: '>=16'}
 
   '@creit.tech/xbull-wallet-connect@https://codeload.github.com/Creit-Tech/xBull-Wallet-Connect/tar.gz/dc6bceaabec7cb5e7a84ca72e865c28da12ed838':
     resolution: {tarball: https://codeload.github.com/Creit-Tech/xBull-Wallet-Connect/tar.gz/dc6bceaabec7cb5e7a84ca72e865c28da12ed838}
@@ -2801,6 +2805,12 @@ snapshots:
       fs-extra: 7.0.1
       human-id: 4.1.3
       prettier: 2.8.8
+
+  '@creit.tech/xbull-wallet-connect@0.4.0':
+    dependencies:
+      rxjs: 7.8.2
+      tweetnacl: 1.0.3
+      tweetnacl-util: 0.15.1
 
   '@creit.tech/xbull-wallet-connect@https://codeload.github.com/Creit-Tech/xBull-Wallet-Connect/tar.gz/dc6bceaabec7cb5e7a84ca72e865c28da12ed838':
     dependencies:
