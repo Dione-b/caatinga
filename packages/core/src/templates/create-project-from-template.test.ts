@@ -244,6 +244,18 @@ describe("createProjectFromTemplate", () => {
     );
   });
 
+  it("should_install_cleanly_on_pnpm_10_26_plus", async () => {
+    const templateRoot = path.resolve(__dirname, "../../../templates/react-vite-counter");
+    const packageJson = await readPackageJson<{
+      dependencies?: Record<string, string>;
+    }>(path.join(templateRoot, "package.json"));
+
+    expect(packageJson.dependencies?.["@creit.tech/xbull-wallet-connect"]).toBe("^0.4.0");
+
+    const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
+    expect(workspaceYaml).toContain("blockExoticSubdeps: false");
+  });
+
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {
     const templatePath = path.resolve(__dirname, "../../../templates/react-vite-counter");
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");

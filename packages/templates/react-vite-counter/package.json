@@ -14,7 +14,7 @@
   "dependencies": {
     "@caatinga/client": "^0.2.4",
     "@caatinga/core": "^0.2.4",
-    "@creit.tech/xbull-wallet-connect": "github:Creit-Tech/xBull-Wallet-Connect",
+    "@creit.tech/xbull-wallet-connect": "^0.4.0",
     "@vitejs/plugin-react": "^4.3.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
