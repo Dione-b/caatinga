@@ -65,9 +65,85 @@ describe("createProjectFromTemplate", () => {
     expect(configText).not.toContain("__PROJECT_NAME__");
 
     const artifactsText = await readFile(path.join(targetDir, "caatinga.artifacts.json"), "utf8");
-    const artifacts = JSON.parse(artifactsText) as { project: string; version: number };
+    const artifacts = JSON.parse(artifactsText) as {
+      project: string;
+      version: number;
+      networks: Record<string, { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }>;
+    };
     expect(artifacts.project).toBe("my-dapp");
     expect(artifacts.version).toBe(1);
+    expect(artifacts.networks.testnet).toBeDefined();
+    expect(artifacts.networks.testnet.contracts).toEqual({});
+    expect(artifacts.networks.testnet.dependencyGraph).toEqual({});
+  });
+
+  it("should_create_initial_artifacts_when_template_does_not_ship_artifacts", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
+    const templateDir = path.join(tmpDir, "template");
+    const targetDir = path.join(tmpDir, "my-dapp");
+    await mkdir(templateDir);
+    await writeFile(path.join(templateDir, "caatinga.template.json"), JSON.stringify({
+      name: "no-artifacts-template",
+      version: "0.1.0",
+      caatinga: {
+        compatibleCore: "^0.2.4",
+        templateVersion: 1
+      },
+      frontend: {
+        framework: "vite-react",
+        packageManager: "npm"
+      },
+      contracts: {
+        path: "contracts",
+        default: "counter"
+      },
+      files: {
+        config: "caatinga.config.ts",
+        artifacts: "caatinga.artifacts.json"
+      }
+    }), "utf8");
+    await writeFile(path.join(templateDir, "caatinga.config.ts"), [
+      "import { defineConfig } from \"@caatinga/core\";",
+      "",
+      "export default defineConfig({",
+      "  project: \"__PROJECT_NAME__\",",
+      "  defaultNetwork: \"testnet\",",
+      "  contracts: {",
+      "    counter: {",
+      "      path: \"./contracts/counter\",",
+      "      wasm: \"./contracts/counter/target/wasm32v1-none/release/counter.wasm\"",
+      "    }",
+      "  },",
+      "  networks: {",
+      "    testnet: {",
+      "      rpcUrl: \"https://soroban-testnet.stellar.org\",",
+      "      networkPassphrase: \"Test SDF Network ; September 2015\"",
+      "    }",
+      "  },",
+      "  frontend: {",
+      "    framework: \"vite-react\",",
+      "    bindingsOutput: \"./src/contracts/generated\"",
+      "  }",
+      "});",
+      ""
+    ].join("\n"), "utf8");
+
+    await createProjectFromTemplate({
+      projectName: "my-dapp",
+      targetDir,
+      templateDir
+    });
+
+    const artifacts = JSON.parse(
+      await readFile(path.join(targetDir, "caatinga.artifacts.json"), "utf8")
+    ) as {
+      project: string;
+      networks: Record<string, { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }>;
+    };
+
+    expect(artifacts.project).toBe("my-dapp");
+    expect(artifacts.networks.testnet.contracts).toEqual({});
+    expect(artifacts.networks.testnet.dependencyGraph).toEqual({});
   });
 
   it("should_fail_when_template_manifest_is_missing", async () => {

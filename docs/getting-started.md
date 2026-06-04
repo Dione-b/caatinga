@@ -56,13 +56,15 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
+`build` only compiles the WASM file. `deploy` is the step that writes the deployed `contractId` into `caatinga.artifacts.json`; browser clients and generated bindings need that contract ID before they can call the contract.
+
 If the CLI is not installed globally, prefix each command with `npx caatinga@next` instead of `npx caatinga`.
 
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
 ## Browser client flow
 
-After `generate`, install the client packages from `next` (match the CLI version when possible):
+After `deploy` and `generate`, install the client packages from `next` (match the CLI version when possible):
 
 ```bash
 npm install @caatinga/client@next @caatinga/core@next github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7

@@ -2,6 +2,7 @@ import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises"
 import path from "node:path";
 import { z } from "zod";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
 import {
   TemplateManifestSchema,
@@ -41,9 +42,23 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
   });
 
   await replaceTemplateVariables(targetDir, options.projectName);
-  await writeArtifacts(createInitialArtifacts(options.projectName), targetDir);
+  await ensureArtifacts(targetDir, options.projectName);
 
   return { targetDir, template: manifest };
+}
+
+async function ensureArtifacts(targetDir: string, projectName: string): Promise<void> {
+  try {
+    const artifacts = await readArtifacts(targetDir);
+    await writeArtifacts({ ...artifacts, project: projectName }, targetDir);
+  } catch (error) {
+    if (error instanceof CaatingaError && error.code === CaatingaErrorCode.ARTIFACT_NOT_FOUND) {
+      await writeArtifacts(createInitialArtifacts(projectName, { networks: ["testnet"] }), targetDir);
+      return;
+    }
+
+    throw error;
+  }
 }
 
 async function readTemplateManifest(templateDir: string): Promise<TemplateManifest> {

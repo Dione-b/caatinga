@@ -25,7 +25,7 @@ export async function evaluateDeployCoverage(options: {
       lines.push({
         name,
         ok: false,
-        fix: `Run: caatinga deploy ${name} --network ${network.name}`
+        fix: `Run: caatinga deploy ${name} --network ${network.name} --source <identity>`
       });
     }
   }
