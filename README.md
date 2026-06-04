@@ -131,7 +131,10 @@ After `init`, you typically work with:
 ## Browser Client
 
 Use `@caatinga/client@next` (or the same version as your CLI) with generated bindings,
-`caatinga.artifacts.json`, and a wallet adapter (Freighter):
+`caatinga.artifacts.json`, and a wallet adapter. Caatinga is not limited to Freighter:
+the client accepts any adapter that implements the wallet contract, and the package ships
+optional adapters for Freighter and Stellar Wallets Kit. Use Stellar Wallets Kit when your
+app should support multiple wallet providers from the same integration layer.
 
 ```bash
 npm install @caatinga/client@next @caatinga/core@next
@@ -157,6 +160,18 @@ const client = createCaatingaClient({
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
 const after = increment.result ?? await client.contract("counter").read<number>("get");
+```
+
+For multi-wallet support, install Stellar Wallets Kit and use the Caatinga adapter:
+
+```bash
+npm install github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+```
+
+```ts
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+
+const wallet = createStellarWalletsKitAdapter();
 ```
 
 See [Client](./docs/client.md) and [examples/counter-web](./examples/counter-web) for a fuller browser integration sketch.
