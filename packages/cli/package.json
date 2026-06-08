@@ -45,6 +45,7 @@
   "scripts": {
     "prepack": "pnpm build",
     "build": "tsup src/index.ts --format esm --dts --clean && rm -rf ./templates && cp -r ../templates ./templates",
+    "predev": "pnpm --filter @caatinga/core build",
     "dev": "tsx src/index.ts",
     "test": "vitest run --pool=threads",
     "typecheck": "tsc --noEmit"

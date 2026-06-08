@@ -1,3 +1,4 @@
+// Keep in sync with examples/counter-web/src/wallet.ts (WalletConnect defaults differ per project).
 import {
   createStellarWalletsKitAdapter,
   type StellarWalletsKitMetadata

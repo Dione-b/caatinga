@@ -2,6 +2,7 @@ import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import { resolveContractId } from "../artifacts/resolve-contract-id.js";
 import { createDefaultBindingAdapter } from "../bindings/default-binding-adapter.js";
 import { buildXdr as buildTransactionXdr } from "../xdr/build-xdr.js";
+import { withWalletTimeout } from "../wallet/with-wallet-timeout.js";
 import type {
   CaatingaBindingAdapter,
   CaatingaClientConfig,
@@ -12,22 +13,14 @@ import type {
   CaatingaReadResult,
   CaatingaXdrBuildResult
 } from "../types.js";
-
-type StellarSdkSignTransaction = (
-  xdr: string,
-  opts?: { networkPassphrase?: string; address?: string }
-) => Promise<{ signedTxXdr: string }> | { signedTxXdr: string };
-
-interface SubmitTransactionLike {
-  signAndSend?: (
-    input?: { signTransaction?: StellarSdkSignTransaction }
-  ) => Promise<unknown> | unknown;
-  send?: () => Promise<unknown> | unknown;
-}
-
-interface SimulateTransactionLike {
-  prepare?: () => Promise<unknown> | unknown;
-}
+import {
+  splitArgsAndOptions,
+  splitInvokeArgsAndOptions,
+  splitReadArgsAndOptions
+} from "./invoke-args.js";
+import { prepareReadTransaction, readSimulationResult } from "./transaction-simulate.js";
+import { normalizeSubmitResult, submitTransaction } from "./transaction-submit.js";
+import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
 
 export class CaatingaContractClient {
   constructor(
@@ -76,11 +69,14 @@ export class CaatingaContractClient {
     let signedXdr: string | undefined;
     const signTransaction: StellarSdkSignTransaction = async (xdr) => {
       try {
-        signedXdr = await this.withWalletTimeout("signTransaction", () =>
-          this.config.wallet.signTransaction({
-            xdr,
-            networkPassphrase: this.config.network.networkPassphrase
-          })
+        signedXdr = await withWalletTimeout(
+          "signTransaction",
+          this.config.walletTimeout,
+          () =>
+            this.config.wallet.signTransaction({
+              xdr,
+              networkPassphrase: this.config.network.networkPassphrase
+            })
         );
       } catch (error) {
         if (error instanceof CaatingaError) {
@@ -192,8 +188,10 @@ export class CaatingaContractClient {
 
     let publicKey: string;
     try {
-      publicKey = await this.withWalletTimeout("getPublicKey", () =>
-        this.config.wallet.getPublicKey()
+      publicKey = await withWalletTimeout(
+        "getPublicKey",
+        this.config.walletTimeout,
+        () => this.config.wallet.getPublicKey()
       );
     } catch (error) {
       if (error instanceof CaatingaError) {
@@ -217,250 +215,4 @@ export class CaatingaContractClient {
 
     return { contractId, transaction };
   }
-
-  private withWalletTimeout<T>(label: string, fn: () => Promise<T>): Promise<T> {
-    const timeoutMs = this.config.walletTimeout;
-    if (timeoutMs === undefined || timeoutMs <= 0) {
-      return fn();
-    }
-
-    let timedOut = false;
-    return new Promise<T>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        timedOut = true;
-        reject(
-          new CaatingaError(
-            `Wallet "${label}" timed out after ${timeoutMs}ms.`,
-            CaatingaErrorCode.WALLET_TIMEOUT,
-            "Ensure the wallet adapter rejects on user dismissal, or increase walletTimeout."
-          )
-        );
-      }, timeoutMs);
-
-      fn().then(
-        (value) => {
-          if (timedOut) {
-            return;
-          }
-          clearTimeout(timer);
-          resolve(value);
-        },
-        (error) => {
-          if (timedOut) {
-            return;
-          }
-          clearTimeout(timer);
-          reject(error);
-        }
-      );
-    });
-  }
-}
-
-function splitArgsAndOptions(
-  argsOrOptions?: Record<string, unknown>,
-  maybeOptions?: { debugRaw?: boolean }
-) {
-  return {
-    args: argsOrOptions,
-    debugRaw: maybeOptions?.debugRaw ?? false
-  };
-}
-
-function splitInvokeArgsAndOptions(
-  argsOrOptions?: Record<string, unknown> | CaatingaInvokeOptions,
-  maybeOptions?: CaatingaInvokeOptions
-) {
-  const looksLikeOptions =
-    argsOrOptions !== undefined &&
-    ("debugXdr" in argsOrOptions || "debugRaw" in argsOrOptions) &&
-    maybeOptions === undefined;
-
-  if (looksLikeOptions) {
-    const options = argsOrOptions as CaatingaInvokeOptions;
-    return {
-      args: undefined,
-      debugXdr: options.debugXdr ?? false,
-      debugRaw: options.debugRaw ?? false
-    };
-  }
-
-  return {
-    args: argsOrOptions as Record<string, unknown> | undefined,
-    debugXdr: maybeOptions?.debugXdr ?? false,
-    debugRaw: maybeOptions?.debugRaw ?? false
-  };
-}
-
-function splitReadArgsAndOptions(
-  argsOrOptions?: Record<string, unknown> | CaatingaReadOptions,
-  maybeOptions?: CaatingaReadOptions
-) {
-  const looksLikeOptions =
-    argsOrOptions !== undefined &&
-    "debugRaw" in argsOrOptions &&
-    maybeOptions === undefined;
-
-  if (looksLikeOptions) {
-    const options = argsOrOptions as CaatingaReadOptions;
-    return {
-      args: undefined,
-      debugRaw: options.debugRaw ?? false
-    };
-  }
-
-  return {
-    args: argsOrOptions as Record<string, unknown> | undefined,
-    debugRaw: maybeOptions?.debugRaw ?? false
-  };
-}
-
-async function submitTransaction(
-  transaction: unknown,
-  signTransaction: StellarSdkSignTransaction,
-  contractName: string,
-  method: string,
-  rpcUrl: string
-): Promise<unknown> {
-  const candidate = transaction as SubmitTransactionLike;
-
-  if (typeof candidate.signAndSend === "function") {
-    try {
-      const raw = await candidate.signAndSend.call(transaction, { signTransaction });
-      assertSubmitResultRecognized(raw, contractName, method);
-      return raw;
-    } catch (error) {
-      if (error instanceof CaatingaError) {
-        throw error;
-      }
-
-      throw new CaatingaError(
-        `Failed to submit XDR for "${contractName}.${method}".`,
-        CaatingaErrorCode.XDR_SUBMIT_FAILED,
-        `RPC: ${rpcUrl}. Check wallet signature and RPC connectivity.`,
-        error
-      );
-    }
-  }
-
-  if (typeof candidate.send === "function") {
-    try {
-      const raw = await candidate.send.call(transaction);
-      assertSubmitResultRecognized(raw, contractName, method);
-      return raw;
-    } catch (error) {
-      if (error instanceof CaatingaError) {
-        throw error;
-      }
-
-      throw new CaatingaError(
-        `Failed to submit XDR for "${contractName}.${method}".`,
-        CaatingaErrorCode.XDR_SUBMIT_FAILED,
-        `RPC: ${rpcUrl}. Check wallet signature and RPC connectivity.`,
-        error
-      );
-    }
-  }
-
-  throw new CaatingaError(
-    `Binding transaction for "${contractName}.${method}" cannot be submitted.`,
-    CaatingaErrorCode.XDR_SUBMIT_FAILED,
-    "Regenerate bindings or provide a compatible binding adapter."
-  );
-}
-
-async function prepareReadTransaction(
-  transaction: unknown,
-  contractName: string,
-  method: string,
-  rpcUrl: string
-): Promise<unknown> {
-  const candidate = transaction as SimulateTransactionLike;
-
-  if (typeof candidate.prepare !== "function") {
-    return transaction;
-  }
-
-  try {
-    return await candidate.prepare.call(transaction);
-  } catch (error) {
-    if (error instanceof CaatingaError) {
-      throw error;
-    }
-
-    throw new CaatingaError(
-      `Failed to prepare XDR for "${contractName}.${method}".`,
-      CaatingaErrorCode.XDR_PREPARE_FAILED,
-      `RPC: ${rpcUrl}. Check connectivity, simulation errors, and binding compatibility.`,
-      error
-    );
-  }
-}
-
-function readSimulationResult<T>(raw: unknown, contractName: string, method: string): T {
-  if (raw !== null && typeof raw === "object" && "result" in raw) {
-    const result = (raw as { result?: T }).result;
-    if (result !== undefined) {
-      return result;
-    }
-  }
-
-  throw new CaatingaError(
-    `Simulation for "${contractName}.${method}" did not return a result.`,
-    CaatingaErrorCode.READ_RESULT_MISSING,
-    `Expected "${contractName}.${method}" to expose a simulation result. Use debugRaw to inspect the generated binding output.`
-  );
-}
-
-function assertSubmitResultRecognized(raw: unknown, contractName: string, method: string): void {
-  if (raw === null || typeof raw !== "object") {
-    return;
-  }
-
-  const record = raw as Record<string, unknown>;
-  const hasTransactionId =
-    "txHash" in record ||
-    "transactionHash" in record ||
-    "hash" in record ||
-    hasNestedSendTransactionResponseHash(record);
-  const hasResult = "result" in record;
-
-  if (hasTransactionId || hasResult) {
-    return;
-  }
-
-  throw new CaatingaError(
-    `Submit returned an unrecognized payload for "${contractName}.${method}".`,
-    CaatingaErrorCode.XDR_RESULT_FAILED,
-    "Expected txHash, transactionHash, hash, sendTransactionResponse.hash, or result on the submit response. Use debugRaw to inspect the binding output."
-  );
-}
-
-function hasNestedSendTransactionResponseHash(record: Record<string, unknown>): boolean {
-  const response = record.sendTransactionResponse;
-  return response !== null && typeof response === "object" && "hash" in response;
-}
-
-function normalizeSubmitResult<T>(raw: unknown): {
-  transactionHash?: string;
-  result?: T;
-} {
-  const candidate = raw as {
-    txHash?: string;
-    transactionHash?: string;
-    hash?: string;
-    sendTransactionResponse?: {
-      hash?: string;
-    };
-    result?: T;
-  };
-
-  return {
-    transactionHash:
-      candidate.txHash ??
-      candidate.transactionHash ??
-      candidate.hash ??
-      candidate.sendTransactionResponse?.hash,
-    result: candidate.result
-  };
 }

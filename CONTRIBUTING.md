@@ -19,11 +19,14 @@ pnpm build
 pnpm test
 ```
 
-Run the CLI directly from source during development:
+Run the CLI directly from source during development (`predev` builds `@caatinga/core` automatically):
 
 ```bash
 pnpm dev init my-dapp
+pnpm dev doctor --network testnet --source alice
 ```
+
+From the repo root, pass CLI arguments directly after `pnpm dev` (do not insert an extra `--`; pnpm forwards args to the CLI script). After changing `packages/core`, rely on `predev` on the next `pnpm dev`, or run `pnpm --filter @caatinga/core build` manually.
 
 ## Project Structure
 

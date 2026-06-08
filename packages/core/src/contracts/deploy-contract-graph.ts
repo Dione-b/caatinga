@@ -4,14 +4,10 @@ import { resolveNetwork, type ResolvedNetwork } from "../networks/resolve-networ
 import { deployContract } from "./deploy-contract.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveDeployOrder } from "./resolve-deploy-order.js";
+import { toSkippedContract, type SkippedContract } from "./deploy-skip.js";
 import { verifyDependencyContracts } from "./verify-dependency-contract.js";
 
-export type SkippedContract = {
-  name: string;
-  contractId: string;
-  network: string;
-  reason: "already-deployed";
-};
+export type { SkippedContract } from "./deploy-skip.js";
 
 export type StaleWasmWarning = {
   contract: string;
@@ -70,12 +66,9 @@ export async function deployContractGraph(options: {
     });
 
     if (existing?.contractId && !options.force) {
-      skippedContracts.push({
-        name: contractName,
-        contractId: existing.contractId,
-        network: network.name,
-        reason: "already-deployed"
-      });
+      skippedContracts.push(
+        toSkippedContract(contractName, existing.contractId, network.name)
+      );
       continue;
     }
 
@@ -100,12 +93,9 @@ export async function deployContractGraph(options: {
     }
 
     if (result.skipped) {
-      skippedContracts.push({
-        name: contractName,
-        contractId: result.contractId,
-        network: network.name,
-        reason: "already-deployed"
-      });
+      skippedContracts.push(
+        toSkippedContract(contractName, result.contractId, network.name)
+      );
     } else {
       deployedContracts.push({ name: contractName, contractId: result.contractId });
     }

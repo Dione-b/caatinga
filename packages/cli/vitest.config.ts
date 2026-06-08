@@ -3,8 +3,9 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@caatinga/core": path.resolve(__dirname, "../core/dist/index.js")
-    }
+    alias: [
+      { find: "@caatinga/core/runtime/requirements", replacement: path.resolve(__dirname, "../core/dist/runtime/requirements.js") },
+      { find: "@caatinga/core", replacement: path.resolve(__dirname, "../core/dist/index.js") }
+    ]
   }
 });

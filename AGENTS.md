@@ -19,7 +19,7 @@ Use pnpm 9.15.4 and Node 20 or newer.
 - `pnpm build`: build all packages through Turbo.
 - `pnpm test`: run all Vitest suites.
 - `pnpm typecheck`: run `tsc --noEmit` across packages.
-- `pnpm dev`: run the CLI from source via `tsx`.
+- `pnpm dev`: run the CLI from source via `tsx` (`predev` builds `@caatinga/core` first; pass CLI args after `pnpm dev`, e.g. `pnpm dev init my-dapp`).
 - `pnpm knip`: detect unused files, exports, and dependencies.
 - `pnpm ci:publish-matrix`: run build, tests, package snapshots, dry-run publish, and consumer checks.
 

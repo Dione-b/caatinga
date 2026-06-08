@@ -1,3 +1,4 @@
+// Keep in sync with packages/templates/react-vite-counter/src/wallet.ts (WalletConnect defaults differ per project).
 import {
   createStellarWalletsKitAdapter,
   type StellarWalletsKitMetadata
