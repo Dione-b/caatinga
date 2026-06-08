@@ -45,7 +45,7 @@ export class Client {
   ) {}
 
   increment(): ExampleTransaction {
-    return new ExampleTransaction("increment");
+    return new ExampleTransaction("increment", 1);
   }
 
   get(): ExampleTransaction {
