@@ -1,12 +1,8 @@
-# ADR 0003: Template manifest and core compatibility
+# ADR 0003 — Template manifest and core compatibility
 
 ## Status
 
-Accepted
-
-## Date
-
-2026-05-11
+Accepted 2026-05-11.
 
 ## Context
 
@@ -36,3 +32,4 @@ Each template must include **`caatinga.template.json`**, including:
 
 - [`architecture.md`](../architecture.md) — extensibility section.
 - [`templates.md`](../templates.md) — manifest schema and compatibility behavior.
+- [ADR 0002](./0002-local-artifacts-as-source-of-truth.md) — local artifacts are the source of truth, including template metadata.

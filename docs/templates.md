@@ -2,8 +2,10 @@
 
 The MVP ships official templates:
 
-- `react-vite-counter` — single Soroban counter dApp.
-- `marketplace-with-token` — **experimental** two-contract layout demonstrating `dependsOn` and `${contracts.token.contractId}` deploy args.
+- `react-vite-counter` — single Soroban counter dApp. **Stable** for the alpha flow.
+- `marketplace-with-token` — **experimental** two-contract layout demonstrating `dependsOn` and `${contracts.token.contractId}` deploy args. See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) for the contract-design rationale.
+
+> **Status: experimental — `marketplace-with-token`** validates the multi-contract dependency graph in code and in the live testnet smoke workflow, but is not yet covered by the full browser/template consumer matrix. Use `react-vite-counter` for first-time Caatinga walkthroughs.
 
 Every template must include `caatinga.template.json`:
 

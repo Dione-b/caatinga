@@ -119,31 +119,26 @@ import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
-const wallet = createStellarWalletsKitAdapter();
-
 const client = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
+  network: { name: "testnet", rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" },
   artifacts,
-  wallet,
-  contracts: {
-    counter: { binding: Counter },
-  },
+  wallet: createStellarWalletsKitAdapter(),
+  contracts: { counter: { binding: Counter } },
 });
 
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
-const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
+
+For the full client contract, XDR debug options, and wallet adapter rules, see [Client](../client.md).
 
 ## Troubleshooting
 
-- `ERR_PNPM_IGNORED_BUILDS` (esbuild): pnpm 11 blocks lifecycle scripts by default. Ensure `pnpm-workspace.yaml` contains `allowBuilds.esbuild: true` (already in the official `react-vite-counter` template). If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
+- `ERR_PNPM_IGNORED_BUILDS` (esbuild): pnpm 11 blocks lifecycle scripts by default. Ensure `pnpm-workspace.yaml` contains `allowBuilds.esbuild: true` (already in the official `react-vite-counter` template).
+  If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
 - `ERR_PNPM_EXOTIC_SUBDEP`: pnpm 10.26+/11.x refused a GitHub subdependency from `stellar-wallets-kit`. Ensure `pnpm-workspace.yaml` contains `blockExoticSubdeps: false` (shipped with the official counter template).
-- `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`. After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
+- `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
+  After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
 - `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
 - `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0-25.2.0.

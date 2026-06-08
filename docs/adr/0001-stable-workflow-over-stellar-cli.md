@@ -1,12 +1,8 @@
-# ADR 0001: Stable Caatinga workflow over Stellar CLI churn
+# ADR 0001 — Stable Caatinga workflow over Stellar CLI churn
 
 ## Status
 
-Accepted
-
-## Date
-
-2026-05-11
+Accepted 2026-05-11.
 
 ## Context
 
@@ -31,4 +27,4 @@ If parsing and subprocess details leak into the CLI or userland, the project bec
 ## Related
 
 - [`architecture.md`](../architecture.md) — package boundaries and promise.
-- Future [ADR 0004](./0004-error-codes-as-public-api.md) — stable codes for `COMMAND_FAILED`-style failures from wrapped tools.
+- [ADR 0004](./0004-error-codes-as-public-api.md) — stable codes for `COMMAND_FAILED`-style failures from wrapped tools.

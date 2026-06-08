@@ -143,39 +143,22 @@ npm install @caatinga/client@next @caatinga/core@next
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
-import { freighterWalletAdapter } from "@caatinga/client/freighter";
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
+  network: { name: "testnet", rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" },
   artifacts,
-  wallet: freighterWalletAdapter,
+  wallet: createStellarWalletsKitAdapter(),
   contracts: { counter: { binding: Counter } },
 });
 
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
-const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
 
-For multi-wallet support, install Stellar Wallets Kit and use the Caatinga adapter:
-
-```bash
-npm install github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
-```
-
-```ts
-import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-
-const wallet = createStellarWalletsKitAdapter();
-```
-
-See [Client](./docs/client.md) and [examples/counter-web](./examples/counter-web) for a fuller browser integration sketch.
+For the full client contract, wallet adapter rules, XDR debug options, and the binding shape Caatinga expects, see [Client](./docs/client.md) and [examples/counter-web](./examples/counter-web).
 
 ## Error Codes
 

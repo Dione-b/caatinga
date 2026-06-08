@@ -1,12 +1,8 @@
-# ADR 0005: Multi-contract dependency deploy
+# ADR 0005 — Multi-contract dependency deploy
 
 ## Status
 
-Accepted
-
-## Date
-
-2026-05-11
+Accepted 2026-05-11.
 
 ## Context
 
@@ -31,3 +27,4 @@ Stellar CLI constructor arguments are passed after `--` using `--snake_case` fla
 
 - [`architecture.md`](../architecture.md) — multi-contract section.
 - [ADR 0002](./0002-local-artifacts-as-source-of-truth.md) — IDs remain local artifacts, not a central registry.
+- [ADR 0003](./0003-template-manifest-compatibility.md) — template manifests gate the experimental multi-contract template.
