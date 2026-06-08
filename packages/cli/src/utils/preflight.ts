@@ -1,27 +1,21 @@
 import chalk from "chalk";
-
-const NODE_MIN_MAJOR = 20;
+import { NODE_MIN_MAJOR } from "@caatinga/core/runtime/requirements";
+import { nodeDiagnostic } from "../diagnostics/node-diagnostic.js";
 
 type PreflightResult =
   | { ok: true }
   | { ok: false; failures: string[] };
 
-function checkNodeVersion(): string | null {
-  const major = parseInt(process.versions.node.split(".")[0] ?? "0", 10);
-  if (major < NODE_MIN_MAJOR) {
-    return `Node.js ${process.versions.node} is below the required minimum v${NODE_MIN_MAJOR}.\n  Install Node.js ${NODE_MIN_MAJOR} or newer: https://nodejs.org/`;
-  }
-  return null;
+function formatNodePreflightFailure(): string {
+  const version = process.versions.node;
+  return `Node.js ${version} is below the required minimum v${NODE_MIN_MAJOR}.\n  Install Node.js ${NODE_MIN_MAJOR} or newer: https://nodejs.org/`;
 }
 
 export function runPreflight(): PreflightResult {
-  const failures: string[] = [];
+  const diagnostic = nodeDiagnostic();
+  if (diagnostic.ok) return { ok: true };
 
-  const nodeFailure = checkNodeVersion();
-  if (nodeFailure) failures.push(nodeFailure);
-
-  if (failures.length > 0) return { ok: false, failures };
-  return { ok: true };
+  return { ok: false, failures: [formatNodePreflightFailure()] };
 }
 
 export function assertPreflight(): void {

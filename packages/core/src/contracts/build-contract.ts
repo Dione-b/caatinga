@@ -3,7 +3,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { resolveContract } from "./resolve-contract.js";
-import { resolveWasmArtifactPath } from "./wasm.js";
+import { CURRENT_RUST_WASM_TARGET, resolveWasmArtifactPath } from "./wasm.js";
 
 export type BuildContractOptions = {
   config: CaatingaConfig;
@@ -11,8 +11,6 @@ export type BuildContractOptions = {
   cwd?: string;
   allowUntestedStellarCli?: boolean;
 };
-
-const RUST_WASM_TARGET = "wasm32v1-none";
 
 const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
   "not installed",
@@ -34,7 +32,7 @@ function isMissingRustWasmTargetError(error: unknown): boolean {
   ];
   const haystack = parts.join("\n").toLowerCase();
 
-  if (!haystack.includes(RUST_WASM_TARGET)) {
+  if (!haystack.includes(CURRENT_RUST_WASM_TARGET)) {
     return false;
   }
 
@@ -64,9 +62,9 @@ export async function buildContract(options: BuildContractOptions) {
       isMissingRustWasmTargetError(error)
     ) {
       throw new CaatingaError(
-        `Required Rust wasm target "${RUST_WASM_TARGET}" is missing.`,
+        `Required Rust wasm target "${CURRENT_RUST_WASM_TARGET}" is missing.`,
         CaatingaErrorCode.RUST_TARGET_NOT_FOUND,
-        `Run \`rustup target add ${RUST_WASM_TARGET}\` and retry.`,
+        `Run \`rustup target add ${CURRENT_RUST_WASM_TARGET}\` and retry.`,
         error
       );
     }

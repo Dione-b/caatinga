@@ -329,6 +329,8 @@ describe("createProjectFromTemplate", () => {
     expect(packageJson.dependencies?.["@creit.tech/xbull-wallet-connect"]).toBe("^0.4.0");
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
+    expect(workspaceYaml).toContain("allowBuilds:");
+    expect(workspaceYaml).toContain("esbuild: true");
     expect(workspaceYaml).toContain("blockExoticSubdeps: false");
   });
 

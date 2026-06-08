@@ -1,3 +1,7 @@
+# pnpm 10.26+ / 11.x block lifecycle scripts by default; vite depends on esbuild.
+allowBuilds:
+  esbuild: true
+
 # stellar-wallets-kit@0.0.7 is unpublished from npm and is therefore pinned
 # to a github: URL in package.json. Its own dependencies also reference
 # @creit.tech/xbull-wallet-connect via a github: URL, and pnpm 10.26+ (and

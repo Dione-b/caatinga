@@ -32,7 +32,10 @@ describe("publish package manifests", () => {
           import: "./dist/browser.js",
           require: "./dist/browser.cjs"
         });
-        expect(packageJson.scripts.build).toContain("src/browser.ts");
+        expect(packageJson.scripts.build).toBe("tsup");
+        expect(
+          readFileSync(join(repoRoot, "packages/core/tsup.config.ts"), "utf8")
+        ).toContain("src/browser.ts");
       }
       expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "README.md", "LICENSE"]));
       expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);
