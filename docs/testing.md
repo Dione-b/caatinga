@@ -1,10 +1,61 @@
 # Testing
 
+## Contents
+
+- [Default CI](#default-ci)
+- [Live testnet smoke (release gate)](#live-testnet-smoke-release-gate)
+- [Smoke script exit codes](#smoke-script-exit-codes)
+- [Smoke secrets handling](#smoke-secrets-handling)
+- [Stellar CLI config blob format](#stellar-cli-config-blob-format)
+- [Stellar CLI fixtures](#stellar-cli-fixtures)
+- [Adding parser behavior](#adding-parser-behavior)
+- [Adding `@caatinga/client` behavior](#adding-caatingaclient-behavior)
+
 Default CI does not require testnet access, Freighter, or private keys. Tests use mocked command execution, mocked generated bindings, and checked-in Stellar CLI output fixtures.
+
+## Default CI
+
+The default GitHub Actions workflow runs typecheck, build, and tests.
+
+## Live testnet smoke (release gate)
+
+Workflow: `.github/workflows/testnet-smoke.yml` — triggers: daily cron, `workflow_dispatch`, GitHub Release `published`.
+
+Required secrets: `CAATINGA_CI_IDENTITY_ALIAS`, `CAATINGA_CI_STELLAR_CONFIG_B64`.
+
+### Smoke script exit codes
+
+| Exit code | Meaning | Workflow behavior |
+| --- | --- | --- |
+| `0` | Success | Pass. |
+| `1` | Hard failure (Caatinga, parser, or Stellar CLI version error) | No workflow retry. |
+| `2` | Classified transient testnet failure | The workflow runs at most one retry. |
+
+CI uploads the following artifacts: `smoke-ci-out/*-smoke.log`, `*-caatinga-version.txt`, `*-stellar-version.txt`, and each generated app directory’s `caatinga.artifacts.json`. The live smoke proves both official templates — `react-vite-counter` and `marketplace-with-token` — including on-chain verification that `marketplace.token_contract_id` matches the deployed token contract ID.
+
+### Smoke secrets handling
 
 Live testnet smoke uses `CAATINGA_CI_IDENTITY_ALIAS` and `CAATINGA_CI_STELLAR_CONFIG_B64`. Caatinga receives only the identity alias through `--source`; secret material is restored into the Stellar CLI config directory and deleted after the job.
 
-Smoke script exit codes: `0` success; `1` hard failure (no workflow retry — includes Caatinga/parser/Stellar CLI version errors); `2` classified transient testnet failure (the workflow runs at most one retry). Artifacts uploaded from CI include `smoke-ci-out/*-smoke.log`, `*-caatinga-version.txt`, `*-stellar-version.txt`, and each generated app directory’s `caatinga.artifacts.json`. The live smoke now proves both official templates: `react-vite-counter` and `marketplace-with-token`, including on-chain verification that `marketplace.token_contract_id` matches the deployed token contract ID. Prefer the config blob plus alias; never pass raw secrets to `caatinga --source`. With Stellar CLI `25.2.0`, the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
+> Prefer the config blob plus alias; **never pass raw secrets to `caatinga --source`**.
+
+### Stellar CLI config blob format
+
+With Stellar CLI `25.2.0`, the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
+
+To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
+
+```bash
+mkdir -p ci-stellar-config/.config
+cp -R ~/.config/stellar ci-stellar-config/.config/stellar
+cp -R ~/.config/soroban ci-stellar-config/.config/soroban
+tar -C ci-stellar-config -czf stellar-ci-config.tgz .config
+base64 -w0 stellar-ci-config.tgz
+```
+
+Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
+
+Before tagging `v1.0.0`, verify three consecutive successful scheduled runs (see [v1.0.0 observability plan](./v1.0.0.md#observability-plan)).
 
 Stellar CLI fixtures live under:
 
@@ -34,25 +85,3 @@ When adding `@caatinga/client` behavior:
 3. Assert XDR is omitted unless `debugXdr` is enabled.
 4. Assert raw output is omitted unless `debugRaw` is enabled.
 5. Assert wallet and binding failures use public `CAATINGA_*` codes.
-
-The default GitHub Actions workflow runs typecheck, build, and tests.
-
-## Live testnet smoke (release gate)
-
-Workflow: `.github/workflows/testnet-smoke.yml` — triggers: daily cron, `workflow_dispatch`, GitHub Release `published`.
-
-Required secrets: `CAATINGA_CI_IDENTITY_ALIAS`, `CAATINGA_CI_STELLAR_CONFIG_B64`.
-
-To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
-
-```bash
-mkdir -p ci-stellar-config/.config
-cp -R ~/.config/stellar ci-stellar-config/.config/stellar
-cp -R ~/.config/soroban ci-stellar-config/.config/soroban
-tar -C ci-stellar-config -czf stellar-ci-config.tgz .config
-base64 -w0 stellar-ci-config.tgz
-```
-
-Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
-
-Before tagging `v1.0.0`, verify three consecutive successful scheduled runs (see [v1.0.0 observability plan](./release/v1.0.0.md#observability-plan)).

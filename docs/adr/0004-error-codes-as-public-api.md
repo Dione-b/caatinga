@@ -1,12 +1,8 @@
-# ADR 0004: Stable error codes as public API
+# ADR 0004 — Stable error codes as public API
 
 ## Status
 
-Accepted
-
-## Date
-
-2026-05-11
+Accepted 2026-05-11.
 
 ## Context
 

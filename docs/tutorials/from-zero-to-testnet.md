@@ -119,25 +119,18 @@ import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
-const wallet = createStellarWalletsKitAdapter();
-
 const client = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
+  network: { name: "testnet", rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" },
   artifacts,
-  wallet,
-  contracts: {
-    counter: { binding: Counter },
-  },
+  wallet: createStellarWalletsKitAdapter(),
+  contracts: { counter: { binding: Counter } },
 });
 
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
-const after = increment.result ?? await client.contract("counter").read<number>("get");
 ```
+
+For the full client contract, XDR debug options, and wallet adapter rules, see [Client](../client.md).
 
 ## Troubleshooting
 

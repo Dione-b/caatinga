@@ -1,12 +1,8 @@
-# ADR 0002: Local artifacts and config as source of truth
+# ADR 0002 — Local artifacts and config as source of truth
 
 ## Status
 
-Accepted
-
-## Date
-
-2026-05-11
+Accepted 2026-05-11.
 
 ## Context
 
@@ -31,5 +27,5 @@ Soroban dApps need to know **which contract IDs** correspond to which logical na
 ## Related
 
 - [`architecture.md`](../architecture.md) — networks vs environments roadmap.
-- Future [ADR 0003](./0003-template-manifest-compatibility.md) — template manifest and `compatibleCore`.
-- Future [ADR 0005](./0005-multi-contract-dependency-deploy.md) — propagating dependency contract IDs without a central registry.
+- [ADR 0003](./0003-template-manifest-compatibility.md) — template manifest and `compatibleCore`.
+- [ADR 0005](./0005-multi-contract-dependency-deploy.md) — propagating dependency contract IDs without a central registry.

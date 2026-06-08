@@ -28,6 +28,48 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 
 Until (2) is real in the product, treat single-contract demos as necessary but not sufficient.
 
+### Alpha flow diagram
+
+```mermaid
+flowchart LR
+  cfg["caatinga.config.ts<br/>(contracts, networks)"]
+  src["contracts/&lt;name&gt;/src/<br/>Rust Soroban source"]
+  init["caatinga init<br/>(template + manifest check)"]
+
+  build["caatinga build<br/>(stellar contract build)"]
+  wasm["target/wasm32v1-none/release/&lt;name&gt;.wasm"]
+
+  deploy["caatinga deploy<br/>(stellar contract deploy)"]
+  artifacts["caatinga.artifacts.json<br/>networks[network].contracts[name].contractId"]
+
+  generate["caatinga generate<br/>(stellar contract bindings)"]
+  bindings["contracts/generated/&lt;name&gt;.ts<br/>(Client, methods)"]
+
+  invoke["caatinga invoke<br/>(stellar contract invoke)"]
+
+  client["@caatinga/client<br/>(createCaatingaClient)"]
+  browser["Browser app<br/>wallet.signTransaction()"]
+
+  cfg --> init
+  init --> src
+  src --> build
+  build --> wasm
+  wasm --> deploy
+  cfg --> deploy
+  deploy --> artifacts
+  artifacts --> generate
+  wasm --> generate
+  generate --> bindings
+  artifacts --> invoke
+  bindings --> invoke
+
+  artifacts --> client
+  bindings --> client
+  client --> browser
+```
+
+Each box is either a file you commit, a CLI command you run, or a runtime component. The arrows show which inputs are required to start the next step — for example, `deploy` needs both the compiled WASM and the network configuration.
+
 ## Package boundaries (monorepo)
 
 - **`@caatinga/cli`:** argument parsing, terminal UX, `doctor` diagnostics, delegation to core—no subprocess orchestration except through core APIs.
@@ -36,6 +78,40 @@ Until (2) is real in the product, treat single-contract demos as necessary but n
 - **`packages/templates`:** official templates consumed by `caatinga init` and validated through `caatinga.template.json` before copy.
 
 Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full `@caatinga/react` SDK surface, plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
+
+### Package dependency diagram
+
+```mermaid
+graph TD
+  user((CLI user))
+  dev((Browser user))
+
+  subgraph monorepo[Caatinga monorepo]
+    cli["@caatinga/cli<br/>(caatinga binary)"]
+    core["@caatinga/core<br/>(config, artifacts, shell, execa)"]
+    coreBrowser["@caatinga/core/browser<br/>(errors + artifact types only)"]
+    client["@caatinga/client<br/>(createCaatingaClient)"]
+    templates["packages/templates<br/>(caatinga.template.json)"]
+  end
+
+  stellarCli["stellar CLI<br/>(external)"]
+  walletExt["Wallet extension<br/>(Freighter / SWK)"]
+
+  user --> cli
+  cli --> core
+  cli --> templates
+  core --> stellarCli
+  core -.exports.-> coreBrowser
+  client --> coreBrowser
+  client --> walletExt
+  dev --> client
+```
+
+Notes encoded in the diagram:
+
+- The CLI depends on core, never the other way around.
+- `@caatinga/core` is the only package that talks to the `stellar` binary. `@caatinga/client` consumes the browser-safe subpath `@caatinga/core/browser`, which excludes `execa` and Node-only modules so Vite/webpack bundles stay slim.
+- `@caatinga/client` does not own wallet state — it composes a wallet adapter (Freighter, Stellar Wallets Kit, or a custom `CaatingaWalletAdapter`).
 
 ## Meta-framework boundary: orchestrate workflow, not mental model
 
