@@ -44,6 +44,21 @@ Generated projects include:
 - Vite and TypeScript config
 - dependencies for generated bindings, `@caatinga/client`, and Stellar Wallets Kit smoke wiring
 
+### pnpm 10.26+ / 11.x
+
+`caatinga.template.json` declares `packageManager: "npm"`, but the `react-vite-counter` template also ships `pnpm-workspace.yaml` so generated apps can install with pnpm 10.26+ or 11.x:
+
+```yaml
+allowBuilds:
+  esbuild: true
+blockExoticSubdeps: false
+```
+
+- `allowBuilds.esbuild: true` — pnpm blocks dependency lifecycle scripts by default; Vite pulls in esbuild. Without this, `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`.
+- `blockExoticSubdeps: false` — opts out of pnpm's exotic-subdependency check for the GitHub package that `stellar-wallets-kit@0.0.7` pulls in transitively. Without this, install fails with `ERR_PNPM_EXOTIC_SUBDEP`.
+
+The experimental `marketplace-with-token` template does not ship this file yet. If you use pnpm with that template, copy the same `pnpm-workspace.yaml` block from `react-vite-counter`.
+
 Set `CAATINGA_TEMPLATES_DIR` during local development to point the CLI at a custom templates directory.
 
 ## Alpha smoke path

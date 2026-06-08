@@ -40,6 +40,8 @@ cd my-dapp
 npm install
 ```
 
+`pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
+
 Without a global CLI install, run `npx caatinga@next init my-dapp` instead of `caatinga init`.
 
 The default template creates:
@@ -139,10 +141,13 @@ const after = increment.result ?? await client.contract("counter").read<number>(
 
 ## Troubleshooting
 
+- `ERR_PNPM_IGNORED_BUILDS` (esbuild): pnpm 11 blocks lifecycle scripts by default. Ensure `pnpm-workspace.yaml` contains `allowBuilds.esbuild: true` (already in the official `react-vite-counter` template). If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
+- `ERR_PNPM_EXOTIC_SUBDEP`: pnpm 10.26+/11.x refused a GitHub subdependency from `stellar-wallets-kit`. Ensure `pnpm-workspace.yaml` contains `blockExoticSubdeps: false` (shipped with the official counter template).
+- `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`. After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
+- `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
 - `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0-25.2.0.
 - `CAATINGA_UNTESTED_CLI_VERSION`: use a tested Stellar CLI version, or pass `--allow-untested-stellar-cli` only for local experiments.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.
-- `CAATINGA_ARTIFACT_NOT_FOUND` after build: ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
 - `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.

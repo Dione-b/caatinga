@@ -5,15 +5,31 @@ Caatinga counter dApp for Stellar/Soroban.
 ## CLI Flow
 
 ```bash
-npm install
+npm install          # or: pnpm install
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
-npm run dev
+npm run dev          # or: pnpm dev
 ```
 
+Run `build` before `deploy` (WASM required) and `deploy` before `generate` (contract ID required).
+
 Use a local Stellar CLI identity alias for `--source`; public `G...` addresses, seed phrases, and secret keys are rejected for signing operations.
+
+## Package managers
+
+Templates default to npm, but pnpm 10.26+/11.x is supported via the shipped `pnpm-workspace.yaml` (`allowBuilds.esbuild: true`, `blockExoticSubdeps: false`).
+
+Package scripts wrap the CLI:
+
+```bash
+npm run caatinga:build
+npm run caatinga:deploy -- --network testnet --source alice
+npm run caatinga:generate -- --network testnet
+```
+
+With pnpm, use `pnpm run caatinga:build` (and the same pattern for deploy/generate). `npx caatinga build counter` works without going through the package manager.
 
 ## Client Smoke Path
 

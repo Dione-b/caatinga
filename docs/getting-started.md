@@ -56,9 +56,31 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
+Run the CLI steps in order: `build` → `deploy` → `generate` → `invoke` (or `npm run dev` / `pnpm dev` after generate). `deploy` requires compiled WASM; `generate` requires a deployed `contractId` in `caatinga.artifacts.json`.
+
 `build` only compiles the WASM file. `deploy` is the step that writes the deployed `contractId` into `caatinga.artifacts.json`; browser clients and generated bindings need that contract ID before they can call the contract.
 
 If the CLI is not installed globally, prefix each command with `npx caatinga@next` instead of `npx caatinga`.
+
+### Using pnpm
+
+Templates default to `npm` (`packageManager: "npm"` in `caatinga.template.json`), but `pnpm install` is also supported. The `react-vite-counter` template ships a `pnpm-workspace.yaml` with:
+
+- `allowBuilds.esbuild: true` — pnpm 10.26+/11.x block lifecycle scripts by default; Vite depends on esbuild.
+- `blockExoticSubdeps: false` — allows the GitHub subdependency pulled in by `stellar-wallets-kit@0.0.7`.
+
+Equivalent package-manager scripts:
+
+```bash
+pnpm install
+pnpm run caatinga:build
+pnpm run caatinga:deploy -- --network testnet --source alice
+pnpm run caatinga:generate -- --network testnet
+```
+
+`npx caatinga build counter` does not depend on your package manager. Use it directly when `pnpm install` or `pnpm run caatinga:build` fails but Rust and Stellar CLI are already healthy.
+
+See [From Zero to Testnet](./tutorials/from-zero-to-testnet.md#troubleshooting) for pnpm install errors and [Templates](./templates.md#pnpm-1026--11x) for the workspace file details.
 
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
