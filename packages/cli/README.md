@@ -31,6 +31,7 @@ If your machine runs a newer Stellar CLI, `--allow-untested-stellar-cli` is the 
 caatinga init my-dapp
 cd my-dapp
 npm install
+# pnpm alternative: pnpm install (template includes pnpm-workspace.yaml for pnpm 10.26+/11)
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
