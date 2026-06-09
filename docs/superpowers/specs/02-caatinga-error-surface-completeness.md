@@ -4,6 +4,14 @@
 
 Implemented on `master` (error codes in `packages/core/src/errors/`, static tests, `docs/errors.md`, `docs/release/error-code-policy.md`). Implementation plan: `docs/superpowers/plans/2026-05-13-caatinga-error-surface-completeness.md`.
 
+> **Errata (2.0.0):** `CAATINGA_UNTESTED_CLI_VERSION` was removed in the `2.0.0`
+> release. The hard floor `CAATINGA_UNSUPPORTED_CLI_VERSION` is the only
+> remaining hard failure on the Stellar CLI version axis; newer-than-tested
+> versions are accepted with a non-fatal `STELLAR_CLI_UNTESTED_VERSION`
+> warning emitted from `evaluateStellarCliCompatibility`. See
+> `docs/stellar-cli-version-contract.md` and the
+> `.changeset/stellar-cli-dynamic-compat.md` entry.
+
 ## Problem
 
 Error codes are public API. If user-facing errors are undocumented or unstable, CI scripts built on Caatinga cannot safely handle failures.

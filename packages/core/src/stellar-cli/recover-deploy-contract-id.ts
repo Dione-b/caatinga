@@ -72,7 +72,6 @@ export async function resolveContractIdFromDeploySalt(options: {
   source: string;
   network: NetworkConfig;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 }): Promise<string> {
   const saltHex = decimalSaltToHex(options.salt);
   const result = await runCommand("stellar", [
@@ -86,7 +85,6 @@ export async function resolveContractIdFromDeploySalt(options: {
     ...buildStellarNetworkArgsFromConfig(options.network)
   ], {
     cwd: options.cwd,
-    allowUntestedStellarCli: options.allowUntestedStellarCli,
     skipStellarVersionCheck: true
   });
 
@@ -98,7 +96,6 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
   source: string;
   network: NetworkConfig;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
   fetchImpl?: typeof fetch;
 }): Promise<string | null> {
   if (!DEPLOY_SIGNING_FAILURE_REGEX.test(options.output)) {
@@ -120,7 +117,6 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
     salt,
     source: options.source,
     network: options.network,
-    cwd: options.cwd,
-    allowUntestedStellarCli: options.allowUntestedStellarCli
+    cwd: options.cwd
   });
 }

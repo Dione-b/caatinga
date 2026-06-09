@@ -2,7 +2,6 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { runCommand } from "./run-command.js";
 
 type CheckBinaryOptions = {
-  allowUntestedStellarCli?: boolean;
   skipStellarVersionCheck?: boolean;
 };
 

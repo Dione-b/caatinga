@@ -9,7 +9,6 @@ export type BuildContractOptions = {
   config: CaatingaConfig;
   contractName: string;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 };
 
 const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
@@ -44,15 +43,12 @@ export async function buildContract(options: BuildContractOptions) {
   const contract = resolveContract(options.config, options.contractName, cwd);
 
   await checkBinary("rustc", "Install Rust before running caatinga build.");
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga build.", {
-    allowUntestedStellarCli: options.allowUntestedStellarCli
-  });
+  await checkBinary("stellar", "Install Stellar CLI before running caatinga build.");
 
   let result;
   try {
     result = await runCommand("stellar", ["contract", "build"], {
       cwd: contract.sourcePath,
-      allowUntestedStellarCli: options.allowUntestedStellarCli,
       failureCode: CaatingaErrorCode.BUILD_FAILED
     });
   } catch (error) {

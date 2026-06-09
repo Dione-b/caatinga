@@ -11,6 +11,20 @@ sample apps under `examples/`.
 
 Tests are colocated with source files and use `*.test.ts`, for example `packages/core/src/config/load-config.test.ts`.
 
+## Current release
+
+The repo is preparing the `2.0.0` release (major bump from `0.2.4`). Highlights:
+
+- Replaces the hard Stellar CLI upper bound (`25.2.0`) with a feature-aware
+  compatibility check: the hard floor (`23.0.0`) is the only hard failure, and the
+  last-tested version is now advisory. See `docs/stellar-cli-version-contract.md`.
+- Removes the public surface listed in `.changeset/stellar-cli-dynamic-compat.md`
+  (`STELLAR_CLI_TESTED_MAX_VERSION`, `assertSupportedStellarCliVersion`,
+  `CAATINGA_UNTESTED_CLI_VERSION`, the `--allow-untested-stellar-cli` CLI flag, and
+  the `allowUntestedStellarCli` options field on contract/CLI options).
+- Adds `evaluateStellarCliCompatibility` and the `checkStellarCliVersion` export in
+  `@caatinga/core`, plus `Diagnostic.warnings` surfacing in `caatinga doctor`.
+
 ## Build, Test, and Development Commands
 
 Use pnpm 9.15.4 and Node 20 or newer.

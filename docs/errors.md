@@ -2,6 +2,12 @@
 
 Caatinga error codes are public API. Automation may parse the `CAATINGA_*` code, but must not parse human-readable messages.
 
+`@caatinga/core` also emits non-fatal `STELLAR_CLI_*` warning codes from the Stellar CLI
+compatibility module (`evaluateStellarCliCompatibility`). Warnings are advisory: they
+surface as stderr lines and as `Diagnostic.warnings` in `caatinga doctor`, but they do
+not throw and they do not set a `CAATINGA_*` exit code. They are not part of the public
+error-code table because they are not errors.
+
 | Code | Meaning | Common cause | User action | CI/release action | Versioning note |
 | --- | --- | --- | --- | --- | --- |
 | `CAATINGA_CONFIG_NOT_FOUND` | Project config was not found. | Command ran outside a Caatinga project. | Run from the project root or create `caatinga.config.ts`. | Fail CI and fix checkout path or project bootstrap. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
@@ -10,8 +16,7 @@ Caatinga error codes are public API. Automation may parse the `CAATINGA_*` code,
 | `CAATINGA_UNEXPECTED_ERROR` | An unexpected non-Caatinga error was normalized. | A dependency or internal path threw an unknown error. | Re-run with the latest output and report the underlying message. | Fail CI and capture logs for triage. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
 | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Caatinga could not find the `stellar` binary. | Stellar CLI is not installed or not in `PATH`. | Install Stellar CLI using the official Stellar setup guide. | Fail CI and install/pin Stellar CLI in the runner image. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
 | `CAATINGA_STELLAR_CLI_VERSION_PARSE_FAILED` | Stellar CLI version output could not be parsed. | `stellar --version` omitted a valid semantic version. | Check the installed Stellar CLI and report the unexpected version output. | Fail CI and pin a Stellar CLI version with parseable output. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI version is below Caatinga's supported minimum. | Installed Stellar CLI is too old or is a prerelease below the supported range. | Install a supported Stellar CLI version. | Fail CI and upgrade the runner's Stellar CLI. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
-| `CAATINGA_UNTESTED_CLI_VERSION` | Stellar CLI version is newer than Caatinga's tested maximum. | Local or CI runner upgraded Stellar CLI before Caatinga fixtures were updated. | Use a tested Stellar CLI version or pass `--allow-untested-stellar-cli` only for local experiments. | Fail CI; do not override in release jobs. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI version is below Caatinga's hard floor (23.0.0). 22.x cannot sign `stellar contract invoke`. | Installed Stellar CLI is too old or is a prerelease below the hard floor. | Install Stellar CLI 23.0.0 or newer (25.2.0 recommended). | Fail CI and upgrade the runner's Stellar CLI. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
 | `CAATINGA_RUST_NOT_FOUND` | Caatinga could not find Rust. | `rustc` is not installed or not in `PATH`. | Install or update Rust. | Fail CI and install Rust before Caatinga commands run. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
 | `CAATINGA_RUST_TARGET_NOT_FOUND` | Caatinga inferred the Wasm target is missing from a failed build. | `stellar contract build` failed with `CAATINGA_BUILD_FAILED` and the combined message/hint/cause mentions `wasm32v1-none` plus install-style wording (for example “not installed”, “rustup target”). | Run `rustup target add wasm32v1-none` and retry; if the heuristic misclassifies, inspect the underlying `CAATINGA_BUILD_FAILED` output. | Fail CI and add the target during runner setup. | Public code; adding a new code is minor, removal/rename/meaning change is major. |
 | `CAATINGA_DEPLOY_FAILED` | Contract deployment failed after command execution started. | Stellar CLI deploy returned an error or deployment output could not be accepted. | Inspect deploy logs, network settings, source account, and artifact path. | Fail CI and retry only after the deploy preconditions are fixed. | Public code; adding a new code is minor, removal/rename/meaning change is major. |

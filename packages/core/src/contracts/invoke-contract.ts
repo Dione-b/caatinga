@@ -21,7 +21,6 @@ export type InvokeContractOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 };
 
 export function parseInvokeTarget(target: string): InvokeTarget {
@@ -54,9 +53,7 @@ export async function invokeContract(options: InvokeContractOptions) {
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga invoke.", {
-    allowUntestedStellarCli: options.allowUntestedStellarCli
-  });
+  await checkBinary("stellar", "Install Stellar CLI before running caatinga invoke.");
 
   let result: Awaited<ReturnType<typeof runCommand>>;
 
@@ -74,7 +71,6 @@ export async function invokeContract(options: InvokeContractOptions) {
       ...(options.args ?? [])
     ], {
       cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli,
       failureCode: CaatingaErrorCode.INVOKE_FAILED
     });
   } catch (error) {

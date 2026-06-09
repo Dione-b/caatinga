@@ -74,6 +74,12 @@ Caatinga Doctor
 Status: ready
 ```
 
+If `caatinga doctor` reports `✓ Stellar CLI 26.0.0 (1 warning)` followed by a
+`STELLAR_CLI_UNTESTED_VERSION` bullet, the command is still `ready` — that warning is
+advisory and does not block deploys, generates, or invokes. See the
+[Stellar CLI version contract](../stellar-cli-version-contract.md) for the warning
+semantics.
+
 If Stellar CLI is missing, install it:
 
 ```bash
@@ -138,11 +144,10 @@ For the full client contract, XDR debug options, and wallet adapter rules, see [
   If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
 - `ERR_PNPM_EXOTIC_SUBDEP`: pnpm 10.26+/11.x refused a GitHub subdependency from `stellar-wallets-kit`. Ensure `pnpm-workspace.yaml` contains `blockExoticSubdeps: false` (shipped with the official counter template).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
-  After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`, or upgrade to `@caatinga/cli@next` (0.2.2+ resolves legacy `wasm32-unknown-unknown` paths automatically).
+  After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
 - `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
-- `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0-25.2.0.
-- `CAATINGA_UNTESTED_CLI_VERSION`: use a tested Stellar CLI version, or pass `--allow-untested-stellar-cli` only for local experiments.
+- `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0 or newer (25.2.0 recommended). Versions newer than the last-tested 25.2.0 run with a non-fatal stderr advisory; no override flag is required.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.
 - `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.

@@ -27,7 +27,7 @@ Most applications should install `@caatinga/cli` or `@caatinga/client` instead o
 - `buildDependencyGraph`, `resolveDeployOrder`, `resolveDeployArgs`
 - `generateBindings`, `invokeContract`, `parseInvokeTarget`
 - `resolveContract`, `parseContractId`
-- Stellar CLI version constants and guards (`STELLAR_CLI_MIN_VERSION`, `STELLAR_CLI_TESTED_MAX_VERSION`, `assertSupportedStellarCliVersion`)
+- Stellar CLI compatibility — `parseStellarCliVersion`, `checkStellarCliVersion`, `evaluateStellarCliCompatibility`, and the `STELLAR_CLI_MIN_VERSION` / `STELLAR_CLI_LAST_TESTED_VERSION` constants. The compatibility model is feature-aware: the hard floor (`23.0.0`) is the only hard failure, the last-tested version is advisory, and the optional `features` argument is a forward-compatible hook for capability checks. See the [Stellar CLI version contract](https://github.com/Dione-b/caatinga/blob/main/docs/stellar-cli-version-contract.md) for the full contract.
 
 ### Templates
 
@@ -87,7 +87,7 @@ Core owns the canonical `CAATINGA_*` enum used by CLI, client, and templates. Au
 Common codes surfaced through core-backed commands:
 
 - config and artifacts: `CAATINGA_CONFIG_NOT_FOUND`, `CAATINGA_INVALID_CONFIG`, `CAATINGA_ARTIFACT_NOT_FOUND`, `CAATINGA_ARTIFACT_INVALID`
-- Stellar CLI: `CAATINGA_STELLAR_CLI_NOT_FOUND`, `CAATINGA_UNSUPPORTED_CLI_VERSION`, `CAATINGA_UNTESTED_CLI_VERSION`
+- Stellar CLI: `CAATINGA_STELLAR_CLI_NOT_FOUND`, `CAATINGA_UNSUPPORTED_CLI_VERSION`
 - contracts: `CAATINGA_BUILD_FAILED`, `CAATINGA_DEPLOY_FAILED`, `CAATINGA_BINDINGS_FAILED`, `CAATINGA_INVOKE_FAILED`
 - dependencies: `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`, `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`, `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
 - templates: `CAATINGA_TEMPLATE_MANIFEST_NOT_FOUND`, `CAATINGA_TEMPLATE_INCOMPATIBLE`

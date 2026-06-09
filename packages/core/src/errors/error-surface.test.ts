@@ -52,11 +52,7 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
   },
   [CaatingaErrorCode.UNSUPPORTED_CLI_VERSION]: {
     file: "packages/core/src/stellar-cli/check-stellar-cli-version.test.ts",
-    trigger: "assertSupportedStellarCliVersion("
-  },
-  [CaatingaErrorCode.UNTESTED_CLI_VERSION]: {
-    file: "packages/core/src/stellar-cli/check-stellar-cli-version.test.ts",
-    trigger: "assertSupportedStellarCliVersion("
+    trigger: "checkStellarCliVersion("
   },
   [CaatingaErrorCode.RUST_NOT_FOUND]: {
     file: "packages/core/src/shell/check-binary.test.ts",

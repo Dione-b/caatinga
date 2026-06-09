@@ -1,143 +1,110 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
-import {
-  STELLAR_CLI_MIN_VERSION,
-  STELLAR_CLI_TESTED_MAX_VERSION,
-  assertSupportedStellarCliVersion,
-  parseStellarCliVersion
-} from "./version.js";
 
-describe("Stellar CLI version contract", () => {
-  it("parses semver from known Stellar CLI outputs", () => {
-    expect(parseStellarCliVersion("stellar 22.0.1")).toBe("22.0.1");
-    expect(parseStellarCliVersion("stellar-cli 21.3.0 (build abc123)")).toBe("21.3.0");
-    expect(parseStellarCliVersion("Stellar CLI version 22.1.0")).toBe("22.1.0");
+const runCommandMock = vi.hoisted(() => vi.fn());
+
+vi.mock("../shell/run-command.js", () => ({
+  runCommand: runCommandMock
+}));
+
+import { checkStellarCliVersion } from "./check-stellar-cli-version.js";
+import { parseStellarCliVersion } from "./version.js";
+
+describe("checkStellarCliVersion", () => {
+  beforeEach(() => {
+    runCommandMock.mockReset();
   });
 
-  it("fails when version output has no semver", () => {
+  it("returns a supported report for the last-tested version", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0"
+    });
+
+    const report = await checkStellarCliVersion();
+
+    expect(report.status).toBe("supported");
+    expect(report.version).toBe("25.2.0");
+    expect(report.warnings).toEqual([]);
+    expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
+      skipStellarVersionCheck: true
+    });
+  });
+
+  it("emits a warning via the onWarning hook for newer-than-tested versions", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar 99.0.0",
+      stderr: "",
+      all: "stellar 99.0.0"
+    });
+
+    const onWarning = vi.fn();
+    const report = await checkStellarCliVersion({ onWarning });
+
+    expect(report.status).toBe("untested");
+    expect(report.version).toBe("99.0.0");
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "STELLAR_CLI_UNTESTED_VERSION" })
+    );
+  });
+
+  it("writes the default warning to stderr when no hook is provided", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar 26.0.0",
+      stderr: "",
+      all: "stellar 26.0.0"
+    });
+
+    const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    try {
+      const report = await checkStellarCliVersion();
+      expect(report.status).toBe("untested");
+      expect(stderrSpy).toHaveBeenCalled();
+      const payload = stderrSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(payload).toContain("Stellar CLI 26.0.0");
+    } finally {
+      stderrSpy.mockRestore();
+    }
+  });
+
+  it("throws UNSUPPORTED_CLI_VERSION for versions below the hard floor", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar 22.0.1",
+      stderr: "",
+      all: "stellar 22.0.1"
+    });
+
+    await expect(checkStellarCliVersion()).rejects.toMatchObject({
+      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
+      message: expect.stringContaining("below the supported minimum 23.0.0")
+    });
+  });
+
+  it("normalizes missing stellar binary to CAATINGA_STELLAR_CLI_NOT_FOUND", async () => {
+    runCommandMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
+
+    await expect(checkStellarCliVersion()).rejects.toMatchObject({
+      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
+    });
+  });
+
+  it("surfaces parse failures from raw output", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar dev build",
+      stderr: "",
+      all: "stellar dev build"
+    });
+
     expect(() => parseStellarCliVersion("stellar dev build")).toThrowError(
       expect.objectContaining({
         code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED
       })
     );
-  });
 
-  it("rejects versions below the minimum", () => {
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version: "22.0.1",
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
-        message: expect.stringContaining("below the supported minimum 23.0.0")
-      })
-    );
-  });
-
-  it("rejects the adjacent version below the minimum", () => {
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version: "21.9.9",
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
-      })
-    );
-  });
-
-  it("rejects 22.x because invoke signing is broken below 23.0.0", () => {
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version: "22.8.1",
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
-      })
-    );
-  });
-
-  it("accepts the minimum supported version boundary", () => {
-    expect(
-      assertSupportedStellarCliVersion({
-        version: "23.0.0",
-        allowUntested: false
-      })
-    ).toBe("23.0.0");
-  });
-
-  it("accepts the tested maximum version boundary", () => {
-    expect(
-      assertSupportedStellarCliVersion({
-        version: "25.2.0",
-        allowUntested: false
-      })
-    ).toBe("25.2.0");
-  });
-
-  it("rejects versions above the tested maximum by default", () => {
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version: "26.0.0",
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNTESTED_CLI_VERSION,
-        message: expect.stringContaining("newer than the tested maximum 25.2.0")
-      })
-    );
-  });
-
-  it("rejects the adjacent version above the tested maximum by default", () => {
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version: "25.2.1",
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNTESTED_CLI_VERSION
-      })
-    );
-  });
-
-  it("allows versions above the tested maximum with explicit local override", () => {
-    expect(
-      assertSupportedStellarCliVersion({
-        version: "99.0.0",
-        allowUntested: true
-      })
-    ).toBe("99.0.0");
-  });
-
-  it("preserves prerelease versions before rejecting unsupported prerelease CLI builds", () => {
-    const version = parseStellarCliVersion("stellar 22.0.0-rc.1");
-
-    expect(version).toBe("22.0.0-rc.1");
-    expect(() =>
-      assertSupportedStellarCliVersion({
-        version,
-        allowUntested: false
-      })
-    ).toThrowError(
-      expect.objectContaining({
-        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
-      })
-    );
-  });
-
-  it("preserves build metadata in parsed version output", () => {
-    expect(parseStellarCliVersion("stellar 22.0.1+build.5")).toBe("22.0.1+build.5");
-  });
-
-  it("declares concrete supported range constants", () => {
-    expect(STELLAR_CLI_MIN_VERSION).toBe("23.0.0");
-    expect(STELLAR_CLI_TESTED_MAX_VERSION).toBe("25.2.0");
+    await expect(checkStellarCliVersion()).rejects.toMatchObject({
+      code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED
+    });
   });
 });

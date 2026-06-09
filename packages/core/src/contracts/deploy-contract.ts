@@ -27,7 +27,6 @@ export type DeployContractOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
   force?: boolean;
   checkStaleWasm?: boolean;
   resolvedDeployArgs?: Record<string, DeployArgValue>;
@@ -60,9 +59,7 @@ export async function deployContract(options: DeployContractOptions) {
   const network = resolveNetwork(options.config, options.networkName);
   const source = assertSafeSourceAccount(options.source);
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga deploy.", {
-    allowUntestedStellarCli: options.allowUntestedStellarCli
-  });
+  await checkBinary("stellar", "Install Stellar CLI before running caatinga deploy.");
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath);
   const contractWithWasm = {
     ...contract,
@@ -139,7 +136,6 @@ export async function deployContract(options: DeployContractOptions) {
   try {
     const result = await runCommand("stellar", stellarArgs, {
       cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli,
       failureCode: CaatingaErrorCode.DEPLOY_FAILED
     });
     output = result.all || `${result.stdout}\n${result.stderr}`;
@@ -153,8 +149,7 @@ export async function deployContract(options: DeployContractOptions) {
       output: `${error.message}\n${error.hint ?? ""}`,
       source,
       network: network.config,
-      cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli
+      cwd
     });
 
     if (!recoveredContractId) {

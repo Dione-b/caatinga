@@ -188,6 +188,8 @@ Layered approach:
 3. Contract tests with **pinned** Stellar CLI versions in CI.
 4. Optional scheduled smoke against testnet.
 
+The runtime compatibility check (`evaluateStellarCliCompatibility`) intentionally decouples the hard floor (22.x invoke-signing bug) from the last-tested version. Drift above the last-tested version is a non-fatal advisory, not a CI failure, so we can keep one pinned fixture version in CI while still running against whatever Stellar CLI the developer has installed. See the [Stellar CLI version contract](./stellar-cli-version-contract.md) for the operational rules.
+
 ## Versioning and migrations
 
 Semver applies to monorepo packages **and** to serialized formats (`caatinga.artifacts.json` already has a `version` field). Breaking format or command behavior should eventually ship with **`caatinga migrate`**—not required on day one, but fields and ADRs should assume migrations will exist.

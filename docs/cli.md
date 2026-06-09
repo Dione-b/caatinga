@@ -48,7 +48,15 @@ Generates TypeScript bindings from the deployed contract ID.
 
 Invokes a deployed contract method. Extra args are forwarded to the Stellar implicit contract CLI.
 
-Use `--allow-untested-stellar-cli` only for local experiments. CI and release workflows must run a supported Stellar CLI version. See [Stellar CLI Version Contract](./stellar-cli-version-contract.md).
+## Stellar CLI compatibility
+
+Caatinga rejects Stellar CLI versions below `23.0.0` because 22.x cannot sign `stellar contract invoke`. Versions newer than the last-tested `25.2.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning. See [Stellar CLI Version Contract](./stellar-cli-version-contract.md).
+
+`caatinga doctor` reports advisory warnings as a `(N warnings)` suffix on the relevant
+diagnostic line plus a `code: message` bullet for each one. Common codes are
+`STELLAR_CLI_UNTESTED_VERSION` (newer than the last-tested boundary) and
+`STELLAR_CLI_MISSING_FEATURE` (a required feature was not advertised by the installed
+CLI).
 
 ## Current limits
 

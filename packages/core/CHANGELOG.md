@@ -1,5 +1,65 @@
 ## Breaking changes policy
 
+## 2.0.0
+
+### Major Changes
+
+- feat(core)!: replace hard Stellar CLI upper bound with feature-aware compatibility
+
+  The hard floor (`23.0.0`) is preserved because 22.x cannot sign
+  `stellar contract invoke` (xdr value invalid). The tested maximum is now
+  **advisory**; versions above the last-tested `25.2.0` are accepted with a
+  non-fatal stderr advisory and a `caatinga doctor` warning. No override flag
+  is required.
+
+  ### Breaking changes (2.0.0)
+
+  Removed public surface:
+
+  - `STELLAR_CLI_TESTED_MAX_VERSION` export from `@caatinga/core`. Use the
+    advisory `STELLAR_CLI_LAST_TESTED_VERSION` constant instead.
+  - `assertSupportedStellarCliVersion` export. Use
+    `evaluateStellarCliCompatibility` for the new feature-aware check.
+  - `CAATINGA_UNTESTED_CLI_VERSION` error code. The hard floor error
+    `CAATINGA_UNSUPPORTED_CLI_VERSION` is the only remaining hard failure.
+  - `--allow-untested-stellar-cli` flag from `build`, `deploy`, `generate`,
+    `invoke`, and `doctor` commands. The override is no longer required.
+  - `allowUntestedStellarCli` field on `RunCommandOptions`,
+    `BuildContractOptions`, `DeployContractOptions`,
+    `DeployContractGraphOptions`, `VerifyDependencyContractOptions`,
+    `VerifyDependencyContractsOptions`, `InvokeContractOptions`,
+    `GenerateBindingsOptions`, and `RunAllDiagnosticsOptions`.
+
+  ### Added
+
+  - `evaluateStellarCliCompatibility({ version, features?, lastTestedVersion? })`
+    returning a `CompatibilityReport` with `version`, `status` (`"supported" |
+"untested" | "unsupported"`), `minVersion`, `lastTestedVersion`, and
+    `warnings[]`. Stub `features` arg is wired through the API and tests but
+    does not perform live probes yet.
+  - `checkStellarCliVersion(options?)` exported from `@caatinga/core` for
+    advanced integrations that want to drive the gate themselves.
+  - `Diagnostic.warnings` on the doctor diagnostic type; the Stellar CLI
+    diagnostic now reports advisory warnings (e.g.
+    `STELLAR_CLI_UNTESTED_VERSION`, `STELLAR_CLI_MISSING_FEATURE`).
+
+  ### Documentation
+
+  - [Stellar CLI version contract](../docs/stellar-cli-version-contract.md)
+    rewritten around the hard floor + advisory last-tested model.
+  - [CLI reference](../docs/cli.md), [From Zero to Testnet](../docs/tutorials/from-zero-to-testnet.md),
+    [Errors](../docs/errors.md), and the package READMEs updated to drop
+    references to `--allow-untested-stellar-cli` and `CAATINGA_UNTESTED_CLI_VERSION`.
+
+  ### Migration
+
+  If you previously relied on `--allow-untested-stellar-cli` to bypass a
+  newer-than-25.2.0 Stellar CLI, simply remove the flag — the new model
+  accepts those versions by default with a non-fatal warning. If you depended
+  on `CAATINGA_UNTESTED_CLI_VERSION` for CI gating, switch to
+  `CAATINGA_UNSUPPORTED_CLI_VERSION` (the only remaining hard failure on the
+  version axis).
+
 ## 0.2.4
 
 ### Patch Changes

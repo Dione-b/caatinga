@@ -9,17 +9,14 @@ export function registerGenerateCommand(program: Command): void {
     .description("Generate TypeScript bindings for a deployed contract")
     .argument("<contract>", "Contract name")
     .option("-n, --network <network>", "Configured network name")
-    .option("--allow-untested-stellar-cli", "Allow local use of a Stellar CLI version newer than Caatinga's tested maximum")
     .action((contractName: string, options: {
       network?: string;
-      allowUntestedStellarCli?: boolean;
     }) => runCliAction(async () => {
       const config = await loadConfig();
       const result = await generateBindings({
         config,
         contractName,
-        networkName: options.network,
-        allowUntestedStellarCli: options.allowUntestedStellarCli === true
+        networkName: options.network
       });
 
       logger.success("Client generated");

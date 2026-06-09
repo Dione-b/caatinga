@@ -8,7 +8,6 @@ import { stellarDiagnostic } from "./stellar-diagnostic.js";
 export type RunAllDiagnosticsOptions = {
   network?: string;
   source?: string;
-  allowUntestedStellarCli?: boolean;
 };
 
 export async function runAllDiagnostics(
@@ -16,7 +15,7 @@ export async function runAllDiagnostics(
 ): Promise<Diagnostic[]> {
   return [
     nodeDiagnostic(),
-    await stellarDiagnostic(options.allowUntestedStellarCli === true),
+    await stellarDiagnostic(),
     await rustDiagnostic(),
     await wasmTargetDiagnostic(),
     await configDiagnostic(),

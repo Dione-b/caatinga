@@ -12,8 +12,8 @@
     "caatinga:generate": "caatinga generate counter"
   },
   "dependencies": {
-    "@caatinga/client": "^0.2.4",
-    "@caatinga/core": "^0.2.4",
+    "@caatinga/client": "^2.0.0",
+    "@caatinga/core": "^2.0.0",
     "@creit.tech/xbull-wallet-connect": "^0.4.0",
     "@vitejs/plugin-react": "^4.3.4",
     "react": "^18.3.1",
@@ -22,7 +22,7 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^0.2.4",
+    "@caatinga/cli": "^2.0.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"

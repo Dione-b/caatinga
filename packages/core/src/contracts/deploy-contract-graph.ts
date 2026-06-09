@@ -29,7 +29,6 @@ export async function deployContractGraph(options: {
   cwd?: string;
   includeDependencies: boolean;
   force: boolean;
-  allowUntestedStellarCli?: boolean;
   checkStaleWasm?: boolean;
   verifyDeps?: boolean;
 }): Promise<DeployContractGraphResult> {
@@ -54,8 +53,7 @@ export async function deployContractGraph(options: {
         dependencies: contractConfig.dependsOn,
         artifacts,
         network,
-        cwd,
-        allowUntestedStellarCli: options.allowUntestedStellarCli
+        cwd
       });
     }
 
@@ -78,7 +76,6 @@ export async function deployContractGraph(options: {
       networkName: network.name,
       source: options.source,
       cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli,
       force: options.force,
       checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
