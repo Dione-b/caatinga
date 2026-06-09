@@ -1,1 +1,1 @@
-export const CAATINGA_CORE_VERSION = "0.2.4";
+export const CAATINGA_CORE_VERSION = "2.0.0";

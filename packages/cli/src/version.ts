@@ -1,1 +1,1 @@
-export const CAATINGA_CLI_VERSION = "0.2.4";
+export const CAATINGA_CLI_VERSION = "2.0.0";
