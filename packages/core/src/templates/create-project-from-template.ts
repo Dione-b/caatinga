@@ -12,6 +12,13 @@ import {
   type TemplateManifest
 } from "./template-manifest.schema.js";
 
+const TEMPLATE_COPY_EXCLUDED_DIRS = new Set([
+  "target",
+  "test_snapshots",
+  "node_modules",
+  ".git"
+]);
+
 export type CreateProjectFromTemplateOptions = {
   projectName: string;
   targetDir: string;
@@ -38,7 +45,8 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
   await cp(templateDir, targetDir, {
     recursive: true,
     force: false,
-    errorOnExist: true
+    errorOnExist: true,
+    filter: (source) => shouldCopyTemplateEntry(templateDir, source)
   });
 
   await replaceTemplateVariables(targetDir, options.projectName);
@@ -122,6 +130,15 @@ async function replaceTemplateVariables(dir: string, projectName: string): Promi
     const content = await readFile(entryPath, "utf8");
     await writeFile(entryPath, content.replaceAll("__PROJECT_NAME__", projectName), "utf8");
   }));
+}
+
+function shouldCopyTemplateEntry(templateDir: string, source: string): boolean {
+  const relativePath = path.relative(templateDir, source);
+  if (!relativePath || relativePath === ".") {
+    return true;
+  }
+
+  return !relativePath.split(path.sep).some((segment) => TEMPLATE_COPY_EXCLUDED_DIRS.has(segment));
 }
 
 function isTextTemplateFile(filePath: string): boolean {

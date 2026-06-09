@@ -1,5 +1,12 @@
 # counter-web
 
+## 0.0.0-smoke-20260609183026
+
+### Patch Changes
+
+- @caatinga/core@0.0.0-smoke-20260609183026
+- @caatinga/client@0.0.0-smoke-20260609183026
+
 ## 0.1.3
 
 ### Patch Changes
