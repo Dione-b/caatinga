@@ -16,7 +16,21 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 | A thin CLI over `@caatinga/core` | A place to store private keys or run silent signing |
 | Template-driven project scaffolding | A hosted registry required for core workflows (future registries are optional) |
 
-**Primary competitor today:** ad-hoc `package.json` scripts. **Possible later overlap:** meta-frameworks in other ecosystems (e.g. Scaffold-ETH-style), only if the workflow and template story mature.
+**Primary competitor today:** ad-hoc `package.json` scripts.
+
+**Direct ecosystem overlap:** [Scaffold Stellar](https://developers.stellar.org/docs/tools/scaffold-stellar) (`stellar scaffold` + `stellar registry`, official templates, `environments.toml`, Vite/React frontend).
+
+**Caatinga differentiation:** npm-first TypeScript toolkit (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`), `caatinga.config.ts` + `caatinga.artifacts.json` as the per-network artifacts contract, `CAATINGA_*` error codes as a public API, explicit wallet adapters, and multi-contract orchestration via `dependsOn` — without an on-chain registry or Rust macro layer.
+
+### Caatinga vs Scaffold Stellar
+
+| Dimension | Caatinga | Scaffold Stellar |
+|-----------|----------|------------------|
+| Entry point | `npm install -g @caatinga/cli` | Stellar CLI plugins (`stellar scaffold`, `stellar registry`) |
+| Config contract | `caatinga.config.ts` + `caatinga.artifacts.json` | `environments.toml` + registry naming |
+| Deploy model | Stellar CLI subprocess + per-network artifacts file | On-chain registry publish/deploy workflow |
+| Browser integration | `@caatinga/client` with pluggable wallet adapters | Generated TS clients + Vite/React template |
+| Error surface | Stable `CAATINGA_*` codes for automation | Stellar CLI / plugin errors |
 
 **What Caatinga should do unusually well:** standardize Stellar/Soroban steps, persist **per-network** deployment facts, generate frontend integration from deployed contracts, avoid manual `contractId` wiring in the app, make XDR visible when debugging, support **multi-contract** reproducible deploys later, and lower friction for JS/TS teams.
 
