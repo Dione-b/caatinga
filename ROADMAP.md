@@ -9,6 +9,7 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 - Keep `CAATINGA_*` errors documented and actionable.
 - Add full counter-web browser example coverage.
 - Publish GitHub releases for all public tags.
+- Decouple the hard Stellar CLI version lock from the advisory last-tested version via `evaluateStellarCliCompatibility`; raise `STELLAR_CLI_LAST_TESTED_VERSION` without breaking consumer installs. (Shipped in `2.0.0`.)
 
 ## Beta
 

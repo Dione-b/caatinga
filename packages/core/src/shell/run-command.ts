@@ -12,7 +12,6 @@ export type RunCommandResult = {
 type RunCommandOptions = {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
-  allowUntestedStellarCli?: boolean;
   skipStellarVersionCheck?: boolean;
   failureCode?: CaatingaErrorCodeValue;
 };
@@ -24,9 +23,7 @@ export async function runCommand(
 ): Promise<RunCommandResult> {
   try {
     if (command === "stellar" && !options.skipStellarVersionCheck) {
-      await checkStellarCliVersion({
-        allowUntested: options.allowUntestedStellarCli === true
-      });
+      await checkStellarCliVersion();
     }
 
     const result = await execa(command, args, {

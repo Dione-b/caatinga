@@ -1,24 +1,28 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { runCommand } from "../shell/run-command.js";
-import { assertSupportedStellarCliVersion, parseStellarCliVersion } from "./version.js";
+import {
+  evaluateStellarCliCompatibility,
+  type CompatibilityReport,
+  type CompatibilityWarning
+} from "./compat.js";
+import { parseStellarCliVersion } from "./version.js";
 
-type CheckStellarCliVersionOptions = {
-  allowUntested: boolean;
+export type CheckStellarCliVersionOptions = {
+  features?: readonly string[];
+  lastTestedVersion?: string;
+  onWarning?: (warning: CompatibilityWarning) => void;
 };
 
 export async function checkStellarCliVersion(
-  input: CheckStellarCliVersionOptions
-): Promise<string> {
+  input: CheckStellarCliVersionOptions = {}
+): Promise<CompatibilityReport> {
+  let rawOutput: string;
+
   try {
     const result = await runCommand("stellar", ["--version"], {
       skipStellarVersionCheck: true
     });
-    const output = result.all || result.stdout || result.stderr;
-
-    return assertSupportedStellarCliVersion({
-      version: parseStellarCliVersion(output),
-      allowUntested: input.allowUntested
-    });
+    rawOutput = result.all || result.stdout || result.stderr;
   } catch (error) {
     if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
       throw new CaatingaError(
@@ -31,4 +35,29 @@ export async function checkStellarCliVersion(
 
     throw error;
   }
+
+  const report = evaluateStellarCliCompatibility({
+    version: parseStellarCliVersion(rawOutput),
+    features: input.features,
+    lastTestedVersion: input.lastTestedVersion
+  });
+
+  for (const warning of report.warnings) {
+    if (input.onWarning) {
+      input.onWarning(warning);
+    } else {
+      defaultEmitWarning(warning);
+    }
+  }
+
+  return report;
+}
+
+function defaultEmitWarning(warning: CompatibilityWarning): void {
+  const lines = [
+    `Warning: ${warning.message}`,
+    warning.remediation ? `  ${warning.remediation}` : undefined
+  ].filter((line): line is string => Boolean(line));
+
+  process.stderr.write(`${lines.join("\n")}\n`);
 }

@@ -7,7 +7,7 @@ Thank you for your interest in contributing. This document covers the essentials
 - [Node.js](https://nodejs.org/) 20 or newer
 - [pnpm](https://pnpm.io/) 9.15.4 (declared in `package.json#packageManager`)
 - [Rust](https://www.rust-lang.org/tools/install) 1.84.0+ with the `wasm32v1-none` target
-- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.x – 25.2.x
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0 or newer (25.2.0 recommended)
 
 ## Setup
 

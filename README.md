@@ -16,6 +16,8 @@
 > (the release-gate validated channel). Pin `@next` or an exact version in apps; review
 > the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 > See [GitHub Releases](https://github.com/Dione-b/caatinga/releases) and [Release process](./docs/release.md).
+>
+> **`v2.0.0` is in alpha.** It removed the `23.0.0–25.2.0` hard lock and the `--allow-untested-stellar-cli` flag. See the [Stellar CLI version contract](./docs/stellar-cli-version-contract.md) for the new feature-aware behavior.
 
 Caatinga reduces the friction of building Stellar/Soroban dApps by standardizing contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration.
 
@@ -46,7 +48,7 @@ Caatinga provides a standard project structure and CLI workflow to connect these
 ## Requirements
 
 - Node.js 20+
-- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0-25.2.0 on your `PATH`
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0 or newer on your `PATH` (25.2.0 recommended; 22.x is unsupported)
 - Rust 1.84.0 or newer with the `wasm32v1-none` target
 - A funded local Stellar CLI identity, for example `alice`
 
@@ -56,10 +58,9 @@ rustup target add wasm32v1-none
 stellar keys generate alice --fund --network testnet
 ```
 
-Caatinga supports Stellar CLI 23.0.0 through 25.2.0. Versions below 23.0.0 fail with
-`CAATINGA_UNSUPPORTED_CLI_VERSION`. Versions above 25.2.0 fail with
-`CAATINGA_UNTESTED_CLI_VERSION` unless `--allow-untested-stellar-cli` is explicitly used
-for local experiments. Release and CI gates must not use that override.
+Caatinga hard-fails on Stellar CLI versions below `23.0.0` (`CAATINGA_UNSUPPORTED_CLI_VERSION`).
+Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisory and a
+`caatinga doctor` warning; no override flag is required.
 
 ## Install
 

@@ -9,7 +9,6 @@ export async function verifyDependencyContract(options: {
   contractId: string;
   network: ResolvedNetwork;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 }): Promise<void> {
   try {
     await runCommand("stellar", [
@@ -21,7 +20,6 @@ export async function verifyDependencyContract(options: {
       ...buildStellarNetworkArgs(options.network)
     ], {
       cwd: options.cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli,
       failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND
     });
   } catch (error) {
@@ -43,7 +41,6 @@ export async function verifyDependencyContracts(options: {
   artifacts: CaatingaArtifacts;
   network: ResolvedNetwork;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 }): Promise<void> {
   for (const dependencyName of options.dependencies) {
     const contractArtifact = options.artifacts.networks[options.network.name]?.contracts[dependencyName];
@@ -60,8 +57,7 @@ export async function verifyDependencyContracts(options: {
       dependencyName,
       contractId: contractArtifact.contractId,
       network: options.network,
-      cwd: options.cwd,
-      allowUntestedStellarCli: options.allowUntestedStellarCli
+      cwd: options.cwd
     });
   }
 }

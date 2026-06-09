@@ -16,6 +16,15 @@ typecheck, docs, build, tests, snapshot packing, publish dry-run, and consumer p
 Actual npm publishing and GitHub Release creation remain operator-controlled until the release
 automation contract is deliberately implemented.
 
+## Release notes
+
+- Report the current `STELLAR_CLI_MIN_VERSION` and `STELLAR_CLI_LAST_TESTED_VERSION`
+  exported from `packages/core/src/stellar-cli/compat.ts`. Bumping the last-tested
+  value is **not** a breaking change (advisory only); bumping the minimum is a hard
+  failure and requires a major version.
+- Call out any removed public error codes, removed CLI flags, and any new
+  `STELLAR_CLI_*` warning codes surfaced through `Diagnostic.warnings`.
+
 ```bash
 pnpm typecheck
 pnpm build

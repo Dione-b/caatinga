@@ -13,7 +13,6 @@ export type GenerateBindingsOptions = {
   contractName: string;
   networkName?: string;
   cwd?: string;
-  allowUntestedStellarCli?: boolean;
 };
 
 export async function generateBindings(options: GenerateBindingsOptions) {
@@ -30,9 +29,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga generate.", {
-    allowUntestedStellarCli: options.allowUntestedStellarCli
-  });
+  await checkBinary("stellar", "Install Stellar CLI before running caatinga generate.");
 
   const outputDir = path.resolve(cwd, options.config.frontend.bindingsOutput, options.contractName);
   await mkdir(outputDir, { recursive: true });
@@ -49,7 +46,6 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     ...buildStellarNetworkArgs(network)
   ], {
     cwd,
-    allowUntestedStellarCli: options.allowUntestedStellarCli,
     failureCode: CaatingaErrorCode.BINDINGS_FAILED
   });
 

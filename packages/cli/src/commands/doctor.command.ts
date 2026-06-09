@@ -9,7 +9,6 @@ import { logger } from "../utils/logger.js";
 type DoctorOptions = {
   network?: string;
   source?: string;
-  allowUntestedStellarCli?: boolean;
 };
 
 function printDeployCoverageLine(line: DeployCoverageLine): void {
@@ -49,7 +48,6 @@ export function registerDoctorCommand(program: Command): void {
     .description("Check local Caatinga, Stellar CLI, Rust, config, and source identity setup")
     .option("-n, --network <network>", "Configured network name to validate")
     .option("-s, --source <source>", "Stellar CLI identity alias to validate")
-    .option("--allow-untested-stellar-cli", "Allow local use of a Stellar CLI version newer than Caatinga's tested maximum")
     .action((options: DoctorOptions) => runCliAction(async () => {
       logger.info("Caatinga Doctor");
       logger.info("");

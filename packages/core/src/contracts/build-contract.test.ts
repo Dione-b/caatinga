@@ -67,31 +67,6 @@ describe("buildContract", () => {
     });
   });
 
-  it("passes the untested Stellar CLI override into the preflight version check", async () => {
-    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
-    const sourceDir = path.join(tmpDir, "contracts", "counter");
-    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
-    await mkdir(sourceDir, { recursive: true });
-    await mkdir(path.dirname(wasmPath), { recursive: true });
-    await writeFile(wasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
-
-    await buildContract({
-      config: baseConfig,
-      contractName: "counter",
-      cwd: tmpDir,
-      allowUntestedStellarCli: true
-    });
-
-    expect(runCommand).toHaveBeenCalledWith("stellar", ["--version"], {
-      allowUntestedStellarCli: true
-    });
-    expect(runCommand).toHaveBeenCalledWith("stellar", ["contract", "build"], {
-      cwd: sourceDir,
-      allowUntestedStellarCli: true,
-      failureCode: CaatingaErrorCode.BUILD_FAILED
-    });
-  });
-
   it("should_throw_RUST_TARGET_NOT_FOUND_when_stellar_build_reports_missing_wasm32v1_none", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
     const sourceDir = path.join(tmpDir, "contracts", "counter");
@@ -196,15 +171,15 @@ describe("buildContract", () => {
     await expect(access(legacyWasmPath)).rejects.toBeDefined();
   });
 
-  it("does not mask Stellar CLI version errors from the preflight check", async () => {
+  it("rethrows UNSUPPORTED_CLI_VERSION surfaced from the preflight version check", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
     const sourceDir = path.join(tmpDir, "contracts", "counter");
     await mkdir(sourceDir, { recursive: true });
     runCommand.mockImplementation(async (command: string, args: string[]) => {
       if (command === "stellar" && args[0] === "--version") {
         throw new CaatingaError(
-          "Stellar CLI 99.0.0 is newer than the tested maximum.",
-          CaatingaErrorCode.UNTESTED_CLI_VERSION
+          "Stellar CLI 22.0.1 is below the supported minimum 23.0.0.",
+          CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
         );
       }
 
@@ -216,7 +191,7 @@ describe("buildContract", () => {
       contractName: "counter",
       cwd: tmpDir
     })).rejects.toMatchObject({
-      code: CaatingaErrorCode.UNTESTED_CLI_VERSION
+      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
     });
   });
 });

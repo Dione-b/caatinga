@@ -44,6 +44,12 @@ release on GitHub is a manual step after the Release Gate passes. See
 Release notes must include Node.js, Stellar CLI, and Rust compatibility, plus any breaking
 changes or public error-code changes.
 
+For Stellar CLI compatibility, report the value of `STELLAR_CLI_MIN_VERSION` and
+`STELLAR_CLI_LAST_TESTED_VERSION` from `packages/core/src/stellar-cli/compat.ts` so
+consumers know which boundary has been validated. Bumping `STELLAR_CLI_LAST_TESTED_VERSION`
+alone does not require a new major version; bumping `STELLAR_CLI_MIN_VERSION` is a
+breaking change because the hard floor is enforced at runtime.
+
 See the operator checklist in [`release/publish-checklist.md`](./release/publish-checklist.md)
 and the stable release contract in [`release/v1.0.0.md`](./release/v1.0.0.md).
 

@@ -96,8 +96,7 @@ describe("build command", () => {
 
       expect(buildContract).toHaveBeenCalledWith({
         config,
-        contractName: "counter",
-        allowUntestedStellarCli: false
+        contractName: "counter"
       });
       expect(evaluateDeployCoverage).toHaveBeenCalledWith({ networkName: "testnet" });
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");

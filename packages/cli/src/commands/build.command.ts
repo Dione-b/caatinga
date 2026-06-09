@@ -9,13 +9,11 @@ export function registerBuildCommand(program: Command): void {
     .command("build")
     .description("Build a configured Soroban contract")
     .argument("[contract]", "Contract name", "counter")
-    .option("--allow-untested-stellar-cli", "Allow local use of a Stellar CLI version newer than Caatinga's tested maximum")
-    .action((contractName: string, options: { allowUntestedStellarCli?: boolean }) => runCliAction(async () => {
+    .action((contractName: string) => runCliAction(async () => {
       const config = await loadConfig();
       const result = await buildContract({
         config,
-        contractName,
-        allowUntestedStellarCli: options.allowUntestedStellarCli === true
+        contractName
       });
 
       logger.success("Contract built");

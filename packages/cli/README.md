@@ -14,7 +14,7 @@ Inside a generated project, prefer `npx caatinga` so the project-local workflow 
 ## Requirements
 
 - Node.js `>=20`
-- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` and `<=25.2.0` on `PATH` (22.x breaks `caatinga invoke` signing)
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (22.x breaks `caatinga invoke` signing)
 - Rust 1.84.0 or newer with the `wasm32v1-none` target (contract builds)
 - A funded Stellar CLI identity for `deploy` and `invoke` (for example `alice`)
 
@@ -23,7 +23,7 @@ rustup target add wasm32v1-none
 stellar keys generate alice --fund --network testnet
 ```
 
-If your machine runs a newer Stellar CLI, `--allow-untested-stellar-cli` is the local-only escape hatch. CI and release workflows must stay on the supported range.
+Stellar CLI versions newer than the last-tested `25.2.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning; no override flag is required.
 
 ## Quick start
 
@@ -63,7 +63,6 @@ The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
 ### `build`
 
 - `[contract]` defaults to `counter` when omitted
-- `--allow-untested-stellar-cli` allows a Stellar CLI newer than Caatinga's tested maximum (local only)
 - prints a deploy reminder when the default network lacks a `contractId` in `caatinga.artifacts.json`; this warning does not fail the build
 
 ### `doctor`
@@ -79,7 +78,6 @@ The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
 - `-s, --source <identity>` is required; must be a Stellar CLI identity alias that can sign (for example `alice`)
 - `--force` redeploys even when artifacts already store a contract ID
 - `--no-deps` skips dependency deployment for a single named contract (`--no-deps` requires `[contract]`)
-- `--allow-untested-stellar-cli` for local experiments only
 
 Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts.
 
@@ -87,7 +85,6 @@ Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deplo
 
 - `-n, --network <network>` selects the network used to resolve deployed contract IDs
 - `invoke` expects `<contract.method>` (for example `counter.increment`) and forwards `[args...]` to the underlying Stellar invocation
-- Both accept `--allow-untested-stellar-cli` for local experiments only
 
 `caatinga dev` is reserved, hidden in pre-v1 builds, and not part of the stability promise. Use your frontend dev server (for example Vite) alongside the commands above.
 
@@ -109,7 +106,7 @@ Unsupported input posture:
 Common codes:
 
 - `CAATINGA_CONFIG_NOT_FOUND`, `CAATINGA_INVALID_CONFIG`
-- `CAATINGA_STELLAR_CLI_NOT_FOUND`, `CAATINGA_UNSUPPORTED_CLI_VERSION`, `CAATINGA_UNTESTED_CLI_VERSION`
+- `CAATINGA_STELLAR_CLI_NOT_FOUND`, `CAATINGA_UNSUPPORTED_CLI_VERSION`
 - `CAATINGA_BUILD_FAILED`, `CAATINGA_DEPLOY_FAILED`, `CAATINGA_BINDINGS_FAILED`, `CAATINGA_INVOKE_FAILED`
 - `CAATINGA_CONTRACT_ID_NOT_FOUND`, `CAATINGA_SOURCE_ACCOUNT_REQUIRED`, `CAATINGA_UNSAFE_SOURCE_ACCOUNT`
 - `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`, `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`

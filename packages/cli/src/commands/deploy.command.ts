@@ -13,7 +13,6 @@ export function registerDeployCommand(program: Command): void {
     .option("--force", "Redeploy contracts even if artifacts already contain contract IDs")
     .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
-    .option("--allow-untested-stellar-cli", "Allow local use of a Stellar CLI version newer than Caatinga's tested maximum")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
     .action((contractName: string | undefined, options: {
       network?: string;
@@ -22,7 +21,6 @@ export function registerDeployCommand(program: Command): void {
       deps?: boolean;
       staleCheck?: boolean;
       verifyDeps?: boolean;
-      allowUntestedStellarCli?: boolean;
     }) => runCliAction(async () => {
       if (options.deps === false && !contractName) {
         throw new CaatingaError(
@@ -41,8 +39,7 @@ export function registerDeployCommand(program: Command): void {
         includeDependencies: options.deps !== false,
         force: options.force === true,
         checkStaleWasm: options.staleCheck !== false,
-        verifyDeps: options.verifyDeps === true,
-        allowUntestedStellarCli: options.allowUntestedStellarCli === true
+        verifyDeps: options.verifyDeps === true
       });
 
       for (const warning of result.staleWasmWarnings) {
