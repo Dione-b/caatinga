@@ -1,6 +1,6 @@
 {
   "name": "counter-web",
-  "version": "0.0.0-smoke-20260609183026",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {

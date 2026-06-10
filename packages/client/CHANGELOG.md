@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 2.0.1
+
+### Patch Changes
+
+- Migrate the wallet flow to the npm-published @creit.tech/stellar-wallets-kit: connect-first UX with shared wallet context, installed-wallet selection modal, HOT Wallet/NEAR chain removed from the browser bundle, and a loading-modal overlay replacing the "Not loaded" flash.
+  - @caatinga/core@2.0.1
+
 ## 2.0.0
 
 ### Major Changes
