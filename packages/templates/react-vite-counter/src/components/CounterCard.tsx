@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
 import { CaatingaError } from "@caatinga/core/browser";
+import { useWallet } from "../context/WalletContext.js";
+import { LoadingModal } from "./LoadingModal.js";
 
 function formatCaatingaError(error: unknown): string {
   if (error instanceof CaatingaError) {
@@ -11,13 +13,22 @@ function formatCaatingaError(error: unknown): string {
 }
 
 export function CounterCard() {
+  const { publicKey } = useWallet();
   const [count, setCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Start in the loading state: the component only mounts once a wallet is
+  // connected, and it fetches immediately — so the first paint should read as
+  // "Loading…" instead of flashing "Not loaded" while the read resolves.
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const formattedCount = useMemo(
-    () => (count === null ? "Not loaded" : new Intl.NumberFormat().format(count)),
-    [count]
-  );
+  const formattedCount = useMemo(() => {
+    if (count !== null) {
+      return new Intl.NumberFormat().format(count);
+    }
+
+    // While loading, the LoadingModal overlay covers this; show a neutral
+    // placeholder (not "Not loaded") so nothing flashes behind it.
+    return loading ? "—" : "Not loaded";
+  }, [count, loading]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -34,8 +45,16 @@ export function CounterCard() {
   }, []);
 
   useEffect(() => {
+    // Reads route through the wallet for the source account, so only fetch once
+    // a wallet is connected. Avoids the "Not loaded" state firing before connect.
+    if (!publicKey) {
+      setCount(null);
+      setLoading(false);
+      return;
+    }
+
     void refresh();
-  }, [refresh]);
+  }, [publicKey, refresh]);
 
   async function increment() {
     setLoading(true);
@@ -57,6 +76,8 @@ export function CounterCard() {
 
   return (
     <section className="counter-panel" aria-labelledby="counter-title">
+      {loading ? <LoadingModal label={count === null ? "Loading…" : "Updating…"} /> : null}
+
       <div className="counter-panel__header">
         <div>
           <p className="eyebrow">Counter Contract</p>

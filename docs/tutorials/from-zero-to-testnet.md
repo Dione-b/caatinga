@@ -114,7 +114,7 @@ npx caatinga deploy counter --network testnet --source alice --force
 After generation, install the browser packages from `next`:
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
 ```
 
 Browser code can compose artifacts, generated bindings, network config, and a wallet adapter:

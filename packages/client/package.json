@@ -61,19 +61,19 @@
   },
   "devDependencies": {
     "tsup": "^8.3.5",
-    "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7",
+    "@creit.tech/stellar-wallets-kit": "^1.9.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "@stellar/freighter-api": "^4.0.0",
-    "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7"
+    "@creit.tech/stellar-wallets-kit": "^1.9.5"
   },
   "peerDependenciesMeta": {
     "@stellar/freighter-api": {
       "optional": true
     },
-    "stellar-wallets-kit": {
+    "@creit.tech/stellar-wallets-kit": {
       "optional": true
     }
   }

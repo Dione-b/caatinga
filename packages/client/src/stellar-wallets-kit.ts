@@ -1,10 +1,10 @@
 export {
-  createStellarWalletsKitAdapter
+  createStellarWalletsKitAdapter,
+  WalletNetwork
 } from "./adapters/stellar-wallets-kit.js";
 export type {
   StellarWalletsKitAdapter,
   StellarWalletsKitAdapterOptions,
-  StellarWalletsKitConnectOptions,
   StellarWalletsKitMetadata,
-  StellarWalletsKitSession
+  StellarWalletsKitOpenModalOptions
 } from "./adapters/stellar-wallets-kit.js";

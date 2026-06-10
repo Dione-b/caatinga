@@ -1,11 +1,22 @@
 import {
   StellarWalletsKit,
   WalletNetwork,
-  WalletType
-} from "stellar-wallets-kit";
-import type { IConnectWalletConnectParams } from "stellar-wallets-kit";
+  allowAllModules,
+  FREIGHTER_ID
+} from "@creit.tech/stellar-wallets-kit";
+import type { ISupportedWallet, ModuleInterface } from "@creit.tech/stellar-wallets-kit";
+import {
+  WalletConnectAllowedMethods,
+  WalletConnectModule
+} from "@creit.tech/stellar-wallets-kit/modules/walletconnect.module";
 import type { CaatingaWalletAdapter } from "../types.js";
 
+export { WalletNetwork };
+
+/**
+ * Optional WalletConnect metadata. When provided, a WalletConnect module is
+ * registered alongside the auto-detected wallets so it shows up in the modal.
+ */
 export interface StellarWalletsKitMetadata {
   name: string;
   description: string;
@@ -17,131 +28,129 @@ export interface StellarWalletsKitMetadata {
 export interface StellarWalletsKitAdapterOptions {
   kit?: StellarWalletsKit;
   network?: WalletNetwork;
-  selectedWallet?: WalletType;
+  /** Wallet pre-selected before the user opens the modal. Defaults to Freighter. */
+  selectedWalletId?: string;
+  /** Override the registered modules. Defaults to every auto-detectable wallet. */
+  modules?: ModuleInterface[];
   walletConnectMetadata?: StellarWalletsKitMetadata;
 }
 
-export interface StellarWalletsKitConnectOptions {
-  chains?: IConnectWalletConnectParams["chains"];
-  methods?: IConnectWalletConnectParams["methods"];
-  pairingTopic?: IConnectWalletConnectParams["pairingTopic"];
-}
-
-export interface StellarWalletsKitSession {
-  id: string;
-  name: string;
-  description: string;
-  url: string;
-  icons: string;
-  accounts: Array<{
-    network: "pubnet" | "testnet";
-    publicKey: string;
-  }>;
+export interface StellarWalletsKitOpenModalOptions {
+  modalTitle?: string;
+  notAvailableText?: string;
+  onClosed?: (error: Error) => void;
 }
 
 export interface StellarWalletsKitAdapter extends CaatingaWalletAdapter {
   kit: StellarWalletsKit;
-  setWallet(wallet: WalletType): Promise<void>;
-  setNetwork(network: WalletNetwork): Promise<void>;
-  startWalletConnect(metadata?: StellarWalletsKitMetadata): Promise<void>;
-  connectWalletConnect(options?: StellarWalletsKitConnectOptions): Promise<void>;
-  getWalletConnectSessions(): Promise<StellarWalletsKitSession[]>;
-  setWalletConnectSession(sessionId: string): void;
-  onWalletConnectSessionDeleted(callback: (sessionId: string) => void): void;
+  /**
+   * Opens the wallet-selection modal (lists only installed/available wallets),
+   * sets the chosen wallet as active, and resolves with the connected address.
+   * Rejects if the user closes the modal without selecting a wallet.
+   */
+  openModal(options?: StellarWalletsKitOpenModalOptions): Promise<string>;
+  setWallet(walletId: string): void;
+  getSupportedWallets(): Promise<ISupportedWallet[]>;
+  disconnect(): Promise<void>;
 }
 
 export function createStellarWalletsKitAdapter(
   options: StellarWalletsKitAdapterOptions = {}
 ): StellarWalletsKitAdapter {
-  const kit = options.kit ?? new StellarWalletsKit({
-    network: options.network ?? WalletNetwork.TESTNET,
-    selectedWallet: options.selectedWallet ?? WalletType.XBULL
-  });
-  let publicKey: string | undefined;
-  let isWalletConnectStarted = false;
-  const sessionDeletedCallbacks = new Set<(sessionId: string) => void>();
+  const network = options.network ?? WalletNetwork.TESTNET;
+  const kit =
+    options.kit ??
+    new StellarWalletsKit({
+      network,
+      selectedWalletId: options.selectedWalletId ?? FREIGHTER_ID,
+      modules: options.modules ?? buildModules(network, options.walletConnectMetadata)
+    });
+
+  let address: string | undefined;
 
   return {
     kit,
 
-    async setWallet(wallet) {
-      await kit.setWallet(wallet);
-      publicKey = undefined;
+    setWallet(walletId) {
+      kit.setWallet(walletId);
+      address = undefined;
     },
 
-    async setNetwork(network) {
-      await kit.setNetwork(network);
-      publicKey = undefined;
+    getSupportedWallets() {
+      return kit.getSupportedWallets();
+    },
+
+    openModal(modalOptions = {}) {
+      return new Promise<string>((resolve, reject) => {
+        void kit.openModal({
+          ...(modalOptions.modalTitle ? { modalTitle: modalOptions.modalTitle } : {}),
+          ...(modalOptions.notAvailableText
+            ? { notAvailableText: modalOptions.notAvailableText }
+            : {}),
+          onWalletSelected: (option: ISupportedWallet) => {
+            kit.setWallet(option.id);
+            kit
+              .getAddress()
+              .then((result) => {
+                address = result.address;
+                resolve(result.address);
+              })
+              .catch((error) => {
+                reject(error instanceof Error ? error : new Error(String(error)));
+              });
+          },
+          onClosed: (error: Error) => {
+            modalOptions.onClosed?.(error);
+            reject(error);
+          }
+        });
+      });
     },
 
     async getPublicKey() {
-      publicKey = await kit.getPublicKey();
-      return publicKey;
+      const result = await kit.getAddress();
+      address = result.address;
+      return result.address;
     },
 
     async signTransaction({ xdr, networkPassphrase }) {
-      const walletNetwork = resolveWalletNetwork(networkPassphrase);
-      if (walletNetwork) {
-        await kit.setNetwork(walletNetwork);
-      }
-
-      const signer = publicKey ?? await kit.getPublicKey();
-      publicKey = signer;
-      const response = await kit.sign({ xdr, publicKey: signer });
-      return response.signedXDR;
-    },
-
-    async startWalletConnect(metadata = options.walletConnectMetadata) {
-      if (!metadata) {
-        throw new Error("WalletConnect metadata is required before starting WalletConnect.");
-      }
-
-      await kit.startWalletConnect(metadata);
-      isWalletConnectStarted = true;
-      for (const callback of sessionDeletedCallbacks) {
-        kit.onSessionDeleted((sessionId: string) => {
-          publicKey = undefined;
-          callback(sessionId);
-        });
-      }
-    },
-
-    async connectWalletConnect(connectOptions) {
-      await kit.connectWalletConnect(connectOptions);
-      publicKey = undefined;
-    },
-
-    async getWalletConnectSessions() {
-      return kit.getSessions();
-    },
-
-    setWalletConnectSession(sessionId) {
-      kit.setSession(sessionId);
-      publicKey = undefined;
-    },
-
-    onWalletConnectSessionDeleted(callback) {
-      sessionDeletedCallbacks.add(callback);
-      if (!isWalletConnectStarted) {
-        return;
-      }
-
-      kit.onSessionDeleted((sessionId: string) => {
-        publicKey = undefined;
-        callback(sessionId);
+      const result = await kit.signTransaction(xdr, {
+        networkPassphrase,
+        ...(address ? { address } : {})
       });
+      return result.signedTxXdr;
+    },
+
+    async disconnect() {
+      await kit.disconnect();
+      address = undefined;
     }
   };
 }
 
-function resolveWalletNetwork(networkPassphrase: string): WalletNetwork | undefined {
-  if (networkPassphrase === "Test SDF Network ; September 2015") {
-    return WalletNetwork.TESTNET;
+// SWK's HOT Wallet module (NEAR-based) pulls @hot-wallet/sdk → @near-js/crypto →
+// randombytes, which references the Node `global` and breaks in the browser.
+// Drop it from the wallet list; consumers should also alias @hot-wallet/sdk to a
+// stub in their bundler so the NEAR chain is never bundled (see template config).
+const HOTWALLET_ID = "hot-wallet";
+
+function buildModules(
+  network: WalletNetwork,
+  walletConnectMetadata?: StellarWalletsKitMetadata
+): ModuleInterface[] {
+  const modules = allowAllModules({
+    filterBy: (module) => module.productId !== HOTWALLET_ID
+  });
+
+  if (walletConnectMetadata) {
+    modules.push(
+      new WalletConnectModule({
+        ...walletConnectMetadata,
+        network,
+        method: WalletConnectAllowedMethods.SIGN
+      })
+    );
   }
 
-  if (networkPassphrase === "Public Global Stellar Network ; September 2015") {
-    return WalletNetwork.PUBLIC;
-  }
-
-  return undefined;
+  return modules;
 }

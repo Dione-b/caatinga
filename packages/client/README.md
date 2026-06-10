@@ -22,7 +22,7 @@ The `@caatinga/client/freighter` subpath is optional and only needed when you wa
 For multi-wallet support, add Stellar Wallets Kit:
 
 ```bash
-pnpm add github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+pnpm add @creit.tech/stellar-wallets-kit
 ```
 
 ```ts

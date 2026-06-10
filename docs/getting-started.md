@@ -89,7 +89,7 @@ Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, 
 After `deploy` and `generate`, install the client packages from `next` (match the CLI version when possible):
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
 ```
 
 Register the generated bindings with `@caatinga/client`:
