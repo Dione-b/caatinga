@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { caatinga } from "./caatinga.js";
-import { stellarWalletAdapter, WalletNetwork, WalletType } from "./wallet.js";
+import { stellarWalletAdapter } from "./wallet.js";
 import "./styles.css";
 
 type Status = {
@@ -28,31 +28,13 @@ function formatError(error: unknown): string {
 export function App() {
   const [status, setStatus] = useState<Status>({});
   const [loading, setLoading] = useState(false);
-  const [selectedWallet, setSelectedWallet] = useState<WalletType>(WalletType.XBULL);
-  const [network, setNetwork] = useState<WalletNetwork>(WalletNetwork.TESTNET);
-
-  async function selectWallet(wallet: WalletType) {
-    setSelectedWallet(wallet);
-    setStatus({});
-    await stellarWalletAdapter.setWallet(wallet);
-  }
-
-  async function selectNetwork(nextNetwork: WalletNetwork) {
-    setNetwork(nextNetwork);
-    setStatus({});
-    await stellarWalletAdapter.setNetwork(nextNetwork);
-  }
 
   async function connectWallet() {
     setLoading(true);
     setStatus({});
     try {
-      if (selectedWallet === WalletType.WALLET_CONNECT) {
-        await stellarWalletAdapter.startWalletConnect();
-        await stellarWalletAdapter.connectWalletConnect();
-      }
-
-      const publicKey = await stellarWalletAdapter.getPublicKey();
+      // Lists only installed/available wallets and resolves with the address.
+      const publicKey = await stellarWalletAdapter.openModal();
       setStatus({ publicKey });
     } catch (error) {
       setStatus({ error: formatError(error) });
@@ -109,36 +91,13 @@ export function App() {
       </section>
 
       <section className="panel">
-        <label>
-          <span>Wallet</span>
-          <select
-            value={selectedWallet}
-            onChange={(event) => void selectWallet(event.target.value as WalletType)}
-          >
-            <option value={WalletType.XBULL}>xBull</option>
-            <option value={WalletType.FREIGHTER}>Freighter</option>
-            <option value={WalletType.ALBEDO}>Albedo</option>
-            <option value={WalletType.RABET}>Rabet</option>
-            <option value={WalletType.WALLET_CONNECT}>WalletConnect</option>
-          </select>
-        </label>
-        <label>
-          <span>Network</span>
-          <select
-            value={network}
-            onChange={(event) => void selectNetwork(event.target.value as WalletNetwork)}
-          >
-            <option value={WalletNetwork.TESTNET}>Testnet</option>
-            <option value={WalletNetwork.PUBLIC}>Public</option>
-          </select>
-        </label>
         <button type="button" onClick={connectWallet} disabled={loading}>
           Connect wallet
         </button>
-        <button type="button" onClick={increment} disabled={loading}>
+        <button type="button" onClick={increment} disabled={loading || !status.publicKey}>
           Increment
         </button>
-        <button type="button" onClick={readCounter} disabled={loading}>
+        <button type="button" onClick={readCounter} disabled={loading || !status.publicKey}>
           Read value
         </button>
       </section>

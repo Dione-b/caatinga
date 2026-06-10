@@ -315,9 +315,7 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
     }>(templatePackageJsonPath);
 
-    expect(packageJson.dependencies?.["stellar-wallets-kit"]).toBe(
-      "github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7"
-    );
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
   });
 
   it("should_install_cleanly_on_pnpm_10_26_plus", async () => {
@@ -326,7 +324,7 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
     }>(path.join(templateRoot, "package.json"));
 
-    expect(packageJson.dependencies?.["@creit.tech/xbull-wallet-connect"]).toBe("^0.4.0");
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
     expect(workspaceYaml).toContain("allowBuilds:");

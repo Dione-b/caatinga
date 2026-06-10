@@ -1,17 +1,16 @@
 // Keep in sync with examples/counter-web/src/wallet.ts (WalletConnect defaults differ per project).
 import {
   createStellarWalletsKitAdapter,
+  WalletNetwork,
   type StellarWalletsKitMetadata
 } from "@caatinga/client/stellar-wallets-kit";
-import { WalletNetwork, WalletType } from "stellar-wallets-kit";
 
 export const stellarWalletAdapter = createStellarWalletsKitAdapter({
   network: WalletNetwork.TESTNET,
-  selectedWallet: WalletType.XBULL,
   walletConnectMetadata: getWalletConnectMetadata()
 });
 
-export { WalletNetwork, WalletType };
+export { WalletNetwork };
 
 function getWalletConnectMetadata(): StellarWalletsKitMetadata | undefined {
   const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined;

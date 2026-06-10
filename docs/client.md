@@ -37,7 +37,7 @@ Not included:
 ## Install
 
 ```bash
-pnpm add @caatinga/client github:Creit-Tech/Stellar-Wallets-Kit#v0.0.7
+pnpm add @caatinga/client @creit.tech/stellar-wallets-kit
 ```
 
 `@caatinga/client` depends on `@caatinga/core` and imports only the browser-safe subpath
