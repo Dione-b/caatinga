@@ -35,6 +35,33 @@ Building Soroban dApps often requires coordinating multiple moving parts:
 
 Caatinga provides a standard project structure and CLI workflow to connect these steps without hiding Stellar concepts such as `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
+## How Caatinga Is Different
+
+Several Stellar scaffolding tools already exist. Caatinga deliberately occupies a different
+spot in the design space — **TypeScript-first, local-first, and low-magic**:
+
+- **npm-first, TypeScript toolchain.** Caatinga ships as npm packages (`@caatinga/cli`,
+  `@caatinga/core`, `@caatinga/client`) and a thin CLI over `@caatinga/core`. It targets teams
+  who live in the JS/TS ecosystem rather than requiring a Rust/Cargo-installed binary as the
+  primary entry point.
+- **Local state is the source of truth.** Deployed contract IDs live in
+  `caatinga.artifacts.json`, per network. There is **no required on-chain registry and no
+  mandatory hosted registry** in the core workflow — your project's local state is
+  authoritative, which keeps the flow simple and dependency-light.
+- **No Rust macro layer.** Caatinga composes, validates, and organizes the workflow. It does
+  not reimplement the Stellar SDK or CLI, and it does not introduce a Caatinga-specific Rust
+  macro or contract model. Generated bindings remain the primary contract API.
+- **Mental model stays visible.** Concepts like `contractId`, RPC URL, network passphrase,
+  signing identity, XDR, fees, and simulation remain explicit instead of being hidden behind
+  generated abstractions.
+- **Bring-your-own scaffolding and frontend.** Projects start from checked, first-party
+  template manifests in this repo. The client focuses on wallet adapters, generated bindings,
+  and explicit invoke/XDR — not on bundling a fixed full-stack UI you have to adopt.
+
+If you want a Rust-centric workflow with an on-chain contract registry and a bundled
+full-stack frontend, other tools may suit you better. Caatinga is for builders who want a
+lightweight, transparent, TypeScript-native path from contract to wallet-ready client.
+
 ## Features
 
 - Scaffold a Soroban dApp from checked template manifests.
