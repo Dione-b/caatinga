@@ -5,16 +5,16 @@
 <p>Developer toolkit for Stellar/Soroban dApps.</p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
-[![npm](https://img.shields.io/npm/v/@caatinga/cli/next?label=%40caatinga%2Fcli%40next)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
+[![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#)
 
 </div>
 
 > **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
-> and exported package paths may change before `v1.0.0`. Install from the npm **`next`** dist-tag
-> (the release-gate validated channel). Pin `@next` or an exact version in apps; review
-> the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> and exported package paths may change before `v1.0.0`. `latest` now tracks `2.0.0`; the
+> `next` dist-tag points to the same release-gate validated build. Pin an exact version in
+> apps and review the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 > See [GitHub Releases](https://github.com/Dione-b/caatinga/releases) and [Release process](./docs/release.md).
 >
 > **`v2.0.0` is in alpha.** It removed the `23.0.0–25.2.0` hard lock and the `--allow-untested-stellar-cli` flag. See the [Stellar CLI version contract](./docs/stellar-cli-version-contract.md) for the new feature-aware behavior.
@@ -34,6 +34,33 @@ Building Soroban dApps often requires coordinating multiple moving parts:
 - frontend wallet integration
 
 Caatinga provides a standard project structure and CLI workflow to connect these steps without hiding Stellar concepts such as `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
+
+## How Caatinga Is Different
+
+Several Stellar scaffolding tools already exist. Caatinga deliberately occupies a different
+spot in the design space — **TypeScript-first, local-first, and low-magic**:
+
+- **npm-first, TypeScript toolchain.** Caatinga ships as npm packages (`@caatinga/cli`,
+  `@caatinga/core`, `@caatinga/client`) and a thin CLI over `@caatinga/core`. It targets teams
+  who live in the JS/TS ecosystem rather than requiring a Rust/Cargo-installed binary as the
+  primary entry point.
+- **Local state is the source of truth.** Deployed contract IDs live in
+  `caatinga.artifacts.json`, per network. There is **no required on-chain registry and no
+  mandatory hosted registry** in the core workflow — your project's local state is
+  authoritative, which keeps the flow simple and dependency-light.
+- **No Rust macro layer.** Caatinga composes, validates, and organizes the workflow. It does
+  not reimplement the Stellar SDK or CLI, and it does not introduce a Caatinga-specific Rust
+  macro or contract model. Generated bindings remain the primary contract API.
+- **Mental model stays visible.** Concepts like `contractId`, RPC URL, network passphrase,
+  signing identity, XDR, fees, and simulation remain explicit instead of being hidden behind
+  generated abstractions.
+- **Bring-your-own scaffolding and frontend.** Projects start from checked, first-party
+  template manifests in this repo. The client focuses on wallet adapters, generated bindings,
+  and explicit invoke/XDR — not on bundling a fixed full-stack UI you have to adopt.
+
+If you want a Rust-centric workflow with an on-chain contract registry and a bundled
+full-stack frontend, other tools may suit you better. Caatinga is for builders who want a
+lightweight, transparent, TypeScript-native path from contract to wallet-ready client.
 
 ## Features
 
@@ -64,22 +91,23 @@ Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisor
 
 ## Install
 
-During alpha, prefer the **`next`** dist-tag on all published packages (`@caatinga/cli`,
-`@caatinga/core`, `@caatinga/client`). It tracks the latest release-gate validated build.
+`latest` and `next` both resolve to `2.0.0` on all published packages (`@caatinga/cli`,
+`@caatinga/core`, `@caatinga/client`). A plain install now pulls the current release-gate
+validated build.
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
 Confirm the resolved version:
 
 ```bash
-npm view @caatinga/cli@next version
-npm view @caatinga/core@next version
-npm view @caatinga/client@next version
+npm view @caatinga/cli version
+npm view @caatinga/core version
+npm view @caatinga/client version
 ```
 
-Without a global install, prefix commands with `npx caatinga@next` (see Quick Start).
+Without a global install, prefix commands with `npx caatinga` (see Quick Start).
 
 ## Quick Start
 
@@ -95,7 +123,7 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-If you did not install the CLI globally, use `npx caatinga@next` instead of `caatinga` / `npx caatinga`.
+If you did not install the CLI globally, use `npx caatinga` instead of `caatinga`.
 
 `deploy` writes the contract ID to `caatinga.artifacts.json`. `generate` creates TypeScript
 bindings under `contracts/generated/`. Run `npx caatinga doctor --network testnet --source alice`
@@ -132,14 +160,14 @@ After `init`, you typically work with:
 
 ## Browser Client
 
-Use `@caatinga/client@next` (or the same version as your CLI) with generated bindings,
+Use `@caatinga/client` (match the same version as your CLI) with generated bindings,
 `caatinga.artifacts.json`, and a wallet adapter. Caatinga is not limited to Freighter:
 the client accepts any adapter that implements the wallet contract, and the package ships
 optional adapters for Freighter and Stellar Wallets Kit. Use Stellar Wallets Kit when your
 app should support multiple wallet providers from the same integration layer.
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next
+npm install @caatinga/client @caatinga/core
 ```
 
 ```ts
