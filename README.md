@@ -5,16 +5,16 @@
 <p>Developer toolkit for Stellar/Soroban dApps.</p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
-[![npm](https://img.shields.io/npm/v/@caatinga/cli/next?label=%40caatinga%2Fcli%40next)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
+[![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#)
 
 </div>
 
 > **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
-> and exported package paths may change before `v1.0.0`. Install from the npm **`next`** dist-tag
-> (the release-gate validated channel). Pin `@next` or an exact version in apps; review
-> the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> and exported package paths may change before `v1.0.0`. `latest` now tracks `2.0.0`; the
+> `next` dist-tag points to the same release-gate validated build. Pin an exact version in
+> apps and review the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 > See [GitHub Releases](https://github.com/Dione-b/caatinga/releases) and [Release process](./docs/release.md).
 >
 > **`v2.0.0` is in alpha.** It removed the `23.0.0–25.2.0` hard lock and the `--allow-untested-stellar-cli` flag. See the [Stellar CLI version contract](./docs/stellar-cli-version-contract.md) for the new feature-aware behavior.
@@ -91,22 +91,23 @@ Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisor
 
 ## Install
 
-During alpha, prefer the **`next`** dist-tag on all published packages (`@caatinga/cli`,
-`@caatinga/core`, `@caatinga/client`). It tracks the latest release-gate validated build.
+`latest` and `next` both resolve to `2.0.0` on all published packages (`@caatinga/cli`,
+`@caatinga/core`, `@caatinga/client`). A plain install now pulls the current release-gate
+validated build.
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
 Confirm the resolved version:
 
 ```bash
-npm view @caatinga/cli@next version
-npm view @caatinga/core@next version
-npm view @caatinga/client@next version
+npm view @caatinga/cli version
+npm view @caatinga/core version
+npm view @caatinga/client version
 ```
 
-Without a global install, prefix commands with `npx caatinga@next` (see Quick Start).
+Without a global install, prefix commands with `npx caatinga` (see Quick Start).
 
 ## Quick Start
 
@@ -122,7 +123,7 @@ npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-If you did not install the CLI globally, use `npx caatinga@next` instead of `caatinga` / `npx caatinga`.
+If you did not install the CLI globally, use `npx caatinga` instead of `caatinga`.
 
 `deploy` writes the contract ID to `caatinga.artifacts.json`. `generate` creates TypeScript
 bindings under `contracts/generated/`. Run `npx caatinga doctor --network testnet --source alice`
@@ -159,14 +160,14 @@ After `init`, you typically work with:
 
 ## Browser Client
 
-Use `@caatinga/client@next` (or the same version as your CLI) with generated bindings,
+Use `@caatinga/client` (match the same version as your CLI) with generated bindings,
 `caatinga.artifacts.json`, and a wallet adapter. Caatinga is not limited to Freighter:
 the client accepts any adapter that implements the wallet contract, and the package ships
 optional adapters for Freighter and Stellar Wallets Kit. Use Stellar Wallets Kit when your
 app should support multiple wallet providers from the same integration layer.
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next
+npm install @caatinga/client @caatinga/core
 ```
 
 ```ts
