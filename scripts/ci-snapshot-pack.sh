@@ -19,6 +19,8 @@ SNAPSHOT_RESTORE_FILES=(
   "$ROOT_DIR/packages/core/CHANGELOG.md"
   "$ROOT_DIR/packages/client/CHANGELOG.md"
   "$ROOT_DIR/packages/cli/CHANGELOG.md"
+  "$ROOT_DIR/examples/counter-web/package.json"
+  "$ROOT_DIR/examples/counter-web/CHANGELOG.md"
 )
 
 cleanup() {
