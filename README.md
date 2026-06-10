@@ -12,7 +12,7 @@
 </div>
 
 > **Alpha software.** APIs, config formats (`caatinga.config.ts`, `caatinga.artifacts.json`),
-> and exported package paths may change before `v1.0.0`. `latest` now tracks `2.0.0`; the
+> and exported package paths may change before `v1.0.0`. `latest` now tracks `2.0.1`; the
 > `next` dist-tag points to the same release-gate validated build. Pin an exact version in
 > apps and review the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 > See [GitHub Releases](https://github.com/Dione-b/caatinga/releases) and [Release process](./docs/release.md).
@@ -91,7 +91,7 @@ Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisor
 
 ## Install
 
-`latest` and `next` both resolve to `2.0.0` on all published packages (`@caatinga/cli`,
+`latest` and `next` both resolve to `2.0.1` on all published packages (`@caatinga/cli`,
 `@caatinga/core`, `@caatinga/client`). A plain install now pulls the current release-gate
 validated build.
 

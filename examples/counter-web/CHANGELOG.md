@@ -1,5 +1,13 @@
 # counter-web
 
+## 0.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/client@2.0.1
+  - @caatinga/core@2.0.1
+
 ## 0.0.0-smoke-20260609183026
 
 ### Patch Changes

@@ -1,18 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
-
-const require = createRequire(import.meta.url);
-const xbullWalletConnectRoot = dirname(
-  require.resolve("@creit-tech/xbull-wallet-connect/package.json")
-);
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@creit-tech/xbull-wallet-connect": join(xbullWalletConnectRoot, "src/index.ts")
+      // Stellar Wallets Kit drags NEAR's @hot-wallet/sdk (Node-only crypto) into
+      // the browser bundle. The adapter filters HOT Wallet out, so stub the SDK
+      // to keep the NEAR chain out of the build. See src/stubs/hot-wallet.ts.
+      "@hot-wallet/sdk": fileURLToPath(new URL("./src/stubs/hot-wallet.ts", import.meta.url))
     }
   }
 });
