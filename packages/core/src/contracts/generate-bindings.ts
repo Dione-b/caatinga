@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { access, mkdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
@@ -14,6 +14,27 @@ export type GenerateBindingsOptions = {
   networkName?: string;
   cwd?: string;
 };
+
+function toBindingImportPath(bindingsOutput: string, contractName: string): string {
+  const normalized = bindingsOutput.replace(/^\.\//, "").split(path.sep).join("/");
+  return `./${path.posix.join(normalized, contractName, "src", "index.js")}`;
+}
+
+export async function removeLegacyBindingStub(
+  cwd: string,
+  bindingsOutput: string,
+  contractName: string
+): Promise<boolean> {
+  const legacyPath = path.resolve(cwd, bindingsOutput, `${contractName}.ts`);
+
+  try {
+    await access(legacyPath);
+    await unlink(legacyPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function generateBindings(options: GenerateBindingsOptions) {
   const cwd = options.cwd ?? process.cwd();
@@ -49,10 +70,18 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     failureCode: CaatingaErrorCode.BINDINGS_FAILED
   });
 
+  const legacyStubRemoved = await removeLegacyBindingStub(
+    cwd,
+    options.config.frontend.bindingsOutput,
+    options.contractName
+  );
+
   return {
     contractName: options.contractName,
     network,
     outputDir,
+    importPath: toBindingImportPath(options.config.frontend.bindingsOutput, options.contractName),
+    legacyStubRemoved,
     output: result.all || result.stdout
   };
 }

@@ -79,7 +79,9 @@ stellar keys generate alice --fund --network testnet
 
 <br />
 
-Caatinga hard-fails on Stellar CLI versions below `23.0.0` (`CAATINGA_UNSUPPORTED_CLI_VERSION`). Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisory and a `caatinga doctor` warning — no override flag required. See the [version contract](./docs/stellar-cli-version-contract.md).
+Caatinga hard-fails on Stellar CLI versions below `23.0.0` (`CAATINGA_UNSUPPORTED_CLI_VERSION`).
+Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisory and a `caatinga doctor` warning — no override flag required.
+See the [version contract](./docs/stellar-cli-version-contract.md).
 
 </details>
 
@@ -142,7 +144,9 @@ my-dapp/
 
 ## 🌐 Browser Client
 
-Use `@caatinga/client` (match your CLI version) with generated bindings, `caatinga.artifacts.json`, and a wallet adapter. Not locked to Freighter — bring any adapter that implements the wallet contract. Optional adapters ship for **Freighter** and **Stellar Wallets Kit** (use the latter for multi-wallet support).
+Use `@caatinga/client` (match your CLI version) with generated bindings, `caatinga.artifacts.json`, and a wallet adapter.
+Not locked to Freighter — bring any adapter that implements the wallet contract.
+Optional adapters ship for **Freighter** and **Stellar Wallets Kit** (use the latter for multi-wallet support).
 
 ```bash
 npm install @caatinga/client @caatinga/core
@@ -151,7 +155,7 @@ npm install @caatinga/client @caatinga/core
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter";
+import * as Counter from "./contracts/generated/counter/src/index.js";
 import artifacts from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
