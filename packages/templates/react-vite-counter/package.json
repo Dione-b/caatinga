@@ -15,6 +15,8 @@
     "@caatinga/client": "^2.0.1",
     "@caatinga/core": "^2.0.1",
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
+    "@stellar/stellar-sdk": "^14.5.0",
+    "buffer": "^6.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

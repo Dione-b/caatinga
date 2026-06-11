@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -83,6 +83,8 @@ describe("generateBindings", () => {
     });
 
     expect(result.outputDir).toBe(path.join(tmpDir, "src/gen/counter"));
+    expect(result.importPath).toBe("./src/gen/counter/src/index.js");
+    expect(result.legacyStubRemoved).toBe(false);
     expect(runCommand).toHaveBeenCalledWith(
       "stellar",
       expect.arrayContaining([
@@ -97,6 +99,42 @@ describe("generateBindings", () => {
       ]),
       { cwd: tmpDir, failureCode: CaatingaErrorCode.BINDINGS_FAILED }
     );
+  });
+
+  it("should_remove_legacy_flat_stub_and_return_importPath_when_stub_exists", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gen-legacy-"));
+
+    const artifacts = createInitialArtifacts("app");
+    artifacts.networks.testnet = {
+      contracts: {
+        counter: {
+          contractId: CONTRACT_ID,
+          wasmHash: "abc",
+          deployedAt: "2026-05-11T12:00:00.000Z",
+          sourcePath: "./contracts/counter",
+          wasmPath: "./rel/counter.wasm",
+          dependencies: [],
+          resolvedDeployArgs: {}
+        }
+      },
+      dependencyGraph: {}
+    };
+    await writeArtifacts(artifacts, tmpDir);
+
+    const legacyStubPath = path.join(tmpDir, "src/gen/counter.ts");
+    await mkdir(path.dirname(legacyStubPath), { recursive: true });
+    await writeFile(legacyStubPath, "export class Client {}\n", "utf8");
+
+    const result = await generateBindings({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      cwd: tmpDir
+    });
+
+    expect(result.importPath).toBe("./src/gen/counter/src/index.js");
+    expect(result.legacyStubRemoved).toBe(true);
+    await expect(access(legacyStubPath)).rejects.toBeDefined();
   });
 
   it("should_throw_CAATINGA_ARTIFACT_NOT_FOUND_when_not_deployed", async () => {
