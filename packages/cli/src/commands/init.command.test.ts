@@ -51,6 +51,7 @@ describe("init command", () => {
       expect(output).toContain(
         "Note: deploy and generate the contract before interacting in the frontend"
       );
+      expect(output).toContain("the dApp reads the contract ID from caatinga.artifacts.json");
     } finally {
       logSpy.mockRestore();
     }
@@ -69,6 +70,7 @@ describe("init command", () => {
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("npx caatinga build");
       expect(output).toContain("npx caatinga deploy");
+      expect(output).toContain("npx caatinga generate");
       expect(output).toContain(
         "Note: deploy and generate the contract before interacting in the frontend"
       );
