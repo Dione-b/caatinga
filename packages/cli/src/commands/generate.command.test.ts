@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import type { CaatingaConfig } from "@caatinga/core";
-import { generateBindings, loadConfig } from "@caatinga/core";
+import { generateBindings } from "@caatinga/core";
 import { registerGenerateCommand } from "./generate.command.js";
 
 const generateBindingsMock = vi.hoisted(() => vi.fn());
