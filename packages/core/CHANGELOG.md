@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 2.1.0
+
+### Minor Changes
+
+- Fail loudly when an app still uses scaffolded placeholder bindings, and surface the underlying cause on signing failures.
+
+  - Add `CAATINGA_PLACEHOLDER_BINDING` error code. The binding adapter now throws it from `createClient` (before any wallet/RPC call) when bindings have not been generated, instead of letting a fake-XDR transaction reach the wallet and surface as a misleading `CAATINGA_XDR_SIGN_FAILED`.
+  - The scaffolded placeholder stub (`react-vite-counter`) now throws `CAATINGA_PLACEHOLDER_BINDING` with a "run `caatinga generate`" hint instead of returning fake XDR.
+  - Add `formatCaatingaError` (exported from `@caatinga/core` and `@caatinga/core/browser`), which renders `[code] message`, the hint, and `Details: <cause>` so the real wallet/RPC error is no longer hidden. The counter template and example now use it.
+  - `caatinga deploy` output now prints a `Next: caatinga generate … / npm run dev` breadcrumb so the post-deploy step is no longer a dead end.
+
 ## 2.0.2
 
 ### Patch Changes

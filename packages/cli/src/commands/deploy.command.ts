@@ -58,5 +58,16 @@ export function registerDeployCommand(program: Command): void {
         logger.info(`  Contract ID: ${contract.contractId}`);
       }
       logger.info("Artifacts updated: caatinga.artifacts.json");
+
+      if (result.deployedContracts.length > 0) {
+        logger.info("");
+        logger.info("Next:");
+        for (const contract of result.deployedContracts) {
+          logger.info(`  npx caatinga generate ${contract.name} --network ${result.network.name}`);
+        }
+        logger.info("  npm run dev");
+        logger.info("");
+        logger.info("Run generate before npm run dev so the app uses real bindings, not the stub.");
+      }
     }));
 }

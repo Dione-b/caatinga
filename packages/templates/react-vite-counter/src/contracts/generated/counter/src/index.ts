@@ -1,37 +1,22 @@
-type TransactionResult = {
-  txHash: string;
-  result?: unknown;
-};
+// Placeholder bindings. This file exists so the template type-checks before you
+// run `caatinga generate`. It does NOT talk to the chain — every method throws a
+// clear, actionable error. `caatinga generate counter` overwrites this file with
+// real Stellar CLI bindings.
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 
-type SignTransaction = (
-  xdr: string,
-  opts?: { networkPassphrase?: string; address?: string }
-) => Promise<{ signedTxXdr: string }> | { signedTxXdr: string };
+// Marker the client checks to detect that real bindings haven't been generated
+// yet. Real Stellar CLI bindings never export this.
+export const __caatingaPlaceholder = true;
 
-class ExampleTransaction {
-  constructor(
-    private readonly method: string,
-    private readonly result?: unknown
-  ) {}
+const GENERATE_HINT =
+  "Run `npx caatinga generate counter --network testnet`, then restart the dev server.";
 
-  toXDR(): string {
-    return `example-${this.method}-xdr`;
-  }
-
-  async prepare(): Promise<ExampleTransaction> {
-    return this;
-  }
-
-  async signAndSend(input?: { signTransaction?: SignTransaction }): Promise<TransactionResult> {
-    const signed = input?.signTransaction
-      ? await input.signTransaction(this.toXDR())
-      : { signedTxXdr: this.toXDR() };
-
-    return {
-      txHash: `example-transaction-hash:${signed.signedTxXdr}`,
-      result: this.result
-    };
-  }
+function placeholderBinding(method: string): never {
+  throw new CaatingaError(
+    `Placeholder bindings are still in use for "counter.${method}".`,
+    CaatingaErrorCode.PLACEHOLDER_BINDING,
+    GENERATE_HINT
+  );
 }
 
 export class Client {
@@ -44,12 +29,12 @@ export class Client {
     }
   ) {}
 
-  increment(): ExampleTransaction {
-    return new ExampleTransaction("increment", 1);
+  increment(): never {
+    return placeholderBinding("increment");
   }
 
-  get(): ExampleTransaction {
-    return new ExampleTransaction("get", 1);
+  get(): never {
+    return placeholderBinding("get");
   }
 
   describe(): string {

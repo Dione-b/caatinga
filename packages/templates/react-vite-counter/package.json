@@ -12,8 +12,8 @@
     "caatinga:generate": "caatinga generate counter"
   },
   "dependencies": {
-    "@caatinga/client": "^2.0.2",
-    "@caatinga/core": "^2.0.2",
+    "@caatinga/client": "^2.1.0",
+    "@caatinga/core": "^2.1.0",
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
     "@stellar/stellar-sdk": "^14.5.0",
     "buffer": "^6.0.3",
@@ -23,7 +23,7 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^2.0.2",
+    "@caatinga/cli": "^2.1.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"

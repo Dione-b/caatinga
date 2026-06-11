@@ -1,4 +1,5 @@
 export { CaatingaError, CaatingaErrorCode, toCaatingaError } from "./errors/CaatingaError.js";
+export { formatCaatingaError } from "./errors/format-caatinga-error.js";
 export { CAATINGA_CORE_VERSION } from "./version.js";
 
 export {
@@ -55,6 +56,10 @@ export { buildDependencyGraph } from "./contracts/dependency-graph.js";
 export { resolveDeployOrder } from "./contracts/resolve-deploy-order.js";
 export { resolveDeployArgs, type DeployArgValue } from "./contracts/resolve-deploy-args.js";
 export { generateBindings, type GenerateBindingsOptions } from "./contracts/generate-bindings.js";
+export {
+  generateBindingsGraph,
+  type GenerateBindingsGraphResult
+} from "./contracts/generate-bindings-graph.js";
 export {
   invokeContract,
   parseInvokeTarget,

@@ -134,6 +134,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/bindings/default-binding-adapter.test.ts",
     trigger: "adapter.callMethod("
   },
+  [CaatingaErrorCode.PLACEHOLDER_BINDING]: {
+    file: "packages/client/src/bindings/default-binding-adapter.test.ts",
+    trigger: "createDefaultBindingAdapter("
+  },
   [CaatingaErrorCode.XDR_BUILD_FAILED]: {
     file: "packages/client/src/client/create-caatinga-client.test.ts",
     trigger: "client.contract(\"counter\").invoke("

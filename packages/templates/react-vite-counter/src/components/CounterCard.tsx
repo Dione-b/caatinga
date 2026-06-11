@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
-import { CaatingaError } from "@caatinga/core/browser";
+import { formatCaatingaError } from "@caatinga/core/browser";
 import { useWallet } from "../context/WalletContext.js";
 import { LoadingModal } from "./LoadingModal.js";
-
-function formatCaatingaError(error: unknown): string {
-  if (error instanceof CaatingaError) {
-    return `[${error.code}] ${error.message}\n\n${error.hint}`;
-  }
-
-  return error instanceof Error ? error.message : String(error);
-}
 
 export function CounterCard() {
   const { publicKey } = useWallet();
