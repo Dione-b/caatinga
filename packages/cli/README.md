@@ -49,7 +49,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
 | `caatinga build [contract]` | Compile contract WASM through Stellar CLI (default contract: `counter`) |
 | `caatinga deploy [contract]` | Deploy one contract or the full configured graph; record IDs in artifacts |
-| `caatinga generate <contract>` | Generate TypeScript bindings from a deployed contract ID |
+| `caatinga generate [contract]` | Generate TypeScript bindings from a deployed contract ID; omit the name to generate for all deployed contracts |
 | `caatinga invoke <contract.method>` | Invoke a deployed contract method; extra args forward to Stellar CLI |
 
 The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.

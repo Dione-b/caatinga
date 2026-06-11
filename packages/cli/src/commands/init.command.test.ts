@@ -69,8 +69,8 @@ describe("init command", () => {
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("npx caatinga build");
-      expect(output).toContain("npx caatinga deploy");
-      expect(output).toContain("npx caatinga generate");
+      expect(output).toContain("npx caatinga deploy   --network testnet --source <identity>");
+      expect(output).toContain("npx caatinga generate --network testnet");
       expect(output).toContain(
         "Note: deploy and generate the contract before interacting in the frontend"
       );

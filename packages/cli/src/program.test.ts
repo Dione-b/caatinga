@@ -75,7 +75,7 @@ describe("createProgram", () => {
           "--template",
           "marketplace-with-token"
         ]);
-      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build marketplace");
+      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build    marketplace");
     } finally {
       logSpy.mockRestore();
     }

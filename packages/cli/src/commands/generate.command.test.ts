@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import type { CaatingaConfig } from "@caatinga/core";
-import { generateBindings } from "@caatinga/core";
+import { generateBindingsGraph } from "@caatinga/core";
 import { registerGenerateCommand } from "./generate.command.js";
 
-const generateBindingsMock = vi.hoisted(() => vi.fn());
+const generateBindingsGraphMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
   return {
     ...actual,
-    generateBindings: generateBindingsMock,
+    generateBindingsGraph: generateBindingsGraphMock,
     loadConfig: loadConfigMock
   };
 });
@@ -23,6 +23,12 @@ const config: CaatingaConfig = {
     counter: {
       path: "./contracts/counter",
       wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+      dependsOn: [],
+      deployArgs: {}
+    },
+    token: {
+      path: "./contracts/token",
+      wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
       dependsOn: [],
       deployArgs: {}
     }
@@ -39,6 +45,24 @@ const config: CaatingaConfig = {
   }
 };
 
+const counterResult = {
+  contractName: "counter",
+  network: { name: "testnet" },
+  outputDir: "/tmp/counter",
+  importPath: "./src/contracts/generated/counter/src/index.js",
+  legacyStubRemoved: true,
+  output: "generated"
+};
+
+const tokenResult = {
+  contractName: "token",
+  network: { name: "testnet" },
+  outputDir: "/tmp/token",
+  importPath: "./src/contracts/generated/token/src/index.js",
+  legacyStubRemoved: false,
+  output: "generated"
+};
+
 function createGenerateProgram(): Command {
   const program = new Command();
   program.exitOverride();
@@ -48,26 +72,22 @@ function createGenerateProgram(): Command {
 
 describe("generate command", () => {
   beforeEach(() => {
-    generateBindingsMock.mockReset();
+    generateBindingsGraphMock.mockReset();
     loadConfigMock.mockReset();
     loadConfigMock.mockResolvedValue(config);
-    generateBindingsMock.mockResolvedValue({
-      contractName: "counter",
-      network: config.networks.testnet,
-      outputDir: "/tmp/counter",
-      importPath: "./src/contracts/generated/counter/src/index.js",
-      legacyStubRemoved: true,
-      output: "generated"
+    generateBindingsGraphMock.mockResolvedValue({
+      network: { name: "testnet" },
+      results: [counterResult]
     });
   });
 
-  it("logs import path, legacy stub removal, and next step after success", async () => {
+  it("passes the named contract to the graph and logs its import path and next step", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
       await createGenerateProgram().parseAsync(["node", "caatinga", "generate", "counter"]);
 
-      expect(generateBindings).toHaveBeenCalledWith({
+      expect(generateBindingsGraph).toHaveBeenCalledWith({
         config,
         contractName: "counter",
         networkName: undefined
@@ -82,19 +102,39 @@ describe("generate command", () => {
     }
   });
 
-  it("does not log legacy stub removal when stub was not present", async () => {
-    generateBindingsMock.mockResolvedValue({
-      contractName: "counter",
-      network: config.networks.testnet,
-      outputDir: "/tmp/counter",
-      importPath: "./src/contracts/generated/counter/src/index.js",
-      legacyStubRemoved: false,
-      output: "generated"
+  it("generates all deployed contracts when no contract name is given", async () => {
+    generateBindingsGraphMock.mockResolvedValue({
+      network: { name: "testnet" },
+      results: [counterResult, tokenResult]
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
-      await createGenerateProgram().parseAsync(["node", "caatinga", "generate", "counter"]);
+      await createGenerateProgram().parseAsync(["node", "caatinga", "generate"]);
+
+      expect(generateBindingsGraph).toHaveBeenCalledWith({
+        config,
+        contractName: undefined,
+        networkName: undefined
+      });
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain("Import path: ./src/contracts/generated/counter/src/index.js");
+      expect(output).toContain("Import path: ./src/contracts/generated/token/src/index.js");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("does not log legacy stub removal when stub was not present", async () => {
+    generateBindingsGraphMock.mockResolvedValue({
+      network: { name: "testnet" },
+      results: [tokenResult]
+    });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createGenerateProgram().parseAsync(["node", "caatinga", "generate"]);
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).not.toContain("Removed legacy stub:");
