@@ -18,8 +18,14 @@ function formatError(error: unknown): string {
     typeof error.code === "string" &&
     error.code.startsWith("CAATINGA_")
   ) {
-    const candidate = error as { code: string; message?: string; hint?: string };
-    return `[${candidate.code}] ${candidate.message ?? "Caatinga error"}\n\nFix:\n${candidate.hint ?? "Check the failing operation and retry."}`;
+    const candidate = error as { code: string; message?: string; hint?: string; cause?: unknown };
+    const base = `[${candidate.code}] ${candidate.message ?? "Caatinga error"}\n\nFix:\n${candidate.hint ?? "Check the failing operation and retry."}`;
+    const cause = candidate.cause;
+    if (cause !== undefined && cause !== null) {
+      const detail = cause instanceof Error ? cause.message : String(cause);
+      if (detail) return `${base}\n\nDetails: ${detail}`;
+    }
+    return base;
   }
 
   return error instanceof Error ? error.message : String(error);

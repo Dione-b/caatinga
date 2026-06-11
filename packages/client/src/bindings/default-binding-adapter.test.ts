@@ -82,6 +82,23 @@ describe("createDefaultBindingAdapter", () => {
     }
   });
 
+  it("throws PLACEHOLDER_BINDING when bindings have not been generated", () => {
+    const adapter = createDefaultBindingAdapter({ __caatingaPlaceholder: true });
+
+    try {
+      adapter.createClient({
+        contractId: "CCOUNTER",
+        publicKey: "GABC",
+        rpcUrl: "https://rpc.example",
+        networkPassphrase: "Test SDF Network ; September 2015"
+      });
+      expect.unreachable("createClient should throw for placeholder bindings");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CaatingaError);
+      expect((error as CaatingaError).code).toBe(CaatingaErrorCode.PLACEHOLDER_BINDING);
+    }
+  });
+
   it("throws when binding method is missing", async () => {
     class Client {}
 

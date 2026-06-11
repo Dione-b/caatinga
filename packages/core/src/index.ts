@@ -1,4 +1,5 @@
 export { CaatingaError, CaatingaErrorCode, toCaatingaError } from "./errors/CaatingaError.js";
+export { formatCaatingaError } from "./errors/format-caatinga-error.js";
 export { CAATINGA_CORE_VERSION } from "./version.js";
 
 export {

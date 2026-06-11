@@ -8,11 +8,25 @@ interface BindingWithClient {
     rpcUrl: string;
     networkPassphrase: string;
   }) => unknown;
+  /**
+   * Set by the scaffolded placeholder binding (`src/contracts/generated/.../index.ts`)
+   * that ships with templates so they type-check before `caatinga generate`. Real
+   * Stellar CLI bindings never set this, so its presence means generate hasn't run.
+   */
+  __caatingaPlaceholder?: boolean;
 }
 
 export function createDefaultBindingAdapter(binding: BindingWithClient): CaatingaBindingAdapter {
   return {
     createClient({ contractId, publicKey, rpcUrl, networkPassphrase }) {
+      if (binding.__caatingaPlaceholder) {
+        throw new CaatingaError(
+          "Placeholder bindings are still in use; the app cannot reach the contract.",
+          CaatingaErrorCode.PLACEHOLDER_BINDING,
+          "Run `caatinga generate <contract> --network <network>`, then restart the dev server."
+        );
+      }
+
       if (!binding.Client) {
         throw new CaatingaError(
           "Generated binding does not export Client.",
