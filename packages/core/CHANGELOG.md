@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 2.0.2
+
+### Patch Changes
+
+- fix(generate-bindings): align generated bindings layout with Stellar CLI output, remove legacy flat stubs, and print the correct import path after `caatinga generate`.
+
 ## 2.0.1
 
 ## 2.0.0

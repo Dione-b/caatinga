@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 2.0.2
+
+### Patch Changes
+
+- fix(template): align generated bindings import with Stellar CLI layout and update the react-vite-counter template stub path.
+  - @caatinga/core@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes

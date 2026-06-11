@@ -25,7 +25,7 @@ caatinga init my-dapp
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. `latest` and `next` both track `2.0.1`. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. `latest` and `next` both track `2.0.2`. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
