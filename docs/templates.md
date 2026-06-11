@@ -46,6 +46,8 @@ Generated projects include:
 - Vite and TypeScript config
 - dependencies for generated bindings, `@caatinga/client`, and Stellar Wallets Kit smoke wiring
 
+`caatinga generate` writes Stellar CLI TypeScript bindings as a subpackage at `{bindingsOutput}/{contractName}/src/index.ts`. Import from `./contracts/generated/counter/src/index.js` (or the matching contract name) rather than a flat `{contractName}.ts` file.
+
 ### pnpm 10.26+ / 11.x
 
 `caatinga.template.json` declares `packageManager: "npm"`, but the `react-vite-counter` template also ships `pnpm-workspace.yaml` so generated apps can install with pnpm 10.26+ or 11.x:

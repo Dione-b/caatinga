@@ -24,5 +24,11 @@ export function registerGenerateCommand(program: Command): void {
       logger.info(`Contract: ${result.contractName}`);
       logger.info(`Network: ${result.network.name}`);
       logger.info(`Output: ${result.outputDir}`);
+      logger.info(`Import path: ${result.importPath}`);
+      if (result.legacyStubRemoved) {
+        logger.info(`Removed legacy stub: ${config.frontend.bindingsOutput}/${result.contractName}.ts`);
+      }
+      logger.info("");
+      logger.info("Next: import bindings from the import path above, then run npm run dev");
     }));
 }
