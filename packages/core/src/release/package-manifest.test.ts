@@ -85,7 +85,7 @@ describe("publish package manifests", () => {
       require: "./dist/stellar-wallets-kit.cjs"
     });
     expect(packageJson.scripts.build).toContain("src/stellar-wallets-kit.ts");
-    expect(packageJson.peerDependencies["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.peerDependencies["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
     expect(packageJson.peerDependenciesMeta["@creit.tech/stellar-wallets-kit"]).toEqual({
       optional: true
     });

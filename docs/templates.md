@@ -55,11 +55,22 @@ Generated projects include:
 ```yaml
 allowBuilds:
   esbuild: true
-blockExoticSubdeps: false
+
+ignoredOptionalDependencies:
+  - "@safe-global/safe-apps-provider"
+  - "@safe-global/safe-apps-sdk"
+
+overrides:
+  uuid: "^14.0.0"
+  "@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"
+  "@reown/appkit-utils>@safe-global/safe-apps-provider": "-"
+  "@safe-global/safe-apps-sdk>@safe-global/safe-gateway-typescript-sdk": "-"
 ```
 
 - `allowBuilds.esbuild: true` — pnpm blocks dependency lifecycle scripts by default; Vite pulls in esbuild. Without this, `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`.
-- `blockExoticSubdeps: false` — opts out of pnpm's exotic-subdependency check for the GitHub package that `stellar-wallets-kit@0.0.7` pulls in transitively. Without this, install fails with `ERR_PNPM_EXOTIC_SUBDEP`.
+- `overrides.uuid` — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies. `package.json` also ships npm `overrides` for the same pin when using npm.
+- Safe overrides — block optional EVM/Safe packages from Reown AppKit (transitive via Stellar Wallets Kit). Irrelevant for Stellar wallets; removes the deprecated `@safe-global/safe-gateway-typescript-sdk` warning on `npm install`. `package.json` ships equivalent nested npm `overrides` for npm users.
+- Trezor/HOT overrides — SWK lists `@trezor/connect-web` and `@hot-wallet/sdk` as direct dependencies but does not register them in `defaultModules()`. npm `overrides` replace them with local stubs under `src/stubs/`; pnpm uses `"-"` path overrides in `pnpm-workspace.yaml`. This avoids critical `protobufjs` advisories (Trezor) and NEAR/`elliptic` noise (HOT) without affecting Freighter, LOBSTR, WalletConnect, etc.
 
 The experimental `marketplace-with-token` template does not ship this file yet. If you use pnpm with that template, copy the same `pnpm-workspace.yaml` block from `react-vite-counter`.
 

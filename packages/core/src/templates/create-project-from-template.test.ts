@@ -315,21 +315,38 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
     }>(templatePackageJsonPath);
 
-    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
   });
 
   it("should_install_cleanly_on_pnpm_10_26_plus", async () => {
     const templateRoot = path.resolve(__dirname, "../../../templates/react-vite-counter");
     const packageJson = await readPackageJson<{
       dependencies?: Record<string, string>;
+      overrides?: Record<string, unknown>;
     }>(path.join(templateRoot, "package.json"));
 
-    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
+    expect(packageJson.overrides?.uuid).toBe("^14.0.0");
+    expect(packageJson.overrides?.["@creit.tech/stellar-wallets-kit"]).toEqual({
+      "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
+      "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
+      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk"
+    });
+    expect(packageJson.overrides?.["@reown/appkit-utils"]).toEqual({
+      "@safe-global/safe-apps-sdk": "-",
+      "@safe-global/safe-apps-provider": "-"
+    });
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
     expect(workspaceYaml).toContain("allowBuilds:");
     expect(workspaceYaml).toContain("esbuild: true");
-    expect(workspaceYaml).toContain("blockExoticSubdeps: false");
+    expect(workspaceYaml).toContain('uuid: "^14.0.0"');
+    expect(workspaceYaml).toContain("ignoredOptionalDependencies:");
+    expect(workspaceYaml).toContain('"@safe-global/safe-apps-provider"');
+    expect(workspaceYaml).toContain('"@safe-global/safe-apps-sdk"');
+    expect(workspaceYaml).toContain('"@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"');
+    expect(workspaceYaml).toContain('"@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"');
+    expect(workspaceYaml).not.toContain("blockExoticSubdeps");
   });
 
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {

@@ -142,7 +142,9 @@ For the full client contract, XDR debug options, and wallet adapter rules, see [
 
 - `ERR_PNPM_IGNORED_BUILDS` (esbuild): pnpm 11 blocks lifecycle scripts by default. Ensure `pnpm-workspace.yaml` contains `allowBuilds.esbuild: true` (already in the official `react-vite-counter` template).
   If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
-- `ERR_PNPM_EXOTIC_SUBDEP`: pnpm 10.26+/11.x refused a GitHub subdependency from `stellar-wallets-kit`. Ensure `pnpm-workspace.yaml` contains `blockExoticSubdeps: false` (shipped with the official counter template).
+- Deprecated `uuid` warnings on install: the official `react-vite-counter` template pins `uuid@^14` via `package.json` overrides. Regenerate from a current template or add the same override if you created the project before this change.
+- Deprecated `@safe-global/safe-gateway-typescript-sdk` on install: optional Safe packages from Reown AppKit (via Stellar Wallets Kit). The official template blocks them with npm/pnpm overrides — regenerate from a current template or copy the Safe override block from [Templates](../templates.md#pnpm-1026--11x).
+- `npm audit` reports vulnerabilities after install: the official template blocks unused SWK deps (Trezor/HOT/Safe) via overrides so **critical** `protobufjs` findings from Trezor should not appear. Remaining low-severity items may still come from WalletConnect/Reown. Regenerate from a current template or copy the override blocks from [Templates](../templates.md#pnpm-1026--11x).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
 - `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.

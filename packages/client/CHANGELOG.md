@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 2.2.0
+
+### Minor Changes
+
+- Upgrade the optional Stellar Wallets Kit peer dependency to `^2.3.0` (Reown AppKit, WalletConnect 2.23).
+- Adapt `createStellarWalletsKitAdapter` to SWK 2.x static API while keeping the Caatinga-facing surface (`openModal`, `WalletNetwork`, etc.) stable.
+- Remove deprecated transitive installs (`@walletconnect/modal`, `@motionone/vue`, `lodash.isequal`, old `@walletconnect/sign-client`, `@safe-global/safe-gateway-typescript-sdk` via template npm/pnpm overrides).
+- Block unused SWK direct deps (`@trezor/connect-web`, `@hot-wallet/sdk`) in the counter template so `npm audit` no longer reports critical `protobufjs` advisories from Trezor.
+
 ## 2.1.0
 
 ### Minor Changes

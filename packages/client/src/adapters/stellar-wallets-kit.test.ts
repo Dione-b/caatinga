@@ -1,49 +1,91 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@creit.tech/stellar-wallets-kit", () => ({
-  StellarWalletsKit: vi.fn(),
-  WalletNetwork: {
+const mocks = vi.hoisted(() => ({
+  authModal: vi.fn(),
+  getAddress: vi.fn(),
+  signTransaction: vi.fn(),
+  setWallet: vi.fn(),
+  refreshSupportedWallets: vi.fn(),
+  disconnect: vi.fn(),
+  init: vi.fn(),
+  setNetwork: vi.fn()
+}));
+
+vi.mock("@creit.tech/stellar-wallets-kit/sdk", () => ({
+  StellarWalletsKit: {
+    init: mocks.init,
+    setNetwork: mocks.setNetwork,
+    setWallet: mocks.setWallet,
+    authModal: mocks.authModal,
+    getAddress: mocks.getAddress,
+    signTransaction: mocks.signTransaction,
+    refreshSupportedWallets: mocks.refreshSupportedWallets,
+    disconnect: mocks.disconnect
+  }
+}));
+
+vi.mock("@creit.tech/stellar-wallets-kit/types", () => ({
+  Networks: {
     PUBLIC: "Public Global Stellar Network ; September 2015",
     TESTNET: "Test SDF Network ; September 2015"
-  },
-  allowAllModules: vi.fn(() => []),
+  }
+}));
+
+vi.mock("@creit.tech/stellar-wallets-kit/modules/utils", () => ({
+  defaultModules: vi.fn(() => [])
+}));
+
+vi.mock("@creit.tech/stellar-wallets-kit/modules/freighter", () => ({
   FREIGHTER_ID: "freighter"
 }));
 
-vi.mock("@creit.tech/stellar-wallets-kit/modules/walletconnect.module", () => ({
-  WalletConnectAllowedMethods: { SIGN: "stellar_signXDR" },
+vi.mock("@creit.tech/stellar-wallets-kit/modules/hotwallet", () => ({
+  HOTWALLET_ID: "hot-wallet"
+}));
+
+vi.mock("@creit.tech/stellar-wallets-kit/modules/wallet-connect", () => ({
   WalletConnectModule: vi.fn()
 }));
 
-import { createStellarWalletsKitAdapter } from "./stellar-wallets-kit.js";
-
-function createKit() {
-  return {
-    setWallet: vi.fn(),
-    getSupportedWallets: vi.fn(async () => [
-      { id: "freighter", name: "Freighter", isAvailable: true }
-    ]),
-    getAddress: vi.fn(async () => ({ address: "GPUBLIC" })),
-    signTransaction: vi.fn(async () => ({ signedTxXdr: "AAAA_SIGNED" })),
-    openModal: vi.fn(),
-    disconnect: vi.fn(async () => undefined)
-  };
-}
+import {
+  createStellarWalletsKitAdapter,
+  resetStellarWalletsKitAdapterForTests
+} from "./stellar-wallets-kit.js";
 
 describe("createStellarWalletsKitAdapter", () => {
+  beforeEach(() => {
+    resetStellarWalletsKitAdapterForTests();
+    vi.clearAllMocks();
+    mocks.getAddress.mockResolvedValue({ address: "GPUBLIC" });
+    mocks.signTransaction.mockResolvedValue({ signedTxXdr: "AAAA_SIGNED" });
+    mocks.refreshSupportedWallets.mockResolvedValue([
+      { id: "freighter", name: "Freighter", isAvailable: true }
+    ]);
+    mocks.disconnect.mockResolvedValue(undefined);
+  });
+
+  it("initializes the kit on first adapter creation", () => {
+    createStellarWalletsKitAdapter();
+
+    expect(mocks.init).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedWalletId: "freighter",
+        modules: []
+      })
+    );
+  });
+
   it("fetches the public key from the kit address", async () => {
-    const kit = createKit();
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    const adapter = createStellarWalletsKitAdapter();
 
     const publicKey = await adapter.getPublicKey();
 
-    expect(kit.getAddress).toHaveBeenCalledTimes(1);
+    expect(mocks.getAddress).toHaveBeenCalledTimes(1);
     expect(publicKey).toBe("GPUBLIC");
   });
 
   it("signs using the cached address and provided network passphrase", async () => {
-    const kit = createKit();
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    const adapter = createStellarWalletsKitAdapter();
     await adapter.getPublicKey();
 
     const signed = await adapter.signTransaction({
@@ -51,7 +93,7 @@ describe("createStellarWalletsKitAdapter", () => {
       networkPassphrase: "Test SDF Network ; September 2015"
     });
 
-    expect(kit.signTransaction).toHaveBeenCalledWith("AAAA_UNSIGNED", {
+    expect(mocks.signTransaction).toHaveBeenCalledWith("AAAA_UNSIGNED", {
       networkPassphrase: "Test SDF Network ; September 2015",
       address: "GPUBLIC"
     });
@@ -59,55 +101,48 @@ describe("createStellarWalletsKitAdapter", () => {
   });
 
   it("signs without an address before any connect", async () => {
-    const kit = createKit();
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    const adapter = createStellarWalletsKitAdapter();
 
     await adapter.signTransaction({
       xdr: "AAAA_UNSIGNED",
       networkPassphrase: "Public Global Stellar Network ; September 2015"
     });
 
-    expect(kit.signTransaction).toHaveBeenCalledWith("AAAA_UNSIGNED", {
+    expect(mocks.signTransaction).toHaveBeenCalledWith("AAAA_UNSIGNED", {
       networkPassphrase: "Public Global Stellar Network ; September 2015"
     });
   });
 
   it("delegates wallet selection to the kit", () => {
-    const kit = createKit();
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    const adapter = createStellarWalletsKitAdapter();
 
     adapter.setWallet("freighter");
 
-    expect(kit.setWallet).toHaveBeenCalledWith("freighter");
+    expect(mocks.setWallet).toHaveBeenCalledWith("freighter");
   });
 
-  it("opens the modal, selects the wallet, and resolves with the address", async () => {
-    const kit = createKit();
-    kit.openModal.mockImplementation(async ({ onWalletSelected }) => {
-      onWalletSelected({ id: "xbull" } as never);
-    });
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+  it("opens the modal via authModal and resolves with the address", async () => {
+    mocks.authModal.mockResolvedValue({ address: "GPUBLIC" });
+    const adapter = createStellarWalletsKitAdapter();
 
-    const address = await adapter.openModal();
+    const resolvedAddress = await adapter.openModal();
 
-    expect(kit.setWallet).toHaveBeenCalledWith("xbull");
-    expect(address).toBe("GPUBLIC");
+    expect(mocks.authModal).toHaveBeenCalledTimes(1);
+    expect(resolvedAddress).toBe("GPUBLIC");
   });
 
   it("rejects when the user closes the modal without selecting", async () => {
-    const kit = createKit();
     const closeError = new Error("Modal closed");
-    kit.openModal.mockImplementation(async ({ onClosed }) => {
-      onClosed(closeError);
-    });
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    mocks.authModal.mockRejectedValue(closeError);
+    const onClosed = vi.fn();
+    const adapter = createStellarWalletsKitAdapter();
 
-    await expect(adapter.openModal()).rejects.toBe(closeError);
+    await expect(adapter.openModal({ onClosed })).rejects.toBe(closeError);
+    expect(onClosed).toHaveBeenCalledWith(closeError);
   });
 
   it("clears the cached address on disconnect", async () => {
-    const kit = createKit();
-    const adapter = createStellarWalletsKitAdapter({ kit: kit as never });
+    const adapter = createStellarWalletsKitAdapter();
     await adapter.getPublicKey();
 
     await adapter.disconnect();
@@ -116,8 +151,8 @@ describe("createStellarWalletsKitAdapter", () => {
       networkPassphrase: "Test SDF Network ; September 2015"
     });
 
-    expect(kit.disconnect).toHaveBeenCalledTimes(1);
-    expect(kit.signTransaction).toHaveBeenLastCalledWith("AAAA_UNSIGNED", {
+    expect(mocks.disconnect).toHaveBeenCalledTimes(1);
+    expect(mocks.signTransaction).toHaveBeenLastCalledWith("AAAA_UNSIGNED", {
       networkPassphrase: "Test SDF Network ; September 2015"
     });
   });

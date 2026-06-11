@@ -61,13 +61,13 @@
   },
   "devDependencies": {
     "tsup": "^8.3.5",
-    "@creit.tech/stellar-wallets-kit": "^1.9.5",
+    "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "@stellar/freighter-api": "^4.0.0",
-    "@creit.tech/stellar-wallets-kit": "^1.9.5"
+    "@creit.tech/stellar-wallets-kit": "^2.3.0"
   },
   "peerDependenciesMeta": {
     "@stellar/freighter-api": {

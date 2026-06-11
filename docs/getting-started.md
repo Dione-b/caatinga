@@ -67,7 +67,8 @@ If the CLI is not installed globally, prefix each command with `npx caatinga@nex
 Templates default to `npm` (`packageManager: "npm"` in `caatinga.template.json`), but `pnpm install` is also supported. The `react-vite-counter` template ships a `pnpm-workspace.yaml` with:
 
 - `allowBuilds.esbuild: true` — pnpm 10.26+/11.x block lifecycle scripts by default; Vite depends on esbuild.
-- `blockExoticSubdeps: false` — allows the GitHub subdependency pulled in by `stellar-wallets-kit@0.0.7`.
+- `overrides.uuid` in `pnpm-workspace.yaml` (and npm `overrides` in `package.json`) — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies.
+- Safe wallet overrides (`ignoredOptionalDependencies` + nested `overrides` in `pnpm-workspace.yaml`; npm `overrides` in `package.json`) — block optional EVM/Safe packages pulled by Reown AppKit through Stellar Wallets Kit. Stellar dApps do not use Safe; this removes the deprecated `@safe-global/safe-gateway-typescript-sdk` install warning.
 
 Equivalent package-manager scripts:
 
