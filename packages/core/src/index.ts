@@ -57,6 +57,10 @@ export { resolveDeployOrder } from "./contracts/resolve-deploy-order.js";
 export { resolveDeployArgs, type DeployArgValue } from "./contracts/resolve-deploy-args.js";
 export { generateBindings, type GenerateBindingsOptions } from "./contracts/generate-bindings.js";
 export {
+  generateBindingsGraph,
+  type GenerateBindingsGraphResult
+} from "./contracts/generate-bindings-graph.js";
+export {
   invokeContract,
   parseInvokeTarget,
   type InvokeContractOptions,

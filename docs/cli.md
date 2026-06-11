@@ -40,9 +40,11 @@ Before deploy, Caatinga compares the WASM file mtime with files under `contracts
 effort). If sources look newer than the WASM, it prints a **warning** and continues deploy. Use
 `--no-stale-check` to skip this check.
 
-## `caatinga generate <contract> [--network testnet]`
+## `caatinga generate [contract] [--network testnet]`
 
-Generates TypeScript bindings from the deployed contract ID.
+Generates TypeScript bindings from the deployed contract ID. The contract name is
+optional: omit it to generate bindings for every contract already deployed on the
+network (read from `caatinga.artifacts.json`), or pass a name to generate just that one.
 
 ## `caatinga invoke <contract.method> --source <identity> [args...]`
 
