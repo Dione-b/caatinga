@@ -18,14 +18,14 @@
 ---
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 caatinga init my-dapp
 ```
 
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Install from the npm **`next`** dist-tag (`2.2.1` today; `latest` may lag). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm release: **`2.2.1`** (`latest` and `next` point to the same version). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -114,9 +114,9 @@ See the [version contract](./docs/stellar-cli-version-contract.md).
 ## 🚀 Quick Start
 
 ```bash
-caatinga init my-dapp
+npx caatinga@latest init my-dapp
 cd my-dapp
-npm install                # or: pnpm install
+npm install                # or: pnpm install — template ships overrides for a clean wallet SDK tree
 
 npx caatinga build  counter
 npx caatinga deploy counter --network testnet --source alice
@@ -126,7 +126,7 @@ npm run dev
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 No global install? Prefix every command with `npx caatinga`.
+> 💡 No global install? Use `npx caatinga@latest` (or `npx caatinga` once `latest` resolves to the version you want).
 
 📖 **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
@@ -175,7 +175,7 @@ Not locked to Freighter — bring any adapter that implements the wallet contrac
 Optional adapters ship for **Freighter** and **Stellar Wallets Kit** (use the latter for multi-wallet support).
 
 ```bash
-npm install @caatinga/client @caatinga/core
+npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```
 
 ```ts

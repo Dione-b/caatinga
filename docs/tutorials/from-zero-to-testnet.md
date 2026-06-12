@@ -2,26 +2,26 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-During alpha, use the npm **`next`** dist-tag for `@caatinga/cli`, `@caatinga/core`, and `@caatinga/client`. It tracks the latest release-gate validated build.
+During alpha, use npm **`latest`** (or **`next`**, same version) for `@caatinga/cli`, `@caatinga/core`, and `@caatinga/client`. Currently **`2.2.1`**.
 
 ## Prerequisites
 
 Install Node.js 20+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 cargo install --locked stellar-cli --version 25.2.0
 rustup target add wasm32v1-none
 stellar --version
 rustc --version
 ```
 
-Confirm the published `next` versions (currently `2.2.1`):
+Confirm the published versions (currently `2.2.1`):
 
 ```bash
-npm view @caatinga/cli@next version
-npm view @caatinga/core@next version
-npm view @caatinga/client@next version
+npm view @caatinga/cli version
+npm view @caatinga/core version
+npm view @caatinga/client version
 ```
 
 Create and fund a local Stellar CLI identity:
@@ -42,7 +42,7 @@ npm install
 
 `pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
 
-Without a global CLI install, run `npx caatinga@next init my-dapp` instead of `caatinga init`.
+Without a global CLI install, run `npx caatinga@latest init my-dapp` instead of `caatinga init`.
 
 The default template creates:
 
@@ -125,7 +125,7 @@ npx caatinga deploy counter --network testnet --source alice --force
 After deploy (which generated the bindings), install the browser packages from `next`:
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
+npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```
 
 Browser code can compose artifacts, generated bindings, network config, and a wallet adapter:
