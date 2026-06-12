@@ -11,10 +11,10 @@ importers:
   .:
     dependencies:
       '@caatinga/client':
-        specifier: ^2.0.0
+        specifier: ^2.2.0
         version: link:packages/client
       '@caatinga/core':
-        specifier: ^2.0.0
+        specifier: ^2.2.0
         version: link:packages/core
     devDependencies:
       '@changesets/cli':
