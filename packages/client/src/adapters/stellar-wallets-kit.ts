@@ -120,9 +120,19 @@ export function createStellarWalletsKitAdapter(
     },
 
     async getPublicKey() {
-      const result = await StellarWalletsKit.getAddress();
-      address = result.address;
-      return result.address;
+      // getAddress() returns only the kit's cached activeAddress, which is
+      // populated by SWK's built-in authModal. Templates that swap authModal for
+      // a custom modal (setWallet + getPublicKey) never populate it, so fall back
+      // to fetchAddress() which queries the selected wallet module directly.
+      try {
+        const cached = await StellarWalletsKit.getAddress();
+        address = cached.address;
+        return cached.address;
+      } catch {
+        const fetched = await StellarWalletsKit.fetchAddress();
+        address = fetched.address;
+        return fetched.address;
+      }
     },
 
     async signTransaction({ xdr, networkPassphrase }) {

@@ -1,16 +1,6 @@
-# pnpm 10.26+ / 11.x block lifecycle scripts by default; vite depends on esbuild.
+# pnpm-only file (npm / yarn / bun ignore it). pnpm 10.26+/11.x block lifecycle
+# scripts by default; vite depends on esbuild's, so allow it. All dependency
+# stubbing now happens at the build layer (see vite.config.ts), so no pnpm-only
+# `overrides` are needed and this template installs identically on every PM.
 allowBuilds:
   esbuild: true
-
-ignoredOptionalDependencies:
-  - "@safe-global/safe-apps-provider"
-  - "@safe-global/safe-apps-sdk"
-
-overrides:
-  uuid: "^14.0.0"
-  "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
-  "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
-  "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"
-  "@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"
-  "@reown/appkit-utils>@safe-global/safe-apps-provider": "-"
-  "@safe-global/safe-apps-sdk>@safe-global/safe-gateway-typescript-sdk": "-"

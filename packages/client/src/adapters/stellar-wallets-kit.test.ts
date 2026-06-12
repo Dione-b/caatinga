@@ -3,6 +3,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 const mocks = vi.hoisted(() => ({
   authModal: vi.fn(),
   getAddress: vi.fn(),
+  fetchAddress: vi.fn(),
   signTransaction: vi.fn(),
   setWallet: vi.fn(),
   refreshSupportedWallets: vi.fn(),
@@ -19,6 +20,7 @@ vi.mock("@creit.tech/stellar-wallets-kit/sdk", () => ({
     setWallet: mocks.setWallet,
     authModal: mocks.authModal,
     getAddress: mocks.getAddress,
+    fetchAddress: mocks.fetchAddress,
     signTransaction: mocks.signTransaction,
     refreshSupportedWallets: mocks.refreshSupportedWallets,
     disconnect: mocks.disconnect,
@@ -66,6 +68,7 @@ describe("createStellarWalletsKitAdapter", () => {
     vi.clearAllMocks();
     mocks.state.selectedModule = undefined;
     mocks.getAddress.mockResolvedValue({ address: "GPUBLIC" });
+    mocks.fetchAddress.mockResolvedValue({ address: "GFETCHED" });
     mocks.signTransaction.mockResolvedValue({ signedTxXdr: "AAAA_SIGNED" });
     mocks.refreshSupportedWallets.mockResolvedValue([
       { id: "freighter", name: "Freighter", isAvailable: true }
@@ -91,6 +94,18 @@ describe("createStellarWalletsKitAdapter", () => {
 
     expect(mocks.getAddress).toHaveBeenCalledTimes(1);
     expect(publicKey).toBe("GPUBLIC");
+  });
+
+  it("falls back to fetchAddress when getAddress reports no connected wallet", async () => {
+    // Custom-modal flow: setWallet() is called but activeAddress is never
+    // populated, so getAddress() rejects with SWK's plain-object error.
+    mocks.getAddress.mockRejectedValue({ code: -1, message: "No wallet has been connected." });
+    const adapter = createStellarWalletsKitAdapter();
+
+    const publicKey = await adapter.getPublicKey();
+
+    expect(mocks.fetchAddress).toHaveBeenCalledTimes(1);
+    expect(publicKey).toBe("GFETCHED");
   });
 
   it("signs using the cached address and provided network passphrase", async () => {

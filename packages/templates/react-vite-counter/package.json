@@ -7,13 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "caatinga:build": "caatinga build counter",
-    "caatinga:deploy": "caatinga deploy counter",
-    "caatinga:generate": "caatinga generate counter"
+    "caatinga:build": "npx caatinga build counter",
+    "caatinga:deploy": "npx caatinga deploy counter --network testnet --source ${CAATINGA_SOURCE:-alice}",
+    "caatinga:generate": "npx caatinga generate counter --network testnet"
   },
   "dependencies": {
-    "@caatinga/client": "^2.1.0",
-    "@caatinga/core": "^2.1.0",
+    "@caatinga/client": "file:./vendor/caatinga-client-2.1.0.tgz",
+    "@caatinga/core": "file:./vendor/caatinga-core-2.1.0.tgz",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "@stellar/stellar-sdk": "^14.5.0",
     "buffer": "^6.0.3",
@@ -23,24 +23,8 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^2.1.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"
-  },
-  "overrides": {
-    "uuid": "^14.0.0",
-    "@creit.tech/stellar-wallets-kit": {
-      "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
-      "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
-      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk"
-    },
-    "@reown/appkit-utils": {
-      "@safe-global/safe-apps-sdk": "-",
-      "@safe-global/safe-apps-provider": "-"
-    },
-    "@safe-global/safe-apps-sdk": {
-      "@safe-global/safe-gateway-typescript-sdk": "-"
-    }
   }
 }

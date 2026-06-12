@@ -1,4 +1,5 @@
 import { useWallet } from "@caatinga/client/react";
+import { WALLET_SELECTION_CLOSED_ERROR } from "../wallet-modal-controller.js";
 
 function shortenAddress(address: string): string {
   if (address.length <= 12) {
@@ -23,7 +24,7 @@ export function WalletButton() {
         <span className={publicKey ? "status-dot status-dot--on" : "status-dot"} />
         {connecting ? "Connecting..." : publicKey ? shortenAddress(publicKey) : "Connect"}
       </button>
-      {error ? (
+      {error && error.name !== WALLET_SELECTION_CLOSED_ERROR ? (
         <p className="wallet-error" role="alert">
           {error.message}
         </p>
