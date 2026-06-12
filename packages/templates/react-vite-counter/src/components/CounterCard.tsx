@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { caatingaClient } from "../caatinga.js";
 import { formatCaatingaError } from "@caatinga/core/browser";
-import { useWallet } from "../context/WalletContext.js";
+import { useWallet } from "@caatinga/client/react";
 import { LoadingModal } from "./LoadingModal.js";
 
 export function CounterCard() {

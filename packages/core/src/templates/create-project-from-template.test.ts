@@ -315,21 +315,30 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
     }>(templatePackageJsonPath);
 
-    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
   });
 
   it("should_install_cleanly_on_pnpm_10_26_plus", async () => {
     const templateRoot = path.resolve(__dirname, "../../../templates/react-vite-counter");
     const packageJson = await readPackageJson<{
       dependencies?: Record<string, string>;
+      overrides?: Record<string, unknown>;
     }>(path.join(templateRoot, "package.json"));
+    const viteConfig = await readFile(path.join(templateRoot, "vite.config.ts"), "utf8");
 
-    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
+    expect(packageJson.overrides).toBeUndefined();
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
     expect(workspaceYaml).toContain("allowBuilds:");
     expect(workspaceYaml).toContain("esbuild: true");
-    expect(workspaceYaml).toContain("blockExoticSubdeps: false");
+    expect(workspaceYaml).not.toContain("overrides:");
+    expect(workspaceYaml).not.toContain("ignoredOptionalDependencies:");
+    expect(workspaceYaml).not.toContain("blockExoticSubdeps");
+
+    expect(viteConfig).toContain("@trezor/connect-web");
+    expect(viteConfig).toContain("@safe-global/safe-apps-sdk");
+    expect(viteConfig).toContain("@hot-wallet/sdk");
   });
 
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {

@@ -4,11 +4,19 @@ import {
   WalletNetwork,
   type StellarWalletsKitMetadata
 } from "@caatinga/client/stellar-wallets-kit";
+import { requestWalletSelection } from "./wallet-modal-controller.js";
 
-export const stellarWalletAdapter = createStellarWalletsKitAdapter({
+const baseWalletAdapter = createStellarWalletsKitAdapter({
   network: WalletNetwork.TESTNET,
   walletConnectMetadata: getWalletConnectMetadata()
 });
+
+// Route connect() through the custom <WalletModal> instead of SWK's built-in
+// authModal. Everything else (persistence, restore, signing) is untouched.
+export const stellarWalletAdapter = {
+  ...baseWalletAdapter,
+  openModal: () => requestWalletSelection()
+};
 
 export { WalletNetwork };
 

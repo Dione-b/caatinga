@@ -85,10 +85,24 @@ describe("publish package manifests", () => {
       require: "./dist/stellar-wallets-kit.cjs"
     });
     expect(packageJson.scripts.build).toContain("src/stellar-wallets-kit.ts");
-    expect(packageJson.peerDependencies["@creit.tech/stellar-wallets-kit"]).toBe("^1.9.5");
+    expect(packageJson.peerDependencies["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
     expect(packageJson.peerDependenciesMeta["@creit.tech/stellar-wallets-kit"]).toEqual({
       optional: true
     });
+  });
+
+  it("client exposes react subpath", () => {
+    const packageJson = JSON.parse(
+      readFileSync(join(repoRoot, "packages/client/package.json"), "utf8")
+    );
+    expect(packageJson.exports["./react"]).toEqual({
+      types: "./dist/react.d.ts",
+      import: "./dist/react.js",
+      require: "./dist/react.cjs"
+    });
+    expect(packageJson.scripts.build).toContain("src/react.ts");
+    expect(packageJson.peerDependencies.react).toBe(">=18");
+    expect(packageJson.peerDependenciesMeta.react).toEqual({ optional: true });
   });
 
   it("publish dry-run uses the pre-v1 next dist-tag", () => {

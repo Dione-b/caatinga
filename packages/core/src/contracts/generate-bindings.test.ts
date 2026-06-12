@@ -13,6 +13,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { generateBindings } from "./generate-bindings.js";
+import { readBindingMarker } from "../bindings/binding-marker.js";
 
 const CONTRACT_ID = `C${"2".repeat(55)}`;
 
@@ -85,6 +86,13 @@ describe("generateBindings", () => {
     expect(result.outputDir).toBe(path.join(tmpDir, "src/gen/counter"));
     expect(result.importPath).toBe("./src/gen/counter/src/index.js");
     expect(result.legacyStubRemoved).toBe(false);
+    expect(result.marker).toMatchObject({
+      version: 1,
+      contractId: CONTRACT_ID,
+      wasmHash: "abc",
+      network: "testnet"
+    });
+    await expect(readBindingMarker(result.outputDir)).resolves.toEqual(result.marker);
     expect(runCommand).toHaveBeenCalledWith(
       "stellar",
       expect.arrayContaining([
@@ -190,6 +198,10 @@ describe("generateBindings", () => {
         cwd: tmpDir
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.BINDINGS_FAILED });
+
+    await expect(
+      readBindingMarker(path.join(tmpDir, "src/gen/counter"))
+    ).resolves.toBeNull();
   });
 
   it("should_propagate_CaatingaError_from_runCommand_unchanged", async () => {

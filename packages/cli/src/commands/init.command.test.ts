@@ -46,12 +46,15 @@ describe("init command", () => {
       expect(output).toContain("npm install");
       expect(output).toContain("npx caatinga build    counter");
       expect(output).toContain("npx caatinga deploy   counter --network testnet --source <identity>");
-      expect(output).toContain("npx caatinga generate counter --network testnet");
+      expect(output).not.toContain("npx caatinga generate counter");
       expect(output).toContain("npm run dev");
       expect(output).toContain(
-        "Note: deploy and generate the contract before interacting in the frontend"
+        "Note: deploy generates TypeScript bindings automatically (--no-generate to skip)"
       );
       expect(output).toContain("the dApp reads the contract ID from caatinga.artifacts.json");
+      expect(output).toContain(
+        "If generation fails, recover with: npx caatinga generate --network testnet"
+      );
     } finally {
       logSpy.mockRestore();
     }
@@ -70,9 +73,8 @@ describe("init command", () => {
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("npx caatinga build");
       expect(output).toContain("npx caatinga deploy   --network testnet --source <identity>");
-      expect(output).toContain("npx caatinga generate --network testnet");
       expect(output).toContain(
-        "Note: deploy and generate the contract before interacting in the frontend"
+        "Note: deploy generates TypeScript bindings automatically (--no-generate to skip)"
       );
     } finally {
       logSpy.mockRestore();

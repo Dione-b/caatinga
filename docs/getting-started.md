@@ -25,7 +25,7 @@ stellar --version
 npm install -g @caatinga/cli@next
 ```
 
-Confirm the resolved versions:
+Confirm the resolved versions (currently `2.2.0` on `@next`):
 
 ```bash
 npm view @caatinga/cli@next version
@@ -52,13 +52,19 @@ cd my-dapp
 npm install
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
-npx caatinga generate counter --network testnet
+npx caatinga status --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-Run the CLI steps in order: `build` → `deploy` → `generate` → `invoke` (or `npm run dev` / `pnpm dev` after generate). `deploy` requires compiled WASM; `generate` requires a deployed `contractId` in `caatinga.artifacts.json`.
+Run the CLI steps in order: `build` → `deploy` → `invoke` (or `npm run dev` / `pnpm dev` after
+deploy). `deploy` requires compiled WASM, writes the deployed `contractId` into
+`caatinga.artifacts.json`, and **generates TypeScript bindings automatically** (pass
+`--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh.
 
 `build` only compiles the WASM file. `deploy` is the step that writes the deployed `contractId` into `caatinga.artifacts.json`; browser clients and generated bindings need that contract ID before they can call the contract.
+
+If bindings generation fails after a deploy (or you skipped it), recover with
+`npx caatinga generate --network testnet`.
 
 If the CLI is not installed globally, prefix each command with `npx caatinga@next` instead of `npx caatinga`.
 
@@ -67,7 +73,11 @@ If the CLI is not installed globally, prefix each command with `npx caatinga@nex
 Templates default to `npm` (`packageManager: "npm"` in `caatinga.template.json`), but `pnpm install` is also supported. The `react-vite-counter` template ships a `pnpm-workspace.yaml` with:
 
 - `allowBuilds.esbuild: true` — pnpm 10.26+/11.x block lifecycle scripts by default; Vite depends on esbuild.
-- `blockExoticSubdeps: false` — allows the GitHub subdependency pulled in by `stellar-wallets-kit@0.0.7`.
+- `overrides.uuid` in `pnpm-workspace.yaml` (and npm `overrides` in `package.json`) — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies.
+- Safe wallet overrides (`ignoredOptionalDependencies` + nested `overrides` in `pnpm-workspace.yaml`;
+  npm `overrides` in `package.json`) — block optional EVM/Safe packages pulled by Reown AppKit through
+  Stellar Wallets Kit. Stellar dApps do not use Safe; this removes the deprecated
+  `@safe-global/safe-gateway-typescript-sdk` install warning.
 
 Equivalent package-manager scripts:
 
@@ -75,8 +85,9 @@ Equivalent package-manager scripts:
 pnpm install
 pnpm run caatinga:build
 pnpm run caatinga:deploy -- --network testnet --source alice
-pnpm run caatinga:generate -- --network testnet
 ```
+
+(`caatinga:generate` still exists as a recovery script; deploy generates bindings for you.)
 
 `npx caatinga build counter` does not depend on your package manager. Use it directly when `pnpm install` or `pnpm run caatinga:build` fails but Rust and Stellar CLI are already healthy.
 
@@ -86,7 +97,7 @@ Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, 
 
 ## Browser client flow
 
-After `deploy` and `generate`, install the client packages from `next` (match the CLI version when possible):
+After `deploy` (which generates the bindings), install the client packages from `next` (match the CLI version when possible):
 
 ```bash
 npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
@@ -111,7 +122,8 @@ const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
 ```
 
-For `debugXdr`, `buildXdr()`, the wallet adapter contract, and the full binding shape Caatinga expects, see [Client](./client.md).
+For `debugXdr`, `buildXdr()`, the wallet adapter contract, and the full binding shape Caatinga expects, see [Client](./client.md). React apps can skip hand-rolled wallet state with
+`WalletProvider`/`useWallet` from `@caatinga/client/react` — see [Wallets](./wallets.md).
 
 Default local checks:
 

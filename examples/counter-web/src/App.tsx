@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { WalletProvider, useWallet } from "@caatinga/client/react";
 import { caatinga } from "./caatinga.js";
 import { stellarWalletAdapter } from "./wallet.js";
 import "./styles.css";
 
 type Status = {
-  publicKey?: string;
   value?: string;
   transactionHash?: string;
   error?: string;
@@ -31,22 +31,15 @@ function formatError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export function App() {
+function AppBody() {
+  const { publicKey, connecting, error: walletError, connect } = useWallet();
   const [status, setStatus] = useState<Status>({});
   const [loading, setLoading] = useState(false);
 
   async function connectWallet() {
-    setLoading(true);
     setStatus({});
-    try {
-      // Lists only installed/available wallets and resolves with the address.
-      const publicKey = await stellarWalletAdapter.openModal();
-      setStatus({ publicKey });
-    } catch (error) {
-      setStatus({ error: formatError(error) });
-    } finally {
-      setLoading(false);
-    }
+    // Connection errors surface through the hook's `error` state.
+    await connect().catch(() => {});
   }
 
   async function increment() {
@@ -85,6 +78,9 @@ export function App() {
     }
   }
 
+  const busy = loading || connecting;
+  const errorMessage = status.error ?? (walletError ? formatError(walletError) : undefined);
+
   return (
     <main className="shell">
       <section className="hero">
@@ -97,24 +93,34 @@ export function App() {
       </section>
 
       <section className="panel">
-        <button type="button" onClick={connectWallet} disabled={loading}>
+        <button type="button" onClick={connectWallet} disabled={busy}>
           Connect wallet
         </button>
-        <button type="button" onClick={increment} disabled={loading || !status.publicKey}>
+        <button type="button" onClick={increment} disabled={busy || !publicKey}>
           Increment
         </button>
-        <button type="button" onClick={readCounter} disabled={loading || !status.publicKey}>
+        <button type="button" onClick={readCounter} disabled={busy || !publicKey}>
           Read value
         </button>
       </section>
 
       <section className="state">
-        <p>Loading: {loading ? "yes" : "no"}</p>
-        <p>Public key: {status.publicKey ?? "not connected"}</p>
+        <p>Loading: {busy ? "yes" : "no"}</p>
+        <p>Public key: {publicKey ?? "not connected"}</p>
         <p>Transaction: {status.transactionHash ?? "none"}</p>
         <p>Value: {status.value ?? "unknown"}</p>
-        {status.error ? <pre>{status.error}</pre> : null}
+        {errorMessage ? <pre>{errorMessage}</pre> : null}
       </section>
     </main>
+  );
+}
+
+export function App() {
+  return (
+    // persist keeps the session across reloads; the provider silently
+    // reconnects on mount (autoConnect defaults to true when persisting).
+    <WalletProvider adapter={stellarWalletAdapter} options={{ persist: true }}>
+      <AppBody />
+    </WalletProvider>
   );
 }

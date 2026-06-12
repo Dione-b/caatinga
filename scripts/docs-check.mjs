@@ -16,11 +16,14 @@ const criticalMarkdownFiles = {
 const extendedMarkdownFiles = [
   "CONTRIBUTING.md",
   "AGENTS.md",
+  "docs/README.md",
+  "docs/cheatsheet.md",
   "docs/cli.md",
   "docs/client.md",
   "docs/config.md",
   "docs/errors.md",
   "docs/stellar-cli-version-contract.md",
+  "docs/wallets.md",
 ];
 
 const criticalJsonFiles = [

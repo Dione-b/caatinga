@@ -18,6 +18,8 @@ Included in alpha:
 - `CaatingaWalletAdapter`
 - Stellar Wallets Kit adapter
 - Freighter adapter compatibility subpath
+- `createWalletSession` — framework-agnostic connection state, persistence, silent restore
+- `@caatinga/client/react` — `WalletProvider` + `useWallet` hooks (optional React peer)
 - `read()`
 - `simulate()`
 - `invoke()`
@@ -27,7 +29,6 @@ Included in alpha:
 
 Not included:
 
-- React hooks
 - CLI XDR commands
 - `caatinga generate --interop`
 - custom SCVal serialization
@@ -215,6 +216,41 @@ The Freighter adapter remains available for compatibility:
 ```ts
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
 ```
+
+For the full adapter guide — bundled adapters, custom adapters, capability methods, and Stellar
+Wallets Kit bundler workarounds — see [Wallets](./wallets.md).
+
+## Wallet session
+
+`createWalletSession(adapter, options?)` wraps any adapter with connection state
+(`disconnected` / `connecting` / `connected`), subscriptions, optional persistence, and silent
+restore — usable from any framework or plain TypeScript:
+
+```ts
+import { createWalletSession } from "@caatinga/client";
+
+const session = createWalletSession(wallet, { persist: true });
+session.subscribe(() => render(session.getState()));
+await session.connect();   // modal when the adapter has one, else getPublicKey()
+await session.restore();   // silent reconnect on page load — never throws
+```
+
+## React hooks
+
+React apps (`react >= 18`, optional peer) get a provider and hook from the `react` subpath:
+
+```tsx
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+
+<WalletProvider adapter={wallet} options={{ persist: true }}>
+  <App />
+</WalletProvider>;
+
+const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
+```
+
+`useWallet` is backed by `useSyncExternalStore`; `WalletProvider` restores persisted sessions on
+mount automatically. Full reference and examples: [Wallets](./wallets.md#react-hooks-caatingaclientreact).
 
 ## Binding Contract
 

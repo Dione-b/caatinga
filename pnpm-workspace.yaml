@@ -1,3 +1,16 @@
 packages:
   - "packages/*"
   - "examples/*"
+
+ignoredOptionalDependencies:
+  - "@safe-global/safe-apps-provider"
+  - "@safe-global/safe-apps-sdk"
+
+overrides:
+  uuid: "^14.0.0"
+  "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
+  "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
+  "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"
+  "@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"
+  "@reown/appkit-utils>@safe-global/safe-apps-provider": "-"
+  "@safe-global/safe-apps-sdk>@safe-global/safe-gateway-typescript-sdk": "-"

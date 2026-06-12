@@ -12,6 +12,7 @@ export type GenerateBindingsGraphResult = {
 export async function generateBindingsGraph(options: {
   config: CaatingaConfig;
   contractName?: string;
+  contractNames?: string[];
   networkName?: string;
   cwd?: string;
 }): Promise<GenerateBindingsGraphResult> {
@@ -21,6 +22,8 @@ export async function generateBindingsGraph(options: {
   let targets: string[];
   if (options.contractName) {
     targets = [options.contractName];
+  } else if (options.contractNames && options.contractNames.length > 0) {
+    targets = options.contractNames;
   } else {
     const artifacts = await readArtifacts(cwd);
     targets = Object.keys(artifacts.networks[network.name]?.contracts ?? {});

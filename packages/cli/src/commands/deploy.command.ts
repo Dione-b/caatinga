@@ -1,5 +1,12 @@
 import { Command } from "commander";
-import { deployContractGraph, CaatingaError, CaatingaErrorCode, loadConfig } from "@caatinga/core";
+import {
+  deployContractGraph,
+  generateBindingsGraph,
+  toCaatingaError,
+  CaatingaError,
+  CaatingaErrorCode,
+  loadConfig
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -14,6 +21,7 @@ export function registerDeployCommand(program: Command): void {
     .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
+    .option("--no-generate", "Skip TypeScript bindings generation after deploy")
     .action((contractName: string | undefined, options: {
       network?: string;
       source: string;
@@ -21,6 +29,7 @@ export function registerDeployCommand(program: Command): void {
       deps?: boolean;
       staleCheck?: boolean;
       verifyDeps?: boolean;
+      generate?: boolean;
     }) => runCliAction(async () => {
       if (options.deps === false && !contractName) {
         throw new CaatingaError(
@@ -59,15 +68,49 @@ export function registerDeployCommand(program: Command): void {
       }
       logger.info("Artifacts updated: caatinga.artifacts.json");
 
-      if (result.deployedContracts.length > 0) {
+      if (result.deployedContracts.length === 0) {
+        return;
+      }
+
+      if (options.generate === false) {
         logger.info("");
+        logger.info("Bindings generation skipped (--no-generate).");
         logger.info("Next:");
         for (const contract of result.deployedContracts) {
           logger.info(`  npx caatinga generate ${contract.name} --network ${result.network.name}`);
         }
         logger.info("  npm run dev");
+        return;
+      }
+
+      // Generation failure must not flip the exit code: the deploy itself succeeded
+      // and the artifacts are already written — the user only needs to rerun generate.
+      try {
+        const generated = await generateBindingsGraph({
+          config,
+          contractNames: result.deployedContracts.map((contract) => contract.name),
+          networkName: result.network.name
+        });
+
         logger.info("");
-        logger.info("Run generate before npm run dev so the app uses real bindings, not the stub.");
+        logger.success("Bindings generated");
+        for (const binding of generated.results) {
+          logger.info(`  ${binding.contractName} → ${binding.importPath}`);
+        }
+        logger.info("");
+        logger.info("Next:");
+        logger.info("  npm run dev");
+      } catch (error) {
+        const caatingaError = toCaatingaError(error);
+        logger.info("");
+        logger.warn("Deploy succeeded, but bindings generation failed.");
+        logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
+        if (caatingaError.hint) {
+          logger.warn(`  Hint: ${caatingaError.hint}`);
+        }
+        logger.info("");
+        logger.info("Recover with:");
+        logger.info(`  npx caatinga generate --network ${result.network.name}`);
       }
     }));
 }

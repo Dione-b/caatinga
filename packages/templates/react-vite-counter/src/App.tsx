@@ -1,6 +1,15 @@
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
+import artifactsJson from "../caatinga.artifacts.json";
+import { ContractNotDeployed } from "./components/ContractNotDeployed";
 import { CounterCard } from "./components/CounterCard";
 import { WalletButton } from "./components/WalletButton";
-import { WalletProvider, useWallet } from "./context/WalletContext";
+import { WalletModal } from "./components/WalletModal";
+import { stellarWalletAdapter } from "./wallet.js";
+
+const artifacts = artifactsJson as CaatingaArtifacts;
+const counterContractId = artifacts.networks?.testnet?.contracts?.counter?.contractId;
+const isDeployed = Boolean(counterContractId);
 
 function AppBody() {
   const { publicKey } = useWallet();
@@ -15,7 +24,9 @@ function AppBody() {
         <WalletButton />
       </header>
 
-      {publicKey ? (
+      {!isDeployed ? (
+        <ContractNotDeployed />
+      ) : publicKey ? (
         <CounterCard />
       ) : (
         <section className="counter-panel" aria-labelledby="connect-title">
@@ -35,8 +46,11 @@ function AppBody() {
 
 export default function App() {
   return (
-    <WalletProvider>
+    // persist keeps the session across reloads; the provider silently
+    // reconnects on mount (autoConnect defaults to true when persisting).
+    <WalletProvider adapter={stellarWalletAdapter} options={{ persist: true }}>
       <AppBody />
+      <WalletModal />
     </WalletProvider>
   );
 }

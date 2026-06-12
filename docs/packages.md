@@ -6,11 +6,13 @@
 | `@caatinga/core` | Config, artifacts, Stellar CLI orchestration |
 | `@caatinga/client` | Browser/client interop over generated bindings |
 
-Install for end users:
+Install for end users (alpha channel):
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 ```
+
+`@next` currently resolves to `2.2.0`.
 
 Monorepo development:
 

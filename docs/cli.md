@@ -23,7 +23,12 @@ With `--network`, doctor also compares every contract in `caatinga.config.ts` ag
 deployed, or `✗` with a suggested `caatinga deploy` command when missing. If any contract is
 missing, doctor exits with code `1` and `CAATINGA_DOCTOR_PARTIAL_DEPLOY`.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check]`
+When the deploy coverage check passes, doctor also prints a `Bindings (<network>)` section with
+the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`, `missing`, or
+`unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
+is advisory only — it never flips doctor to `blocked`.
+
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first
@@ -40,11 +45,34 @@ Before deploy, Caatinga compares the WASM file mtime with files under `contracts
 effort). If sources look newer than the WASM, it prints a **warning** and continues deploy. Use
 `--no-stale-check` to skip this check.
 
+After a successful deploy, Caatinga **automatically generates TypeScript bindings** for the
+contracts it just deployed. Pass `--no-generate` to skip (useful in CI jobs that only deploy).
+If generation fails, the deploy still succeeds (exit code `0`) — the CLI prints a warning with
+the recovery command `npx caatinga generate --network <network>`.
+
 ## `caatinga generate [contract] [--network testnet]`
 
 Generates TypeScript bindings from the deployed contract ID. The contract name is
 optional: omit it to generate bindings for every contract already deployed on the
 network (read from `caatinga.artifacts.json`), or pass a name to generate just that one.
+In all-contracts mode the command first prints the current freshness of each contract's
+bindings (`[fresh]`, `[stale]`, `[missing]`, or `[unknown]` with the reason).
+
+Each successful generation writes a `.caatinga-bindings.json` marker next to the bindings
+recording the source `contractId`, `wasmHash`, and network. `status`, `doctor`, and `generate`
+use that marker to detect stale bindings after a redeploy. Deleting a bindings directory simply
+resets its state to `missing`.
+
+## `caatinga status [--network <name>] [--json]`
+
+Shows, per network, every configured contract with its deployed contract ID, WASM hash,
+dependencies, and binding freshness in a table. Contracts not yet deployed on the network are
+listed with `✗` so you can see what's left. Without `--network` it reports every network present
+in `caatinga.artifacts.json` (falling back to `defaultNetwork` for empty projects).
+
+For every deployed contract whose bindings are not fresh, status prints the exact
+`caatinga generate` command that fixes it. `--json` prints the full machine-readable structure
+on stdout for scripts and CI.
 
 ## `caatinga invoke <contract.method> --source <identity> [args...]`
 

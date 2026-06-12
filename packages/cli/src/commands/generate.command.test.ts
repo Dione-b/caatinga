@@ -6,13 +6,17 @@ import { registerGenerateCommand } from "./generate.command.js";
 
 const generateBindingsGraphMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn());
+const readArtifactsMock = vi.hoisted(() => vi.fn());
+const evaluateBindingsFreshnessMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
   return {
     ...actual,
     generateBindingsGraph: generateBindingsGraphMock,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
+    readArtifacts: readArtifactsMock,
+    evaluateBindingsFreshness: evaluateBindingsFreshnessMock
   };
 });
 
@@ -74,7 +78,11 @@ describe("generate command", () => {
   beforeEach(() => {
     generateBindingsGraphMock.mockReset();
     loadConfigMock.mockReset();
+    readArtifactsMock.mockReset();
+    evaluateBindingsFreshnessMock.mockReset();
     loadConfigMock.mockResolvedValue(config);
+    readArtifactsMock.mockResolvedValue({ project: "counter-app", version: 1, networks: {} });
+    evaluateBindingsFreshnessMock.mockResolvedValue([]);
     generateBindingsGraphMock.mockResolvedValue({
       network: { name: "testnet" },
       results: [counterResult]
@@ -121,6 +129,46 @@ describe("generate command", () => {
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Import path: ./src/contracts/generated/counter/src/index.js");
       expect(output).toContain("Import path: ./src/contracts/generated/token/src/index.js");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("prints freshness pre-state in all-contracts mode", async () => {
+    evaluateBindingsFreshnessMock.mockResolvedValue([
+      {
+        contractName: "counter",
+        status: "stale",
+        outputDir: "/tmp/counter",
+        marker: null,
+        reason: "wasmHash changed since last generate"
+      },
+      { contractName: "token", status: "fresh", outputDir: "/tmp/token", marker: null }
+    ]);
+    generateBindingsGraphMock.mockResolvedValue({
+      network: { name: "testnet" },
+      results: [counterResult, tokenResult]
+    });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createGenerateProgram().parseAsync(["node", "caatinga", "generate"]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain("[stale] counter — wasmHash changed since last generate");
+      expect(output).toContain("[fresh] token");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("skips freshness pre-state when a contract name is given", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createGenerateProgram().parseAsync(["node", "caatinga", "generate", "counter"]);
+
+      expect(evaluateBindingsFreshnessMock).not.toHaveBeenCalled();
     } finally {
       logSpy.mockRestore();
     }

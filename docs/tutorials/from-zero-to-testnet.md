@@ -16,7 +16,7 @@ stellar --version
 rustc --version
 ```
 
-Confirm the published `next` versions:
+Confirm the published `next` versions (currently `2.2.0`):
 
 ```bash
 npm view @caatinga/cli@next version
@@ -92,16 +92,27 @@ If the Wasm target is missing, install it:
 rustup target add wasm32v1-none
 ```
 
-## Build, Deploy, Generate, Invoke
+## Build, Deploy, Invoke
 
 ```bash
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
-npx caatinga generate counter --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`deploy` saves the deployed `contractId` under the selected network in `caatinga.artifacts.json`. `generate` reads that artifact and writes TypeScript bindings under the generated bindings directory configured in `caatinga.config.ts`.
+`deploy` saves the deployed `contractId` under the selected network in `caatinga.artifacts.json`
+and then **generates TypeScript bindings automatically** under the bindings directory configured
+in `caatinga.config.ts`. Pass `--no-generate` to skip generation; if generation fails the deploy
+still succeeds and the CLI prints the recovery command (`npx caatinga generate --network testnet`).
+
+Check the result at any time:
+
+```bash
+npx caatinga status --network testnet
+```
+
+The table shows each contract's contract ID, whether it is deployed, and whether its bindings are
+still fresh (a redeploy marks them `stale` until the next generate).
 
 To redeploy even when an artifact already contains a contract ID:
 
@@ -111,7 +122,7 @@ npx caatinga deploy counter --network testnet --source alice --force
 
 ## Use the Contract in a Client
 
-After generation, install the browser packages from `next`:
+After deploy (which generated the bindings), install the browser packages from `next`:
 
 ```bash
 npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
@@ -137,12 +148,22 @@ const increment = await client.contract("counter").invoke<number>("increment");
 ```
 
 For the full client contract, XDR debug options, and wallet adapter rules, see [Client](../client.md).
+For wallet sessions, persistence, and the React `WalletProvider`/`useWallet` hooks used by the
+default template, see [Wallets](../wallets.md).
 
 ## Troubleshooting
 
 - `ERR_PNPM_IGNORED_BUILDS` (esbuild): pnpm 11 blocks lifecycle scripts by default. Ensure `pnpm-workspace.yaml` contains `allowBuilds.esbuild: true` (already in the official `react-vite-counter` template).
   If you ran `pnpm approve-builds` interactively, replace any placeholder value with the boolean `true` — incomplete approval leaves invalid YAML.
-- `ERR_PNPM_EXOTIC_SUBDEP`: pnpm 10.26+/11.x refused a GitHub subdependency from `stellar-wallets-kit`. Ensure `pnpm-workspace.yaml` contains `blockExoticSubdeps: false` (shipped with the official counter template).
+- Deprecated `uuid` warnings on install: the official `react-vite-counter` template pins `uuid@^14` via `package.json` overrides. Regenerate from a current template or add the same override if you created the project before this change.
+- Deprecated `@safe-global/safe-gateway-typescript-sdk` on install: optional Safe packages from Reown
+  AppKit (via Stellar Wallets Kit). The official template blocks them with npm/pnpm overrides —
+  regenerate from a current template or copy the Safe override block from
+  [Templates](../templates.md#pnpm-1026--11x).
+- `npm audit` reports vulnerabilities after install: the official template blocks unused SWK deps
+  (Trezor/HOT/Safe) via overrides so **critical** `protobufjs` findings from Trezor should not appear.
+  Remaining low-severity items may still come from WalletConnect/Reown. Regenerate from a current
+  template or copy the override blocks from [Templates](../templates.md#pnpm-1026--11x).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
 - `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.

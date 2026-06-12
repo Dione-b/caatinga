@@ -1,12 +1,6 @@
-# pnpm 10.26+ / 11.x block lifecycle scripts by default; vite depends on esbuild.
+# pnpm-only file (npm / yarn / bun ignore it). pnpm 10.26+/11.x block lifecycle
+# scripts by default; vite depends on esbuild's, so allow it. All dependency
+# stubbing now happens at the build layer (see vite.config.ts), so no pnpm-only
+# `overrides` are needed and this template installs identically on every PM.
 allowBuilds:
   esbuild: true
-
-# stellar-wallets-kit@0.0.7 is unpublished from npm and is therefore pinned
-# to a github: URL in package.json. Its own dependencies also reference
-# @creit.tech/xbull-wallet-connect via a github: URL, and pnpm 10.26+ (and
-# 11.x) defaults blockExoticSubdeps to true, which would refuse to install
-# that exotic subdep. Allow it explicitly. This is a targeted opt-out for
-# this one transitive dep; direct dependencies in package.json still must
-# come from a trusted source.
-blockExoticSubdeps: false

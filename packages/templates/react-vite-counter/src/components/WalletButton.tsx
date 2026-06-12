@@ -1,4 +1,5 @@
-import { useWallet } from "../context/WalletContext.js";
+import { useWallet } from "@caatinga/client/react";
+import { WALLET_SELECTION_CLOSED_ERROR } from "../wallet-modal-controller.js";
 
 function shortenAddress(address: string): string {
   if (address.length <= 12) {
@@ -9,23 +10,23 @@ function shortenAddress(address: string): string {
 }
 
 export function WalletButton() {
-  const { publicKey, loading, error, connect, disconnect } = useWallet();
+  const { publicKey, connecting, error, connect, disconnect } = useWallet();
 
   return (
     <div className="wallet-shell">
       <button
         className="wallet-button"
         type="button"
-        onClick={publicKey ? () => void disconnect() : () => void connect()}
-        disabled={loading}
+        onClick={publicKey ? () => void disconnect() : () => void connect().catch(() => {})}
+        disabled={connecting}
         aria-live="polite"
       >
         <span className={publicKey ? "status-dot status-dot--on" : "status-dot"} />
-        {loading ? "Connecting..." : publicKey ? shortenAddress(publicKey) : "Connect"}
+        {connecting ? "Connecting..." : publicKey ? shortenAddress(publicKey) : "Connect"}
       </button>
-      {error ? (
+      {error && error.name !== WALLET_SELECTION_CLOSED_ERROR ? (
         <p className="wallet-error" role="alert">
-          {error}
+          {error.message}
         </p>
       ) : null}
     </div>
