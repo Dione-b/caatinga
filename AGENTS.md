@@ -13,7 +13,7 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 ## Current release
 
-Published on npm `@next`: **`2.2.1`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`).
+Published on npm **`latest`** / **`next`**: **`2.2.1`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`).
 
 Highlights from the `2.x` line:
 

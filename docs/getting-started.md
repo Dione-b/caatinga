@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
-During alpha, install published packages from the npm **`next`** dist-tag (release-gate validated). Pin `@next` or an exact version in apps; see [Release process](./release.md).
+During alpha, install published packages from npm (`latest` / `next`, currently **`2.2.1`**). Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -22,18 +22,18 @@ stellar --version
 ## Install from npm
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
-Confirm the resolved versions (currently `2.2.1` on `@next`):
+Confirm the resolved versions (currently `2.2.1` on `latest` / `next`):
 
 ```bash
-npm view @caatinga/cli@next version
-npm view @caatinga/core@next version
-npm view @caatinga/client@next version
+npm view @caatinga/cli version
+npm view @caatinga/core version
+npm view @caatinga/client version
 ```
 
-Without a global CLI install, use `npx caatinga@next` in the commands below.
+Without a global CLI install, use `npx caatinga@latest` in the commands below.
 
 ## From the repository
 
@@ -45,7 +45,7 @@ pnpm --filter @caatinga/cli dev init my-dapp
 
 ## Generated app flow
 
-After `caatinga init` (global `@next` CLI) or `npx caatinga@next init`:
+After `caatinga init` (global CLI) or `npx caatinga@latest init`:
 
 ```bash
 cd my-dapp
@@ -66,7 +66,7 @@ deploy). `deploy` requires compiled WASM, writes the deployed `contractId` into
 If bindings generation fails after a deploy (or you skipped it), recover with
 `npx caatinga generate --network testnet`.
 
-If the CLI is not installed globally, prefix each command with `npx caatinga@next` instead of `npx caatinga`.
+If the CLI is not installed globally, prefix each command with `npx caatinga@latest` instead of `npx caatinga`.
 
 ### Using pnpm
 
@@ -97,10 +97,10 @@ Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, 
 
 ## Browser client flow
 
-After `deploy` (which generates the bindings), install the client packages from `next` (match the CLI version when possible):
+After `deploy` (which generates the bindings), install the client packages (match the CLI version when possible):
 
 ```bash
-npm install @caatinga/client@next @caatinga/core@next @creit.tech/stellar-wallets-kit
+npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```
 
 Register the generated bindings with `@caatinga/client`:
