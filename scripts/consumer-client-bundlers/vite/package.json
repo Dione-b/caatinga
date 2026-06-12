@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "@caatinga/client": "0.0.0-placeholder",
-    "@caatinga/core": "0.0.0-placeholder"
+    "@caatinga/core": "0.0.0-placeholder",
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

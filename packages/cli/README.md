@@ -1,6 +1,6 @@
 # @caatinga/cli
 
-Developer toolkit for Stellar / Soroban dApps — `init`, `build`, `deploy`, `generate`, and `invoke`.
+Developer toolkit for Stellar / Soroban dApps — `init`, `build`, `deploy`, `generate`, `status`, and `invoke`.
 
 ## Install
 
@@ -35,11 +35,11 @@ npm install
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
-npx caatinga generate counter --network testnet
+npx caatinga status --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`build` only compiles the WASM file. `deploy` writes contract IDs to `caatinga.artifacts.json`, and the frontend/client flow needs those IDs before it can resolve a contract. `generate` creates TypeScript bindings under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`).
+`build` only compiles the WASM file. `deploy` writes contract IDs to `caatinga.artifacts.json` and then generates TypeScript bindings automatically under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`); pass `--no-generate` to skip. `status` shows what's deployed per network and whether bindings are fresh.
 
 ## Commands
 
@@ -49,10 +49,11 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
 | `caatinga build [contract]` | Compile contract WASM through Stellar CLI (default contract: `counter`) |
 | `caatinga deploy [contract]` | Deploy one contract or the full configured graph; record IDs in artifacts |
-| `caatinga generate [contract]` | Generate TypeScript bindings from a deployed contract ID; omit the name to generate for all deployed contracts |
+| `caatinga generate [contract]` | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts |
+| `caatinga status [--network <name>] [--json]` | Show deployed contracts and binding freshness per network |
 | `caatinga invoke <contract.method>` | Invoke a deployed contract method; extra args forward to Stellar CLI |
 
-The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
+The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> invoke`.
 
 ### `init`
 
@@ -78,12 +79,17 @@ The supported CLI flow is `init -> build -> deploy -> generate -> invoke`.
 - `-s, --source <identity>` is required; must be a Stellar CLI identity alias that can sign (for example `alice`)
 - `--force` redeploys even when artifacts already store a contract ID
 - `--no-deps` skips dependency deployment for a single named contract (`--no-deps` requires `[contract]`)
+- `--no-generate` skips the automatic bindings generation after deploy
 
 Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts.
 
-### `generate` and `invoke`
+After a successful deploy, bindings generate automatically for the deployed contracts. A generation failure never fails the deploy — the CLI prints a warning plus the recovery command (`npx caatinga generate --network <network>`).
+
+### `generate`, `status`, and `invoke`
 
 - `-n, --network <network>` selects the network used to resolve deployed contract IDs
+- `generate` prints binding freshness per contract before regenerating in all-contracts mode
+- `status` prints a per-network table (contract ID, WASM hash, deployed, binding freshness, dependencies); `--json` emits the machine-readable structure
 - `invoke` expects `<contract.method>` (for example `counter.increment`) and forwards `[args...]` to the underlying Stellar invocation
 
 `caatinga dev` is reserved, hidden in pre-v1 builds, and not part of the stability promise. Use your frontend dev server (for example Vite) alongside the commands above.

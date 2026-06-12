@@ -143,6 +143,15 @@ Acontece em `@caatinga/client`. O client **não detém chaves privadas nem seria
 
 `wallet/with-wallet-timeout.ts` aplica timeout às operações de assinatura.
 
+### Sessão de wallet e hooks React
+
+`createWalletSession(adapter, { persist: true })` (em `wallet/wallet-session.ts`) adiciona estado
+de conexão (`disconnected`/`connecting`/`connected`), persistência em `localStorage` e reconexão
+silenciosa (`restore()`) sobre qualquer adapter. O subpath `@caatinga/client/react` expõe
+`WalletProvider` + `useWallet` para apps React (peer opcional `react >= 18`) — o template
+`react-vite-counter` usa esse provider em vez de um contexto manual. Guia completo:
+[Wallets](./wallets.md).
+
 ### Fluxo do client
 
 ```
@@ -190,8 +199,9 @@ const next = await client.contract("counter").invoke<number>("increment");
 | `caatinga init <dir>` | Cria projeto a partir de template (valida manifest). |
 | `caatinga doctor [--network] [--source]` | Checa Node, Stellar CLI, Rust, config, artifacts, rede e identidade de source. Exibe warnings. |
 | `caatinga build [contract]` | Compila WASM do contrato (default: `counter`). |
-| `caatinga deploy [contract] --source <id> --network <net>` | Faz deploy e grava `contractId` nos artifacts. |
-| `caatinga generate <contract> --network <net>` | Gera bindings TypeScript do contrato implantado. |
+| `caatinga deploy [contract] --source <id> --network <net>` | Faz deploy, grava `contractId` nos artifacts e gera bindings automaticamente (`--no-generate` para pular). |
+| `caatinga generate [contract] --network <net>` | (Re)gera bindings TypeScript; sem nome, regenera todos os contratos implantados. |
+| `caatinga status [--network <net>] [--json]` | Tabela por rede: contratos implantados, hashes e frescor dos bindings. |
 | `caatinga invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato. |
 | `caatinga dev` | Proxy opinativo sobre Vite + validação (MVP). |
 

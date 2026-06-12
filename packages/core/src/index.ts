@@ -23,6 +23,28 @@ export {
   type CreateInitialArtifactsOptions
 } from "./artifacts/write-artifacts.js";
 export { updateArtifact } from "./artifacts/update-artifact.js";
+export {
+  collectProjectStatus,
+  type CollectProjectStatusOptions,
+  type ContractStatusEntry,
+  type NetworkStatus,
+  type ProjectStatus
+} from "./artifacts/project-status.js";
+
+export {
+  BINDING_MARKER_FILENAME,
+  BindingMarkerSchema,
+  readBindingMarker,
+  writeBindingMarker,
+  type BindingMarker
+} from "./bindings/binding-marker.js";
+export {
+  evaluateBindingFreshness,
+  evaluateBindingsFreshness,
+  type BindingFreshness,
+  type BindingFreshnessStatus,
+  type EvaluateBindingFreshnessOptions
+} from "./bindings/binding-freshness.js";
 
 export { WELL_KNOWN_NETWORKS } from "./networks/networks.js";
 export { resolveNetwork, type ResolvedNetwork } from "./networks/resolve-network.js";

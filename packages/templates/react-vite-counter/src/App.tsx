@@ -1,6 +1,7 @@
+import { WalletProvider, useWallet } from "@caatinga/client/react";
 import { CounterCard } from "./components/CounterCard";
 import { WalletButton } from "./components/WalletButton";
-import { WalletProvider, useWallet } from "./context/WalletContext";
+import { stellarWalletAdapter } from "./wallet.js";
 
 function AppBody() {
   const { publicKey } = useWallet();
@@ -35,7 +36,9 @@ function AppBody() {
 
 export default function App() {
   return (
-    <WalletProvider>
+    // persist keeps the session across reloads; the provider silently
+    // reconnects on mount (autoConnect defaults to true when persisting).
+    <WalletProvider adapter={stellarWalletAdapter} options={{ persist: true }}>
       <AppBody />
     </WalletProvider>
   );

@@ -1,6 +1,7 @@
 import { access, mkdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
+import { writeBindingMarker, type BindingMarker } from "../bindings/binding-marker.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -76,12 +77,22 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     options.contractName
   );
 
+  const marker: BindingMarker = {
+    version: 1,
+    contractId: contractArtifact.contractId,
+    wasmHash: contractArtifact.wasmHash,
+    network: network.name,
+    generatedAt: new Date().toISOString()
+  };
+  await writeBindingMarker(outputDir, marker);
+
   return {
     contractName: options.contractName,
     network,
     outputDir,
     importPath: toBindingImportPath(options.config.frontend.bindingsOutput, options.contractName),
     legacyStubRemoved,
+    marker,
     output: result.all || result.stdout
   };
 }

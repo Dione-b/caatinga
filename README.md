@@ -35,10 +35,11 @@ Caatinga standardizes contract builds, deployments, artifacts, typed bindings, a
 | --- | --- | --- |
 | 🏗️ | **Scaffold** | Bootstrap a Soroban dApp from checked template manifests |
 | 🔨 | **Build** | Compile configured contracts through Stellar CLI |
-| 🚀 | **Deploy** | Ship one contract or a full dependency graph, with per-network artifacts |
-| 🔗 | **Bind** | Generate TypeScript bindings from deployed contracts |
+| 🚀 | **Deploy** | Ship one contract or a full dependency graph — bindings regenerate automatically |
+| 🔗 | **Bind** | TypeScript bindings with freshness tracking (stale bindings get flagged, not shipped) |
+| 📊 | **Status** | `caatinga status`: deployed contracts + binding freshness per network, `--json` for scripts |
 | ⚡ | **Invoke** | Call contract methods straight from the CLI |
-| 🌐 | **Connect** | Wire up wallet adapters in the browser via `@caatinga/client` |
+| 🌐 | **Connect** | Multi-wallet adapters, persistent wallet sessions, and React hooks via `@caatinga/client` |
 | 🩺 | **Diagnose** | Catch setup problems early with `caatinga doctor` |
 
 <br />
@@ -58,6 +59,29 @@ Caatinga connects these steps with a standard project structure and CLI workflow
 - **🧩 Bring your own scaffolding & frontend** — start from first-party templates; the client focuses on wallet adapters and explicit invoke/XDR, not a fixed full-stack UI.
 
 > Want a Rust-centric workflow with an on-chain registry and a bundled full-stack frontend? Another tool may suit you better. Caatinga is for builders who want a **lightweight, transparent, TypeScript-native** path from contract to wallet-ready client.
+
+<br />
+
+## 🏛️ How it fits together
+
+```
+   caatinga.config.ts                    caatinga.artifacts.json
+   (contracts, networks)                 (contractIds + wasmHash per network)
+          │                                        ▲          │
+          ▼                                        │          ▼
+  ┌────────────────┐    ┌──────────────────┐  ┌─────────────────────────┐
+  │ caatinga build │ →  │ caatinga deploy  │→ │ bindings auto-generated │
+  │  (Stellar CLI) │    │ (graph-aware)    │  │ + freshness markers     │
+  └────────────────┘    └──────────────────┘  └─────────────────────────┘
+                                                          │
+                              browser                     ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ @caatinga/client: bindings + artifacts + wallet adapter          │
+  │   └─ wallet session (persist/restore) ─ @caatinga/client/react  │
+  └──────────────────────────────────────────────────────────────────┘
+```
+
+`caatinga status` reads the same artifacts and tells you, per network, what is deployed and whether bindings are still fresh.
 
 <br />
 
@@ -94,17 +118,17 @@ caatinga init my-dapp
 cd my-dapp
 npm install                # or: pnpm install
 
-npx caatinga build counter
-npx caatinga deploy   counter --network testnet --source alice
-npx caatinga generate counter --network testnet
-npx caatinga invoke   counter.increment --network testnet --source alice
+npx caatinga build  counter
+npx caatinga deploy counter --network testnet --source alice
+npx caatinga status --network testnet
+npm run dev
 ```
 
-That's it. `deploy` writes the contract ID to `caatinga.artifacts.json`; `generate` creates TypeScript bindings under `contracts/generated/`. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
+That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
 > 💡 No global install? Prefix every command with `npx caatinga`.
 
-📖 **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md)
+📖 **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
 <br />
 
@@ -115,7 +139,7 @@ my-dapp/
 ├── caatinga.config.ts        # contracts, WASM paths, networks
 ├── caatinga.artifacts.json   # deployed contract IDs per network
 ├── contracts/                # Rust Soroban contracts
-│   └── generated/            # TS bindings (after `generate`)
+│   └── generated/            # TS bindings (auto-generated on deploy)
 └── src/                      # frontend/client from the selected template
 ```
 
@@ -126,10 +150,11 @@ my-dapp/
 | Command | What it does |
 | --- | --- |
 | `caatinga init <dir>` | Create a project from a template |
-| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts & network setup |
+| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network & binding freshness |
 | `caatinga build [contract]` | Compile contract WASM *(default: `counter`)* |
-| `caatinga deploy [contract]` | Deploy and save `contractId` to artifacts |
-| `caatinga generate <contract>` | Generate TS bindings from a deployed contract |
+| `caatinga deploy [contract]` | Deploy, save `contractId` to artifacts, auto-generate bindings |
+| `caatinga generate [contract]` | (Re)generate TS bindings — recovery/CI path, deploy does it for you |
+| `caatinga status` | Show deployed contracts + binding freshness per network (`--json` for scripts) |
 | `caatinga invoke <contract.method>` | Call a contract method |
 
 **Common flags**
@@ -139,6 +164,7 @@ my-dapp/
 | `--source` | Local Stellar CLI identity that can sign (e.g. `alice`). Public `G...` addresses are **not** accepted for signing. |
 | `--network` | Network from `caatinga.config.ts` (e.g. `testnet`) |
 | `--force` | Redeploy even if artifacts already hold a contract ID |
+| `--no-generate` | Skip automatic bindings generation after deploy |
 
 <br />
 
@@ -173,7 +199,20 @@ const before    = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
 ```
 
-📖 Full contract, adapter rules & XDR debug options: [Client docs](./docs/client.md) · [examples/counter-web](./examples/counter-web)
+**React apps** get wallet state, persistence, and silent reconnect from the `react` subpath — no hand-rolled context:
+
+```tsx
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+
+<WalletProvider adapter={createStellarWalletsKitAdapter()} options={{ persist: true }}>
+  <App />
+</WalletProvider>;
+
+// anywhere below the provider:
+const { publicKey, connected, connecting, connect, disconnect } = useWallet();
+```
+
+📖 Adapters, sessions, hooks & custom wallets: [Wallets](./docs/wallets.md) · invoke/XDR flows: [Client docs](./docs/client.md) · [examples/counter-web](./examples/counter-web)
 
 <br />
 
@@ -193,11 +232,14 @@ Currently **alpha.** The roadmap prioritizes CLI stability, docs, error contract
 
 ## 📚 Docs
 
+Full index: [docs/README.md →](./docs/README.md)
+
 | | |
 | --- | --- |
 | [Getting started](./docs/getting-started.md) | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) |
-| [CLI reference](./docs/cli.md) | [Config](./docs/config.md) |
-| [Client](./docs/client.md) | [Errors](./docs/errors.md) |
+| [Cheatsheet](./docs/cheatsheet.md) | [CLI reference](./docs/cli.md) |
+| [Client](./docs/client.md) | [Wallets](./docs/wallets.md) |
+| [Config](./docs/config.md) | [Errors](./docs/errors.md) |
 | [Release process](./docs/release.md) | [Architecture](./docs/architecture.md) |
 
 <br />

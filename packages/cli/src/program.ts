@@ -6,6 +6,7 @@ import { registerDoctorCommand } from "./commands/doctor.command.js";
 import { registerGenerateCommand } from "./commands/generate.command.js";
 import { registerInitCommand } from "./commands/init.command.js";
 import { registerInvokeCommand } from "./commands/invoke.command.js";
+import { registerStatusCommand } from "./commands/status.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
 export function createProgram(): Command {
@@ -23,6 +24,7 @@ export function createProgram(): Command {
   registerDeployCommand(program);
   registerGenerateCommand(program);
   registerInvokeCommand(program);
+  registerStatusCommand(program);
 
   return program;
 }

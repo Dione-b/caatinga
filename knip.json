@@ -2,5 +2,10 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignore": ["scripts/consumer-client-bundlers/**"],
   "ignoreWorkspaces": ["packages/templates/*"],
-  "ignoreDependencies": ["@stellar/freighter-api"]
+  "ignoreDependencies": [
+    "@stellar/freighter-api",
+    "@testing-library/dom",
+    "@testing-library/react",
+    "react-dom"
+  ]
 }

@@ -49,6 +49,8 @@ Supported runtime root exports:
 - `createDefaultBindingAdapter`
 - `CaatingaContractClient`
 - `buildXdr`
+- `createWalletSession`
+- `WALLET_SESSION_STORAGE_KEY`
 
 Supported type-only root exports:
 
@@ -62,12 +64,15 @@ Supported type-only root exports:
 - `CaatingaReadOptions`
 - `CaatingaReadResult`
 - `CaatingaWalletAdapter`
+- `CaatingaWalletCapabilities`
 - `CaatingaXdrBuildResult`
+- `WalletSession`, `WalletSessionOptions`, `WalletSessionState`, `WalletSessionStatus`, `WalletSessionStorage`
 
-Supported subpath export:
+Supported subpath exports:
 
 - `@caatinga/client/freighter` -> `freighterWalletAdapter` (optional)
 - `@caatinga/client/stellar-wallets-kit` -> `createStellarWalletsKitAdapter` (optional)
+- `@caatinga/client/react` -> `WalletProvider`, `useWallet`, `useWalletSession` (optional, needs `react >= 18`)
 
 Primary flow:
 
@@ -122,6 +127,33 @@ export interface CaatingaWalletAdapter {
 
 The default Freighter adapter is exported from `@caatinga/client/freighter`.
 
+## Wallet Session and React Hooks
+
+Wrap any adapter with connection state, persistence, and silent restore:
+
+```ts
+import { createWalletSession } from "@caatinga/client";
+
+const session = createWalletSession(wallet, { persist: true });
+await session.connect();   // modal when available, else getPublicKey()
+await session.restore();   // silent reconnect on page load — never throws
+session.subscribe(() => console.log(session.getState()));
+```
+
+React apps (optional `react >= 18` peer) use the `react` subpath instead of a hand-rolled context:
+
+```tsx
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+
+<WalletProvider adapter={wallet} options={{ persist: true }}>
+  <App />
+</WalletProvider>;
+
+const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
+```
+
+Full guide: [docs/wallets.md](https://github.com/Dione-b/caatinga/blob/main/docs/wallets.md).
+
 ## Debug Output Rules
 
 - XDR data is omitted by default
@@ -151,5 +183,5 @@ Common codes include:
 
 - this package does not replace Stellar CLI, Stellar SDK, Soroban SDK, or generated bindings
 - manual SCVal serialization and manual XDR parsing are out of scope
-- React hooks, multisig orchestration, backend signing, and non-documented wallet integrations are not part of the supported contract
+- multisig orchestration, backend signing, and non-documented wallet integrations are not part of the supported contract
 - private module paths and undocumented helpers are less stable than the exports listed above

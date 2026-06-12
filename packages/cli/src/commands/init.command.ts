@@ -38,17 +38,16 @@ export function registerInitCommand(program: Command): void {
         logger.info(
           `  npx caatinga deploy   ${defaultContract} --network testnet --source <identity>`
         );
-        logger.info(`  npx caatinga generate ${defaultContract} --network testnet`);
       } else {
         logger.info("  npx caatinga build");
         logger.info("  npx caatinga deploy   --network testnet --source <identity>");
-        logger.info("  npx caatinga generate --network testnet");
       }
       logger.info("  npm run dev");
       logger.info("");
       logger.info(
-        "Note: deploy and generate the contract before interacting in the frontend —"
+        "Note: deploy generates TypeScript bindings automatically (--no-generate to skip) —"
       );
       logger.info("the dApp reads the contract ID from caatinga.artifacts.json.");
+      logger.info("If generation fails, recover with: npx caatinga generate --network testnet");
     }));
 }

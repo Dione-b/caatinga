@@ -3,6 +3,7 @@ import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import { runAllDiagnostics } from "../diagnostics/run-all.js";
 import { printDiagnostic, printFixes } from "../diagnostics/types.js";
 import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
+import { evaluateBindingCoverage, type BindingCoverageLine } from "./doctor-bindings.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -42,6 +43,31 @@ export async function reportDeployCoverage(networkName: string): Promise<boolean
   return true;
 }
 
+function printBindingCoverageLine(line: BindingCoverageLine): void {
+  if (line.status === "fresh") {
+    logger.info(`✓ ${line.name} — bindings fresh`);
+    return;
+  }
+
+  logger.info(`✗ ${line.name} — bindings ${line.status}${line.reason ? ` (${line.reason})` : ""}`);
+  if (line.fix) logger.info(`  ${line.fix}`);
+}
+
+/** Advisory only: stale bindings never flip doctor to blocked. */
+export async function reportBindingCoverage(networkName: string): Promise<void> {
+  const coverage = await evaluateBindingCoverage({ networkName });
+
+  if (coverage.lines.length === 0) {
+    return;
+  }
+
+  logger.info("");
+  logger.info(`Bindings (${networkName}):`);
+  for (const line of coverage.lines) {
+    printBindingCoverageLine(line);
+  }
+}
+
 export function registerDoctorCommand(program: Command): void {
   program
     .command("doctor")
@@ -69,6 +95,7 @@ export function registerDoctorCommand(program: Command): void {
           ready = false;
           throw error;
         }
+        await reportBindingCoverage(options.network);
       }
 
       logger.info("");

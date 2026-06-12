@@ -52,6 +52,8 @@ export interface StellarWalletsKitAdapter extends CaatingaWalletAdapter {
    */
   openModal(options?: StellarWalletsKitOpenModalOptions): Promise<string>;
   setWallet(walletId: string): void;
+  /** Id of the wallet currently selected in the kit, or undefined before any selection. */
+  getWalletId(): string | undefined;
   getSupportedWallets(): Promise<ISupportedWallet[]>;
   disconnect(): Promise<void>;
 }
@@ -88,6 +90,16 @@ export function createStellarWalletsKitAdapter(
     setWallet(walletId) {
       StellarWalletsKit.setWallet(walletId);
       address = undefined;
+    },
+
+    getWalletId() {
+      // Read from the kit so authModal/setWallet selections stay the single
+      // source of truth. The getter throws while no wallet is selected.
+      try {
+        return StellarWalletsKit.selectedModule.productId;
+      } catch {
+        return undefined;
+      }
     },
 
     getSupportedWallets() {

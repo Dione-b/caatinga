@@ -8,7 +8,8 @@ const mocks = vi.hoisted(() => ({
   refreshSupportedWallets: vi.fn(),
   disconnect: vi.fn(),
   init: vi.fn(),
-  setNetwork: vi.fn()
+  setNetwork: vi.fn(),
+  state: { selectedModule: undefined as { productId: string } | undefined }
 }));
 
 vi.mock("@creit.tech/stellar-wallets-kit/sdk", () => ({
@@ -20,7 +21,14 @@ vi.mock("@creit.tech/stellar-wallets-kit/sdk", () => ({
     getAddress: mocks.getAddress,
     signTransaction: mocks.signTransaction,
     refreshSupportedWallets: mocks.refreshSupportedWallets,
-    disconnect: mocks.disconnect
+    disconnect: mocks.disconnect,
+    // Mirrors the real kit: throws `{code: -3}` until a wallet is selected.
+    get selectedModule() {
+      if (!mocks.state.selectedModule) {
+        throw { code: -3, message: "Please set the wallet first" };
+      }
+      return mocks.state.selectedModule;
+    }
   }
 }));
 
@@ -56,6 +64,7 @@ describe("createStellarWalletsKitAdapter", () => {
   beforeEach(() => {
     resetStellarWalletsKitAdapterForTests();
     vi.clearAllMocks();
+    mocks.state.selectedModule = undefined;
     mocks.getAddress.mockResolvedValue({ address: "GPUBLIC" });
     mocks.signTransaction.mockResolvedValue({ signedTxXdr: "AAAA_SIGNED" });
     mocks.refreshSupportedWallets.mockResolvedValue([
@@ -119,6 +128,19 @@ describe("createStellarWalletsKitAdapter", () => {
     adapter.setWallet("freighter");
 
     expect(mocks.setWallet).toHaveBeenCalledWith("freighter");
+  });
+
+  it("reports undefined wallet id before any selection", () => {
+    const adapter = createStellarWalletsKitAdapter();
+
+    expect(adapter.getWalletId()).toBeUndefined();
+  });
+
+  it("reads the wallet id from the kit's selected module", () => {
+    const adapter = createStellarWalletsKitAdapter();
+    mocks.state.selectedModule = { productId: "freighter" };
+
+    expect(adapter.getWalletId()).toBe("freighter");
   });
 
   it("opens the modal via authModal and resolves with the address", async () => {

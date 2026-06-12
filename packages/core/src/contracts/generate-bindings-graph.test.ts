@@ -99,6 +99,35 @@ describe("generateBindingsGraph", () => {
     expect(result.results.map((entry) => entry.contractName)).toEqual(["counter"]);
   });
 
+  it("generates only the listed contracts when contractNames is given", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gengraph-list-"));
+    await writeDeployed(tmpDir, { counter: CONTRACT_ID, token: TOKEN_ID });
+
+    const result = await generateBindingsGraph({
+      config: baseConfig,
+      contractNames: ["token"],
+      networkName: "testnet",
+      cwd: tmpDir
+    });
+
+    expect(result.results.map((entry) => entry.contractName)).toEqual(["token"]);
+  });
+
+  it("prefers contractName over contractNames when both are given", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gengraph-prec-"));
+    await writeDeployed(tmpDir, { counter: CONTRACT_ID, token: TOKEN_ID });
+
+    const result = await generateBindingsGraph({
+      config: baseConfig,
+      contractName: "counter",
+      contractNames: ["token"],
+      networkName: "testnet",
+      cwd: tmpDir
+    });
+
+    expect(result.results.map((entry) => entry.contractName)).toEqual(["counter"]);
+  });
+
   it("throws ARTIFACT_NOT_FOUND when no contracts are deployed and no name is given", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gengraph-none-"));
     await writeDeployed(tmpDir, {});

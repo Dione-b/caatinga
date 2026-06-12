@@ -1,7 +1,38 @@
 import { Command } from "commander";
-import { generateBindingsGraph, loadConfig } from "@caatinga/core";
+import {
+  evaluateBindingsFreshness,
+  generateBindingsGraph,
+  loadConfig,
+  readArtifacts,
+  resolveNetwork
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+
+async function printFreshnessPreState(config: Awaited<ReturnType<typeof loadConfig>>, networkName?: string): Promise<void> {
+  try {
+    const network = resolveNetwork(config, networkName);
+    const artifacts = await readArtifacts();
+    const freshness = await evaluateBindingsFreshness({
+      config,
+      artifacts,
+      networkName: network.name
+    });
+
+    if (freshness.length === 0) {
+      return;
+    }
+
+    logger.info("Current bindings:");
+    for (const entry of freshness) {
+      const reason = entry.reason ? ` — ${entry.reason}` : "";
+      logger.info(`  [${entry.status}] ${entry.contractName}${reason}`);
+    }
+    logger.info("");
+  } catch {
+    // Pre-state is informational only; generation proceeds and reports real errors.
+  }
+}
 
 export function registerGenerateCommand(program: Command): void {
   program
@@ -13,6 +44,11 @@ export function registerGenerateCommand(program: Command): void {
       network?: string;
     }) => runCliAction(async () => {
       const config = await loadConfig();
+
+      if (!contractName) {
+        await printFreshnessPreState(config, options.network);
+      }
+
       const { network, results } = await generateBindingsGraph({
         config,
         contractName,

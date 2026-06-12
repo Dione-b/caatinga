@@ -125,7 +125,7 @@ Notes encoded in the diagram:
 
 - The CLI depends on core, never the other way around.
 - `@caatinga/core` is the only package that talks to the `stellar` binary. `@caatinga/client` consumes the browser-safe subpath `@caatinga/core/browser`, which excludes `execa` and Node-only modules so Vite/webpack bundles stay slim.
-- `@caatinga/client` does not own wallet state — it composes a wallet adapter (Freighter, Stellar Wallets Kit, or a custom `CaatingaWalletAdapter`).
+- `@caatinga/client` does not own wallet state — it composes a wallet adapter (Freighter, Stellar Wallets Kit, or a custom `CaatingaWalletAdapter`). On top of the adapter, `createWalletSession` provides optional connection state, persistence, and silent restore; the `@caatinga/client/react` subpath wraps that session in `WalletProvider`/`useWallet` for React apps (React stays an optional peer).
 
 ## Meta-framework boundary: orchestrate workflow, not mental model
 
@@ -145,6 +145,12 @@ Local project state is authoritative:
 - Generated bindings (path from `caatinga.config.ts`)
 - `caatinga.config.ts`
 - `caatinga.artifacts.json`
+
+Each generated binding package carries a `.caatinga-bindings.json` marker recording the source
+`contractId`, `wasmHash`, and network. `caatinga status`, `doctor`, and `generate` compare the
+marker against `caatinga.artifacts.json` to flag stale bindings after a redeploy. The marker is a
+sidecar, not part of the artifacts schema: deleting a bindings directory simply resets its state
+to `missing`.
 
 No central cache or remote artifact registry is assumed in the core MVP. Optional remote services may exist later but must not be **hard dependencies** of core.
 
