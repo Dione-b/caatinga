@@ -327,14 +327,19 @@ describe("createProjectFromTemplate", () => {
     const viteConfig = await readFile(path.join(templateRoot, "vite.config.ts"), "utf8");
 
     expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
-    expect(packageJson.overrides).toBeUndefined();
+    expect(packageJson.overrides?.uuid).toBe("^14.0.0");
+    expect(packageJson.overrides?.["@creit.tech/stellar-wallets-kit"]).toEqual({
+      "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
+      "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
+      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk"
+    });
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
     expect(workspaceYaml).toContain("allowBuilds:");
     expect(workspaceYaml).toContain("esbuild: true");
-    expect(workspaceYaml).not.toContain("overrides:");
-    expect(workspaceYaml).not.toContain("ignoredOptionalDependencies:");
-    expect(workspaceYaml).not.toContain("blockExoticSubdeps");
+    expect(workspaceYaml).toContain("overrides:");
+    expect(workspaceYaml).toContain("ignoredOptionalDependencies:");
+    expect(workspaceYaml).toContain('uuid: "^14.0.0"');
 
     expect(viteConfig).toContain("@trezor/connect-web");
     expect(viteConfig).toContain("@safe-global/safe-apps-sdk");

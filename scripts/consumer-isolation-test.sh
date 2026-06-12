@@ -9,6 +9,29 @@ NPM_CACHE_DIR="$TMP_DIR/.npm-cache"
 NPM_USERCONFIG="$TMP_DIR/.npmrc"
 RESOLVE_ABS_PATH_CMD='import path from "node:path"; process.stdout.write(path.resolve(process.argv[1]));'
 
+assert_no_deprecated_install_warnings() {
+  local log_file="$1"
+  local deprecated_pattern='npm warn deprecated|deprecated subdependencies found|@walletconnect/modal|@walletconnect/sign-client@2\.11|@motionone/vue|@trezor/connect-web@9|ripple-lib@|uuid@8'
+
+  if grep -Eiq "$deprecated_pattern" "$log_file"; then
+    echo "Install reported deprecated wallet SDK dependencies:" >&2
+    grep -Ei "$deprecated_pattern" "$log_file" >&2 || true
+    exit 1
+  fi
+}
+
+assert_swk_version_at_least_2_3() {
+  local app_dir="$1"
+  (
+    cd "$app_dir"
+    npm ls @creit.tech/stellar-wallets-kit --depth=0 2>/dev/null | grep -E '@creit\.tech/stellar-wallets-kit@[2-9]\.[3-9]|@creit\.tech/stellar-wallets-kit@[3-9]\.'
+  ) || {
+    echo "Expected @creit.tech/stellar-wallets-kit >= 2.3.0 in $app_dir" >&2
+    (cd "$app_dir" && npm ls @creit.tech/stellar-wallets-kit --depth=0) >&2 || true
+    exit 1
+  }
+}
+
 source "$ROOT_DIR/scripts/lib/archive-contains-path.sh"
 
 cleanup() {
@@ -135,9 +158,11 @@ export EXPECTED_CORE_RANGE="$(_read_template_range dependencies '@caatinga/core'
 export EXPECTED_CLIENT_RANGE="$(_read_template_range dependencies '@caatinga/client')"
 export EXPECTED_CLI_RANGE="$(_read_template_range devDependencies '@caatinga/cli')"
 
+echo "consumer-isolation: installing packed @caatinga/* tarballs..."
 cd "$TMP_DIR"
 npm init -y >/dev/null
 npm install --no-audit --fund=false --prefer-offline "${_kcore[0]}" "${_kclient[0]}" "${_kcli[0]}"
+echo "consumer-isolation: tarball install done."
 
 CAATINGA_BIN="$TMP_DIR/node_modules/.bin/caatinga"
 if [[ ! -x "$CAATINGA_BIN" ]]; then
@@ -164,6 +189,7 @@ if (typeof createCaatingaClient !== "function") {
 }
 '
 "$CAATINGA_BIN" --version
+echo "consumer-isolation: scaffolding react-vite-counter as test-app..."
 "$CAATINGA_BIN" init test-app --template react-vite-counter
 test -f test-app/caatinga.config.ts
 test -f test-app/caatinga.artifacts.json
@@ -214,7 +240,12 @@ if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@
 writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 "
 
-npm install --no-audit --fund=false --prefer-offline
+echo "consumer-isolation: npm install in test-app (~400 packages; may take several minutes on a cold cache)..."
+npm install --no-audit --fund=false --prefer-offline 2>&1 | tee "$TMP_DIR/test-app-npm-install.log"
+echo "consumer-isolation: test-app npm install done."
+assert_no_deprecated_install_warnings "$TMP_DIR/test-app-npm-install.log"
+assert_swk_version_at_least_2_3 "$TMP_DIR/test-app"
+echo "consumer-isolation: npm run build in test-app..."
 npm run build
 
 if ! grep -r 'createCaatingaClient' dist/ >/dev/null 2>&1; then
@@ -224,6 +255,7 @@ fi
 
 cd "$TMP_DIR"
 
+echo "consumer-isolation: scaffolding marketplace-with-token as market-app..."
 "$CAATINGA_BIN" init market-app --template marketplace-with-token
 test -f market-app/caatinga.config.ts
 test -f market-app/caatinga.artifacts.json
@@ -247,6 +279,9 @@ if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@
 writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 "
 
+echo "consumer-isolation: npm install in market-app..."
 npm install --no-audit --fund=false --prefer-offline
+echo "consumer-isolation: npm run build in market-app..."
 npm run build
+echo "consumer-isolation: OK"
 cd "$TMP_DIR"

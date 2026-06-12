@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Experimental multi-contract Soroban template with token dependency injection.",
   "caatinga": {
-    "compatibleCore": "^2.2.0",
+    "compatibleCore": "^2.2.1",
     "templateVersion": 1
   },
   "frontend": {

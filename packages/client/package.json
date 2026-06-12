@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/client",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Browser and Node client for Soroban smart contracts — connects generated bindings, Caatinga artifacts, and wallet adapters",
   "keywords": [
     "stellar",
@@ -62,7 +62,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caatinga/core": "^2.2.0"
+    "@caatinga/core": "^2.2.1"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

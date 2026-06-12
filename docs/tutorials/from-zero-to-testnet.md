@@ -16,7 +16,7 @@ stellar --version
 rustc --version
 ```
 
-Confirm the published `next` versions (currently `2.2.0`):
+Confirm the published `next` versions (currently `2.2.1`):
 
 ```bash
 npm view @caatinga/cli@next version

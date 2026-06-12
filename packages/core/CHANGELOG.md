@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 2.2.1
+
+### Patch Changes
+
+- Restore install-time dependency overrides in the `react-vite-counter` template so `npm install` and `pnpm install` no longer pull deprecated WalletConnect 2.11, Trezor Connect, HOT Wallet, Safe, and `uuid@8` transitives. Keep Vite aliases as a bundler safety net and add consumer CI checks for deprecated install warnings.
+
 ## 2.2.0
 
 ### Minor Changes
