@@ -1,6 +1,6 @@
 {
   "name": "caatinga",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.4",
@@ -32,7 +32,7 @@
     "yaml": "^2.7.0"
   },
   "dependencies": {
-    "@caatinga/client": "^2.0.0",
-    "@caatinga/core": "^2.0.0"
+    "@caatinga/client": "^2.2.0",
+    "@caatinga/core": "^2.2.0"
   }
 }

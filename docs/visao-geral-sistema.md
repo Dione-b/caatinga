@@ -229,7 +229,7 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Release atual `2.1.0` (linha `2.x`, bump major a partir de `0.2.4`).
+- **Status:** alpha. Release atual `2.2.0` (linha `2.x`, bump major a partir de `0.2.4`). Destaques: `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`, gate `ContractNotDeployed` no template counter.
 - **Distribuição:** dist-tag `next` em todos os pacotes publicados durante o alpha.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.

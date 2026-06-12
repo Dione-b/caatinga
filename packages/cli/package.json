@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/cli",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Caatinga CLI for building dApps on Stellar/Soroban",
   "keywords": [
     "stellar",
@@ -44,14 +44,14 @@
   ],
   "scripts": {
     "prepack": "pnpm build",
-    "build": "tsup src/index.ts --format esm --dts --clean && rm -rf ./templates && cp -r ../templates ./templates",
+    "build": "tsup src/index.ts --format esm --dts --clean && rm -rf ./templates && mkdir ./templates && (cd ../templates && tar --exclude=node_modules --exclude=dist -cf - .) | (cd ./templates && tar -xf -)",
     "predev": "pnpm --filter @caatinga/core build",
     "dev": "tsx src/index.ts",
     "test": "vitest run --pool=threads",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caatinga/core": "^2.1.0",
+    "@caatinga/core": "^2.2.0",
     "chalk": "^5.4.1",
     "commander": "^12.1.0"
   },

@@ -25,7 +25,7 @@ stellar --version
 npm install -g @caatinga/cli@next
 ```
 
-Confirm the resolved versions:
+Confirm the resolved versions (currently `2.2.0` on `@next`):
 
 ```bash
 npm view @caatinga/cli@next version

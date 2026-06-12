@@ -324,29 +324,21 @@ describe("createProjectFromTemplate", () => {
       dependencies?: Record<string, string>;
       overrides?: Record<string, unknown>;
     }>(path.join(templateRoot, "package.json"));
+    const viteConfig = await readFile(path.join(templateRoot, "vite.config.ts"), "utf8");
 
     expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
-    expect(packageJson.overrides?.uuid).toBe("^14.0.0");
-    expect(packageJson.overrides?.["@creit.tech/stellar-wallets-kit"]).toEqual({
-      "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
-      "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
-      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk"
-    });
-    expect(packageJson.overrides?.["@reown/appkit-utils"]).toEqual({
-      "@safe-global/safe-apps-sdk": "-",
-      "@safe-global/safe-apps-provider": "-"
-    });
+    expect(packageJson.overrides).toBeUndefined();
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
     expect(workspaceYaml).toContain("allowBuilds:");
     expect(workspaceYaml).toContain("esbuild: true");
-    expect(workspaceYaml).toContain('uuid: "^14.0.0"');
-    expect(workspaceYaml).toContain("ignoredOptionalDependencies:");
-    expect(workspaceYaml).toContain('"@safe-global/safe-apps-provider"');
-    expect(workspaceYaml).toContain('"@safe-global/safe-apps-sdk"');
-    expect(workspaceYaml).toContain('"@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"');
-    expect(workspaceYaml).toContain('"@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"');
+    expect(workspaceYaml).not.toContain("overrides:");
+    expect(workspaceYaml).not.toContain("ignoredOptionalDependencies:");
     expect(workspaceYaml).not.toContain("blockExoticSubdeps");
+
+    expect(viteConfig).toContain("@trezor/connect-web");
+    expect(viteConfig).toContain("@safe-global/safe-apps-sdk");
+    expect(viteConfig).toContain("@hot-wallet/sdk");
   });
 
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {
