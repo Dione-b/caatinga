@@ -12,7 +12,7 @@ Install for end users (alpha channel):
 npm install -g @caatinga/cli@next
 ```
 
-`@next` currently resolves to `2.2.0`.
+`@next` currently resolves to `2.2.1`.
 
 Monorepo development:
 

@@ -11,10 +11,10 @@ importers:
   .:
     dependencies:
       '@caatinga/client':
-        specifier: ^2.2.0
+        specifier: ^2.2.1
         version: link:packages/client
       '@caatinga/core':
-        specifier: ^2.2.0
+        specifier: ^2.2.1
         version: link:packages/core
     devDependencies:
       '@changesets/cli':
@@ -75,7 +75,7 @@ importers:
   packages/cli:
     dependencies:
       '@caatinga/core':
-        specifier: ^2.2.0
+        specifier: ^2.2.1
         version: link:../core
       chalk:
         specifier: ^5.4.1
@@ -100,7 +100,7 @@ importers:
   packages/client:
     dependencies:
       '@caatinga/core':
-        specifier: ^2.2.0
+        specifier: ^2.2.1
         version: link:../core
       '@stellar/freighter-api':
         specifier: ^4.0.0

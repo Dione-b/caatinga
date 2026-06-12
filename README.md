@@ -18,14 +18,14 @@
 ---
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 caatinga init my-dapp
 ```
 
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. `latest` and `next` both track `2.2.0`. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Install from the npm **`next`** dist-tag (`2.2.1` today; `latest` may lag). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
