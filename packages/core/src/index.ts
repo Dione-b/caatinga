@@ -67,6 +67,7 @@ export {
 
 export { validateSourceShape } from "./contracts/validate-source-shape.js";
 export { resolveContract, type ResolvedContract } from "./contracts/resolve-contract.js";
+export { resolveDefaultContractName } from "./contracts/resolve-default-contract.js";
 export { buildContract, type BuildContractOptions } from "./contracts/build-contract.js";
 export { deployContract, type DeployContractOptions } from "./contracts/deploy-contract.js";
 export {

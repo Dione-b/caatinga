@@ -1,0 +1,16 @@
+{
+  "name": "__PROJECT_NAME__",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "caatinga build",
+    "deploy": "caatinga deploy",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "@caatinga/cli": "^2.2.1",
+    "@caatinga/core": "^2.2.1",
+    "vite": "^6.0.0"
+  }
+}

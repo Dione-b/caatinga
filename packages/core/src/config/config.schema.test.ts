@@ -98,4 +98,39 @@ describe("CaatingaConfigSchema", () => {
       tokenContractId: "${contracts.token.contractId}"
     });
   });
+
+  it("parses zk circuit configuration", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      zk: {
+        circuits: {
+          main: {
+            path: "./circuits",
+            protocol: "groth16",
+            curve: "bls12381",
+            verifierContract: "verifier"
+          }
+        }
+      }
+    });
+
+    expect(result.zk?.circuits.main.curve).toBe("bls12381");
+  });
+
+  it("rejects unsupported zk curves", () => {
+    expect(() =>
+      CaatingaConfigSchema.parse({
+        ...minimalValid,
+        zk: {
+          circuits: {
+            main: {
+              path: "./circuits",
+              protocol: "groth16",
+              curve: "bn128"
+            }
+          }
+        }
+      })
+    ).toThrow();
+  });
 });

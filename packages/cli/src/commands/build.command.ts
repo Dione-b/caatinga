@@ -1,5 +1,12 @@
 import { Command } from "commander";
-import { buildContract, CaatingaError, CaatingaErrorCode, loadConfig, type CaatingaConfig } from "@caatinga/core";
+import {
+  buildContract,
+  CaatingaError,
+  CaatingaErrorCode,
+  loadConfig,
+  resolveDefaultContractName,
+  type CaatingaConfig
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { evaluateDeployCoverage } from "./doctor-deploy-coverage.js";
@@ -8,12 +15,13 @@ export function registerBuildCommand(program: Command): void {
   program
     .command("build")
     .description("Build a configured Soroban contract")
-    .argument("[contract]", "Contract name", "counter")
-    .action((contractName: string) => runCliAction(async () => {
+    .argument("[contract]", "Contract name")
+    .action((contractName: string | undefined) => runCliAction(async () => {
       const config = await loadConfig();
+      const resolvedContractName = contractName ?? resolveDefaultContractName(config);
       const result = await buildContract({
         config,
-        contractName
+        contractName: resolvedContractName
       });
 
       logger.success("Contract built");
