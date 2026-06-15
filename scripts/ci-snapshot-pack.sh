@@ -14,9 +14,11 @@ TEMPLATES_DIR="$ROOT_DIR/packages/templates"
 source "$ROOT_DIR/scripts/lib/archive-contains-path.sh"
 SNAPSHOT_RESTORE_FILES=(
   "$ROOT_DIR/packages/core/package.json"
+  "$ROOT_DIR/packages/zk/package.json"
   "$ROOT_DIR/packages/client/package.json"
   "$ROOT_DIR/packages/cli/package.json"
   "$ROOT_DIR/packages/core/CHANGELOG.md"
+  "$ROOT_DIR/packages/zk/CHANGELOG.md"
   "$ROOT_DIR/packages/client/CHANGELOG.md"
   "$ROOT_DIR/packages/cli/CHANGELOG.md"
   "$ROOT_DIR/examples/counter-web/package.json"
@@ -114,6 +116,7 @@ const rootDir = process.argv[1];
 const templatesDir = path.join(rootDir, "packages/templates");
 const packageVersions = {
   "@caatinga/core": JSON.parse(readFileSync(path.join(rootDir, "packages/core/package.json"), "utf8")).version,
+  "@caatinga/zk": JSON.parse(readFileSync(path.join(rootDir, "packages/zk/package.json"), "utf8")).version,
   "@caatinga/client": JSON.parse(readFileSync(path.join(rootDir, "packages/client/package.json"), "utf8")).version,
   "@caatinga/cli": JSON.parse(readFileSync(path.join(rootDir, "packages/cli/package.json"), "utf8")).version
 };
@@ -148,15 +151,22 @@ for (const entry of readdirSync(templatesDir)) {
 pnpm --dir "$ROOT_DIR" --filter @caatinga/cli build
 
 ( cd "$ROOT_DIR/packages/core" && pnpm pack --pack-destination "$PACKED_DIR" )
+( cd "$ROOT_DIR/packages/zk" && pnpm pack --pack-destination "$PACKED_DIR" )
 ( cd "$ROOT_DIR/packages/client" && pnpm pack --pack-destination "$PACKED_DIR" )
 ( cd "$ROOT_DIR/packages/cli" && pnpm pack --pack-destination "$PACKED_DIR" )
 
 shopt -s nullglob
 core_tarball=( "$PACKED_DIR"/caatinga-core-*.tgz )
+zk_tarball=( "$PACKED_DIR"/caatinga-zk-*.tgz )
 client_tarball=( "$PACKED_DIR"/caatinga-client-*.tgz )
 cli_tarball=( "$PACKED_DIR"/caatinga-cli-*.tgz )
 if [[ ${#core_tarball[@]} -ne 1 ]]; then
   echo "Expected exactly one core tarball in $PACKED_DIR, found ${#core_tarball[@]}" >&2
+  exit 1
+fi
+
+if [[ ${#zk_tarball[@]} -ne 1 ]]; then
+  echo "Expected exactly one zk tarball in $PACKED_DIR, found ${#zk_tarball[@]}" >&2
   exit 1
 fi
 
@@ -192,6 +202,7 @@ for template_name in "$TEMPLATES_DIR"/*; do
 done
 
 packed_core_version="$(tar -xOf "${core_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
+packed_zk_version="$(tar -xOf "${zk_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_client_version="$(tar -xOf "${client_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_cli_version="$(tar -xOf "${cli_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 core_runtime_version="$(node --input-type=module -e '
@@ -211,14 +222,16 @@ export EXPECTED_PACKED_INTERNAL_VERSIONS="$(node --input-type=module -e '
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const [rootDir, coreVersion, clientVersion, cliVersion] = process.argv.slice(1);
+const [rootDir, coreVersion, zkVersion, clientVersion, cliVersion] = process.argv.slice(1);
 const packageVersions = {
   "@caatinga/core": coreVersion,
+  "@caatinga/zk": zkVersion,
   "@caatinga/client": clientVersion,
   "@caatinga/cli": cliVersion
 };
 const packageJsonPaths = [
   path.join(rootDir, "packages/core/package.json"),
+  path.join(rootDir, "packages/zk/package.json"),
   path.join(rootDir, "packages/client/package.json"),
   path.join(rootDir, "packages/cli/package.json")
 ];
@@ -249,7 +262,7 @@ for (const packageJsonPath of packageJsonPaths) {
 }
 
 process.stdout.write(JSON.stringify(expectedByPackage));
-' "$ROOT_DIR" "$packed_core_version" "$packed_client_version" "$packed_cli_version")"
+' "$ROOT_DIR" "$packed_core_version" "$packed_zk_version" "$packed_client_version" "$packed_cli_version")"
 
 export EXPECTED_TEMPLATE_INTERNAL_RANGES="$(node --input-type=module -e '
 import { readdirSync, readFileSync, statSync } from "node:fs";
