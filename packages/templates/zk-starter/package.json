@@ -9,8 +9,8 @@
     "dev": "vite"
   },
   "devDependencies": {
-    "@caatinga/cli": "^2.2.1",
-    "@caatinga/core": "^2.2.1",
+    "@caatinga/cli": "^2.3.0",
+    "@caatinga/core": "^2.3.0",
     "vite": "^6.0.0"
   }
 }
