@@ -23,6 +23,7 @@ export type CreateProjectFromTemplateOptions = {
   projectName: string;
   targetDir: string;
   templateDir: string;
+  filter?: (relativePath: string) => boolean;
 };
 
 export async function createProjectFromTemplate(options: CreateProjectFromTemplateOptions) {
@@ -41,16 +42,19 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
 
   const manifest = await readTemplateManifest(templateDir);
 
+  const mergeIntoExisting = Boolean(options.filter);
   await mkdir(targetDir, { recursive: true });
   await cp(templateDir, targetDir, {
     recursive: true,
-    force: false,
-    errorOnExist: true,
-    filter: (source) => shouldCopyTemplateEntry(templateDir, source)
+    force: mergeIntoExisting,
+    errorOnExist: !mergeIntoExisting,
+    filter: (source) => shouldCopyTemplateEntry(templateDir, source, options.filter)
   });
 
   await replaceTemplateVariables(targetDir, options.projectName);
-  await ensureArtifacts(targetDir, options.projectName);
+  if (!mergeIntoExisting) {
+    await ensureArtifacts(targetDir, options.projectName);
+  }
 
   return { targetDir, template: manifest };
 }
@@ -132,10 +136,19 @@ async function replaceTemplateVariables(dir: string, projectName: string): Promi
   }));
 }
 
-function shouldCopyTemplateEntry(templateDir: string, source: string): boolean {
+function shouldCopyTemplateEntry(
+  templateDir: string,
+  source: string,
+  userFilter?: (relativePath: string) => boolean
+): boolean {
   const relativePath = path.relative(templateDir, source);
   if (!relativePath || relativePath === ".") {
     return true;
+  }
+
+  const normalizedPath = relativePath.split(path.sep).join("/");
+  if (userFilter && !userFilter(normalizedPath)) {
+    return false;
   }
 
   return !relativePath.split(path.sep).some((segment) => TEMPLATE_COPY_EXCLUDED_DIRS.has(segment));

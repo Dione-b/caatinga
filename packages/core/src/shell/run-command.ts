@@ -12,6 +12,7 @@ export type RunCommandResult = {
 type RunCommandOptions = {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  input?: string;
   skipStellarVersionCheck?: boolean;
   failureCode?: CaatingaErrorCodeValue;
 };
@@ -29,6 +30,7 @@ export async function runCommand(
     const result = await execa(command, args, {
       cwd: options.cwd,
       env: options.env,
+      input: options.input,
       all: true,
       reject: true
     } satisfies Options);

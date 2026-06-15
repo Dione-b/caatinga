@@ -24,6 +24,12 @@ const pkg = JSON.parse(readFileSync('$ROOT_DIR/packages/cli/package.json', 'utf8
 process.stdout.write(pkg.version);
 ")
 
+ZK_VERSION=$(node --input-type=module -e "
+import { readFileSync } from 'node:fs';
+const pkg = JSON.parse(readFileSync('$ROOT_DIR/packages/zk/package.json', 'utf8'));
+process.stdout.write(pkg.version);
+")
+
 FAILURES=0
 
 fail() {
@@ -37,14 +43,18 @@ echo ""
 echo "  core:   $CORE_VERSION"
 echo "  client: $CLIENT_VERSION"
 echo "  cli:    $CLI_VERSION"
+echo "  zk:     $ZK_VERSION"
 echo ""
 
-# 1. All three publishable packages must share the same version (fixed group in changeset config)
+# 1. All publishable packages must share the same version (fixed group in changeset config)
 if [[ "$CORE_VERSION" != "$CLIENT_VERSION" ]]; then
   fail "@caatinga/core ($CORE_VERSION) and @caatinga/client ($CLIENT_VERSION) versions differ."
 fi
 if [[ "$CORE_VERSION" != "$CLI_VERSION" ]]; then
   fail "@caatinga/core ($CORE_VERSION) and @caatinga/cli ($CLI_VERSION) versions differ."
+fi
+if [[ "$CORE_VERSION" != "$ZK_VERSION" ]]; then
+  fail "@caatinga/core ($CORE_VERSION) and @caatinga/zk ($ZK_VERSION) versions differ."
 fi
 
 EXPECTED_RANGE="^$CORE_VERSION"
@@ -67,6 +77,7 @@ process.stdout.write(pkg['$section']?.['$name'] ?? '');
 
 check_dep "$ROOT_DIR/packages/client/package.json" "dependencies" "@caatinga/core"
 check_dep "$ROOT_DIR/packages/cli/package.json"    "dependencies" "@caatinga/core"
+check_dep "$ROOT_DIR/packages/cli/package.json"    "dependencies" "@caatinga/zk"
 
 # 3. Templates must reference the correct version range for all publishable packages
 for template_dir in "$ROOT_DIR"/packages/templates/*/; do

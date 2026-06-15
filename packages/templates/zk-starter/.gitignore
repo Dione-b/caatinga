@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.artifacts/
+circuits/*.r1cs
+circuits/*.wasm
+circuits/*.sym
+circuits/*.zkey
+target/

@@ -5,6 +5,10 @@ import { registerDevCommand } from "./commands/dev.command.js";
 import { registerDoctorCommand } from "./commands/doctor.command.js";
 import { registerGenerateCommand } from "./commands/generate.command.js";
 import { registerInitCommand } from "./commands/init.command.js";
+import { registerZkInitCommand } from "./commands/zk-init.command.js";
+import { registerZkBuildCommand } from "./commands/zk-build.command.js";
+import { registerZkProveCommand } from "./commands/zk-prove.command.js";
+import { registerZkInvokeCommand } from "./commands/zk-invoke.command.js";
 import { registerInvokeCommand } from "./commands/invoke.command.js";
 import { registerStatusCommand } from "./commands/status.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
@@ -18,6 +22,10 @@ export function createProgram(): Command {
     .version(CAATINGA_CLI_VERSION);
 
   registerInitCommand(program);
+  registerZkInitCommand(program);
+  registerZkBuildCommand(program);
+  registerZkProveCommand(program);
+  registerZkInvokeCommand(program);
   registerDevCommand(program);
   registerDoctorCommand(program);
   registerBuildCommand(program);

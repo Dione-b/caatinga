@@ -15,7 +15,7 @@
       "dependsOn": ["@caatinga/core#build"]
     },
     "@caatinga/cli#typecheck": {
-      "dependsOn": ["@caatinga/core#build"]
+      "dependsOn": ["@caatinga/core#build", "@caatinga/zk#build"]
     },
     "@caatinga/client#build": {
       "dependsOn": ["@caatinga/core#build", "^build"]

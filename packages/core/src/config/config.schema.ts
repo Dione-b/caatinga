@@ -14,6 +14,17 @@ export const NetworkConfigSchema = z.object({
   networkPassphrase: z.string().min(1)
 });
 
+const ZkCircuitSchema = z.object({
+  path: z.string().min(1),
+  protocol: z.literal("groth16"),
+  curve: z.literal("bls12381"),
+  verifierContract: z.string().optional(),
+});
+
+const ZkConfigSchema = z.object({
+  circuits: z.record(z.string().min(1), ZkCircuitSchema),
+}).optional();
+
 export const CaatingaConfigSchema = z.object({
   project: z.string().min(1),
   defaultNetwork: z.string().min(1).default("testnet"),
@@ -28,7 +39,8 @@ export const CaatingaConfigSchema = z.object({
   frontend: z.object({
     framework: z.enum(["vite-react", "next", "astro"]).default("vite-react"),
     bindingsOutput: z.string().min(1)
-  })
+  }),
+  zk: ZkConfigSchema,
 });
 
 export type CaatingaConfig = z.infer<typeof CaatingaConfigSchema>;

@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@caatinga/core": "^2.2.1",
+    "@caatinga/zk": "^2.2.1",
     "chalk": "^5.4.1",
     "commander": "^12.1.0"
   },
