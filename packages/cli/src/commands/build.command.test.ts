@@ -141,4 +141,67 @@ describe("build command", () => {
       logSpy.mockRestore();
     }
   });
+
+  it("builds the sole configured contract when no name is passed", async () => {
+    const verifierConfig: CaatingaConfig = {
+      ...config,
+      contracts: {
+        verifier: {
+          path: "./contracts/verifier",
+          wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+          dependsOn: [],
+          deployArgs: {}
+        }
+      }
+    };
+    loadConfigMock.mockResolvedValue(verifierConfig);
+    buildContractMock.mockResolvedValue({
+      contract: {
+        name: "verifier",
+        config: verifierConfig.contracts.verifier
+      }
+    });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createBuildProgram().parseAsync(["node", "caatinga", "build"]);
+
+      expect(buildContract).toHaveBeenCalledWith({
+        config: verifierConfig,
+        contractName: "verifier"
+      });
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("fails when multiple contracts are configured and no name is passed", async () => {
+    const multiContractConfig: CaatingaConfig = {
+      ...config,
+      contracts: {
+        counter: config.contracts.counter,
+        token: {
+          path: "./contracts/token",
+          wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
+          dependsOn: [],
+          deployArgs: {}
+        }
+      }
+    };
+    loadConfigMock.mockResolvedValue(multiContractConfig);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await createBuildProgram().parseAsync(["node", "caatinga", "build"]);
+
+      const errors = errorSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(errors).toContain("Pass a contract name to build.");
+      expect(errors).toContain("counter, token");
+      expect(buildContract).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+    } finally {
+      errorSpy.mockRestore();
+      process.exitCode = 0;
+    }
+  });
 });

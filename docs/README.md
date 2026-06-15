@@ -15,6 +15,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | Doc | What you get |
 | --- | --- |
 | [CLI](./cli.md) | Every command: init, doctor, build, deploy, generate, status, invoke |
+| [ZK module](./zk.md) | Circom + Groth16 scaffold, build, prove, and verifier invoke |
 | [Config](./config.md) | `caatinga.config.ts` schema: contracts, networks, frontend |
 | [Client](./client.md) | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings |
 | [Wallets](./wallets.md) | Adapter contract, Stellar Wallets Kit, wallet session, React hooks |
@@ -35,7 +36,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Quick orientation
 
-- **Current release:** `2.2.1` (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`; `latest` = `next`).
+- **Current release:** `2.2.1` (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`; `latest` = `next`).
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in

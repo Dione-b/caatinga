@@ -292,6 +292,16 @@ describe("createProjectFromTemplate", () => {
           "@caatinga/core": expectedInternalDependencies["@caatinga/core"],
           "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
         }
+      },
+      {
+        template: "zk-starter",
+        expected: {
+          "@caatinga/core": {
+            section: "devDependencies",
+            value: `^${corePackageJson.version}`
+          },
+          "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
+        }
       }
     ];
 
@@ -356,11 +366,25 @@ describe("createProjectFromTemplate", () => {
     expect(cargoToml).toContain('soroban-sdk = { version = "22.0.1", features = ["testutils"] }');
   });
 
+  it("ships zk-starter with wasm32v1-none verifier config", async () => {
+    const templatePath = path.resolve(__dirname, "../../../templates/zk-starter");
+    const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
+    const cargoToml = await readFile(path.join(templatePath, "contracts/verifier/Cargo.toml"), "utf8");
+    const inputJson = JSON.parse(
+      await readFile(path.join(templatePath, "circuits/input.json"), "utf8")
+    ) as Record<string, string>;
+
+    expect(config).toContain("wasm32v1-none");
+    expect(cargoToml).toContain('soroban-sdk = "25.1.0"');
+    expect(inputJson).not.toHaveProperty("c");
+  });
+
   it("ships lockfiles for official Rust contracts so smoke builds stay reproducible", async () => {
     const templateContracts = [
       "../../../templates/react-vite-counter/contracts/counter/Cargo.lock",
       "../../../templates/marketplace-with-token/contracts/token/Cargo.lock",
-      "../../../templates/marketplace-with-token/contracts/marketplace/Cargo.lock"
+      "../../../templates/marketplace-with-token/contracts/marketplace/Cargo.lock",
+      "../../../templates/zk-starter/contracts/verifier/Cargo.lock"
     ];
 
     await Promise.all(templateContracts.map(async templateContractLockPath => {

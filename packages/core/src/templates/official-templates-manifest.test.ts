@@ -42,6 +42,7 @@ describe("official template manifests", () => {
     const templateNames = await listOfficialTemplateNames();
     expect(templateNames.length).toBeGreaterThan(0);
     expect(templateNames).toContain("marketplace-with-token");
+    expect(templateNames).toContain("zk-starter");
 
     for (const templateName of templateNames) {
       const manifestPath = path.join(officialTemplatesDir, templateName, "caatinga.template.json");
