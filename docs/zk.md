@@ -19,8 +19,11 @@ official `groth16_verifier` pattern.
 ## Quick start
 
 ```bash
-# New ZK project
+# New ZK project with the example multiplier template
 caatinga zk init my-zk-dapp
+
+# New ZK-only project with an empty starter circuit
+caatinga zk init my-zk-dapp --minimal
 
 # Or add ZK files to an existing project
 caatinga zk init
@@ -43,11 +46,22 @@ caatinga zk invoke --source-account <identity>
 | Command | Purpose |
 | --- | --- |
 | `caatinga zk init [project]` | Scaffold `zk-starter` (multiplier circuit + verifier). |
+| `caatinga zk init [project] --minimal` | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
 | `caatinga zk build [circuit]` | Compile Circom (`-p bls12381`) and run dev trusted setup. |
 | `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` from `input.json`. |
 | `caatinga zk invoke [circuit]` | Serialize snarkjs output and call `verify_proof` on-chain. |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
+
+## Minimal scaffold vs template
+
+Use `caatinga zk init my-zk-dapp` when you want a working multiplier example with a minimal Vite +
+React shell (wallet connect, deploy status, placeholder bindings). Use
+`caatinga zk init my-zk-dapp --minimal` when you want a ZK-only starting point: no frontend config,
+no Vite files, and a `template Main()` circuit that simply exposes one output.
+
+Both flows keep the same conventions: `circuits/main.circom`, `circuits/input.json`,
+`contracts.verifier`, and artifacts under `.artifacts/zk/main/`.
 
 ## Circuit inputs
 

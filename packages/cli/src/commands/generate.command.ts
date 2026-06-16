@@ -64,7 +64,7 @@ export function registerGenerateCommand(program: Command): void {
         logger.info(`Output: ${result.outputDir}`);
         logger.info(`Import path: ${result.importPath}`);
         if (result.legacyStubRemoved) {
-          logger.info(`Removed legacy stub: ${config.frontend.bindingsOutput}/${result.contractName}.ts`);
+          logger.info(`Removed legacy stub: ${config.frontend?.bindingsOutput}/${result.contractName}.ts`);
         }
       }
       logger.info("");

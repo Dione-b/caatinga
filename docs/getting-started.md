@@ -96,6 +96,24 @@ See [From Zero to Testnet](./tutorials/from-zero-to-testnet.md#troubleshooting) 
 
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
+## ZK project flow
+
+For the editable multiplier example:
+
+```bash
+npx caatinga zk init my-zk-dapp
+```
+
+For a ZK-only project without frontend files:
+
+```bash
+npx caatinga zk init my-zk-dapp --minimal
+```
+
+Both flows create `circuits/main.circom`, `circuits/input.json`, and `contracts/verifier`. The
+minimal flow omits `frontend` from `caatinga.config.ts`, so `caatinga status` works but
+`caatinga generate` requires adding `frontend.bindingsOutput` first.
+
 ## Browser client flow
 
 After `deploy` (which generates the bindings), install the client packages (match the CLI version when possible):

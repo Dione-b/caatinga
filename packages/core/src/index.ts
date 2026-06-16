@@ -94,6 +94,10 @@ export {
   type CreateProjectFromTemplateOptions
 } from "./templates/create-project-from-template.js";
 export {
+  createZkProject,
+  type CreateZkProjectOptions
+} from "./scaffold/create-zk-project.js";
+export {
   TemplateManifestSchema,
   type TemplateManifest
 } from "./templates/template-manifest.schema.js";

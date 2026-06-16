@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - Add ZK workflow support: publish `@caatinga/zk`, CLI commands (`zk-init`, `zk-build`, `zk-prove`, `zk-invoke`), and the `zk-starter` template for Circom Groth16 verifiers on Soroban.
+- Add `caatinga zk init --minimal` and merge ZK config when adding ZK files to an existing project.
 
 ### Patch Changes
 

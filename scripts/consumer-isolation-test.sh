@@ -305,5 +305,21 @@ echo "consumer-isolation: npm install in market-app..."
 npm install --no-audit --fund=false --prefer-offline
 echo "consumer-isolation: npm run build in market-app..."
 npm run build
-echo "consumer-isolation: OK"
 cd "$TMP_DIR"
+
+echo "consumer-isolation: scaffolding minimal ZK project as zk-minimal..."
+"$CAATINGA_BIN" zk init zk-minimal --minimal
+test -f zk-minimal/caatinga.config.ts
+test -f zk-minimal/caatinga.artifacts.json
+test -f zk-minimal/circuits/main.circom
+test -f zk-minimal/contracts/verifier/src/lib.rs
+if grep -q 'Multiplier' zk-minimal/circuits/main.circom; then
+  echo "Minimal ZK scaffold should not use the multiplier template" >&2
+  exit 1
+fi
+if grep -q 'frontend' zk-minimal/caatinga.config.ts; then
+  echo "Minimal ZK scaffold should not require frontend config" >&2
+  exit 1
+fi
+
+echo "consumer-isolation: OK"
