@@ -23,11 +23,17 @@ and writes them to `.artifacts/zk/<circuit>/public.json`.
 The verifier WASM is built for `wasm32v1-none` (current Stellar CLI default). The path is
 configured in `caatinga.config.ts` under `contracts.verifier.wasm`.
 
-## Frontend
+## Frontend (hybrid flow)
 
-The template ships a minimal Vite + React shell (`index.html`, `src/App.tsx`, wallet modal) so
-`npm run dev` works out of the box. Placeholder verifier bindings live under
-`src/bindings/verifier/` until `caatinga generate verifier` overwrites them after deploy.
+The template ships a Vite + React dApp modeled after `react-vite-counter`:
+
+- edit private inputs (`a`, `b`) in the browser
+- download `input.json` and save it to `circuits/input.json`
+- run `npm run caatinga:zk:prove` (CLI prove)
+- connect a wallet and click **Verify proof on-chain** (`caatingaClient` + generated verifier bindings)
+
+Placeholder verifier bindings live under `src/bindings/verifier/` until `caatinga generate verifier`
+overwrites them after deploy. The dev server serves `.artifacts/zk/main/*.json` at `/zk-artifacts/*`.
 
 ## Workflow
 
@@ -36,9 +42,11 @@ npm install
 npm run caatinga:build
 npm run caatinga:zk:build
 npm run caatinga:deploy
-npm run caatinga:zk:prove
-npx caatinga zk invoke --source-account <account>
+npm run caatinga:generate
 npm run dev
+# UI: set a/b → download input.json → save to circuits/input.json
+npm run caatinga:zk:prove
+# UI: connect wallet → Verify proof on-chain
 ```
 
 ## Trusted setup

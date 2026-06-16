@@ -9,21 +9,15 @@ export function ContractNotDeployed() {
         <span className="network-pill">testnet</span>
       </div>
       <p>
-        The Groth16 verifier has no on-chain ID yet. Build the Soroban contract, run the Circom
-        trusted setup, deploy, then prove and invoke from the CLI. The frontend reads the contract
-        ID from <code>caatinga.artifacts.json</code> after deploy.
+        The Groth16 verifier has no on-chain ID yet. Build and deploy first — the dApp reads the contract
+        ID from <code>caatinga.artifacts.json</code>. Deploy also generates TypeScript bindings automatically.
       </p>
       <pre className="counter-error" role="note">
-        {`npm install
-npx caatinga build verifier
+        {`npx caatinga build verifier
 npx caatinga zk build main
 npx caatinga deploy verifier --network testnet --source <identity>
-npx caatinga zk prove main
-npx caatinga zk invoke --source-account <identity>
-npm run dev
-
-# If bindings generation failed after deploy:
-npx caatinga generate verifier --network testnet`}
+npx caatinga generate verifier --network testnet
+npm run dev`}
       </pre>
     </section>
   );

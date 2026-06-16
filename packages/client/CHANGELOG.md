@@ -8,6 +8,7 @@
 
 ### Patch Changes
 
+- Unwrap Stellar SDK `Result<T>` values in `read()` / `simulate()` and call `simulate()` on bindings that do not expose `prepare()`.
 - Updated dependencies
   - @caatinga/core@2.3.0
 

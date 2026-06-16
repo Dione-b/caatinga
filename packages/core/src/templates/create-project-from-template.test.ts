@@ -262,9 +262,10 @@ describe("createProjectFromTemplate", () => {
     const packageVersions = await Promise.all([
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../client/package.json")),
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../package.json")),
-      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../cli/package.json"))
+      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../cli/package.json")),
+      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../zk/package.json"))
     ]);
-    const [clientPackageJson, corePackageJson, cliPackageJson] = packageVersions;
+    const [clientPackageJson, corePackageJson, cliPackageJson, zkPackageJson] = packageVersions;
     const expectedInternalDependencies = {
       "@caatinga/client": {
         section: "dependencies",
@@ -279,6 +280,13 @@ describe("createProjectFromTemplate", () => {
         value: `^${cliPackageJson.version}`
       }
     } satisfies Record<string, { section: string; value: string }>;
+    const expectedZkStarterDependencies = {
+      ...expectedInternalDependencies,
+      "@caatinga/zk": {
+        section: "dependencies",
+        value: `^${zkPackageJson.version}`
+      }
+    };
 
     const templateExpectations = [
       {
@@ -295,11 +303,7 @@ describe("createProjectFromTemplate", () => {
       },
       {
         template: "zk-starter",
-        expected: {
-          "@caatinga/client": expectedInternalDependencies["@caatinga/client"],
-          "@caatinga/core": expectedInternalDependencies["@caatinga/core"],
-          "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
-        }
+        expected: expectedZkStarterDependencies
       }
     ];
 
@@ -375,13 +379,20 @@ describe("createProjectFromTemplate", () => {
     await expect(readFile(path.join(templatePath, "index.html"), "utf8")).resolves.toContain('id="root"');
     await expect(readFile(path.join(templatePath, "src/main.tsx"), "utf8")).resolves.toContain("ReactDOM.createRoot");
     await expect(readFile(path.join(templatePath, "src/App.tsx"), "utf8")).resolves.toContain("WalletProvider");
+    await expect(readFile(path.join(templatePath, "src/caatinga.ts"), "utf8")).resolves.toContain("createCaatingaClient");
+    await expect(readFile(path.join(templatePath, "src/components/CircuitCard.tsx"), "utf8")).resolves.toContain(
+      "verify_proof"
+    );
+    await expect(readFile(path.join(templatePath, "src/components/LoadingModal.tsx"), "utf8")).resolves.toBeTruthy();
     await expect(
       readFile(path.join(templatePath, "src/bindings/verifier/src/index.ts"), "utf8")
     ).resolves.toContain("__caatingaPlaceholder");
 
     expect(packageJson.dependencies?.react).toBeDefined();
+    expect(packageJson.dependencies?.["@caatinga/zk"]).toBeDefined();
     expect(packageJson.scripts?.dev).toBe("vite");
     expect(viteConfig).toContain("@vitejs/plugin-react");
+    expect(viteConfig).toContain("/zk-artifacts");
   });
 
   it("ships zk-starter with wasm32v1-none verifier config", async () => {

@@ -543,3 +543,53 @@ button:hover {
   font-size: 0.92rem;
   word-break: break-all;
 }
+
+.zk-form {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.zk-form label {
+  display: grid;
+  gap: 8px;
+  color: #45515a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.zk-form input {
+  min-height: 44px;
+  border: 1px solid #d9d5ca;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #20232a;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.zk-form__preview {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed #d9d5ca;
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.zk-form__preview strong {
+  font-size: 1.4rem;
+  color: #111318;
+}
+
+.zk-success {
+  margin: 16px 0 0;
+  color: #1d6154;
+  font-weight: 700;
+}

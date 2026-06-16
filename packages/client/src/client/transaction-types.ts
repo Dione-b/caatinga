@@ -12,4 +12,5 @@ export interface SubmitTransactionLike {
 
 export interface SimulateTransactionLike {
   prepare?: () => Promise<unknown> | unknown;
+  simulate?: (options?: { restore?: boolean }) => Promise<unknown> | unknown;
 }

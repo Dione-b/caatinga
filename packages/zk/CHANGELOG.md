@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - Add ZK workflow support: publish `@caatinga/zk`, CLI commands (`zk-init`, `zk-build`, `zk-prove`, `zk-invoke`), and the `zk-starter` template for Circom Groth16 verifiers on Soroban.
+- Add `@caatinga/zk/browser` for browser-safe proof serialization and verifier binding args.
 - Document compatibility with both `zk-starter` and the new minimal ZK scaffold.
 
 ### Patch Changes

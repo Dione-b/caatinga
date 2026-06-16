@@ -27,7 +27,21 @@ export class Client {
     }
   ) {}
 
-  verify_proof(): never {
+  verify_proof(_args: {
+    vk: {
+      alpha: unknown;
+      beta: unknown;
+      gamma: unknown;
+      delta: unknown;
+      ic: unknown[];
+    };
+    proof: {
+      a: unknown;
+      b: unknown;
+      c: unknown;
+    };
+    pub_signals: bigint[];
+  }): never {
     return placeholderBinding("verify_proof");
   }
 

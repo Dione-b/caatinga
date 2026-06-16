@@ -322,4 +322,11 @@ if grep -q 'frontend' zk-minimal/caatinga.config.ts; then
   exit 1
 fi
 
+echo "consumer-isolation: scaffolding zk-starter template as zk-starter-app..."
+"$CAATINGA_BIN" zk init zk-starter-app
+test -f zk-starter-app/src/caatinga.ts
+test -f zk-starter-app/src/components/CircuitCard.tsx
+grep -q 'verify_proof' zk-starter-app/src/components/CircuitCard.tsx
+grep -q '/zk-artifacts' zk-starter-app/vite.config.ts
+
 echo "consumer-isolation: OK"

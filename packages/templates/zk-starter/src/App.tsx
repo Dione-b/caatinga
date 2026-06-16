@@ -1,10 +1,10 @@
 import { WalletProvider, useWallet } from "@caatinga/client/react";
 import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import artifactsJson from "../caatinga.artifacts.json";
+import { CircuitCard } from "./components/CircuitCard";
 import { ContractNotDeployed } from "./components/ContractNotDeployed";
 import { WalletButton } from "./components/WalletButton";
 import { WalletModal } from "./components/WalletModal";
-import { ZkStatusPanel } from "./components/ZkStatusPanel";
 import { stellarWalletAdapter } from "./wallet.js";
 
 const artifacts = artifactsJson as CaatingaArtifacts;
@@ -26,8 +26,19 @@ function AppBody() {
 
       {!isDeployed ? (
         <ContractNotDeployed />
+      ) : publicKey ? (
+        <CircuitCard />
       ) : (
-        <ZkStatusPanel artifacts={artifacts} publicKey={publicKey} />
+        <section className="counter-panel" aria-labelledby="connect-title">
+          <div className="counter-panel__header">
+            <div>
+              <p className="eyebrow">Get started</p>
+              <h2 id="connect-title">Connect your wallet</h2>
+            </div>
+            <span className="network-pill">testnet</span>
+          </div>
+          <p>Connect a Stellar wallet to verify Groth16 proofs on the deployed verifier contract.</p>
+        </section>
       )}
     </main>
   );
