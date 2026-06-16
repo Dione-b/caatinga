@@ -3,6 +3,7 @@ import path from "node:path";
 import { createJiti } from "jiti";
 import { z } from "zod";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { isDependenciesNotInstalledError } from "./is-dependencies-not-installed-error.js";
 import { CaatingaConfigSchema, type CaatingaConfig } from "./config.schema.js";
 
 export type LoadConfigOptions = {
@@ -34,6 +35,15 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Caati
         "caatinga.config.ts is invalid.",
         CaatingaErrorCode.INVALID_CONFIG,
         error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")
+      );
+    }
+
+    if (isDependenciesNotInstalledError(error)) {
+      throw new CaatingaError(
+        "Project dependencies are not installed.",
+        CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED,
+        "Run npm install (or pnpm install) in the project root, then retry.",
+        error
       );
     }
 

@@ -5,6 +5,7 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 ## Alpha
 
 - Stabilize `init`, `doctor`, `build`, `deploy`, `generate`, and `invoke`.
+- Minimal project scaffold via `caatinga init --minimal` (shipped).
 - Improve README, tutorials, troubleshooting, and architecture docs.
 - Keep `CAATINGA_*` errors documented and actionable.
 - Add full counter-web browser example coverage.

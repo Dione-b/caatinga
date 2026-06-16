@@ -1,6 +1,6 @@
 # Templates
 
-The MVP ships official templates:
+The MVP ships official templates. For a step-by-step `caatinga init` walkthrough, see [Template project](./tutorials/template-project.md).
 
 - `react-vite-counter` — single Soroban counter dApp. **Stable** for the alpha flow.
 - `marketplace-with-token` — **experimental** two-contract layout demonstrating `dependsOn` and `${contracts.token.contractId}` deploy args. See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) for the contract-design rationale.
@@ -74,6 +74,7 @@ overrides:
 
 The reasoning behind each workaround (and how to apply them outside the template) is documented in
 [Wallets — Stellar Wallets Kit bundler workarounds](./wallets.md#stellar-wallets-kit-bundler-workarounds).
+For custom Vite apps, prefer `@caatinga/client/vite` helpers (`walletStubViteAliases`, `walletStubOverrides`, `walletStubPnpmWorkspaceYaml`).
 
 The experimental `marketplace-with-token` template does not ship this file yet. If you use pnpm with that template, copy the same `pnpm-workspace.yaml` block from `react-vite-counter`.
 

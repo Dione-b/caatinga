@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
-import { assertSafeSourceAccount } from "./source-account.js";
+import { assertSafeSourceAccount, resolveCliSource } from "./source-account.js";
 
 describe("assertSafeSourceAccount", () => {
   it("should_throw_SOURCE_IS_PUBLIC_KEY_when_G_address", () => {
@@ -43,5 +43,32 @@ describe("assertSafeSourceAccount", () => {
       expect(error).toBeInstanceOf(CaatingaError);
       expect((error as CaatingaError).code).toBe(CaatingaErrorCode.SOURCE_ACCOUNT_REQUIRED);
     }
+  });
+});
+
+describe("resolveCliSource", () => {
+  const previous = process.env.CAATINGA_SOURCE;
+
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.CAATINGA_SOURCE;
+    } else {
+      process.env.CAATINGA_SOURCE = previous;
+    }
+  });
+
+  it("should_default_to_alice_when_no_explicit_or_env", () => {
+    delete process.env.CAATINGA_SOURCE;
+    expect(resolveCliSource()).toBe("alice");
+  });
+
+  it("should_use_CAATINGA_SOURCE_when_set", () => {
+    process.env.CAATINGA_SOURCE = "bob";
+    expect(resolveCliSource()).toBe("bob");
+  });
+
+  it("should_prefer_explicit_source_over_env", () => {
+    process.env.CAATINGA_SOURCE = "bob";
+    expect(resolveCliSource("carol")).toBe("carol");
   });
 });

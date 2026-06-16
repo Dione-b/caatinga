@@ -18,6 +18,8 @@ official `groth16_verifier` pattern.
 
 ## Quick start
 
+For a step-by-step tutorial, see [ZK project](./tutorials/zk-project.md). Command reference and library API remain in this document.
+
 ```bash
 # New ZK project with the example multiplier template
 caatinga zk init my-zk-dapp

@@ -125,6 +125,12 @@ await client.contract("token").invoke("transfer", {
 
 ## Read and Simulate
 
+| API | When to use |
+| --- | --- |
+| `read()` | Read-only methods; returns the parsed value directly |
+| `simulate()` | Read-only methods when you need `status`, `contractId`, or `debugRaw` |
+| `invoke()` | State-changing methods that must be signed and submitted |
+
 Use `read()` for read-only contract methods when the UI only needs the returned value:
 
 ```ts
@@ -147,6 +153,29 @@ console.log(result.raw);
 `simulate()` prepares the generated binding transaction and returns the parsed binding result. It calls
 `wallet.getPublicKey()` to build the generated client, but it does not call `wallet.signTransaction()`.
 If the simulated method does not expose a result, the client throws `CAATINGA_READ_RESULT_MISSING`.
+
+Calling `invoke()` on a read-only binding method may fail with a hint to use `read()` or `simulate()` instead.
+
+## Project layout
+
+Keep Caatinga client wiring in a dedicated module with **static imports**:
+
+```ts
+// src/caatinga.ts — static imports only
+import { createCaatingaClient } from "@caatinga/client";
+import artifactsJson from "../caatinga.artifacts.json";
+import * as Counter from "./contracts/generated/counter/src/index.js";
+import { stellarWalletAdapter } from "./wallet.js";
+
+export const caatingaClient = createCaatingaClient({ /* ... */ });
+```
+
+```ts
+// src/App.tsx — import the pre-built client
+import { caatingaClient } from "./caatinga.js";
+```
+
+Avoid dynamic `import()` of bindings or `caatinga.artifacts.json` inside React components. Vite needs static import paths to bundle JSON artifacts and generated contract modules correctly. The official `react-vite-counter` template follows this pattern in `src/caatinga.ts`.
 
 ## XDR Debug
 

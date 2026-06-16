@@ -2,6 +2,7 @@ import { execa, type Options } from "execa";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { CaatingaErrorCodeValue } from "../errors/CaatingaErrorCode.js";
 import { checkStellarCliVersion } from "../stellar-cli/check-stellar-cli-version.js";
+import { resolveSubprocessEnv } from "./resolve-subprocess-env.js";
 
 export type RunCommandResult = {
   stdout: string;
@@ -29,7 +30,7 @@ export async function runCommand(
 
     const result = await execa(command, args, {
       cwd: options.cwd,
-      env: options.env,
+      env: resolveSubprocessEnv(options.env ?? {}),
       input: options.input,
       all: true,
       reject: true

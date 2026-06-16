@@ -25,7 +25,7 @@ Any exception must be called out in release notes and package changelogs.
 
 - `alpha`
 - `beta`
-- `next` — currently `2.3.1` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
+- `next` — currently `2.4.0` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
 - `latest` — currently `2.2.1`
 
 ## Release Gate

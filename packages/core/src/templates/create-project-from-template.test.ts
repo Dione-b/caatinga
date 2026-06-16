@@ -353,9 +353,8 @@ describe("createProjectFromTemplate", () => {
     expect(workspaceYaml).toContain("ignoredOptionalDependencies:");
     expect(workspaceYaml).toContain('uuid: "^14.0.0"');
 
-    expect(viteConfig).toContain("@trezor/connect-web");
-    expect(viteConfig).toContain("@safe-global/safe-apps-sdk");
-    expect(viteConfig).toContain("@hot-wallet/sdk");
+    expect(viteConfig).toContain("@caatinga/client/vite");
+    expect(viteConfig).toContain("walletStubViteAliases");
   });
 
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {

@@ -8,6 +8,14 @@ Creates a project from a bundled template and writes `caatinga.artifacts.json`.
 
 `init` validates `caatinga.template.json` before copying files and prints the selected template name and version.
 
+For a step-by-step guide, see [Template project](./tutorials/template-project.md). To compare template, minimal, and ZK scaffolds, see [Choosing a project scaffold](./tutorials/project-scaffolds.md).
+
+Use `--minimal` (or `--empty`) to scaffold a CLI-only project with a Soroban contract stub — no React/Vite template, no wallet stubs:
+
+```bash
+caatinga init my-contract-app --minimal
+```
+
 ## `caatinga build [contract]`
 
 Builds the configured contract with `stellar contract build`.
@@ -15,8 +23,8 @@ Builds the configured contract with `stellar contract build`.
 ## `caatinga doctor [--network testnet] [--source alice]`
 
 Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI,
-Rust, `wasm32v1-none`, `caatinga.config.ts`, `caatinga.artifacts.json`, an optional configured
-network, and an optional local Stellar CLI identity.
+Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`), `caatinga.config.ts`,
+`caatinga.artifacts.json`, an optional configured network, and an optional local Stellar CLI identity.
 
 With `--network`, doctor also compares every contract in `caatinga.config.ts` against
 `caatinga.artifacts.json` for that network. Each contract prints `✓` with its contract ID when
@@ -76,7 +84,15 @@ on stdout for scripts and CI.
 
 ## `caatinga invoke <contract.method> --source <identity> [args...]`
 
-Invokes a deployed contract method. Extra args are forwarded to the Stellar implicit contract CLI.
+Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI.
+
+If Stellar CLI reports that the target is a read-only method, Caatinga suggests `caatinga read` (or `client.read()` / `client.simulate()` in browser code) instead of `force: true`.
+
+## `caatinga read <contract.method> [--network testnet] [args...]`
+
+Simulates a read-only contract method with `stellar contract invoke --send=no`. `--source` is optional; Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice` for the simulation account.
+
+Use `read` for getters and pure queries. Use `invoke` for increments, transfers, and other state-changing calls.
 
 ## Stellar CLI compatibility
 

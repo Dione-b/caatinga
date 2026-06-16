@@ -10,6 +10,7 @@ import { registerZkBuildCommand } from "./commands/zk-build.command.js";
 import { registerZkProveCommand } from "./commands/zk-prove.command.js";
 import { registerZkInvokeCommand } from "./commands/zk-invoke.command.js";
 import { registerInvokeCommand } from "./commands/invoke.command.js";
+import { registerReadCommand } from "./commands/read.command.js";
 import { registerStatusCommand } from "./commands/status.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
@@ -32,6 +33,7 @@ export function createProgram(): Command {
   registerDeployCommand(program);
   registerGenerateCommand(program);
   registerInvokeCommand(program);
+  registerReadCommand(program);
   registerStatusCommand(program);
 
   return program;

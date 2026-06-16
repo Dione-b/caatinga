@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
-During alpha, install published packages from npm. Use **`next`** for the current line (**`2.3.1`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+During alpha, install published packages from npm. Use **`next`** for the current line (**`2.4.0`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ stellar --version
 npm install -g @caatinga/cli@next
 ```
 
-Confirm the resolved versions (`next` is currently **`2.3.1`**; `latest` is **`2.2.1`**):
+Confirm the resolved versions (`next` is currently **`2.4.0`**; `latest` is **`2.2.1`**):
 
 ```bash
 npm view @caatinga/cli@next version
@@ -43,6 +43,18 @@ pnpm install
 pnpm build
 pnpm --filter @caatinga/cli dev init my-dapp
 ```
+
+## Choose your scaffold
+
+Caatinga supports three starting paths: **template** (full dApp), **minimal** (CLI + contract only), and **ZK** (Circom + Groth16 verifier). See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a comparison table and links to step-by-step guides:
+
+| Guide | Command |
+| --- | --- |
+| [Template project](./tutorials/template-project.md) | `npx caatinga init my-dapp` |
+| [Minimal project](./tutorials/minimal-project.md) | `npx caatinga init my-contract-app --minimal` |
+| [ZK project](./tutorials/zk-project.md) | `npx caatinga zk init my-zk-dapp` |
+
+The default template flow (`react-vite-counter`) is summarized below. Minimal and ZK flows are documented in their dedicated guides.
 
 ## Generated app flow
 
@@ -67,52 +79,9 @@ deploy). `deploy` requires compiled WASM, writes the deployed `contractId` into
 If bindings generation fails after a deploy (or you skipped it), recover with
 `npx caatinga generate --network testnet`.
 
-If the CLI is not installed globally, prefix each command with `npx caatinga@latest` instead of `npx caatinga`.
-
-### Using pnpm
-
-Templates default to `npm` (`packageManager: "npm"` in `caatinga.template.json`), but `pnpm install` is also supported. The `react-vite-counter` template ships a `pnpm-workspace.yaml` with:
-
-- `allowBuilds.esbuild: true` — pnpm 10.26+/11.x block lifecycle scripts by default; Vite depends on esbuild.
-- `overrides.uuid` in `pnpm-workspace.yaml` (and npm `overrides` in `package.json`) — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies.
-- Safe wallet overrides (`ignoredOptionalDependencies` + nested `overrides` in `pnpm-workspace.yaml`;
-  npm `overrides` in `package.json`) — block optional EVM/Safe packages pulled by Reown AppKit through
-  Stellar Wallets Kit. Stellar dApps do not use Safe; this removes the deprecated
-  `@safe-global/safe-gateway-typescript-sdk` install warning.
-
-Equivalent package-manager scripts:
-
-```bash
-pnpm install
-pnpm run caatinga:build
-pnpm run caatinga:deploy -- --network testnet --source alice
-```
-
-(`caatinga:generate` still exists as a recovery script; deploy generates bindings for you.)
-
-`npx caatinga build counter` does not depend on your package manager. Use it directly when `pnpm install` or `pnpm run caatinga:build` fails but Rust and Stellar CLI are already healthy.
-
-See [From Zero to Testnet](./tutorials/from-zero-to-testnet.md#troubleshooting) for pnpm install errors and [Templates](./templates.md#pnpm-1026--11x) for the workspace file details.
-
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
 
-## ZK project flow
-
-For the editable multiplier example:
-
-```bash
-npx caatinga zk init my-zk-dapp
-```
-
-For a ZK-only project without frontend files:
-
-```bash
-npx caatinga zk init my-zk-dapp --minimal
-```
-
-Both flows create `circuits/main.circom`, `circuits/input.json`, and `contracts/verifier`. The
-minimal flow omits `frontend` from `caatinga.config.ts`, so `caatinga status` works but
-`caatinga generate` requires adding `frontend.bindingsOutput` first.
+Template projects support `pnpm install` as well as npm — see [Templates — pnpm](./templates.md#pnpm-1026--11x).
 
 ## Browser client flow
 

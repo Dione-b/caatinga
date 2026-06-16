@@ -1,5 +1,6 @@
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
+import { enrichReadCallInvokeError } from "./read-call-error.js";
 
 export async function submitTransaction(
   transaction: unknown,
@@ -20,6 +21,11 @@ export async function submitTransaction(
         throw error;
       }
 
+      const readCallError = enrichReadCallInvokeError(error, contractName, method);
+      if (readCallError) {
+        throw readCallError;
+      }
+
       throw new CaatingaError(
         `Failed to submit XDR for "${contractName}.${method}".`,
         CaatingaErrorCode.XDR_SUBMIT_FAILED,
@@ -37,6 +43,11 @@ export async function submitTransaction(
     } catch (error) {
       if (error instanceof CaatingaError) {
         throw error;
+      }
+
+      const readCallError = enrichReadCallInvokeError(error, contractName, method);
+      if (readCallError) {
+        throw readCallError;
       }
 
       throw new CaatingaError(

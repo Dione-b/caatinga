@@ -1,5 +1,26 @@
 ## Breaking changes policy
 
+## 2.4.0
+
+### Minor Changes
+
+- DX release for custom and minimal Soroban projects:
+
+  - Add `caatinga init --minimal` / `--empty` (CLI + Soroban contract stub, no frontend template).
+  - Add `caatinga read` for read-only contract simulation without signing.
+  - Improve `caatinga doctor` with a dependencies check (`CAATINGA_DEPENDENCIES_NOT_INSTALLED`) before config parsing.
+  - Harden subprocess PATH resolution so an older `stellar` in `~/.cargo/bin` does not shadow a newer CLI on PATH.
+  - Default `--source-account` for `caatinga read` via `CAATINGA_SOURCE` or `alice`.
+  - Export `@caatinga/client/vite` wallet stub helpers; update templates to use them.
+  - Add read-call hints in CLI and client when `invoke()` targets a read-only method.
+  - Add `assertSorobanSymbol` on `@caatinga/core/browser` and docs for Soroban types, project scaffolds, and client layout.
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@2.4.0
+  - @caatinga/zk@2.4.0
+
 ## 2.3.1
 
 ### Patch Changes
