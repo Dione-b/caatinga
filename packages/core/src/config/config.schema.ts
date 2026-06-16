@@ -39,7 +39,7 @@ export const CaatingaConfigSchema = z.object({
   frontend: z.object({
     framework: z.enum(["vite-react", "next", "astro"]).default("vite-react"),
     bindingsOutput: z.string().min(1)
-  }),
+  }).optional(),
   zk: ZkConfigSchema,
 });
 

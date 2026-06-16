@@ -5,6 +5,7 @@
 | `@caatinga/cli` | End-user CLI (`caatinga` binary) |
 | `@caatinga/core` | Config, artifacts, Stellar CLI orchestration |
 | `@caatinga/client` | Browser/client interop over generated bindings |
+| `@caatinga/zk` | ZK proof serialization and Circom Groth16 workflow helpers |
 
 Install for end users:
 
@@ -12,7 +13,7 @@ Install for end users:
 npm install -g @caatinga/cli
 ```
 
-`latest` and `next` currently resolve to **`2.2.1`**.
+`next` currently resolves to **`2.3.1`**; `latest` remains **`2.2.1`** until promoted.
 
 Monorepo development:
 

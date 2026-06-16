@@ -1,0 +1,595 @@
+:root {
+  color: #20232a;
+  background: #f4f2ec;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  background: #1d6154;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #174d44;
+}
+
+.app-shell {
+  width: min(960px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.topbar h1,
+.counter-panel h2 {
+  margin: 0;
+  color: #16181d;
+  letter-spacing: 0;
+}
+
+.topbar h1 {
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 1;
+}
+
+.counter-panel h2 {
+  font-size: 1.35rem;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #697076;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wallet-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.wallet-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.wallet-controls label {
+  display: grid;
+  gap: 4px;
+  color: #45515a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.wallet-controls select {
+  min-height: 36px;
+  border: 1px solid #d9d5ca;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #20232a;
+  font: inherit;
+  font-size: 0.86rem;
+  text-transform: none;
+}
+
+.wallet-error,
+.counter-error {
+  margin: 0;
+  max-width: min(360px, 100%);
+  color: #8b1e1e;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.counter-error {
+  margin-top: 16px;
+}
+
+.wallet-button,
+.network-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #a9afb4;
+}
+
+.status-dot--on {
+  background: #66c887;
+}
+
+.counter-panel {
+  position: relative;
+  border: 1px solid #d9d5ca;
+  border-radius: 8px;
+  padding: clamp(20px, 5vw, 40px);
+  background: #fffdf7;
+  box-shadow: 0 18px 60px rgba(32, 35, 42, 0.08);
+}
+
+.loading-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.loading-modal__card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: 1px solid #d9d5ca;
+  border-radius: 10px;
+  background: #fffdf7;
+  box-shadow: 0 12px 40px rgba(32, 35, 42, 0.14);
+  color: #20232a;
+  font-weight: 700;
+}
+
+.loading-modal__spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #d9d5ca;
+  border-top-color: #1d6154;
+  border-radius: 50%;
+  animation: loading-spin 0.7s linear infinite;
+}
+
+.loading-modal__label {
+  font-size: 0.95rem;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-modal__spinner {
+    animation-duration: 1.6s;
+  }
+}
+
+.counter-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.network-pill {
+  min-height: 32px;
+  border: 1px solid #d9d5ca;
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #45515a;
+  font-weight: 700;
+}
+
+.counter-value {
+  margin: 48px 0;
+  color: #111318;
+  font-size: clamp(5rem, 24vw, 12rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0;
+}
+
+.counter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.secondary-button {
+  border: 1px solid #d9d5ca;
+  background: #ffffff;
+  color: #20232a;
+}
+
+.secondary-button:hover {
+  background: #f4f2ec;
+}
+
+.wallet-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(32, 35, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.wallet-modal__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(400px, 100%);
+  max-height: min(600px, calc(100vh - 32px));
+  border: 1px solid #d9d5ca;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 0 18px 60px rgba(32, 35, 42, 0.22);
+  outline: none;
+  animation: wallet-modal-pop 0.18s ease;
+}
+
+@keyframes wallet-modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.wallet-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 8px;
+}
+
+.wallet-modal__header h2 {
+  margin: 0;
+  color: #16181d;
+  font-size: 1.2rem;
+}
+
+.wallet-modal__close {
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #697076;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.wallet-modal__close:hover {
+  background: #f4f2ec;
+  color: #20232a;
+}
+
+.wallet-modal__body {
+  overflow-y: auto;
+  padding: 0 12px 16px;
+}
+
+.wallet-modal__section {
+  margin: 14px 10px 6px;
+}
+
+.wallet-modal__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #20232a;
+  font-weight: 700;
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.wallet-option:hover {
+  background: #f4f2ec;
+  border-color: #d9d5ca;
+}
+
+.wallet-option:disabled {
+  background: transparent;
+  border-color: transparent;
+  opacity: 0.5;
+  cursor: default;
+}
+
+.wallet-option--connecting,
+.wallet-option--connecting:hover {
+  background: #f4f2ec;
+  border-color: #d9d5ca;
+}
+
+.wallet-option__icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #eee9dd;
+  border-radius: 8px;
+  background: #ffffff;
+  object-fit: contain;
+}
+
+.wallet-option__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-option__badge {
+  border: 1px solid #d9d5ca;
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: #ffffff;
+  color: #45515a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wallet-option__spinner {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #d9d5ca;
+  border-top-color: #1d6154;
+  border-radius: 50%;
+  animation: loading-spin 0.7s linear infinite;
+}
+
+.wallet-option--skeleton {
+  pointer-events: none;
+}
+
+.wallet-skeleton__icon,
+.wallet-skeleton__line {
+  border-radius: 8px;
+  background: #ece8dc;
+  animation: wallet-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.wallet-skeleton__icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+}
+
+.wallet-skeleton__line {
+  width: 45%;
+  height: 14px;
+}
+
+@keyframes wallet-skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.wallet-modal__empty {
+  margin: 14px 10px;
+  color: #45515a;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.wallet-modal__error {
+  margin: 0 20px 4px;
+  max-height: 72px;
+  overflow-y: auto;
+  border: 1px solid #e7c8c8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fbf1f1;
+  color: #8b1e1e;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.wallet-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid #eee9dd;
+  color: #697076;
+  font-size: 0.82rem;
+}
+
+.wallet-modal__footer a {
+  color: #1d6154;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wallet-modal__footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .topbar,
+  .counter-panel__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wallet-button,
+  .wallet-controls,
+  .wallet-controls label,
+  .wallet-controls select,
+  .counter-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wallet-modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .wallet-modal__panel {
+    width: 100%;
+    max-height: 80vh;
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    animation: wallet-modal-rise 0.2s ease;
+  }
+}
+
+@keyframes wallet-modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-modal__panel {
+    animation: none;
+  }
+
+  .wallet-option__spinner {
+    animation-duration: 1.6s;
+  }
+
+  .wallet-skeleton__icon,
+  .wallet-skeleton__line {
+    animation: none;
+  }
+}
+
+.zk-meta {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.zk-meta div {
+  display: grid;
+  gap: 6px;
+}
+
+.zk-meta dt {
+  margin: 0;
+  color: #697076;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.zk-meta dd {
+  margin: 0;
+  color: #20232a;
+  font-size: 0.92rem;
+  word-break: break-all;
+}
+
+.zk-form {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.zk-form label {
+  display: grid;
+  gap: 8px;
+  color: #45515a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.zk-form input {
+  min-height: 44px;
+  border: 1px solid #d9d5ca;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #20232a;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.zk-form__preview {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed #d9d5ca;
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.zk-form__preview strong {
+  font-size: 1.4rem;
+  color: #111318;
+}
+
+.zk-success {
+  margin: 16px 0 0;
+  color: #1d6154;
+  font-weight: 700;
+}

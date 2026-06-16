@@ -2,7 +2,7 @@
 
 ## Before `next`
 
-- verify package READMEs are current for `@caatinga/cli`, `@caatinga/client`, and `@caatinga/core`
+- verify package READMEs are current for `@caatinga/cli`, `@caatinga/client`, `@caatinga/core`, and `@caatinga/zk`
 - verify `.github/workflows/release-gate.yml` passed for the intended tag or release candidate
 - run `pnpm typecheck`
 - run `pnpm build`

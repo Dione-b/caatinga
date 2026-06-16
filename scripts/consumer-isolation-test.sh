@@ -65,6 +65,7 @@ if [[ "$SKIP_PACK" != "1" ]]; then
   rm -rf "$ROOT_DIR/packages/cli/templates"
   cp -r "$ROOT_DIR/packages/templates" "$ROOT_DIR/packages/cli/templates"
   ( cd "$ROOT_DIR/packages/core" && pnpm pack --pack-destination "$PACKED_DIR" )
+  ( cd "$ROOT_DIR/packages/zk" && pnpm pack --pack-destination "$PACKED_DIR" )
   ( cd "$ROOT_DIR/packages/client" && pnpm pack --pack-destination "$PACKED_DIR" )
   ( cd "$ROOT_DIR/packages/cli" && pnpm pack --pack-destination "$PACKED_DIR" )
 else
@@ -99,11 +100,17 @@ for (const section of sections) {
 done
 
 _kcore=( "$PACKED_DIR"/caatinga-core-*.tgz )
+_kzk=( "$PACKED_DIR"/caatinga-zk-*.tgz )
 _kclient=( "$PACKED_DIR"/caatinga-client-*.tgz )
 _kcli=( "$PACKED_DIR"/caatinga-cli-*.tgz )
 
 if [[ ${#_kcore[@]} -ne 1 ]]; then
   echo "Expected exactly one core tarball in $PACKED_DIR, found ${#_kcore[@]}" >&2
+  exit 1
+fi
+
+if [[ ${#_kzk[@]} -ne 1 ]]; then
+  echo "Expected exactly one zk tarball in $PACKED_DIR, found ${#_kzk[@]}" >&2
   exit 1
 fi
 
@@ -161,7 +168,7 @@ export EXPECTED_CLI_RANGE="$(_read_template_range devDependencies '@caatinga/cli
 echo "consumer-isolation: installing packed @caatinga/* tarballs..."
 cd "$TMP_DIR"
 npm init -y >/dev/null
-npm install --no-audit --fund=false --prefer-offline "${_kcore[0]}" "${_kclient[0]}" "${_kcli[0]}"
+npm install --no-audit --fund=false --prefer-offline "${_kcore[0]}" "${_kzk[0]}" "${_kclient[0]}" "${_kcli[0]}"
 echo "consumer-isolation: tarball install done."
 
 CAATINGA_BIN="$TMP_DIR/node_modules/.bin/caatinga"
@@ -223,6 +230,7 @@ for (const [section, values] of Object.entries(expected)) {
 cd test-app
 
 export CAATINGA_PATCH_CORE="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kcore[0]}")"
+export CAATINGA_PATCH_ZK="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kzk[0]}")"
 export CAATINGA_PATCH_CLIENT="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kclient[0]}")"
 export CAATINGA_PATCH_CLI="file:$(node --input-type=module -e "$RESOLVE_ABS_PATH_CMD" "${_kcli[0]}")"
 
@@ -237,6 +245,13 @@ if (pj.devDependencies && Object.prototype.hasOwnProperty.call(pj.devDependencie
 if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@caatinga/cli\")) {
   pj.dependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
 }
+pj.overrides = {
+  ...(pj.overrides ?? {}),
+  \"@caatinga/core\": process.env.CAATINGA_PATCH_CORE,
+  \"@caatinga/zk\": process.env.CAATINGA_PATCH_ZK,
+  \"@caatinga/client\": process.env.CAATINGA_PATCH_CLIENT,
+  \"@caatinga/cli\": process.env.CAATINGA_PATCH_CLI
+};
 writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 "
 
@@ -276,6 +291,13 @@ if (pj.devDependencies && Object.prototype.hasOwnProperty.call(pj.devDependencie
 if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@caatinga/cli\")) {
   pj.dependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
 }
+pj.overrides = {
+  ...(pj.overrides ?? {}),
+  \"@caatinga/core\": process.env.CAATINGA_PATCH_CORE,
+  \"@caatinga/zk\": process.env.CAATINGA_PATCH_ZK,
+  \"@caatinga/client\": process.env.CAATINGA_PATCH_CLIENT,
+  \"@caatinga/cli\": process.env.CAATINGA_PATCH_CLI
+};
 writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
 "
 
@@ -283,5 +305,28 @@ echo "consumer-isolation: npm install in market-app..."
 npm install --no-audit --fund=false --prefer-offline
 echo "consumer-isolation: npm run build in market-app..."
 npm run build
-echo "consumer-isolation: OK"
 cd "$TMP_DIR"
+
+echo "consumer-isolation: scaffolding minimal ZK project as zk-minimal..."
+"$CAATINGA_BIN" zk init zk-minimal --minimal
+test -f zk-minimal/caatinga.config.ts
+test -f zk-minimal/caatinga.artifacts.json
+test -f zk-minimal/circuits/main.circom
+test -f zk-minimal/contracts/verifier/src/lib.rs
+if grep -q 'Multiplier' zk-minimal/circuits/main.circom; then
+  echo "Minimal ZK scaffold should not use the multiplier template" >&2
+  exit 1
+fi
+if grep -q 'frontend' zk-minimal/caatinga.config.ts; then
+  echo "Minimal ZK scaffold should not require frontend config" >&2
+  exit 1
+fi
+
+echo "consumer-isolation: scaffolding zk-starter template as zk-starter-app..."
+"$CAATINGA_BIN" zk init zk-starter-app
+test -f zk-starter-app/src/caatinga.ts
+test -f zk-starter-app/src/components/CircuitCard.tsx
+grep -q 'verify_proof' zk-starter-app/src/components/CircuitCard.tsx
+grep -q '/zk-artifacts' zk-starter-app/vite.config.ts
+
+echo "consumer-isolation: OK"

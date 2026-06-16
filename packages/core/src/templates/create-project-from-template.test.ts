@@ -262,9 +262,10 @@ describe("createProjectFromTemplate", () => {
     const packageVersions = await Promise.all([
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../client/package.json")),
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../package.json")),
-      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../cli/package.json"))
+      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../cli/package.json")),
+      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../zk/package.json"))
     ]);
-    const [clientPackageJson, corePackageJson, cliPackageJson] = packageVersions;
+    const [clientPackageJson, corePackageJson, cliPackageJson, zkPackageJson] = packageVersions;
     const expectedInternalDependencies = {
       "@caatinga/client": {
         section: "dependencies",
@@ -279,6 +280,13 @@ describe("createProjectFromTemplate", () => {
         value: `^${cliPackageJson.version}`
       }
     } satisfies Record<string, { section: string; value: string }>;
+    const expectedZkStarterDependencies = {
+      ...expectedInternalDependencies,
+      "@caatinga/zk": {
+        section: "dependencies",
+        value: `^${zkPackageJson.version}`
+      }
+    };
 
     const templateExpectations = [
       {
@@ -295,13 +303,7 @@ describe("createProjectFromTemplate", () => {
       },
       {
         template: "zk-starter",
-        expected: {
-          "@caatinga/core": {
-            section: "devDependencies",
-            value: `^${corePackageJson.version}`
-          },
-          "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
-        }
+        expected: expectedZkStarterDependencies
       }
     ];
 
@@ -366,6 +368,33 @@ describe("createProjectFromTemplate", () => {
     expect(cargoToml).toContain('soroban-sdk = { version = "22.0.1", features = ["testutils"] }');
   });
 
+  it("ships zk-starter with a minimal vite-react frontend", async () => {
+    const templatePath = path.resolve(__dirname, "../../../templates/zk-starter");
+    const viteConfig = await readFile(path.join(templatePath, "vite.config.ts"), "utf8");
+    const packageJson = await readPackageJson<{
+      dependencies?: Record<string, string>;
+      scripts?: Record<string, string>;
+    }>(path.join(templatePath, "package.json"));
+
+    await expect(readFile(path.join(templatePath, "index.html"), "utf8")).resolves.toContain('id="root"');
+    await expect(readFile(path.join(templatePath, "src/main.tsx"), "utf8")).resolves.toContain("ReactDOM.createRoot");
+    await expect(readFile(path.join(templatePath, "src/App.tsx"), "utf8")).resolves.toContain("WalletProvider");
+    await expect(readFile(path.join(templatePath, "src/caatinga.ts"), "utf8")).resolves.toContain("createCaatingaClient");
+    await expect(readFile(path.join(templatePath, "src/components/CircuitCard.tsx"), "utf8")).resolves.toContain(
+      "verify_proof"
+    );
+    await expect(readFile(path.join(templatePath, "src/components/LoadingModal.tsx"), "utf8")).resolves.toBeTruthy();
+    await expect(
+      readFile(path.join(templatePath, "src/bindings/verifier/src/index.ts"), "utf8")
+    ).resolves.toContain("__caatingaPlaceholder");
+
+    expect(packageJson.dependencies?.react).toBeDefined();
+    expect(packageJson.dependencies?.["@caatinga/zk"]).toBeDefined();
+    expect(packageJson.scripts?.dev).toBe("vite");
+    expect(viteConfig).toContain("@vitejs/plugin-react");
+    expect(viteConfig).toContain("/zk-artifacts");
+  });
+
   it("ships zk-starter with wasm32v1-none verifier config", async () => {
     const templatePath = path.resolve(__dirname, "../../../templates/zk-starter");
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
@@ -377,6 +406,23 @@ describe("createProjectFromTemplate", () => {
     expect(config).toContain("wasm32v1-none");
     expect(cargoToml).toContain('soroban-sdk = "25.1.0"');
     expect(inputJson).not.toHaveProperty("c");
+  });
+
+  it("keeps zk-starter verifier files aligned with the canonical scaffold", async () => {
+    const templatePath = path.resolve(__dirname, "../../../templates/zk-starter/contracts/verifier");
+    const scaffoldPath = path.resolve(__dirname, "../../scaffolds/zk-verifier");
+    const verifierFiles = [
+      "Cargo.toml",
+      "Cargo.lock",
+      "src/lib.rs",
+      "src/test.rs"
+    ];
+
+    for (const file of verifierFiles) {
+      await expect(readFile(path.join(templatePath, file), "utf8")).resolves.toBe(
+        await readFile(path.join(scaffoldPath, file), "utf8")
+      );
+    }
   });
 
   it("ships lockfiles for official Rust contracts so smoke builds stay reproducible", async () => {

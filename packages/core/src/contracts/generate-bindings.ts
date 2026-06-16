@@ -39,6 +39,14 @@ export async function removeLegacyBindingStub(
 
 export async function generateBindings(options: GenerateBindingsOptions) {
   const cwd = options.cwd ?? process.cwd();
+  if (!options.config.frontend) {
+    throw new CaatingaError(
+      "Frontend bindings are not configured.",
+      CaatingaErrorCode.INVALID_CONFIG,
+      "Add a frontend.bindingsOutput entry to caatinga.config.ts before running caatinga generate."
+    );
+  }
+
   const network = resolveNetwork(options.config, options.networkName);
   const artifacts = await readArtifacts(cwd);
   const contractArtifact = artifacts.networks[network.name]?.contracts[options.contractName];

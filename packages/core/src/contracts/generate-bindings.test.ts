@@ -159,6 +159,39 @@ describe("generateBindings", () => {
     ).rejects.toMatchObject({ code: CaatingaErrorCode.ARTIFACT_NOT_FOUND });
   });
 
+  it("should_throw_CAATINGA_INVALID_CONFIG_when_frontend_is_not_configured", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gen-no-frontend-"));
+    const artifacts = createInitialArtifacts("app");
+    artifacts.networks.testnet = {
+      contracts: {
+        counter: {
+          contractId: CONTRACT_ID,
+          wasmHash: "abc",
+          deployedAt: "2026-05-11T12:00:00.000Z",
+          sourcePath: "./contracts/counter",
+          wasmPath: "./rel/counter.wasm",
+          dependencies: [],
+          resolvedDeployArgs: {}
+        }
+      },
+      dependencyGraph: {}
+    };
+    await writeArtifacts(artifacts, tmpDir);
+    const { frontend, ...zkOnlyConfig } = baseConfig;
+
+    await expect(
+      generateBindings({
+        config: zkOnlyConfig,
+        contractName: "counter",
+        networkName: "testnet",
+        cwd: tmpDir
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.INVALID_CONFIG,
+      message: "Frontend bindings are not configured."
+    });
+  });
+
   it("should_propagate_BINDINGS_FAILED_when_stellar_bindings_command_fails", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-gen-fail-"));
 

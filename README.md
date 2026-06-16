@@ -25,7 +25,7 @@ caatinga init my-dapp
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm release: **`2.2.1`** (`latest` and `next` point to the same version). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.3.1`** (`latest` remains **`2.2.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -39,6 +39,7 @@ Caatinga standardizes contract builds, deployments, artifacts, typed bindings, a
 | 🔗 | **Bind** | TypeScript bindings with freshness tracking (stale bindings get flagged, not shipped) |
 | 📊 | **Status** | `caatinga status`: deployed contracts + binding freshness per network, `--json` for scripts |
 | ⚡ | **Invoke** | Call contract methods straight from the CLI |
+| 🔐 | **ZK** | Circom Groth16 workflow (`zk-init`, `zk-build`, `zk-prove`, `zk-invoke`) via `@caatinga/zk` |
 | 🌐 | **Connect** | Multi-wallet adapters, persistent wallet sessions, and React hooks via `@caatinga/client` |
 | 🩺 | **Diagnose** | Catch setup problems early with `caatinga doctor` |
 
@@ -52,7 +53,7 @@ Caatinga connects these steps with a standard project structure and CLI workflow
 
 #### How it's different
 
-- **🟦 npm-first, TypeScript toolchain** — ships as npm packages (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`) for teams who live in JS/TS, not as a Cargo-installed binary.
+- **🟦 npm-first, TypeScript toolchain** — ships as npm packages (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) for teams who live in JS/TS, not as a Cargo-installed binary.
 - **💾 Local state is the source of truth** — deployed contract IDs live in `caatinga.artifacts.json`, per network. No required on-chain or hosted registry.
 - **🪄 No Rust macro layer** — Caatinga composes and organizes; it doesn't reimplement the Stellar SDK/CLI or add a custom contract model. Generated bindings stay the primary API.
 - **👀 Mental model stays visible** — `contractId`, RPC URL, passphrase, identity, XDR, fees, and simulation remain explicit.

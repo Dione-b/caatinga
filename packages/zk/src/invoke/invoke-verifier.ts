@@ -1,6 +1,7 @@
 import { invokeContract, loadConfig, readArtifacts, type CaatingaConfig } from "@caatinga/core";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { concatG1Hex, concatG2Hex } from "../serialization/curve-bytes.js";
 import { serializeProof, type SnarkjsProof } from "../serialization/serialize-proof.js";
 import { serializeVk, type SnarkjsVk } from "../serialization/serialize-vk.js";
 import { ZkError } from "../errors/ZkError.js";
@@ -16,14 +17,6 @@ export type InvokeVerifierOptions = {
   cwd?: string;
   config?: CaatingaConfig;
 };
-
-function concatG1(point: { x: Uint8Array; y: Uint8Array }): string {
-  return Buffer.concat([point.x, point.y]).toString("hex");
-}
-
-function concatG2(point: { x: [Uint8Array, Uint8Array]; y: [Uint8Array, Uint8Array] }): string {
-  return Buffer.concat([point.x[0], point.x[1], point.y[0], point.y[1]]).toString("hex");
-}
 
 export function buildStellarVerifyProofArgs(options: {
   proof: SnarkjsProof;
@@ -43,11 +36,11 @@ export function buildStellarVerifyProofArgs(options: {
     args.push(
       "--vk",
       JSON.stringify({
-        alpha: concatG1(serializedVk.alpha),
-        beta: concatG2(serializedVk.beta),
-        gamma: concatG2(serializedVk.gamma),
-        delta: concatG2(serializedVk.delta),
-        ic: serializedVk.ic.map(concatG1),
+        alpha: concatG1Hex(serializedVk.alpha),
+        beta: concatG2Hex(serializedVk.beta),
+        gamma: concatG2Hex(serializedVk.gamma),
+        delta: concatG2Hex(serializedVk.delta),
+        ic: serializedVk.ic.map(concatG1Hex),
       })
     );
   }
@@ -55,9 +48,9 @@ export function buildStellarVerifyProofArgs(options: {
   args.push(
     "--proof",
     JSON.stringify({
-      a: concatG1(serializedProof.a),
-      b: concatG2(serializedProof.b),
-      c: concatG1(serializedProof.c),
+      a: concatG1Hex(serializedProof.a),
+      b: concatG2Hex(serializedProof.b),
+      c: concatG1Hex(serializedProof.c),
     })
   );
   args.push("--pub_signals", JSON.stringify(options.publicSignals));

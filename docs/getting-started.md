@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
-During alpha, install published packages from npm (`latest` / `next`, currently **`2.2.1`**). Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+During alpha, install published packages from npm. Use **`next`** for the current line (**`2.3.1`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -22,15 +22,16 @@ stellar --version
 ## Install from npm
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 ```
 
-Confirm the resolved versions (currently `2.2.1` on `latest` / `next`):
+Confirm the resolved versions (`next` is currently **`2.3.1`**; `latest` is **`2.2.1`**):
 
 ```bash
-npm view @caatinga/cli version
-npm view @caatinga/core version
-npm view @caatinga/client version
+npm view @caatinga/cli@next version
+npm view @caatinga/core@next version
+npm view @caatinga/client@next version
+npm view @caatinga/zk version
 ```
 
 Without a global CLI install, use `npx caatinga@latest` in the commands below.
@@ -94,6 +95,24 @@ pnpm run caatinga:deploy -- --network testnet --source alice
 See [From Zero to Testnet](./tutorials/from-zero-to-testnet.md#troubleshooting) for pnpm install errors and [Templates](./templates.md#pnpm-1026--11x) for the workspace file details.
 
 Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
+
+## ZK project flow
+
+For the editable multiplier example:
+
+```bash
+npx caatinga zk init my-zk-dapp
+```
+
+For a ZK-only project without frontend files:
+
+```bash
+npx caatinga zk init my-zk-dapp --minimal
+```
+
+Both flows create `circuits/main.circom`, `circuits/input.json`, and `contracts/verifier`. The
+minimal flow omits `frontend` from `caatinga.config.ts`, so `caatinga status` works but
+`caatinga generate` requires adding `frontend.bindingsOutput` first.
 
 ## Browser client flow
 

@@ -36,6 +36,7 @@ describe("publish package manifests", () => {
         expect(
           readFileSync(join(repoRoot, "packages/core/tsup.config.ts"), "utf8")
         ).toContain("src/browser.ts");
+        expect(packageJson.files).toContain("scaffolds");
       }
       expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "README.md", "LICENSE"]));
       expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);

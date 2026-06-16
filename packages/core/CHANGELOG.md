@@ -1,5 +1,18 @@
 ## Breaking changes policy
 
+## 2.3.1
+
+### Patch Changes
+
+- Add hybrid zk-starter browser verification, `@caatinga/zk/browser`, and unwrap Stellar `Result` values in client read/simulate flows.
+
+## 2.3.0
+
+### Minor Changes
+
+- Add ZK workflow support: publish `@caatinga/zk`, CLI commands (`zk-init`, `zk-build`, `zk-prove`, `zk-invoke`), and the `zk-starter` template for Circom Groth16 verifiers on Soroban.
+- Add a programmatic minimal ZK scaffold API and allow ZK-only configs without `frontend`.
+
 ## 2.2.1
 
 ### Patch Changes

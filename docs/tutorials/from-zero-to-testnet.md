@@ -2,26 +2,26 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-During alpha, use npm **`latest`** (or **`next`**, same version) for `@caatinga/cli`, `@caatinga/core`, and `@caatinga/client`. Currently **`2.2.1`**.
+During alpha, use npm **`next`** for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`. Currently **`2.3.1`** on `next`; `latest` remains **`2.2.1`**.
 
 ## Prerequisites
 
 Install Node.js 20+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 cargo install --locked stellar-cli --version 25.2.0
 rustup target add wasm32v1-none
 stellar --version
 rustc --version
 ```
 
-Confirm the published versions (currently `2.2.1`):
+Confirm the published versions (`next` is currently **`2.3.1`**):
 
 ```bash
-npm view @caatinga/cli version
-npm view @caatinga/core version
-npm view @caatinga/client version
+npm view @caatinga/cli@next version
+npm view @caatinga/core@next version
+npm view @caatinga/client@next version
 ```
 
 Create and fund a local Stellar CLI identity:

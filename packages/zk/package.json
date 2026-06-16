@@ -1,9 +1,11 @@
 {
   "name": "@caatinga/zk",
-  "version": "2.2.1",
+  "version": "2.3.1",
   "description": "Zero-knowledge proof serialization bridge for Stellar/Soroban",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,16 +14,25 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js",
+      "require": "./dist/browser.cjs"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run --pool=threads",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caatinga/core": "^2.2.1"
+    "@caatinga/core": "^2.3.1"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

@@ -1,6 +1,6 @@
 {
   "name": "caatinga",
-  "version": "2.2.1",
+  "version": "2.3.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.4",
@@ -16,7 +16,7 @@
     "check:fixtures": "bash scripts/check-fixture-references.sh",
     "check:wasm-targets": "bash scripts/check-wasm-target-paths.sh",
     "changeset": "changeset",
-    "pack:packages": "( cd packages/core && pnpm pack --pack-destination ../../packed ) && ( cd packages/client && pnpm pack --pack-destination ../../packed ) && ( cd packages/cli && pnpm pack --pack-destination ../../packed )",
+    "pack:packages": "( cd packages/core && pnpm pack --pack-destination ../../packed ) && ( cd packages/zk && pnpm pack --pack-destination ../../packed ) && ( cd packages/client && pnpm pack --pack-destination ../../packed ) && ( cd packages/cli && pnpm pack --pack-destination ../../packed )",
     "test:consumer": "bash scripts/consumer-isolation-test.sh",
     "test:consumer:client-bundlers": "bash scripts/consumer-client-bundlers-test.sh",
     "ci:snapshot-pack": "bash scripts/ci-snapshot-pack.sh",
@@ -32,7 +32,7 @@
     "yaml": "^2.7.0"
   },
   "dependencies": {
-    "@caatinga/client": "^2.2.1",
-    "@caatinga/core": "^2.2.1"
+    "@caatinga/client": "^2.3.1",
+    "@caatinga/core": "^2.3.1"
   }
 }

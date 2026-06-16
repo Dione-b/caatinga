@@ -35,6 +35,16 @@ export async function evaluateBindingFreshness(
   options: EvaluateBindingFreshnessOptions
 ): Promise<BindingFreshness> {
   const cwd = options.cwd ?? process.cwd();
+  if (!options.config.frontend) {
+    return {
+      contractName: options.contractName,
+      status: "unknown",
+      outputDir: "",
+      marker: null,
+      reason: "frontend bindings are not configured"
+    };
+  }
+
   const outputDir = path.resolve(cwd, options.config.frontend.bindingsOutput, options.contractName);
   const contractArtifact =
     options.artifacts.networks[options.networkName]?.contracts[options.contractName];

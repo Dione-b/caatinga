@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/core",
-  "version": "2.2.1",
+  "version": "2.3.1",
   "description": "Core config, artifacts, command orchestration, and error primitives for Caatinga/Soroban toolkit",
   "keywords": [
     "stellar",
@@ -45,6 +45,7 @@
   },
   "files": [
     "dist",
+    "scaffolds",
     "README.md",
     "LICENSE"
   ],

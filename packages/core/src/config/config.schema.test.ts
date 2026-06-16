@@ -42,7 +42,28 @@ describe("CaatingaConfigSchema", () => {
       ...rest,
       frontend: { bindingsOutput: "./out" }
     });
-    expect(parsed.frontend.framework).toBe("vite-react");
+    expect(parsed.frontend?.framework).toBe("vite-react");
+  });
+
+  it("accepts zk-only config without frontend", () => {
+    const { frontend, ...zkOnly } = {
+      ...minimalValid,
+      zk: {
+        circuits: {
+          main: {
+            path: "./circuits",
+            protocol: "groth16" as const,
+            curve: "bls12381" as const,
+            verifierContract: "verifier"
+          }
+        }
+      }
+    };
+
+    const parsed = CaatingaConfigSchema.parse(zkOnly);
+
+    expect(parsed.frontend).toBeUndefined();
+    expect(parsed.zk?.circuits.main.verifierContract).toBe("verifier");
   });
 
   it("should_reject_when_contracts_record_empty", () => {

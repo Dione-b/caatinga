@@ -11,6 +11,7 @@ The following packages are published:
 - `@caatinga/cli`
 - `@caatinga/core`
 - `@caatinga/client`
+- `@caatinga/zk`
 
 Template files are bundled with `@caatinga/cli`; there is no separate public
 `@caatinga/templates` package in the current workspace.
@@ -24,7 +25,7 @@ Any exception must be called out in release notes and package changelogs.
 
 - `alpha`
 - `beta`
-- `next` — currently `2.2.1` for `@caatinga/cli`, `@caatinga/core`, and `@caatinga/client` (same as `latest`)
+- `next` — currently `2.3.1` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
 - `latest` — currently `2.2.1`
 
 ## Release Gate
@@ -56,7 +57,8 @@ and the stable release contract in [`release/v1.0.0.md`](./release/v1.0.0.md).
 ## Package changelogs
 
 Each published package maintains its own Changesets-generated changelog under
-`packages/cli/CHANGELOG.md`, `packages/core/CHANGELOG.md`, and `packages/client/CHANGELOG.md`.
+`packages/cli/CHANGELOG.md`, `packages/core/CHANGELOG.md`, `packages/client/CHANGELOG.md`,
+and `packages/zk/CHANGELOG.md`.
 Those files include a **Breaking changes policy** header that links to the v1 public API contract
 in [`release/v1.0.0.md`](./release/v1.0.0.md) and the `CAATINGA_*` error reference in
 [`errors.md`](./errors.md). There is no root `CHANGELOG.md`; use the package changelog for the

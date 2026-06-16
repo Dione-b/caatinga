@@ -167,6 +167,27 @@ describe("evaluateBindingFreshness", () => {
     expect(result.reason).toContain("not deployed");
   });
 
+  it("should_report_unknown_when_frontend_config_is_absent", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-fresh-"));
+    const { frontend, ...zkOnlyConfig } = baseConfig;
+
+    const result = await evaluateBindingFreshness({
+      config: zkOnlyConfig,
+      artifacts: artifactsWith(CONTRACT_ID, "abc"),
+      networkName: "testnet",
+      contractName: "counter",
+      cwd: tmpDir
+    });
+
+    expect(result).toMatchObject({
+      contractName: "counter",
+      status: "unknown",
+      outputDir: "",
+      marker: null,
+      reason: "frontend bindings are not configured"
+    });
+  });
+
   it("should_report_unknown_when_bindings_exist_without_marker", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-fresh-"));
     await seedGeneratedBindings(tmpDir);
