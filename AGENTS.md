@@ -13,13 +13,16 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 ## Current release
 
-Published on npm **`latest`** / **`next`**: **`2.2.1`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`).
+Published on npm:
+- **`next`**: **`2.3.0`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
+- **`latest`**: **`2.2.1`** (previous stable line until promoted)
 
 Highlights from the `2.x` line:
 
 - Replaces the hard Stellar CLI upper bound (`25.2.0`) with a feature-aware
   compatibility check: the hard floor (`23.0.0`) is the only hard failure, and the
   last-tested version is now advisory. See `docs/stellar-cli-version-contract.md`.
+- `2.3.0`: ZK workflow — `@caatinga/zk`, CLI `zk-*` commands, and `zk-starter` template for Circom Groth16 verifiers on Soroban
 - `2.2.1`: restore template install-time overrides (clean `npm install` / `pnpm install` without deprecated wallet SDK transitives)
 - `2.2.0`: `caatinga status`, deploy auto-generates bindings, binding freshness
   markers, `@caatinga/client/react` (`WalletProvider`/`useWallet`), and template DX
