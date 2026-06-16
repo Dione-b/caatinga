@@ -50,6 +50,7 @@ export { WELL_KNOWN_NETWORKS } from "./networks/networks.js";
 export { resolveNetwork, type ResolvedNetwork } from "./networks/resolve-network.js";
 
 export { runCommand, type RunCommandResult } from "./shell/run-command.js";
+export { resolveSubprocessEnv, isCargoBinMissingFromPath } from "./shell/resolve-subprocess-env.js";
 export { checkBinary } from "./shell/check-binary.js";
 export { parseContractId } from "./stellar-cli/parse-contract-id.js";
 export { checkStellarCliVersion, type CheckStellarCliVersionOptions } from "./stellar-cli/check-stellar-cli-version.js";
@@ -90,6 +91,13 @@ export {
   type InvokeTarget
 } from "./contracts/invoke-contract.js";
 export {
+  readContract,
+  buildReadCallHint,
+  isReadCallFailure,
+  READ_CALL_FAILURE_REGEX,
+  type ReadContractOptions
+} from "./contracts/read-contract.js";
+export {
   createProjectFromTemplate,
   type CreateProjectFromTemplateOptions
 } from "./templates/create-project-from-template.js";
@@ -97,6 +105,10 @@ export {
   createZkProject,
   type CreateZkProjectOptions
 } from "./scaffold/create-zk-project.js";
+export {
+  createMinimalProject,
+  type CreateMinimalProjectOptions
+} from "./scaffold/create-minimal-project.js";
 export {
   TemplateManifestSchema,
   type TemplateManifest

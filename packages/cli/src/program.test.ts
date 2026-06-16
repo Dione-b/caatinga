@@ -23,7 +23,7 @@ describe("createProgram", () => {
     const commandNames = createProgram().commands.map((command) => command.name());
 
     expect(commandNames).toEqual(
-      expect.arrayContaining(["init", "dev", "doctor", "build", "deploy", "generate", "invoke", "status"])
+      expect.arrayContaining(["init", "dev", "doctor", "build", "deploy", "generate", "invoke", "read", "status"])
     );
   });
 

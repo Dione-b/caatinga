@@ -1,5 +1,5 @@
 import { CURRENT_RUST_WASM_TARGET } from "@caatinga/core/runtime/requirements";
-import { runCommand } from "@caatinga/core";
+import { isCargoBinMissingFromPath, runCommand } from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 
 export async function rustDiagnostic(): Promise<Diagnostic> {
@@ -21,7 +21,18 @@ export async function wasmTargetDiagnostic(): Promise<Diagnostic> {
     const installedTargets = result.stdout || result.all;
 
     if (installedTargets.split(/\r?\n/).includes(CURRENT_RUST_WASM_TARGET)) {
-      return { ok: true, label: `${CURRENT_RUST_WASM_TARGET} target installed` };
+      const warnings = isCargoBinMissingFromPath()
+        ? [{
+            code: "RUST_PATH_ADVISORY",
+            message: "~/.cargo/bin is not on PATH. Caatinga enriches subprocess PATH for build, but manual cargo/stellar runs from non-login shells may still fail until PATH is updated."
+          }]
+        : undefined;
+
+      return {
+        ok: true,
+        label: `${CURRENT_RUST_WASM_TARGET} target installed`,
+        warnings
+      };
     }
 
     return {

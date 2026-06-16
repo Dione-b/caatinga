@@ -99,4 +99,31 @@ describe("loadConfig", () => {
 
     await expect(loadConfig({ cwd: tmpDir })).rejects.toThrow("syntax boom");
   });
+
+  it("should_throw_CAATINGA_DEPENDENCIES_NOT_INSTALLED_when_caatinga_core_is_missing", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
+    await writeFile(
+      path.join(tmpDir, "caatinga.config.ts"),
+      `import { defineConfig } from "@caatinga/core";
+export default defineConfig({
+  project: "tmp-app",
+  defaultNetwork: "testnet",
+  contracts: {
+    counter: { path: "./contracts/counter", wasm: "./target/counter.wasm" }
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    }
+  }
+});
+`,
+      "utf8"
+    );
+
+    await expect(loadConfig({ cwd: tmpDir })).rejects.toMatchObject({
+      code: CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED
+    });
+  });
 });

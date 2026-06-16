@@ -3,12 +3,14 @@ import { Command } from "commander";
 import { registerInitCommand } from "./init.command.js";
 
 const createProjectMock = vi.hoisted(() => vi.fn());
+const createMinimalProjectMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
   return {
     ...actual,
-    createProjectFromTemplate: createProjectMock
+    createProjectFromTemplate: createProjectMock,
+    createMinimalProject: createMinimalProjectMock
   };
 });
 
@@ -26,6 +28,7 @@ function createInitProgram(): Command {
 describe("init command", () => {
   beforeEach(() => {
     createProjectMock.mockReset();
+    createMinimalProjectMock.mockReset();
     createProjectMock.mockResolvedValue({
       targetDir: "/abs/my-dapp",
       template: {
@@ -76,6 +79,29 @@ describe("init command", () => {
       expect(output).toContain(
         "Note: deploy generates TypeScript bindings automatically (--no-generate to skip)"
       );
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("uses createMinimalProject when --minimal is passed", async () => {
+    createMinimalProjectMock.mockResolvedValue({ targetDir: "/abs/my-app" });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createInitProgram().parseAsync(["node", "caatinga", "init", "my-app", "--minimal"]);
+
+      expect(createMinimalProjectMock).toHaveBeenCalledWith({
+        projectName: "my-app",
+        targetDir: expect.stringContaining("my-app")
+      });
+      expect(createProjectMock).not.toHaveBeenCalled();
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain("Minimal project created");
+      expect(output).toContain("npx caatinga build app");
+      expect(output).toContain("npx caatinga read app.hello --network testnet --source <identity>");
+      expect(output).not.toContain("npm run dev");
     } finally {
       logSpy.mockRestore();
     }

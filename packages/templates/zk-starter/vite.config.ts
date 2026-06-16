@@ -2,11 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { walletStubViteAliases } from "@caatinga/client/vite";
 import { fileURLToPath } from "node:url";
 
-const emptyStub = fileURLToPath(
-  new URL("./src/stubs/empty-wallet-dep/index.cjs", import.meta.url)
-);
+const stubsDir = fileURLToPath(new URL("./src/stubs", import.meta.url));
 
 function zkArtifactsPlugin(): Plugin {
   const artifactsDir = path.resolve(process.cwd(), ".artifacts/zk/main");
@@ -61,13 +60,6 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      "@hot-wallet/sdk": fileURLToPath(new URL("./src/stubs/hot-wallet.ts", import.meta.url)),
-      "@trezor/connect-web": emptyStub,
-      "@trezor/connect-plugin-stellar": emptyStub,
-      "@safe-global/safe-apps-sdk": emptyStub,
-      "@safe-global/safe-apps-provider": emptyStub,
-      "@safe-global/safe-gateway-typescript-sdk": emptyStub,
-    },
-  },
+    alias: walletStubViteAliases(stubsDir)
+  }
 });

@@ -1,4 +1,5 @@
 import type { Diagnostic } from "./types.js";
+import { dependenciesDiagnostic } from "./dependencies-diagnostic.js";
 import { artifactsDiagnostic, configDiagnostic, networkDiagnostic } from "./project-diagnostic.js";
 import { nodeDiagnostic } from "./node-diagnostic.js";
 import { rustDiagnostic, wasmTargetDiagnostic } from "./rust-diagnostic.js";
@@ -18,6 +19,7 @@ export async function runAllDiagnostics(
     await stellarDiagnostic(),
     await rustDiagnostic(),
     await wasmTargetDiagnostic(),
+    await dependenciesDiagnostic(),
     await configDiagnostic(),
     await artifactsDiagnostic(),
     await networkDiagnostic(options.network),

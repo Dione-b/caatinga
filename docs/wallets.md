@@ -185,6 +185,30 @@ SWK pulls optional wallet SDKs that misbehave in browser bundles. The official
 `react-vite-counter` template ships these workarounds preconfigured; copy them if you wire SWK
 into your own app.
 
+### Adding SWK to a custom Vite app
+
+`@caatinga/client/vite` exports reusable helpers so you do not copy 15+ lines of overrides by hand:
+
+```ts
+import { walletStubViteAliases, walletStubOverrides, walletStubPnpmWorkspaceYaml } from "@caatinga/client/vite";
+import { fileURLToPath } from "node:url";
+
+const stubsDir = fileURLToPath(new URL("./src/stubs", import.meta.url));
+
+// vite.config.ts
+export default defineConfig({
+  resolve: { alias: walletStubViteAliases(stubsDir) }
+});
+
+// package.json → overrides (npm)
+// walletStubOverrides("./src/stubs")
+
+// pnpm-workspace.yaml
+// walletStubPnpmWorkspaceYaml()
+```
+
+Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `caatinga init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
+
 ### HOT Wallet stub
 
 SWK's HOT Wallet module (NEAR-based) pulls `@hot-wallet/sdk` → `@near-js/crypto` → `randombytes`,

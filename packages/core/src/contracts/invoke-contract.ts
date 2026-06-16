@@ -6,13 +6,16 @@ import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
+import {
+  buildReadCallHint,
+  isReadCallFailure,
+  parseInvokeTarget
+} from "./invoke-target.js";
 
 const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
-export type InvokeTarget = {
-  contractName: string;
-  method: string;
-};
+export type { InvokeTarget } from "./invoke-target.js";
+export { parseInvokeTarget } from "./invoke-target.js";
 
 export type InvokeContractOptions = {
   config: CaatingaConfig;
@@ -22,20 +25,6 @@ export type InvokeContractOptions = {
   source?: string;
   cwd?: string;
 };
-
-export function parseInvokeTarget(target: string): InvokeTarget {
-  const [contractName, method, extra] = target.split(".");
-
-  if (!contractName || !method || extra) {
-    throw new CaatingaError(
-      `Invalid invoke target "${target}".`,
-      CaatingaErrorCode.INVOKE_TARGET_INVALID,
-      "Use the format contract.method, for example counter.increment."
-    );
-  }
-
-  return { contractName, method };
-}
 
 export async function invokeContract(options: InvokeContractOptions) {
   const cwd = options.cwd ?? process.cwd();
@@ -74,6 +63,19 @@ export async function invokeContract(options: InvokeContractOptions) {
       failureCode: CaatingaErrorCode.INVOKE_FAILED
     });
   } catch (error) {
+    if (
+      error instanceof CaatingaError
+      && error.code === CaatingaErrorCode.INVOKE_FAILED
+      && isReadCallFailure(error)
+    ) {
+      throw new CaatingaError(
+        error.message,
+        error.code,
+        buildReadCallHint(target, network.name),
+        error
+      );
+    }
+
     if (
       error instanceof CaatingaError
       && error.code === CaatingaErrorCode.INVOKE_FAILED

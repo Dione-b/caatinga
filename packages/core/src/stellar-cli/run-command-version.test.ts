@@ -77,7 +77,7 @@ describe("runCommand Stellar CLI version gate", () => {
     expect(checkStellarCliVersionMock).toHaveBeenCalledWith();
     expect(execaMock).toHaveBeenCalledWith("stellar", ["contract", "build"], {
       cwd: undefined,
-      env: undefined,
+      env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
       reject: true
     });
@@ -143,7 +143,7 @@ describe("runCommand Stellar CLI version gate", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock).toHaveBeenCalledWith("stellar", ["--version"], {
       cwd: undefined,
-      env: undefined,
+      env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
       reject: true
     });

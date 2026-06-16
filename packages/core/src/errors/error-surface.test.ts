@@ -34,6 +34,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/config/load-config.test.ts",
     trigger: "loadConfig("
   },
+  [CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED]: {
+    file: "packages/core/src/config/load-config.test.ts",
+    trigger: "loadConfig("
+  },
   [CaatingaErrorCode.COMMAND_FAILED]: {
     file: "packages/core/src/shell/run-command.test.ts",
     trigger: "runCommand("

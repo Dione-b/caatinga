@@ -25,7 +25,7 @@ caatinga init my-dapp
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.3.1`** (`latest` remains **`2.2.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.4.0`** (`latest` remains **`2.2.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -129,7 +129,7 @@ That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and ge
 
 > 💡 No global install? Use `npx caatinga@latest` (or `npx caatinga` once `latest` resolves to the version you want).
 
-📖 **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
+📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
 <br />
 
@@ -237,7 +237,9 @@ Full index: [docs/README.md →](./docs/README.md)
 
 | | |
 | --- | --- |
-| [Getting started](./docs/getting-started.md) | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) |
+| [Getting started](./docs/getting-started.md) | [Choosing a project scaffold](./docs/tutorials/project-scaffolds.md) |
+| [Template project](./docs/tutorials/template-project.md) | [Minimal project](./docs/tutorials/minimal-project.md) |
+| [ZK project](./docs/tutorials/zk-project.md) | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) |
 | [Cheatsheet](./docs/cheatsheet.md) | [CLI reference](./docs/cli.md) |
 | [Client](./docs/client.md) | [Wallets](./docs/wallets.md) |
 | [Config](./docs/config.md) | [Errors](./docs/errors.md) |

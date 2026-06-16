@@ -7,6 +7,10 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | Doc | What you get |
 | --- | --- |
 | [Getting started](./getting-started.md) | Install, scaffold, and the CLI → browser flow |
+| [Choosing a project scaffold](./tutorials/project-scaffolds.md) | Template vs minimal vs ZK — pick your starting path |
+| [Template project](./tutorials/template-project.md) | `caatinga init` walkthrough |
+| [Minimal project](./tutorials/minimal-project.md) | `caatinga init --minimal` CLI-only |
+| [ZK project](./tutorials/zk-project.md) | `caatinga zk init` walkthrough |
 | [From Zero to Testnet](./tutorials/from-zero-to-testnet.md) | Full walkthrough: scaffold → deploy → invoke on testnet |
 | [Cheatsheet](./cheatsheet.md) | The whole command loop and flags on one page |
 
@@ -14,10 +18,11 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 | Doc | What you get |
 | --- | --- |
-| [CLI](./cli.md) | Every command: init, doctor, build, deploy, generate, status, invoke |
+| [CLI](./cli.md) | Every command: init, doctor, build, deploy, generate, status, invoke, read |
 | [ZK module](./zk.md) | Circom + Groth16 scaffold, build, prove, and verifier invoke |
 | [Config](./config.md) | `caatinga.config.ts` schema: contracts, networks, frontend |
 | [Client](./client.md) | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings |
+| [Soroban types](./soroban-types.md) | Symbol vs string and other binding footguns |
 | [Wallets](./wallets.md) | Adapter contract, Stellar Wallets Kit, wallet session, React hooks |
 | [Templates](./templates.md) | Official templates and their package-manager quirks |
 | [Errors](./errors.md) | Every public `CAATINGA_*` error code with fixes |
@@ -36,7 +41,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Quick orientation
 
-- **Current release:** `next` **`2.3.1`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`); `latest` **`2.2.1`**.
+- **Current release:** `next` **`2.4.0`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`); `latest` **`2.2.1`**.
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in

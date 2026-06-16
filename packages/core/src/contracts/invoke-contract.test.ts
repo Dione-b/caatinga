@@ -209,4 +209,49 @@ describe("invokeContract", () => {
       hint: expect.stringContaining("Stellar CLI 22.x")
     });
   });
+
+  it("should_surface_read_call_hint_when_stellar_reports_read_only_method", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-invoke-read-"));
+
+    const artifacts = createInitialArtifacts("app");
+    artifacts.networks.testnet = {
+      contracts: {
+        counter: {
+          contractId: CONTRACT_ID,
+          wasmHash: "abc",
+          deployedAt: "2026-05-11T12:00:00.000Z",
+          sourcePath: "./contracts/counter",
+          wasmPath: "./rel/counter.wasm",
+          dependencies: [],
+          resolvedDeployArgs: {}
+        }
+      },
+      dependencyGraph: {}
+    };
+    await writeArtifacts(artifacts, tmpDir);
+
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        throw new CaatingaError(
+          "Command failed: stellar contract invoke",
+          CaatingaErrorCode.INVOKE_FAILED,
+          "This is a read call. Use force: true to sign and send anyway."
+        );
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    await expect(
+      invokeContract({
+        config: baseConfig,
+        target: "counter.get",
+        networkName: "testnet",
+        source: "alice",
+        cwd: tmpDir
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.INVOKE_FAILED,
+      hint: expect.stringMatching(/caatinga read counter\.get/)
+    });
+  });
 });

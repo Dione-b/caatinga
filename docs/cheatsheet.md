@@ -1,7 +1,19 @@
 # Cheatsheet
 
-The whole Caatinga loop on one page. Every command runs inside a generated project
-(`caatinga init my-dapp`).
+The whole Caatinga loop on one page. Every command runs inside a generated project.
+
+## Scaffold commands
+
+```bash
+caatinga init <dir>                    # template (default: react-vite-counter)
+caatinga init <dir> -t <template>      # explicit template (e.g. marketplace-with-token)
+caatinga init <dir> --minimal          # CLI + Soroban stub (no frontend)
+caatinga zk init <dir>                 # zk-starter template
+caatinga zk init <dir> --minimal       # ZK-only scaffold (no frontend)
+caatinga zk init                       # add ZK files to current project
+```
+
+See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for when to use each path.
 
 ## The loop
 

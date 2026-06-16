@@ -1,5 +1,5 @@
 import { access } from "node:fs/promises";
-import { CaatingaError, loadConfig, readArtifacts, resolveNetwork } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode, loadConfig, readArtifacts, resolveNetwork } from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 
 export async function configDiagnostic(): Promise<Diagnostic> {
@@ -7,11 +7,42 @@ export async function configDiagnostic(): Promise<Diagnostic> {
     await loadConfig();
     return { ok: true, label: "caatinga.config.ts found" };
   } catch (error) {
-    const hint = error instanceof CaatingaError ? error.hint : undefined;
+    if (error instanceof CaatingaError) {
+      if (error.code === CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED) {
+        return {
+          ok: false,
+          label: "Project dependencies not installed",
+          fix: error.hint ?? "Run npm install (or pnpm install) in the project root."
+        };
+      }
+
+      if (error.code === CaatingaErrorCode.CONFIG_NOT_FOUND) {
+        return {
+          ok: false,
+          label: "caatinga.config.ts not found",
+          fix: error.hint ?? "Run this command from a Caatinga project root."
+        };
+      }
+
+      if (error.code === CaatingaErrorCode.INVALID_CONFIG) {
+        return {
+          ok: false,
+          label: "caatinga.config.ts is invalid",
+          fix: error.hint ?? "Fix schema errors in caatinga.config.ts."
+        };
+      }
+
+      return {
+        ok: false,
+        label: "caatinga.config.ts not ready",
+        fix: error.hint ?? "Run this command from a Caatinga project root."
+      };
+    }
+
     return {
       ok: false,
       label: "caatinga.config.ts not ready",
-      fix: hint ?? "Run this command from a Caatinga project root."
+      fix: "Run this command from a Caatinga project root."
     };
   }
 }

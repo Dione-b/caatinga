@@ -17,3 +17,7 @@ export function assertSafeSourceAccount(source: string | undefined): string {
 
   return source;
 }
+
+export function resolveCliSource(explicit?: string): string {
+  return assertSafeSourceAccount(explicit ?? process.env.CAATINGA_SOURCE ?? "alice");
+}
