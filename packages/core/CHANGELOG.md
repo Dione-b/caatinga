@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 2.3.1
+
+### Patch Changes
+
+- Add hybrid zk-starter browser verification, `@caatinga/zk/browser`, and unwrap Stellar `Result` values in client read/simulate flows.
+
 ## 2.3.0
 
 ### Minor Changes

@@ -229,7 +229,7 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Release atual no npm **`next`**: **`2.3.0`** (`latest` permanece **`2.2.1`**). Destaques: workflow ZK (`@caatinga/zk`, comandos `zk-*`, template `zk-starter`), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`.
+- **Status:** alpha. Release atual no npm **`next`**: **`2.3.1`** (`latest` permanece **`2.2.1`**). Destaques: frontend híbrido `zk-starter`, `@caatinga/zk/browser`, workflow ZK (`@caatinga/zk`, comandos `zk-*`), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`.
 - **Distribuição:** dist-tag `next` em todos os pacotes publicados durante o alpha.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.
