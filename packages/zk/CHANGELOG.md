@@ -1,5 +1,20 @@
 ## Breaking changes policy
 
+## 2.4.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@2.4.3
+
+## 2.4.2
+
+### Patch Changes
+
+- Sync all documentation with current codebase: add missing `read` command, ZK library API, config schema, subpath exports, CLI flags, error codes, and fix version references to 2.4.1.
+- Updated dependencies
+  - @caatinga/core@2.4.2
+
 ## 2.4.1
 
 ### Patch Changes

@@ -142,6 +142,37 @@ describe("build command", () => {
     }
   });
 
+  it("does not warn about frontend for projects without a frontend config", async () => {
+    const minimalConfig: CaatingaConfig = {
+      ...config,
+      frontend: undefined
+    };
+    loadConfigMock.mockResolvedValue(minimalConfig);
+    evaluateDeployCoverageMock.mockResolvedValue({
+      complete: false,
+      lines: [
+        {
+          name: "counter",
+          ok: false,
+          fix: "Run: caatinga deploy counter --network testnet --source <identity>"
+        }
+      ]
+    });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createBuildProgram().parseAsync(["node", "caatinga", "build", "counter"]);
+
+      const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(warnings).toContain("Next: caatinga deploy counter --network testnet --source <identity>");
+      expect(warnings).not.toContain("frontend needs contractId");
+    } finally {
+      warnSpy.mockRestore();
+      logSpy.mockRestore();
+    }
+  });
+
   it("builds the sole configured contract when no name is passed", async () => {
     const verifierConfig: CaatingaConfig = {
       ...config,

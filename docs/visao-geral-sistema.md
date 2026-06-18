@@ -34,6 +34,9 @@ Monorepo pnpm gerenciado por Turbo. Quatro pacotes principais sob `packages/`.
                            └── exports ──> @caatinga/core/browser (só errors + tipos de artifact)
                                                   │
                        @caatinga/client ──────────┘────> wallet extension (Freighter / Stellar Wallets Kit)
+                       @caatinga/client/react ────────── WalletProvider, useWallet (React)
+                       @caatinga/client/vite ─────────── helpers de bundler para SWK
+                       @caatinga/zk ──────────────────── serialização de provas ZK
 packages/templates ────> consumido por `caatinga init`
 ```
 
@@ -50,7 +53,8 @@ packages/templates ────> consumido por `caatinga init`
 |--------|------------------|
 | `@caatinga/cli` | Parsing de argumentos, UX de terminal, diagnósticos `doctor`, delegação ao core. Sem orquestração de subprocess fora das APIs do core. |
 | `@caatinga/core` | Carrega `caatinga.config.ts`, valida schemas, resolve redes/contratos, lê/escreve `caatinga.artifacts.json`, roda a CLI Stellar via camada única de shell. |
-| `@caatinga/client` | Client de browser/Node sobre bindings gerados, artifacts e wallet adapters. `invoke()`, `buildXdr()`, debug XDR explícito. Não detém chaves nem serializa SCVal à mão. |
+| `@caatinga/client` | Client de browser/Node sobre bindings gerados, artifacts e wallet adapters. `invoke()`, `buildXdr()`, debug XDR explícito. Subpaths: `./react` (WalletProvider/useWallet), `./vite` (helpers de bundler), `./freighter`, `./stellar-wallets-kit`. |
+| `@caatinga/zk` | Serialização de provas ZK, workflow Circom Groth16, args de binding para verificação on-chain. Subpath `./browser` para helpers de binding no browser. |
 | `packages/templates` | Templates oficiais consumidos por `caatinga init`, validados via `caatinga.template.json` antes de copiar. |
 
 ### Fonte de verdade (MVP)
@@ -202,7 +206,8 @@ const next = await client.contract("counter").invoke<number>("increment");
 | `caatinga deploy [contract] --source <id> --network <net>` | Faz deploy, grava `contractId` nos artifacts e gera bindings automaticamente (`--no-generate` para pular). |
 | `caatinga generate [contract] --network <net>` | (Re)gera bindings TypeScript; sem nome, regenera todos os contratos implantados. |
 | `caatinga status [--network <net>] [--json]` | Tabela por rede: contratos implantados, hashes e frescor dos bindings. |
-| `caatinga invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato. |
+| `caatinga invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato que altera estado. |
+| `caatinga read <contract.method> [--network <net>]` | Simula método read-only (sem assinatura). |
 | `caatinga dev` | Proxy opinativo sobre Vite + validação (MVP). |
 
 **Flags comuns:**
@@ -229,7 +234,7 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Release atual no npm **`next`**: **`2.4.0`** (`latest` permanece **`2.2.1`**). Destaques: `init --minimal`, `caatinga read`, guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`.
+- **Status:** alpha. Release atual no npm **`next`**: **`2.4.1`** (`latest` permanece **`2.2.1`**). Destaques: `init --minimal`, `caatinga read`, guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`.
 - **Distribuição:** dist-tag `next` em todos os pacotes publicados durante o alpha.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.

@@ -249,6 +249,10 @@ import { freighterWalletAdapter } from "@caatinga/client/freighter";
 For the full adapter guide — bundled adapters, custom adapters, capability methods, and Stellar
 Wallets Kit bundler workarounds — see [Wallets](./wallets.md).
 
+Vite apps using Stellar Wallets Kit get reusable bundler helpers from `@caatinga/client/vite`:
+`walletStubViteAliases`, `walletStubOverrides`, and `walletStubPnpmWorkspaceYaml`. These avoid
+copying 15+ lines of overrides by hand — see [Wallets — Adding SWK to a custom Vite app](./wallets.md#adding-swk-to-a-custom-vite-app).
+
 ## Wallet session
 
 `createWalletSession(adapter, options?)` wraps any adapter with connection state
@@ -275,7 +279,7 @@ import { WalletProvider, useWallet } from "@caatinga/client/react";
   <App />
 </WalletProvider>;
 
-const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
+const { publicKey, connected, connecting, error, connect, disconnect, session } = useWallet();
 ```
 
 `useWallet` is backed by `useSyncExternalStore`; `WalletProvider` restores persisted sessions on
@@ -310,5 +314,7 @@ Client failures use public `CAATINGA_*` codes. The most common are:
 - `CAATINGA_XDR_SIGN_FAILED`
 - `CAATINGA_XDR_SUBMIT_FAILED`
 - `CAATINGA_XDR_RESULT_FAILED`
+- `CAATINGA_READ_RESULT_MISSING`
+- `CAATINGA_PLACEHOLDER_BINDING`
 
 See [`errors.md`](./errors.md) for the full table.

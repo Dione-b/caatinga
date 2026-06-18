@@ -49,9 +49,14 @@ caatinga zk invoke --source-account <identity>
 | --- | --- |
 | `caatinga zk init [project]` | Scaffold `zk-starter` (multiplier circuit + verifier). |
 | `caatinga zk init [project] --minimal` | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
+| `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`. |
+| `caatinga zk init [project] --force` | Overwrite existing scaffold files. |
 | `caatinga zk build [circuit]` | Compile Circom (`-p bls12381`) and run dev trusted setup. |
+| `caatinga zk build [circuit] --embed-vk` | Build with embedded verification key stub (WIP). |
 | `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` from `input.json`. |
+| `caatinga zk prove [circuit] --debug` | Emit intermediate `witness.wtns` for debugging. |
 | `caatinga zk invoke [circuit]` | Serialize snarkjs output and call `verify_proof` on-chain. |
+| `caatinga zk invoke [circuit] --embed-vk` | Use embedded VK entrypoint (WIP). |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
 
@@ -100,20 +105,61 @@ in `caatinga.config.ts`.
 
 ## Library API (`@caatinga/zk`)
 
-Importable serialization bridge (no hidden runtime dependency on your circuit):
+### Serialization (Node)
 
 ```ts
 import { serializeProof, serializeVk, serializePublicSignals } from "@caatinga/zk";
 ```
 
-For browser invoke flows (for example `zk-starter`), use the browser-only subpath:
+### Full workflow (Node)
 
 ```ts
-import { buildVerifyProofBindingArgs } from "@caatinga/zk/browser";
+import {
+  buildCircuit,           // compile Circom circuit
+  proveCircuit,           // generate proof from input.json
+  invokeVerifier,         // call verify_proof on-chain
+  buildStellarVerifyProofArgs,  // build args for browser read/simulate
+  ptauSizeForConstraints, // determine powers-of-tau file size
+} from "@caatinga/zk";
 ```
 
-Types align with snarkjs JSON (`SnarkjsProof`, `SnarkjsVk`) and the byte layouts expected by the
-Soroban BLS12-381 types.
+### Browser subpath
+
+```ts
+import {
+  buildVerifyProofBindingArgs,  // build args for browser verify_proof read
+  concatG1Bytes,                // concatenate G1 point bytes
+  concatG2Bytes,                // concatenate G2 point bytes
+} from "@caatinga/zk/browser";
+```
+
+### Types
+
+| Type | Source | Purpose |
+| --- | --- | --- |
+| `SnarkjsProof` | `@caatinga/zk` | snarkjs JSON proof shape |
+| `SnarkjsVk` | `@caatinga/zk` | snarkjs JSON verification key shape |
+| `SerializedProof` | `@caatinga/zk` | Byte-serialized proof for Soroban |
+| `SerializedVk` | `@caatinga/zk` | Byte-serialized VK for Soroban |
+| `BuildCircuitOptions` | `@caatinga/zk` | Options for `buildCircuit()` |
+| `ProveCircuitOptions` | `@caatinga/zk` | Options for `proveCircuit()` |
+| `InvokeVerifierOptions` | `@caatinga/zk` | Options for `invokeVerifier()` |
+| `InvokeVerifierResult` | `@caatinga/zk` | Result of `invokeVerifier()` |
+| `SerializedG1` | `@caatinga/zk/browser` | Byte-serialized G1 point |
+| `SerializedG2` | `@caatinga/zk/browser` | Byte-serialized G2 point |
+| `VerifyProofBindingArgs` | `@caatinga/zk/browser` | Args for browser binding read |
+| `VerifyProofBindingBuffers` | `@caatinga/zk/browser` | Raw buffer form of binding args |
+
+### Error handling
+
+`ZkError` is thrown by ZK library functions with a `code` property:
+
+| Code | Meaning |
+| --- | --- |
+| `ZK_VK_REQUIRED` | Verification key is required but not provided |
+| `ZK_INVOKE_FAILED` | On-chain verification call failed |
+| `ZK_VERIFY_FAILED` | Local verification failed |
+| `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform |
 
 ## Dynamic VK vs embedded VK
 
@@ -158,14 +204,14 @@ export default defineConfig({
         path: "./circuits",
         protocol: "groth16",
         curve: "bls12381",
-        verifierContract: "verifier",
+        verifierContract: "verifier",  // optional: contract name for on-chain verification
       },
     },
   },
 });
 ```
 
-Only `bls12381` is accepted today; other curves fail config validation.
+Only `bls12381` is accepted today; other curves fail config validation. `verifierContract` is optional — when omitted, `zk invoke` targets the default verifier.
 
 ## Phase note
 

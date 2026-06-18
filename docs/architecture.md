@@ -37,10 +37,8 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 ## Validation roadmap (flows)
 
 1. **Alpha flow (current):** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
-2. **Next architectural proof:** **multi-contract deploy with dependencies** (e.g. deploy token, then marketplace that depends on token’s `contractId`, then generate bindings for both, then invoke across that dependency).
-3. **After that:** upgrade / redeploy with **artifacts history** and clear migration story.
-
-Until (2) is real in the product, treat single-contract demos as necessary but not sufficient.
+2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then marketplace that depends on token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
+3. **Next:** upgrade / redeploy with **artifacts history** and clear migration story.
 
 ### Alpha flow diagram
 
@@ -88,10 +86,11 @@ Each box is either a file you commit, a CLI command you run, or a runtime compon
 
 - **`@caatinga/cli`:** argument parsing, terminal UX, `doctor` diagnostics, delegation to core—no subprocess orchestration except through core APIs.
 - **`@caatinga/core`:** load `caatinga.config.ts`, validate schemas, resolve networks/contracts, read/write `caatinga.artifacts.json`, run Stellar CLI and related tools via a **single shell layer** (`run-command.ts`). **All `execa` usage stays here.**
-- **`@caatinga/client`:** thin client/browser interop over generated bindings, artifacts, wallet adapters, `invoke()`, `buildXdr()`, and explicit XDR/raw debug output. It does not own signing keys or serialize SCVal manually.
+- **`@caatinga/client`:** thin client/browser interop over generated bindings, artifacts, wallet adapters, `invoke()`, `buildXdr()`, and explicit XDR/raw debug output. It does not own signing keys or serialize SCVal manually. Subpaths: `./react` (WalletProvider/useWallet), `./vite` (bundler helpers), `./freighter`, `./stellar-wallets-kit`.
+- **`@caatinga/zk`:** ZK proof serialization, Circom Groth16 workflow helpers, and browser binding args for on-chain verification.
 - **`packages/templates`:** official templates consumed by `caatinga init` and validated through `caatinga.template.json` before copy.
 
-Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full `@caatinga/react` SDK surface, plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
+Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
 
 ### Package dependency diagram
 
@@ -105,6 +104,10 @@ graph TD
     core["@caatinga/core<br/>(config, artifacts, shell, execa)"]
     coreBrowser["@caatinga/core/browser<br/>(errors + artifact types only)"]
     client["@caatinga/client<br/>(createCaatingaClient)"]
+    clientReact["@caatinga/client/react<br/>(WalletProvider, useWallet)"]
+    clientVite["@caatinga/client/vite<br/>(SWK bundler helpers)"]
+    zk["@caatinga/zk<br/>(ZK proof serialization)"]
+    zkBrowser["@caatinga/zk/browser<br/>(browser binding args)"]
     templates["packages/templates<br/>(caatinga.template.json)"]
   end
 
@@ -118,6 +121,9 @@ graph TD
   core -.exports.-> coreBrowser
   client --> coreBrowser
   client --> walletExt
+  client -.exports.-> clientReact
+  client -.exports.-> clientVite
+  zk -.exports.-> zkBrowser
   dev --> client
 ```
 
@@ -189,7 +195,7 @@ Caatinga does **not** manage long-lived private keys. CI provides identities (`-
 
 ## Client and frontend SDK
 
-Alpha starts with **`@caatinga/client`**, not React hooks. The client composes generated bindings, artifacts, network config, and wallet adapters. A future `@caatinga/react` should be thin hooks over this layer and generated bindings: wallet wiring, loading/error helpers, and network context. Avoid a parallel generic Soroban client that bypasses generated types.
+`@caatinga/client` provides the browser/client-side interop layer: generated binding registration, artifact-based `contractId` lookup, wallet adapters, `invoke()`, `read()`, `simulate()`, `buildXdr()`, and explicit XDR/raw debug output. The `@caatinga/client/react` subpath ships `WalletProvider` + `useWallet` hooks so React apps stop hand-rolling wallet context — React stays an optional peer. Avoid a parallel generic Soroban client that bypasses generated types.
 
 ## DX beyond CLI
 

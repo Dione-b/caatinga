@@ -13,7 +13,7 @@ Install for end users:
 npm install -g @caatinga/cli
 ```
 
-`next` currently resolves to **`2.4.0`**; `latest` remains **`2.2.1`** until promoted.
+`next` currently resolves to **`2.4.1`**; `latest` remains **`2.2.1`** until promoted.
 
 Monorepo development:
 
@@ -25,4 +25,19 @@ pnpm dev -- init my-app
 
 The last command runs the CLI from source via `tsx` in `packages/cli`.
 
-Future names such as `@caatinga/react` are reserved in architecture docs and are not published yet.
+### Subpath exports
+
+Each package exposes subpath exports for fine-grained imports:
+
+| Package | Subpath | Purpose |
+|---------|---------|---------|
+| `@caatinga/core` | `.` | Config, artifacts, shell, errors (Node) |
+| `@caatinga/core` | `./browser` | Errors + artifact types only (Vite/webpack safe) |
+| `@caatinga/core` | `./runtime/requirements` | Node/Rust version constants |
+| `@caatinga/client` | `.` | Client root (createCaatingaClient, wallet session, etc.) |
+| `@caatinga/client` | `./freighter` | Bundled Freighter adapter |
+| `@caatinga/client` | `./stellar-wallets-kit` | Bundled Stellar Wallets Kit adapter |
+| `@caatinga/client` | `./react` | `WalletProvider` + `useWallet` hooks (optional React peer) |
+| `@caatinga/client` | `./vite` | Vite bundler helpers for SWK stubs |
+| `@caatinga/zk` | `.` | ZK proof serialization + Circom workflow |
+| `@caatinga/zk` | `./browser` | Browser-only ZK binding helpers |

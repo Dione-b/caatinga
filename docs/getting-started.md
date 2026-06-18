@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
-During alpha, install published packages from npm. Use **`next`** for the current line (**`2.4.0`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+During alpha, install published packages from npm. Use **`next`** for the current line (**`2.4.1`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ stellar --version
 npm install -g @caatinga/cli@next
 ```
 
-Confirm the resolved versions (`next` is currently **`2.4.0`**; `latest` is **`2.2.1`**):
+Confirm the resolved versions (`next` is currently **`2.4.1`**; `latest` is **`2.2.1`**):
 
 ```bash
 npm view @caatinga/cli@next version
@@ -67,6 +67,12 @@ npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga status --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
+```
+
+For read-only calls (getters, pure queries), use `read` instead of `invoke` — it simulates without signing or submitting:
+
+```bash
+npx caatinga read counter.get --network testnet
 ```
 
 Run the CLI steps in order: `build` → `deploy` → `invoke` (or `npm run dev` / `pnpm dev` after

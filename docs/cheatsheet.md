@@ -47,6 +47,7 @@ npx caatinga generate --network testnet           # regenerate everything deploy
 | `caatinga generate [contract]` | (Re)generate TypeScript bindings from deployed contract IDs |
 | `caatinga status` | Table of deployed contracts + binding freshness per network |
 | `caatinga invoke <contract.method>` | Call a contract method from the CLI |
+| `caatinga read <contract.method>` | Simulate a read-only contract method (no signing) |
 
 ## Flags
 
