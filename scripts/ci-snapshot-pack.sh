@@ -109,7 +109,7 @@ for template_manifest in "$TEMPLATES_DIR"/*/caatinga.template.json; do
 done
 
 node --input-type=module -e '
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const rootDir = process.argv[1];
@@ -145,6 +145,13 @@ for (const entry of readdirSync(templatesDir)) {
   }
 
   writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`);
+
+  const manifestPath = path.join(templateDir, "caatinga.template.json");
+  if (existsSync(manifestPath)) {
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    manifest.caatinga.compatibleCore = `^${packageVersions["@caatinga/core"]}`;
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
 }
 ' "$ROOT_DIR"
 
@@ -205,18 +212,6 @@ packed_core_version="$(tar -xOf "${core_tarball[0]}" package/package.json | node
 packed_zk_version="$(tar -xOf "${zk_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_client_version="$(tar -xOf "${client_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
 packed_cli_version="$(tar -xOf "${cli_tarball[0]}" package/package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; const pkg = JSON.parse(readFileSync(0, "utf8")); process.stdout.write(pkg.version);')"
-core_runtime_version="$(node --input-type=module -e '
-import { readFileSync } from "node:fs";
-
-const source = readFileSync(process.argv[1], "utf8");
-const match = source.match(/CAATINGA_CORE_VERSION\s*=\s*"([^"]+)"/);
-if (!match) {
-  console.error("Could not read CAATINGA_CORE_VERSION.");
-  process.exit(1);
-}
-
-process.stdout.write(match[1]);
-' "$ROOT_DIR/packages/core/src/version.ts")"
 
 export EXPECTED_PACKED_INTERNAL_VERSIONS="$(node --input-type=module -e '
 import { readFileSync } from "node:fs";
@@ -383,7 +378,7 @@ if (templateVersion !== 1) {
   );
   process.exit(1);
 }
-' "$core_runtime_version" "$template_name"; then
+' "$packed_core_version" "$template_name"; then
     echo "Bundled CLI template manifest failed compatibility validation." >&2
     tar -xOf "${cli_tarball[0]}" "package/templates/${template_name}/caatinga.template.json" >&2 || true
     exit 1
