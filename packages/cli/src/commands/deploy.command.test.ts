@@ -172,4 +172,34 @@ describe("deploy command", () => {
       logSpy.mockRestore();
     }
   });
+
+  it("skips bindings when project has no frontend configured", async () => {
+    const minimalConfig: CaatingaConfig = {
+      project: "minimal-app",
+      defaultNetwork: "testnet",
+      contracts: config.contracts,
+      networks: config.networks
+    };
+    loadConfigMock.mockResolvedValue(minimalConfig);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      await createDeployProgram().parseAsync([
+        "node", "caatinga", "deploy", "--source", "alice"
+      ]);
+
+      expect(generateBindingsGraph).not.toHaveBeenCalled();
+      expect(process.exitCode).toBeUndefined();
+
+      const logOutput = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      const warnOutput = warnSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(logOutput).toContain("Deploy complete");
+      expect(logOutput).toContain("Bindings skipped (no frontend configured).");
+      expect(warnOutput).not.toContain("Deploy succeeded, but bindings generation failed.");
+    } finally {
+      logSpy.mockRestore();
+      warnSpy.mockRestore();
+    }
+  });
 });

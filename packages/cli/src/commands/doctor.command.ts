@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
+import { CaatingaError, CaatingaErrorCode, loadConfig } from "@caatinga/core";
 import { runAllDiagnostics } from "../diagnostics/run-all.js";
 import { printDiagnostic, printFixes } from "../diagnostics/types.js";
 import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
@@ -88,14 +88,20 @@ export function registerDoctorCommand(program: Command): void {
 
       let ready = diagnostics.every((diagnostic) => diagnostic.ok);
 
-      if (options.network && ready) {
+      let deployNetwork = options.network;
+      if (!deployNetwork && ready) {
+        const config = await loadConfig();
+        deployNetwork = config.defaultNetwork;
+      }
+
+      if (deployNetwork && ready) {
         try {
-          await reportDeployCoverage(options.network);
+          await reportDeployCoverage(deployNetwork);
         } catch (error) {
           ready = false;
           throw error;
         }
-        await reportBindingCoverage(options.network);
+        await reportBindingCoverage(deployNetwork);
       }
 
       logger.info("");

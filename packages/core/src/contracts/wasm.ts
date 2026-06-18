@@ -14,24 +14,35 @@ export function toCurrentWasmTargetPath(wasmPath: string): string {
   return wasmPath.replaceAll(LEGACY_RUST_WASM_TARGET, CURRENT_RUST_WASM_TARGET);
 }
 
+export type ResolveWasmArtifactPathOptions = {
+  sourcePath?: string;
+};
+
 function wasmNotFoundError(
   configuredWasmPath: string,
   options?: { migratedPath?: string }
 ): CaatingaError {
   const migratedPath = options?.migratedPath;
-  const hint =
-    migratedPath === undefined
-      ? "Run caatinga build before deploy or generate."
-      : [
-          "Run caatinga build before deploy or generate.",
-          `Soroban builds use the "${CURRENT_RUST_WASM_TARGET}" target.`,
-          `Update wasm in caatinga.config.ts to "${toConfigRelativeWasmPath(migratedPath)}" or an equivalent path under target/${CURRENT_RUST_WASM_TARGET}/release/.`
-        ].join(" ");
+  const cargoTargetDir = process.env.CARGO_TARGET_DIR;
+  const hintParts = ["Run caatinga build before deploy or generate."];
+
+  if (migratedPath !== undefined) {
+    hintParts.push(
+      `Soroban builds use the "${CURRENT_RUST_WASM_TARGET}" target.`,
+      `Update wasm in caatinga.config.ts to "${toConfigRelativeWasmPath(migratedPath)}" or an equivalent path under target/${CURRENT_RUST_WASM_TARGET}/release/.`
+    );
+  }
+
+  if (cargoTargetDir) {
+    hintParts.push(
+      `CARGO_TARGET_DIR is set to "${cargoTargetDir}"; the WASM may be under that directory instead of the configured path. Unset CARGO_TARGET_DIR or update wasm in caatinga.config.ts.`
+    );
+  }
 
   return new CaatingaError(
     `WASM output was not found at ${configuredWasmPath}.`,
     CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-    hint
+    hintParts.join(" ")
   );
 }
 
@@ -40,22 +51,82 @@ function toConfigRelativeWasmPath(absoluteWasmPath: string): string {
   return relative.startsWith("..") ? absoluteWasmPath : `./${relative.split(path.sep).join("/")}`;
 }
 
-export async function resolveWasmArtifactPath(configuredWasmPath: string): Promise<string> {
+function wasmFileName(configuredWasmPath: string): string {
+  return path.basename(configuredWasmPath);
+}
+
+function buildAlternateWasmCandidates(
+  configuredWasmPath: string,
+  options?: ResolveWasmArtifactPathOptions
+): string[] {
+  const fileName = wasmFileName(configuredWasmPath);
+  const candidates: string[] = [];
+  const seen = new Set<string>();
+
+  function addCandidate(candidate: string): void {
+    const resolved = path.resolve(candidate);
+    if (seen.has(resolved)) {
+      return;
+    }
+    seen.add(resolved);
+    candidates.push(resolved);
+  }
+
+  const cargoTargetDir = process.env.CARGO_TARGET_DIR;
+  if (cargoTargetDir) {
+    addCandidate(path.join(cargoTargetDir, CURRENT_RUST_WASM_TARGET, "release", fileName));
+    addCandidate(path.join(cargoTargetDir, LEGACY_RUST_WASM_TARGET, "release", fileName));
+  }
+
+  if (options?.sourcePath) {
+    addCandidate(path.join(options.sourcePath, "target", CURRENT_RUST_WASM_TARGET, "release", fileName));
+    addCandidate(path.join(options.sourcePath, "target", LEGACY_RUST_WASM_TARGET, "release", fileName));
+  }
+
+  return candidates;
+}
+
+async function firstExistingPath(paths: string[]): Promise<string | undefined> {
+  for (const candidate of paths) {
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      continue;
+    }
+  }
+
+  return undefined;
+}
+
+export async function resolveWasmArtifactPath(
+  configuredWasmPath: string,
+  options?: ResolveWasmArtifactPathOptions
+): Promise<string> {
+  const resolvedConfiguredPath = path.resolve(configuredWasmPath);
+
   try {
-    await access(configuredWasmPath);
-    return configuredWasmPath;
+    await access(resolvedConfiguredPath);
+    return resolvedConfiguredPath;
   } catch {
-    const currentTargetPath = toCurrentWasmTargetPath(configuredWasmPath);
-    if (currentTargetPath === configuredWasmPath) {
-      throw wasmNotFoundError(configuredWasmPath);
+    const currentTargetPath = toCurrentWasmTargetPath(resolvedConfiguredPath);
+    if (currentTargetPath !== resolvedConfiguredPath) {
+      const migratedPath = await firstExistingPath([currentTargetPath]);
+      if (migratedPath) {
+        return migratedPath;
+      }
     }
 
-    try {
-      await access(currentTargetPath);
-      return currentTargetPath;
-    } catch {
-      throw wasmNotFoundError(configuredWasmPath, { migratedPath: currentTargetPath });
+    const alternatePath = await firstExistingPath(
+      buildAlternateWasmCandidates(resolvedConfiguredPath, options)
+    );
+    if (alternatePath) {
+      return alternatePath;
     }
+
+    throw wasmNotFoundError(resolvedConfiguredPath, {
+      migratedPath: currentTargetPath !== resolvedConfiguredPath ? currentTargetPath : undefined
+    });
   }
 }
 

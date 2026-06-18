@@ -54,7 +54,7 @@ function packageJsonSource(projectName: string): string {
     scripts: {
       build: "caatinga build app",
       deploy: "caatinga deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
-      doctor: "caatinga doctor",
+      doctor: "caatinga doctor --network testnet",
       "read:hello": "caatinga read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
       "read:version": "caatinga read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}"
     },

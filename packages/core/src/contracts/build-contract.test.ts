@@ -12,6 +12,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { buildContract } from "./build-contract.js";
+import { CURRENT_RUST_WASM_TARGET } from "./wasm.js";
 
 const baseConfig: CaatingaConfig = {
   project: "app",
@@ -169,6 +170,60 @@ describe("buildContract", () => {
 
     expect(result.contract.wasmPath).toBe(currentWasmPath);
     await expect(access(legacyWasmPath)).rejects.toBeDefined();
+  });
+
+  it("should_resolve_wasm_under_CARGO_TARGET_DIR_after_stellar_build", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
+    const sourceDir = path.join(tmpDir, "contracts", "counter");
+    const configuredWasmPath = path.join(
+      tmpDir,
+      "contracts",
+      "counter",
+      "target",
+      CURRENT_RUST_WASM_TARGET,
+      "release",
+      "counter.wasm"
+    );
+    const cargoTargetDir = path.join(tmpDir, "cargo-target");
+    const actualWasmPath = path.join(
+      cargoTargetDir,
+      CURRENT_RUST_WASM_TARGET,
+      "release",
+      "counter.wasm"
+    );
+    const config: CaatingaConfig = {
+      ...baseConfig,
+      contracts: {
+        counter: {
+          ...baseConfig.contracts.counter,
+          path: "./contracts/counter",
+          wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"
+        }
+      }
+    };
+
+    await mkdir(sourceDir, { recursive: true });
+    await mkdir(path.dirname(actualWasmPath), { recursive: true });
+    await writeFile(actualWasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
+
+    const previous = process.env.CARGO_TARGET_DIR;
+    process.env.CARGO_TARGET_DIR = cargoTargetDir;
+    try {
+      const result = await buildContract({
+        config,
+        contractName: "counter",
+        cwd: tmpDir
+      });
+
+      expect(result.contract.wasmPath).toBe(actualWasmPath);
+      await expect(access(configuredWasmPath)).rejects.toBeDefined();
+    } finally {
+      if (previous === undefined) {
+        delete process.env.CARGO_TARGET_DIR;
+      } else {
+        process.env.CARGO_TARGET_DIR = previous;
+      }
+    }
   });
 
   it("rethrows UNSUPPORTED_CLI_VERSION surfaced from the preflight version check", async () => {
