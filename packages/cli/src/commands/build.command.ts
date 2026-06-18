@@ -63,5 +63,7 @@ async function warnIfDefaultNetworkNeedsDeploy(config: CaatingaConfig): Promise<
   for (const command of missingDeployCommands) {
     logger.warn(`Next: ${command}`);
   }
-  logger.warn("The frontend needs contractId in caatinga.artifacts.json; build alone is not enough.");
+  if (config.frontend) {
+    logger.warn("The frontend needs contractId in caatinga.artifacts.json; build alone is not enough.");
+  }
 }

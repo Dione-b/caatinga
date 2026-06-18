@@ -1,5 +1,19 @@
 ## Breaking changes policy
 
+## 2.4.3
+
+### Patch Changes
+
+- Fix CLI `--version` to read the version from `package.json` instead of a hardcoded constant, preventing published versions from reporting the wrong version number.
+
+  Fix `@caatinga/core` `CAATINGA_CORE_VERSION` to read from `package.json` as well, and update official templates to `^2.4.2` so they stay compatible with the current core version.
+
+  Avoid mentioning the frontend in the post-build deploy warning when the project has no `frontend` configuration.
+
+- Updated dependencies
+  - @caatinga/core@2.4.3
+  - @caatinga/zk@2.4.3
+
 ## 2.4.2
 
 ### Patch Changes
