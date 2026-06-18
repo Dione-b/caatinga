@@ -70,4 +70,60 @@ describe("wasm target paths", () => {
       code: CaatingaErrorCode.ARTIFACT_NOT_FOUND
     });
   });
+
+  it("should_resolve_wasm_under_CARGO_TARGET_DIR_when_configured_path_missing", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-"));
+    const cargoTargetDir = path.join(tmpDir, "cargo-target");
+    const configuredPath = path.join(
+      tmpDir,
+      "contracts",
+      "counter",
+      "target",
+      CURRENT_RUST_WASM_TARGET,
+      "release",
+      "counter.wasm"
+    );
+    const actualWasmPath = path.join(
+      cargoTargetDir,
+      CURRENT_RUST_WASM_TARGET,
+      "release",
+      "counter.wasm"
+    );
+
+    await mkdir(path.dirname(actualWasmPath), { recursive: true });
+    await writeFile(actualWasmPath, Buffer.from("wasm"), "utf8");
+
+    const previous = process.env.CARGO_TARGET_DIR;
+    process.env.CARGO_TARGET_DIR = cargoTargetDir;
+    try {
+      await expect(resolveWasmArtifactPath(configuredPath)).resolves.toBe(actualWasmPath);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.CARGO_TARGET_DIR;
+      } else {
+        process.env.CARGO_TARGET_DIR = previous;
+      }
+    }
+  });
+
+  it("should_include_CARGO_TARGET_DIR_hint_when_wasm_not_found_and_env_is_set", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-"));
+    const configuredPath = path.join(tmpDir, "missing", "counter.wasm");
+    const cargoTargetDir = path.join(tmpDir, "cargo-target");
+
+    const previous = process.env.CARGO_TARGET_DIR;
+    process.env.CARGO_TARGET_DIR = cargoTargetDir;
+    try {
+      await expect(resolveWasmArtifactPath(configuredPath)).rejects.toMatchObject({
+        code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
+        hint: expect.stringContaining("CARGO_TARGET_DIR")
+      });
+    } finally {
+      if (previous === undefined) {
+        delete process.env.CARGO_TARGET_DIR;
+      } else {
+        process.env.CARGO_TARGET_DIR = previous;
+      }
+    }
+  });
 });

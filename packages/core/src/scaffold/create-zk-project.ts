@@ -66,7 +66,8 @@ function packageJsonSource(projectName: string): string {
       "zk:build": "caatinga zk build main",
       "zk:prove": "caatinga zk prove main",
       build: "caatinga build verifier",
-      deploy: "caatinga deploy verifier"
+      deploy: "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
+      doctor: "caatinga doctor --network testnet"
     },
     devDependencies: {
       "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
@@ -86,7 +87,7 @@ Minimal Caatinga ZK project.
 npm install
 npx caatinga zk build main
 npx caatinga build verifier
-npx caatinga deploy verifier --network testnet
+npx caatinga deploy verifier --network testnet --source <identity>
 npx caatinga zk prove main
 \`\`\`
 

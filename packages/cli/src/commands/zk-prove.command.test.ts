@@ -67,4 +67,21 @@ describe("zk prove command", () => {
       debug: false,
     });
   });
+
+  it("prints the proof artifact path after generating", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerZkProveCommand(program);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await program.parseAsync(["node", "caatinga", "zk", "prove"]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain("Generated proof for circuit \"main\"");
+      expect(output).toContain(".artifacts/zk/main/proof.json");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });

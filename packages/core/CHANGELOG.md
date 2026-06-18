@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 2.4.1
+
+### Patch Changes
+
+- Resolve WASM artifacts under `CARGO_TARGET_DIR` when the configured path is missing.
+- Fix minimal and zk-minimal scaffold deploy/doctor npm scripts (`--network`, `--source`).
+
 ## 2.4.0
 
 ### Minor Changes

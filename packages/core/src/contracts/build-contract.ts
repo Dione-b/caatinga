@@ -67,7 +67,9 @@ export async function buildContract(options: BuildContractOptions) {
     throw error;
   }
 
-  const wasmPath = await resolveWasmArtifactPath(contract.wasmPath);
+  const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
+    sourcePath: contract.sourcePath
+  });
 
   return {
     contract: {

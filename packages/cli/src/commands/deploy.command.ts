@@ -83,6 +83,12 @@ export function registerDeployCommand(program: Command): void {
         return;
       }
 
+      if (!config.frontend) {
+        logger.info("");
+        logger.info("Bindings skipped (no frontend configured).");
+        return;
+      }
+
       // Generation failure must not flip the exit code: the deploy itself succeeded
       // and the artifacts are already written — the user only needs to rerun generate.
       try {

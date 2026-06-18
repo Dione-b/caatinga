@@ -25,14 +25,16 @@ export function registerZkProveCommand(program: Command): void {
           throw new Error(`Circuit "${name}" not found`);
         }
 
+        const artifactsDir = `.artifacts/zk/${name}`;
         await proveCircuit({
           circuitName: name,
           circuitPath: circuit.path,
-          artifactsDir: `.artifacts/zk/${name}`,
+          artifactsDir,
           inputPath: path.join(circuit.path, "input.json"),
           debug: Boolean(options.debug),
         });
         logger.success(`Generated proof for circuit "${name}"`);
+        logger.info(`Proof written to: ${path.join(artifactsDir, "proof.json")}`);
       });
     });
 }

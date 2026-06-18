@@ -40,7 +40,7 @@ describe("createMinimalProject", () => {
     expect(packageJson.scripts.invoke).toBeUndefined();
     expect(packageJson.scripts["read:hello"]).toContain("caatinga read app.hello");
     expect(packageJson.scripts["read:version"]).toContain("caatinga read app.version");
-    expect(packageJson.scripts.doctor).toBe("caatinga doctor");
+    expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
     expect(readme).toContain("caatinga read app.hello");

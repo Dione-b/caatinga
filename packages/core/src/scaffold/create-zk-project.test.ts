@@ -49,6 +49,15 @@ describe("createZkProject", () => {
     const artifacts = await readArtifacts(targetDir);
     expect(artifacts.project).toBe("my-zk-app");
     expect(Object.keys(artifacts.networks)).toEqual(["testnet"]);
+
+    const packageJson = JSON.parse(await readFile(path.join(targetDir, "package.json"), "utf8"));
+    expect(packageJson.scripts.deploy).toBe(
+      "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}"
+    );
+    expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
+
+    const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
+    expect(readme).toContain("npx caatinga deploy verifier --network testnet --source <identity>");
   });
 
   it("fails instead of overwriting existing project files by default", async () => {

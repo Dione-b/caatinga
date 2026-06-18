@@ -1,5 +1,15 @@
 ## Breaking changes policy
 
+## 2.4.1
+
+### Patch Changes
+
+- Run deploy coverage in `caatinga doctor` using `defaultNetwork` when `--network` is omitted.
+- Skip auto-generate bindings on deploy when the project has no `frontend` config.
+- Updated dependencies
+  - @caatinga/core@2.4.1
+  - @caatinga/zk@2.4.1
+
 ## 2.4.0
 
 ### Minor Changes
