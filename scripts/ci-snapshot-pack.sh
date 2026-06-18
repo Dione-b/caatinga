@@ -96,16 +96,6 @@ cat > "$SNAPSHOT_CHANGESET_FILE" <<'EOF'
 chore: ci snapshot for pack validation (do not commit)
 EOF
 
-core_runtime_version="$(node --input-type=module -e '
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
-const pkg = JSON.parse(
-  readFileSync(path.join(process.argv[1], "packages/core/package.json"), "utf8")
-);
-process.stdout.write(pkg.version);
-' "$ROOT_DIR")"
-
 pnpm --dir "$ROOT_DIR" exec changeset version --snapshot smoke
 
 for template_pkg in "$TEMPLATES_DIR"/*/package.json; do
@@ -119,7 +109,7 @@ for template_manifest in "$TEMPLATES_DIR"/*/caatinga.template.json; do
 done
 
 node --input-type=module -e '
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const rootDir = process.argv[1];
@@ -155,6 +145,13 @@ for (const entry of readdirSync(templatesDir)) {
   }
 
   writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`);
+
+  const manifestPath = path.join(templateDir, "caatinga.template.json");
+  if (existsSync(manifestPath)) {
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    manifest.caatinga.compatibleCore = `^${packageVersions["@caatinga/core"]}`;
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
 }
 ' "$ROOT_DIR"
 
@@ -381,7 +378,7 @@ if (templateVersion !== 1) {
   );
   process.exit(1);
 }
-' "$core_runtime_version" "$template_name"; then
+' "$packed_core_version" "$template_name"; then
     echo "Bundled CLI template manifest failed compatibility validation." >&2
     tar -xOf "${cli_tarball[0]}" "package/templates/${template_name}/caatinga.template.json" >&2 || true
     exit 1
