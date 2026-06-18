@@ -82,7 +82,7 @@ For every deployed contract whose bindings are not fresh, status prints the exac
 `caatinga generate` command that fixes it. `--json` prints the full machine-readable structure
 on stdout for scripts and CI.
 
-## `caatinga invoke <contract.method> --source <identity> [args...]`
+## `caatinga invoke <contract.method> --source <identity> [--network testnet] [args...]`
 
 Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI.
 

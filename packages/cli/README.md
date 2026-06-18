@@ -52,6 +52,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | `caatinga generate [contract]` | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts |
 | `caatinga status [--network <name>] [--json]` | Show deployed contracts and binding freshness per network |
 | `caatinga invoke <contract.method>` | Invoke a deployed contract method; extra args forward to Stellar CLI |
+| `caatinga read <contract.method>` | Simulate a read-only contract method (no signing or submission) |
 
 The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> invoke`.
 
@@ -79,6 +80,8 @@ The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> i
 - `-s, --source <identity>` is required; must be a Stellar CLI identity alias that can sign (for example `alice`)
 - `--force` redeploys even when artifacts already store a contract ID
 - `--no-deps` skips dependency deployment for a single named contract (`--no-deps` requires `[contract]`)
+- `--verify-deps` confirms each dependency's contract ID exists on-chain before resolving deploy arguments
+- `--no-stale-check` skips the WASM-older-than-sources warning
 - `--no-generate` skips the automatic bindings generation after deploy
 
 Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts.
@@ -91,6 +94,7 @@ After a successful deploy, bindings generate automatically for the deployed cont
 - `generate` prints binding freshness per contract before regenerating in all-contracts mode
 - `status` prints a per-network table (contract ID, WASM hash, deployed, binding freshness, dependencies); `--json` emits the machine-readable structure
 - `invoke` expects `<contract.method>` (for example `counter.increment`) and forwards `[args...]` to the underlying Stellar invocation
+- `read` simulates a read-only method without signing; `--source` is optional (defaults to `alice`)
 
 `caatinga dev` is reserved, hidden in pre-v1 builds, and not part of the stability promise. Use your frontend dev server (for example Vite) alongside the commands above.
 

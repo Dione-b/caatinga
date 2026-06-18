@@ -64,7 +64,6 @@ Supported type-only root exports:
 - `CaatingaReadOptions`
 - `CaatingaReadResult`
 - `CaatingaWalletAdapter`
-- `CaatingaWalletCapabilities`
 - `CaatingaXdrBuildResult`
 - `WalletSession`, `WalletSessionOptions`, `WalletSessionState`, `WalletSessionStatus`, `WalletSessionStorage`
 
@@ -73,6 +72,7 @@ Supported subpath exports:
 - `@caatinga/client/freighter` -> `freighterWalletAdapter` (optional)
 - `@caatinga/client/stellar-wallets-kit` -> `createStellarWalletsKitAdapter` (optional)
 - `@caatinga/client/react` -> `WalletProvider`, `useWallet`, `useWalletSession` (optional, needs `react >= 18`)
+- `@caatinga/client/vite` -> `walletStubViteAliases`, `walletStubOverrides`, `walletStubPnpmWorkspaceYaml` (Vite bundler helpers for SWK stubs)
 
 Primary flow:
 
@@ -149,7 +149,7 @@ import { WalletProvider, useWallet } from "@caatinga/client/react";
   <App />
 </WalletProvider>;
 
-const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
+const { publicKey, connected, connecting, error, connect, disconnect, session } = useWallet();
 ```
 
 Full guide: [docs/wallets.md](https://github.com/Dione-b/caatinga/blob/main/docs/wallets.md).
@@ -173,11 +173,14 @@ Common codes include:
 - `CAATINGA_BINDING_CLIENT_NOT_FOUND`
 - `CAATINGA_BINDING_METHOD_NOT_FOUND`
 - `CAATINGA_WALLET_NOT_CONNECTED`
+- `CAATINGA_WALLET_TIMEOUT`
 - `CAATINGA_XDR_BUILD_FAILED`
 - `CAATINGA_XDR_PREPARE_FAILED`
 - `CAATINGA_XDR_SIGN_FAILED`
 - `CAATINGA_XDR_SUBMIT_FAILED`
 - `CAATINGA_XDR_RESULT_FAILED`
+- `CAATINGA_READ_RESULT_MISSING`
+- `CAATINGA_PLACEHOLDER_BINDING`
 
 ## Limitations
 

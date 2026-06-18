@@ -25,7 +25,7 @@ caatinga init my-dapp
 Caatinga standardizes contract builds, deployments, artifacts, typed bindings, and wallet-ready client integration — without hiding Stellar concepts like `contractId`, RPC URLs, network passphrases, signing identities, or XDR.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.4.0`** (`latest` remains **`2.2.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.4.1`** (`latest` remains **`2.2.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -156,7 +156,8 @@ my-dapp/
 | `caatinga deploy [contract]` | Deploy, save `contractId` to artifacts, auto-generate bindings |
 | `caatinga generate [contract]` | (Re)generate TS bindings — recovery/CI path, deploy does it for you |
 | `caatinga status` | Show deployed contracts + binding freshness per network (`--json` for scripts) |
-| `caatinga invoke <contract.method>` | Call a contract method |
+| `caatinga invoke <contract.method>` | Call a state-changing contract method |
+| `caatinga read <contract.method>` | Simulate a read-only contract method (no signing) |
 
 **Common flags**
 
@@ -166,6 +167,9 @@ my-dapp/
 | `--network` | Network from `caatinga.config.ts` (e.g. `testnet`) |
 | `--force` | Redeploy even if artifacts already hold a contract ID |
 | `--no-generate` | Skip automatic bindings generation after deploy |
+| `--no-deps` | Deploy a single contract without its `dependsOn` graph |
+| `--verify-deps` | Confirm dependency contract IDs exist on-chain first |
+| `--no-stale-check` | Skip the WASM-older-than-sources warning |
 
 <br />
 
@@ -210,8 +214,10 @@ import { WalletProvider, useWallet } from "@caatinga/client/react";
 </WalletProvider>;
 
 // anywhere below the provider:
-const { publicKey, connected, connecting, connect, disconnect } = useWallet();
+const { publicKey, connected, connecting, connect, disconnect, session } = useWallet();
 ```
+
+Vite apps using Stellar Wallets Kit get bundler workarounds from `@caatinga/client/vite` (`walletStubViteAliases`, `walletStubOverrides`, `walletStubPnpmWorkspaceYaml`) — see [Wallets](./docs/wallets.md#stellar-wallets-kit-bundler-workarounds).
 
 📖 Adapters, sessions, hooks & custom wallets: [Wallets](./docs/wallets.md) · invoke/XDR flows: [Client docs](./docs/client.md) · [examples/counter-web](./examples/counter-web)
 

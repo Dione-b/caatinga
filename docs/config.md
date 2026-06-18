@@ -39,8 +39,8 @@ Root config:
 | `defaultNetwork` | string (min 1) | no | `"testnet"` | |
 | `contracts` | `Record<string, ContractConfig>` | yes | — | at least one entry |
 | `networks` | `Record<string, NetworkConfig>` | yes | — | at least one entry |
-| `frontend.framework` | `"vite-react" \| "next" \| "astro"` | no | `"vite-react"` | |
-| `frontend.bindingsOutput` | string (min 1) | yes | — | path for generated bindings |
+| `frontend` | `FrontendConfig` | no | — | optional frontend configuration (see below) |
+| `zk` | `ZkConfig` | no | — | ZK circuit configuration (see below) |
 
 `ContractConfig` (each value in `contracts`):
 
@@ -51,12 +51,34 @@ Root config:
 | `dependsOn` | `string[]` | no | `[]` | contract names deployed first |
 | `deployArgs` | `Record<string, string \| number \| boolean>` | no | `{}` | constructor args; supports placeholders |
 
+`FrontendConfig` (optional root `frontend` field):
+
+| Field | Type | Required | Default | Notes |
+| --- | --- | --- | --- | --- |
+| `framework` | `"vite-react" \| "next" \| "astro"` | no | `"vite-react"` | |
+| `bindingsOutput` | string (min 1) | yes | — | path for generated bindings |
+
 `NetworkConfig` (each value in `networks`):
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `rpcUrl` | string (valid URL) | yes | |
 | `networkPassphrase` | string (min 1) | yes | |
+
+`ZkConfig` (optional root `zk` field):
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes | at least one circuit entry |
+
+`ZkCircuitConfig` (each value in `zk.circuits`):
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `path` | string (min 1) | yes | directory containing `.circom` files |
+| `protocol` | `"groth16"` | yes | only Groth16 supported today |
+| `curve` | `"bls12381"` | yes | only BLS12-381 supported today |
+| `verifierContract` | string | no | contract name for on-chain verification |
 
 ## Artifacts
 

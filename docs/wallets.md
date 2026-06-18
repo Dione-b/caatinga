@@ -51,7 +51,18 @@ The adapter wraps SWK 2.x static methods and adds:
 - `setWallet(walletId)` / `getWalletId()` — select a wallet programmatically / read the currently
   selected wallet id (`undefined` before any selection).
 - `getSupportedWallets()` and `disconnect()`.
+- `kit` — exposes the underlying static `StellarWalletsKit` class for advanced usage.
 - Optional WalletConnect support via `walletConnectMetadata` (needs a WalletConnect `projectId`).
+
+Exported types from `@caatinga/client/stellar-wallets-kit`:
+
+| Type | Purpose |
+| --- | --- |
+| `StellarWalletsKitAdapter` | Return type of `createStellarWalletsKitAdapter` |
+| `StellarWalletsKitAdapterOptions` | Options for adapter creation (network, metadata) |
+| `StellarWalletsKitMetadata` | WalletConnect metadata shape |
+| `StellarWalletsKitOpenModalOptions` | Options for `openModal()` |
+| `WalletNetwork` | Enum of supported network passphrases |
 
 ### Freighter (single wallet)
 
