@@ -54,7 +54,7 @@ npx caatinga build verifier
 npx caatinga zk build main
 npx caatinga deploy verifier --network testnet --source alice
 npx caatinga zk prove main
-npx caatinga zk invoke --source-account alice
+npx caatinga zk invoke --source alice
 ```
 
 Step by step:

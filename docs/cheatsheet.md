@@ -20,7 +20,8 @@ See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for when to 
 ```bash
 caatinga init my-dapp && cd my-dapp && npm install   # scaffold
 npx caatinga doctor --network testnet --source alice # verify environment
-npx caatinga build counter                           # compile WASM
+npx caatinga build counter                           # compile one contract WASM
+npx caatinga build                                   # compile all configured contracts
 npx caatinga deploy counter --network testnet --source alice
 #   ↳ writes contractId to caatinga.artifacts.json
 #   ↳ auto-generates TypeScript bindings (skip with --no-generate)
@@ -42,7 +43,7 @@ npx caatinga generate --network testnet           # regenerate everything deploy
 | --- | --- |
 | `caatinga init <dir>` | Scaffold a project from a template |
 | `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity |
-| `caatinga build [contract]` | Compile contract WASM via Stellar CLI |
+| `caatinga build [contract]` | Compile contract WASM; omit name to build all configured contracts |
 | `caatinga deploy [contract]` | Deploy (graph-aware), record artifacts, auto-generate bindings |
 | `caatinga generate [contract]` | (Re)generate TypeScript bindings from deployed contract IDs |
 | `caatinga status` | Table of deployed contracts + binding freshness per network |
@@ -54,7 +55,7 @@ npx caatinga generate --network testnet           # regenerate everything deploy
 | Flag | Commands | Description |
 | --- | --- | --- |
 | `--network <name>` | doctor, deploy, generate, status, invoke | Network from `caatinga.config.ts` |
-| `--source <identity>` | doctor, deploy, invoke | Local Stellar CLI identity that signs (never a `G...` address) |
+| `--source <identity>` | doctor, deploy, invoke, zk invoke | Local Stellar CLI identity that signs (never a `G...` address) |
 | `--force` | deploy | Redeploy even when artifacts already hold a contract ID |
 | `--no-generate` | deploy | Skip automatic bindings generation (CI without binding needs) |
 | `--no-deps` | deploy | Deploy a single contract without its `dependsOn` graph |
@@ -85,4 +86,16 @@ generated binding package.
 | `contracts/generated/<name>/` | Generated TypeScript bindings (+ freshness marker) |
 
 Setup broken? `npx caatinga doctor --network testnet --source alice` tells you which layer.
-Full reference: [CLI](./cli.md) · errors: [Errors](./errors.md).
+
+## ZK loop
+
+```bash
+caatinga zk init my-zk-dapp && cd my-zk-dapp && npm install
+npx caatinga build verifier
+npx caatinga zk build main
+npx caatinga deploy verifier --network testnet --source alice
+npx caatinga zk prove main
+npx caatinga zk invoke main --source alice
+```
+
+Full reference: [ZK module](./zk.md) · [ZK tutorial](./tutorials/zk-project.md) · [CLI](./cli.md) · [Errors](./errors.md).

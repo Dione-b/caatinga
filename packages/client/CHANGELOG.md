@@ -1,5 +1,19 @@
 ## Breaking changes policy
 
+## 2.4.5
+
+### Patch Changes
+
+- Address Caatinga usability feedback from ZK and CLI testing:
+
+  - Standardize `caatinga zk invoke` on `--source` (aligned with deploy/invoke)
+  - Build all configured contracts when `caatinga build` is run without a contract name
+  - Generate real BLS12-381 coordinates in `vk.rs` with `caatinga zk build --embed-vk` (no `todo!()` stub)
+  - Map on-chain ZK verification failures to `CAATINGA_ZK_VERIFICATION_FAILED` instead of `CAATINGA_UNEXPECTED_ERROR`
+
+- Updated dependencies
+  - @caatinga/core@2.4.5
+
 ## 2.4.4
 
 ### Patch Changes

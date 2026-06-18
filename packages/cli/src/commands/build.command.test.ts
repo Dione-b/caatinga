@@ -206,7 +206,7 @@ describe("build command", () => {
     }
   });
 
-  it("fails when multiple contracts are configured and no name is passed", async () => {
+  it("builds all configured contracts when no name is passed", async () => {
     const multiContractConfig: CaatingaConfig = {
       ...config,
       contracts: {
@@ -220,19 +220,35 @@ describe("build command", () => {
       }
     };
     loadConfigMock.mockResolvedValue(multiContractConfig);
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    buildContractMock
+      .mockResolvedValueOnce({
+        contract: {
+          name: "counter",
+          config: multiContractConfig.contracts.counter
+        }
+      })
+      .mockResolvedValueOnce({
+        contract: {
+          name: "token",
+          config: multiContractConfig.contracts.token
+        }
+      });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
       await createBuildProgram().parseAsync(["node", "caatinga", "build"]);
 
-      const errors = errorSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(errors).toContain("Pass a contract name to build.");
-      expect(errors).toContain("counter, token");
-      expect(buildContract).not.toHaveBeenCalled();
-      expect(process.exitCode).toBe(1);
+      expect(buildContract).toHaveBeenCalledTimes(2);
+      expect(buildContract).toHaveBeenNthCalledWith(1, {
+        config: multiContractConfig,
+        contractName: "counter"
+      });
+      expect(buildContract).toHaveBeenNthCalledWith(2, {
+        config: multiContractConfig,
+        contractName: "token"
+      });
     } finally {
-      errorSpy.mockRestore();
-      process.exitCode = 0;
+      logSpy.mockRestore();
     }
   });
 });

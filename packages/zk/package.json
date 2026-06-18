@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/zk",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "Zero-knowledge proof serialization bridge for Stellar/Soroban",
   "type": "module",
   "engines": {
@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caatinga/core": "^2.4.4"
+    "@caatinga/core": "^2.4.5"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

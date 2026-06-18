@@ -25,7 +25,7 @@ Any exception must be called out in release notes and package changelogs.
 
 - `alpha`
 - `beta`
-- `next` — currently `2.4.0` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
+- `next` — currently `2.4.5` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
 - `latest` — currently `2.2.1`
 
 ## Release Gate
@@ -37,8 +37,8 @@ checks. It does not publish to npm or create a GitHub Release.
 ## GitHub Releases
 
 GitHub Releases document alpha milestones for contributors and early adopters. Publishing a
-release on GitHub is a manual step after the Release Gate passes. See
-[`docs/release/v0.2.1-alpha.0.md`](./release/v0.2.1-alpha.0.md) for the first alpha notes.
+release on GitHub is a manual step after the Release Gate passes. See package changelogs under
+`packages/*/CHANGELOG.md` for version history.
 
 ## Release Notes
 
@@ -51,8 +51,9 @@ consumers know which boundary has been validated. Bumping `STELLAR_CLI_LAST_TEST
 alone does not require a new major version; bumping `STELLAR_CLI_MIN_VERSION` is a
 breaking change because the hard floor is enforced at runtime.
 
-See the operator checklist in [`release/publish-checklist.md`](./release/publish-checklist.md)
-and the stable release contract in [`release/v1.0.0.md`](./release/v1.0.0.md).
+See the operator checklist in [`release/publish-checklist.md`](./release/publish-checklist.md),
+the stable release contract in [`release/v1.0.0.md`](./release/v1.0.0.md), and the v1 blocking
+spec index in [`release/v1-viability-index.md`](./release/v1-viability-index.md).
 
 ## Package changelogs
 

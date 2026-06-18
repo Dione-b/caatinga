@@ -40,7 +40,7 @@ caatinga zk build
 # Deploy and prove
 caatinga deploy verifier --network testnet --source <identity>
 caatinga zk prove
-caatinga zk invoke --source-account <identity>
+caatinga zk invoke --source <identity>
 ```
 
 ## Commands
@@ -52,7 +52,7 @@ caatinga zk invoke --source-account <identity>
 | `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`. |
 | `caatinga zk init [project] --force` | Overwrite existing scaffold files. |
 | `caatinga zk build [circuit]` | Compile Circom (`-p bls12381`) and run dev trusted setup. |
-| `caatinga zk build [circuit] --embed-vk` | Build with embedded verification key stub (WIP). |
+| `caatinga zk build [circuit] --embed-vk` | Emit `contracts/verifier/src/vk.rs` with embedded BLS12-381 coordinates. |
 | `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` from `input.json`. |
 | `caatinga zk prove [circuit] --debug` | Emit intermediate `witness.wtns` for debugging. |
 | `caatinga zk invoke [circuit]` | Serialize snarkjs output and call `verify_proof` on-chain. |
@@ -158,7 +158,7 @@ import {
 | --- | --- |
 | `ZK_VK_REQUIRED` | Verification key is required but not provided |
 | `ZK_INVOKE_FAILED` | On-chain verification call failed |
-| `ZK_VERIFY_FAILED` | Local verification failed |
+| `ZK_VERIFY_FAILED` | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
 | `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform |
 
 ## Dynamic VK vs embedded VK
@@ -166,16 +166,19 @@ import {
 | Mode | When to use |
 | --- | --- |
 | **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes. |
-| **`--embed-vk`** | Intended for a static VK baked into the verifier contract (see WIP note below). |
+| **`--embed-vk`** | Static VK baked into the verifier contract (see WIP note below for end-to-end status). |
 
 Embedded VK is opt-in and visible in your repo — never a hidden dependency.
 
-### WIP: `--embed-vk`
+### WIP: end-to-end `--embed-vk`
 
-`caatinga zk build --embed-vk` currently writes a stub `contracts/verifier/src/vk.rs` with
-`todo!()` placeholders. The verifier contract scaffold still expects a dynamic VK argument, and
-`caatinga zk invoke --embed-vk` does not yet target an embedded-VK entrypoint. Use the default
-dynamic VK flow for end-to-end verification today.
+`caatinga zk build --embed-vk` writes `contracts/verifier/src/vk.rs` with real BLS12-381
+coordinates from `verification_key.json`. Re-run the same command after circuit changes to
+regenerate the file.
+
+The default `zk-starter` verifier scaffold still expects a dynamic VK argument. Wiring an
+embedded-VK entrypoint in the contract and `caatinga zk invoke --embed-vk` is not complete yet.
+Use the default dynamic VK flow for end-to-end verification today.
 
 ## Trusted setup warning
 

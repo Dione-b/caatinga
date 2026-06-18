@@ -18,7 +18,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 | Doc | What you get |
 | --- | --- |
-| [CLI](./cli.md) | Every command: init, doctor, build, deploy, generate, status, invoke, read |
+| [CLI](./cli.md) | Every command: init, doctor, build, deploy, generate, status, invoke, read, zk |
 | [ZK module](./zk.md) | Circom + Groth16 scaffold, build, prove, and verifier invoke |
 | [Config](./config.md) | `caatinga.config.ts` schema: contracts, networks, frontend |
 | [Client](./client.md) | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings |
@@ -35,13 +35,14 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | [Visão geral do sistema (PT)](./visao-geral-sistema.md) | Architecture overview in Portuguese |
 | [Testing](./testing.md) | Test layers and how to run them |
 | [Release process](./release.md) | Changesets, dist-tags, release gate |
+| [v1 viability index](./release/v1-viability-index.md) | Stable-release blocking specs |
 | [Stellar CLI version contract](./stellar-cli-version-contract.md) | Supported Stellar CLI range and advisories |
 | [Packages](./packages.md) | What each npm package contains |
 | [ADRs](./adr/) | Architecture decision records |
 
 ## Quick orientation
 
-- **Current release:** `next` **`2.4.0`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`); `latest` **`2.2.1`**.
+- **Current release:** `next` **`2.4.5`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`); `latest` **`2.2.1`**.
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in

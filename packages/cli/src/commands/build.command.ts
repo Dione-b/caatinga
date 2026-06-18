@@ -4,7 +4,6 @@ import {
   CaatingaError,
   CaatingaErrorCode,
   loadConfig,
-  resolveDefaultContractName,
   type CaatingaConfig
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
@@ -14,20 +13,25 @@ import { evaluateDeployCoverage } from "./doctor-deploy-coverage.js";
 export function registerBuildCommand(program: Command): void {
   program
     .command("build")
-    .description("Build a configured Soroban contract")
-    .argument("[contract]", "Contract name")
+    .description("Build one or all configured Soroban contracts")
+    .argument("[contract]", "Contract name (builds all if omitted)")
     .action((contractName: string | undefined) => runCliAction(async () => {
       const config = await loadConfig();
-      const resolvedContractName = contractName ?? resolveDefaultContractName(config);
-      const result = await buildContract({
-        config,
-        contractName: resolvedContractName
-      });
 
-      logger.success("Contract built");
-      logger.info("");
-      logger.info(`Contract: ${result.contract.name}`);
-      logger.info(`WASM: ${result.contract.config.wasm}`);
+      const contractNames = contractName
+        ? [contractName]
+        : Object.keys(config.contracts);
+
+      for (const name of contractNames) {
+        const result = await buildContract({
+          config,
+          contractName: name
+        });
+
+        logger.success(`Contract built: ${result.contract.name}`);
+        logger.info(`  WASM: ${result.contract.config.wasm}`);
+      }
+
       await warnIfDefaultNetworkNeedsDeploy(config);
     }));
 }

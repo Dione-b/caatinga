@@ -14,12 +14,29 @@ export class CaatingaError extends Error {
   }
 }
 
+const ZK_ERROR_CODE_MAP: Record<string, CaatingaErrorCodeValue> = {
+  ZK_VERIFY_FAILED: CaatingaErrorCode.ZK_VERIFICATION_FAILED,
+};
+
 export function toCaatingaError(error: unknown): CaatingaError {
   if (error instanceof CaatingaError) {
     return error;
   }
 
   if (error instanceof Error) {
+    const zkCode = "code" in error && typeof error.code === "string"
+      ? ZK_ERROR_CODE_MAP[error.code]
+      : undefined;
+
+    if (zkCode) {
+      return new CaatingaError(
+        error.message,
+        zkCode,
+        "hint" in error && typeof error.hint === "string" ? error.hint : undefined,
+        error
+      );
+    }
+
     return new CaatingaError(error.message, CaatingaErrorCode.UNEXPECTED_ERROR, undefined, error);
   }
 

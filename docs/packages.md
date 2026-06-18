@@ -13,7 +13,7 @@ Install for end users:
 npm install -g @caatinga/cli
 ```
 
-`next` currently resolves to **`2.4.1`**; `latest` remains **`2.2.1`** until promoted.
+`next` currently resolves to **`2.4.5`**; `latest` remains **`2.2.1`** until promoted.
 
 Monorepo development:
 

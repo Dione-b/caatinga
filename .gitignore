@@ -16,8 +16,6 @@ coverage
 smoke-ci-out/
 smoke-app/
 smoke-app-retry/
-docs/superpowers/specs/*
-!docs/superpowers/specs/00-v1-viability-index.md
 
 # Cargo / Soroban contract build outputs
 target/

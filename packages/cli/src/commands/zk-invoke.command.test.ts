@@ -70,7 +70,7 @@ describe("zk invoke command", () => {
       "caatinga",
       "zk",
       "invoke",
-      "--source-account",
+      "--source",
       "alice",
     ]);
 

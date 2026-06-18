@@ -18,7 +18,8 @@ caatinga init my-contract-app --minimal
 
 ## `caatinga build [contract]`
 
-Builds the configured contract with `stellar contract build`.
+Builds one configured contract with `stellar contract build`. Omit `contract` to build **every**
+contract listed in `caatinga.config.ts` (same batch semantics as `caatinga deploy` without a name).
 
 ## `caatinga doctor [--network testnet] [--source alice]`
 
@@ -94,6 +95,20 @@ Simulates a read-only contract method with `stellar contract invoke --send=no`. 
 
 Use `read` for getters and pure queries. Use `invoke` for increments, transfers, and other state-changing calls.
 
+## ZK commands
+
+Circom Groth16 workflow (`caatinga zk init`, `build`, `prove`, `invoke`). Full reference:
+[ZK module](./zk.md).
+
+| Command | Purpose |
+| --- | --- |
+| `caatinga zk build [circuit] [--embed-vk]` | Compile Circom and run dev trusted setup |
+| `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` |
+| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` |
+
+`--source` matches deploy/invoke (not `--source-account`). When verification returns `false`,
+the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`.
+
 ## Stellar CLI compatibility
 
 Caatinga rejects Stellar CLI versions below `23.0.0` because 22.x cannot sign `stellar contract invoke`. Versions newer than the last-tested `25.2.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning. See [Stellar CLI Version Contract](./stellar-cli-version-contract.md).
@@ -123,5 +138,6 @@ Caatinga emits public `CAATINGA_*` error codes for automation. Common examples:
 - `CAATINGA_TEMPLATE_INCOMPATIBLE`
 - `CAATINGA_XDR_BUILD_FAILED`
 - `CAATINGA_XDR_SIGN_FAILED`
+- `CAATINGA_ZK_VERIFICATION_FAILED`
 
 See `docs/errors.md` for the full table.

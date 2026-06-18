@@ -10,10 +10,10 @@ export function registerZkInvokeCommand(program: Command): void {
     .command("invoke [circuitName]")
     .description("Serialize the proof and invoke the verifier contract")
     .option("--embed-vk", "Use the embedded VK path (no VK argument)")
-    .requiredOption("--source-account <account>", "Stellar source account")
+    .requiredOption("-s, --source <identity>", "Stellar CLI identity alias that can sign (for example alice)")
     .action(async (
       circuitName: string | undefined,
-      options: { embedVk?: boolean; sourceAccount: string }
+      options: { embedVk?: boolean; source: string }
     ) => {
       await runCliAction(async () => {
         const config = await loadConfig();
@@ -31,7 +31,7 @@ export function registerZkInvokeCommand(program: Command): void {
         const result = await invokeVerifier({
           verifierContract: circuit.verifierContract,
           network: config.defaultNetwork,
-          sourceAccount: options.sourceAccount,
+          sourceAccount: options.source,
           proofPath: `.artifacts/zk/${name}/proof.json`,
           vkPath: `.artifacts/zk/${name}/verification_key.json`,
           publicSignalsPath: `.artifacts/zk/${name}/public.json`,

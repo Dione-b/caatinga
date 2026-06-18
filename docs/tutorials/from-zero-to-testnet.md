@@ -2,7 +2,7 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-During alpha, use npm **`next`** for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`. Currently **`2.4.0`** on `next`; `latest` remains **`2.2.1`**.
+During alpha, use npm **`next`** for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`. Currently **`2.4.5`** on `next`; `latest` remains **`2.2.1`**.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ stellar --version
 rustc --version
 ```
 
-Confirm the published versions (`next` is currently **`2.4.0`**):
+Confirm the published versions (`next` is currently **`2.4.5`**):
 
 ```bash
 npm view @caatinga/cli@next version
