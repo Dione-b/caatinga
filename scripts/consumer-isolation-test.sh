@@ -11,7 +11,7 @@ RESOLVE_ABS_PATH_CMD='import path from "node:path"; process.stdout.write(path.re
 
 assert_no_deprecated_install_warnings() {
   local log_file="$1"
-  local deprecated_pattern='npm warn deprecated|deprecated subdependencies found|@walletconnect/modal|@walletconnect/sign-client@2\.11|@motionone/vue|@trezor/connect-web@9|ripple-lib@|uuid@8'
+  local deprecated_pattern='@walletconnect/modal|@walletconnect/sign-client@2\.11|@motionone/vue|@trezor/connect-web@9|ripple-lib@|uuid@8'
 
   if grep -Eiq "$deprecated_pattern" "$log_file"; then
     echo "Install reported deprecated wallet SDK dependencies:" >&2

@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 2.4.4
+
+### Patch Changes
+
+- Align official templates with the current `@caatinga/core` release, fix `ci-snapshot-pack` core version capture, and narrow consumer isolation deprecated-dependency checks to wallet SDK packages only.
+- Updated dependencies
+  - @caatinga/core@2.4.4
+  - @caatinga/zk@2.4.4
+
 ## 2.4.3
 
 ### Patch Changes
