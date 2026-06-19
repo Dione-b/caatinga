@@ -1,11 +1,11 @@
 // Placeholder bindings. This file exists so the template type-checks before you
 // run `caatinga generate`. It does NOT talk to the chain — every method throws a
 // clear, actionable error. `caatinga generate counter` overwrites this file with
-// real Stellar CLI bindings.
+// real @stellar/stellar-sdk generate bindings.
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 
 // Marker the client checks to detect that real bindings haven't been generated
-// yet. Real Stellar CLI bindings never export this.
+// yet. Real @stellar/stellar-sdk generate bindings never export this.
 export const __caatingaPlaceholder = true;
 
 const GENERATE_HINT =

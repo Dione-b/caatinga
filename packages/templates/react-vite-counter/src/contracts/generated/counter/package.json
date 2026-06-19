@@ -1,0 +1,11 @@
+{
+  "name": "counter",
+  "version": "0.0.1",
+  "description": "Placeholder binding package — replaced by @stellar/stellar-sdk generate",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

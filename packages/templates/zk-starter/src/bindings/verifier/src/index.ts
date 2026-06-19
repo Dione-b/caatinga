@@ -1,7 +1,7 @@
 // Placeholder bindings. This file exists so the template type-checks before you
 // run `caatinga generate`. It does NOT talk to the chain — every method throws a
 // clear, actionable error. `caatinga generate verifier` overwrites this file with
-// real Stellar CLI bindings.
+// real @stellar/stellar-sdk generate bindings.
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 
 export const __caatingaPlaceholder = true;

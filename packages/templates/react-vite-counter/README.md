@@ -15,7 +15,7 @@ npm run dev          # or: pnpm dev
 
 Run `build` before `deploy` (WASM required) and `deploy` before `generate` (contract ID required).
 
-The checked-in binding stub under `src/contracts/generated/counter/src/index.ts` is a placeholder so the template type-checks before you run `caatinga generate`. Run `caatinga generate` before `npm run dev` so the browser uses real Stellar CLI bindings instead of the stub.
+The checked-in binding stub under `src/contracts/generated/counter/` is a placeholder so the template type-checks before you run `caatinga generate`. Run `caatinga generate` before `npm run dev` so the browser uses real `@stellar/stellar-sdk generate` bindings instead of the stub.
 
 Use a local Stellar CLI identity alias for `--source`; public `G...` addresses, seed phrases, and secret keys are rejected for signing operations.
 
@@ -40,7 +40,7 @@ After `caatinga generate`, wire generated bindings to the client:
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter/src/index.js";
+import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const wallet = createStellarWalletsKitAdapter();
