@@ -1,6 +1,6 @@
 {
   "name": "caatinga",
-  "version": "2.4.1",
+  "version": "3.0.0",
   "private": true,
   "engines": {
     "node": ">=22"
@@ -35,7 +35,7 @@
     "yaml": "^2.7.0"
   },
   "dependencies": {
-    "@caatinga/client": "^2.4.1",
-    "@caatinga/core": "^2.4.1"
+    "@caatinga/client": "^3.0.0",
+    "@caatinga/core": "^3.0.0"
   }
 }

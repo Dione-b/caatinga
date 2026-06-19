@@ -86,7 +86,7 @@ describe("createProjectFromTemplate", () => {
       name: "no-artifacts-template",
       version: "0.1.0",
       caatinga: {
-        compatibleCore: "^2.0.0",
+        compatibleCore: "^3.0.0",
         templateVersion: 1
       },
       frontend: {
