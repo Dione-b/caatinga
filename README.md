@@ -179,7 +179,7 @@ This functionality ships through `@caatinga/zk`. See the [ZK docs](./docs/zk.md)
 
 ## 📋 Requirements
 
-- **Node.js** 20+
+- **Node.js** 22+
 - **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on your `PATH` *(25.2.0 recommended; 22.x unsupported)*
 - **Rust** 1.84.0+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)

@@ -6,7 +6,7 @@ During alpha, install published packages from npm. Use **`next`** for the curren
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - pnpm 9+ for repository development
 - Rust 1.84.0 or newer with the wasm32v1-none target.
 - Stellar CLI

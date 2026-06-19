@@ -34,7 +34,7 @@ Highlights from the `2.x` line:
 
 ## Build, Test, and Development Commands
 
-Use pnpm 9.15.4 and Node 20 or newer.
+Use pnpm 9.15.4 and Node 22 or newer.
 
 - `pnpm install --frozen-lockfile`: install exactly from `pnpm-lock.yaml`; this is CI behavior.
 - `pnpm build`: build all packages through Turbo.
@@ -80,7 +80,7 @@ Before committing changes that touch tooling, dependencies, or CI, verify that v
   `pnpm@9.15.4`). Do not also pin a different pnpm version in `.github/workflows/*` (for example
   `pnpm/action-setup` with `version: 9`); `pnpm/action-setup@v4` reads `packageManager` and errors
   on duplicate sources.
-- **Node.js**: Workflows use Node 20; keep `engines` and any `.nvmrc` / `node-version` inputs aligned with that baseline.
+- **Node.js**: Workflows use Node 22; keep `engines` and any `.nvmrc` / `node-version` inputs aligned with that baseline.
 - **Lockfile**: After dependency or `packageManager` changes, run `pnpm install` and commit `pnpm-lock.yaml` so CI `--frozen-lockfile` installs match.
 - **Workspace linking**: Root `.npmrc` sets `prefer-workspace-packages=true` and `link-workspace-packages=true` so local `@caatinga/*` packages resolve from the monorepo before npm (needed when a version bump is not yet published).
 - **Workspace packages**: When bumping published versions or internal `workspace:*` ranges, update all affected `package.json` files in the same change.

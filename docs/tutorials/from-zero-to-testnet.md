@@ -6,7 +6,7 @@ During alpha, use npm **`next`** for `@caatinga/cli`, `@caatinga/core`, `@caatin
 
 ## Prerequisites
 
-Install Node.js 20+ and Rust first. Then install the supported Stellar CLI and Wasm target:
+Install Node.js 22+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
 npm install -g @caatinga/cli@next
@@ -62,7 +62,7 @@ Expected shape:
 ```txt
 Caatinga Doctor
 
-✓ Node.js 20.11.0
+✓ Node.js 22
 ✓ Stellar CLI 25.2.0
 ✓ Rust 1.84.0
 ✓ wasm32v1-none target installed

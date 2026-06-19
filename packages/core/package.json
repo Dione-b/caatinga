@@ -20,7 +20,7 @@
   "author": "Caatinga contributors",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "type": "module",
   "main": "./dist/index.cjs",

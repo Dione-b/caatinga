@@ -13,7 +13,7 @@ Inside a generated project, prefer `npx caatinga` so the project-local workflow 
 
 ## Requirements
 
-- Node.js `>=20`
+- Node.js `>=22`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (22.x breaks `caatinga invoke` signing)
 - Rust 1.84.0 or newer with the `wasm32v1-none` target (contract builds)
 - A funded Stellar CLI identity for `deploy` and `invoke` (for example `alice`)
