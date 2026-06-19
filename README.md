@@ -24,7 +24,8 @@ npm install -g @caatinga/cli
 caatinga init my-dapp
 ```
 
-Go from a Rust contract to a wallet-ready frontend without juggling WASM, identities, contract IDs, and bindings by hand. Caatinga wires build, deploy, artifacts, typed bindings, and wallet adapters into one workflow — while keeping `contractId`, RPC URLs, network passphrases, signing identities, and XDR explicit (no magic).
+Go from a Rust contract to a wallet-ready frontend without juggling WASM, identities, contract IDs, and bindings by hand.
+Caatinga wires build, deploy, artifacts, typed bindings, and wallet adapters into one workflow — while keeping `contractId`, RPC URLs, network passphrases, signing identities, and XDR explicit (no magic).
 
 > **Caatinga is a workflow layer for Soroban development.** It connects contracts, deployments, bindings, artifacts, and wallets into a single developer experience.
 

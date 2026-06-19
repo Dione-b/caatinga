@@ -306,7 +306,8 @@ If `@stellar/stellar-sdk generate` changes this generated shape, the compatibili
 
 The return is a `SentTransaction<T>`. Caatinga normalizes `sendTransactionResponse.hash` → `transactionHash` and reads the `result` getter → `result` on invoke responses.
 
-Multi-auth: when a simulated transaction has unsigned non-invoker Soroban auth entries (delegated address credentials / "AddressV2"), signing raises `NeedsMoreSignaturesError`. Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED`. Full `signAuthEntry` orchestration is not yet provided by the browser wallet adapter — handle multi-signer flows in application code.
+Multi-auth: when a simulated transaction has unsigned non-invoker Soroban auth entries (delegated address credentials / "AddressV2"), signing raises `NeedsMoreSignaturesError`.
+Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED`. Full `signAuthEntry` orchestration is not yet provided by the browser wallet adapter — handle multi-signer flows in application code.
 
 ## Failure behavior
 
