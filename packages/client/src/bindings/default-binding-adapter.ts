@@ -31,7 +31,7 @@ export function createDefaultBindingAdapter(binding: BindingWithClient): Caating
         throw new CaatingaError(
           "Generated binding does not export Client.",
           CaatingaErrorCode.BINDING_CLIENT_NOT_FOUND,
-          "Regenerate bindings with Stellar CLI."
+          "Run caatinga generate <contract> --network <network> (uses @stellar/stellar-sdk generate)."
         );
       }
 
