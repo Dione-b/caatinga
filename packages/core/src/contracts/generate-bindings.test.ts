@@ -43,10 +43,10 @@ describe("generateBindings", () => {
   beforeEach(() => {
     runCommand.mockReset();
     runCommand.mockImplementation(async (command: string, args: string[]) => {
-      if (command === "stellar" && args[0] === "contract" && args[1] === "bindings") {
+      if (command === "npx" && args.includes("generate")) {
         return { stdout: "generated", stderr: "", all: "generated" };
       }
-      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+      return { stdout: "", stderr: "", all: "" };
     });
   });
 
@@ -84,7 +84,7 @@ describe("generateBindings", () => {
     });
 
     expect(result.outputDir).toBe(path.join(tmpDir, "src/gen/counter"));
-    expect(result.importPath).toBe("./src/gen/counter/src/index.js");
+    expect(result.importPath).toBe("./src/gen/counter");
     expect(result.legacyStubRemoved).toBe(false);
     expect(result.marker).toMatchObject({
       version: 1,
@@ -94,16 +94,20 @@ describe("generateBindings", () => {
     });
     await expect(readBindingMarker(result.outputDir)).resolves.toEqual(result.marker);
     expect(runCommand).toHaveBeenCalledWith(
-      "stellar",
+      "npx",
       expect.arrayContaining([
-        "contract",
-        "bindings",
-        "typescript",
+        "--yes",
+        "@stellar/stellar-sdk",
+        "generate",
         "--contract-id",
         CONTRACT_ID,
         "--output-dir",
         result.outputDir,
-        "--overwrite"
+        "--contract-name",
+        "counter",
+        "--overwrite",
+        "--network",
+        "testnet"
       ]),
       { cwd: tmpDir, failureCode: CaatingaErrorCode.BINDINGS_FAILED }
     );
@@ -140,7 +144,7 @@ describe("generateBindings", () => {
       cwd: tmpDir
     });
 
-    expect(result.importPath).toBe("./src/gen/counter/src/index.js");
+    expect(result.importPath).toBe("./src/gen/counter");
     expect(result.legacyStubRemoved).toBe(true);
     await expect(access(legacyStubPath)).rejects.toBeDefined();
   });
@@ -213,14 +217,14 @@ describe("generateBindings", () => {
     await writeArtifacts(artifacts, tmpDir);
 
     runCommand.mockImplementation(async (command: string, args: string[]) => {
-      if (command === "stellar" && args[0] === "contract" && args[1] === "bindings") {
+      if (command === "npx" && args.includes("generate")) {
         throw new CaatingaError(
-          "Command failed: stellar contract bindings",
+          "Command failed: npx @stellar/stellar-sdk generate",
           CaatingaErrorCode.BINDINGS_FAILED,
           "bindings output"
         );
       }
-      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+      return { stdout: "", stderr: "", all: "" };
     });
 
     await expect(
@@ -258,10 +262,10 @@ describe("generateBindings", () => {
     await writeArtifacts(artifacts, tmpDir);
 
     runCommand.mockImplementation(async (command: string, args: string[]) => {
-      if (command === "stellar" && args[0] === "contract" && args[1] === "bindings") {
+      if (command === "npx" && args.includes("generate")) {
         throw new CaatingaError("cargo failed", CaatingaErrorCode.BUILD_FAILED, "rustc output");
       }
-      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+      return { stdout: "", stderr: "", all: "" };
     });
 
     await expect(

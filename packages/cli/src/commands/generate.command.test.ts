@@ -53,7 +53,7 @@ const counterResult = {
   contractName: "counter",
   network: { name: "testnet" },
   outputDir: "/tmp/counter",
-  importPath: "./src/contracts/generated/counter/src/index.js",
+  importPath: "./src/contracts/generated/counter",
   legacyStubRemoved: true,
   output: "generated"
 };
@@ -62,7 +62,7 @@ const tokenResult = {
   contractName: "token",
   network: { name: "testnet" },
   outputDir: "/tmp/token",
-  importPath: "./src/contracts/generated/token/src/index.js",
+  importPath: "./src/contracts/generated/token",
   legacyStubRemoved: false,
   output: "generated"
 };
@@ -102,7 +102,7 @@ describe("generate command", () => {
       });
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(output).toContain("Import path: ./src/contracts/generated/counter/src/index.js");
+      expect(output).toContain("Import path: ./src/contracts/generated/counter");
       expect(output).toContain("Removed legacy stub: ./src/contracts/generated/counter.ts");
       expect(output).toContain("Next: import bindings from the import path above, then run npm run dev");
     } finally {
@@ -127,8 +127,8 @@ describe("generate command", () => {
       });
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(output).toContain("Import path: ./src/contracts/generated/counter/src/index.js");
-      expect(output).toContain("Import path: ./src/contracts/generated/token/src/index.js");
+      expect(output).toContain("Import path: ./src/contracts/generated/counter");
+      expect(output).toContain("Import path: ./src/contracts/generated/token");
     } finally {
       logSpy.mockRestore();
     }

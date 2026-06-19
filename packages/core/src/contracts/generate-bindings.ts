@@ -5,9 +5,8 @@ import { writeBindingMarker, type BindingMarker } from "../bindings/binding-mark
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
-import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
-import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
+import { buildGenerateNetworkArgs } from "./build-generate-network-args.js";
 
 export type GenerateBindingsOptions = {
   config: CaatingaConfig;
@@ -18,7 +17,7 @@ export type GenerateBindingsOptions = {
 
 function toBindingImportPath(bindingsOutput: string, contractName: string): string {
   const normalized = bindingsOutput.replace(/^\.\//, "").split(path.sep).join("/");
-  return `./${path.posix.join(normalized, contractName, "src", "index.js")}`;
+  return `./${path.posix.join(normalized, contractName)}`;
 }
 
 export async function removeLegacyBindingStub(
@@ -59,21 +58,21 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga generate.");
-
   const outputDir = path.resolve(cwd, options.config.frontend.bindingsOutput, options.contractName);
   await mkdir(outputDir, { recursive: true });
 
-  const result = await runCommand("stellar", [
-    "contract",
-    "bindings",
-    "typescript",
+  const result = await runCommand("npx", [
+    "--yes",
+    "@stellar/stellar-sdk",
+    "generate",
     "--contract-id",
     contractArtifact.contractId,
     "--output-dir",
     outputDir,
+    "--contract-name",
+    options.contractName,
     "--overwrite",
-    ...buildStellarNetworkArgs(network)
+    ...buildGenerateNetworkArgs(network)
   ], {
     cwd,
     failureCode: CaatingaErrorCode.BINDINGS_FAILED

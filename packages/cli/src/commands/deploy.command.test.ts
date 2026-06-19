@@ -57,7 +57,7 @@ const generateResult = {
       contractName: "counter",
       network: { name: "testnet" },
       outputDir: "/tmp/counter",
-      importPath: "./src/contracts/generated/counter/src/index.js",
+      importPath: "./src/contracts/generated/counter",
       legacyStubRemoved: false,
       output: "generated"
     }
@@ -99,7 +99,7 @@ describe("deploy command", () => {
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Deploy complete");
       expect(output).toContain("Bindings generated");
-      expect(output).toContain("counter → ./src/contracts/generated/counter/src/index.js");
+      expect(output).toContain("counter → ./src/contracts/generated/counter");
       expect(output).toContain("npm run dev");
     } finally {
       logSpy.mockRestore();
