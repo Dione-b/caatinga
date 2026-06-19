@@ -14,8 +14,15 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 ## Current release
 
 Published on npm:
-- **`next`**: **`2.4.5`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
+- **`next`**: **`3.0.0`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
 - **`latest`**: **`2.2.1`** (previous stable line until promoted)
+
+Highlights from the `3.0.0` line:
+
+- Node floor raised to **22** (`.nvmrc`, `engines`, CI workflows) for `@stellar/stellar-sdk` v16.
+- `caatinga generate` uses **`npx @stellar/stellar-sdk generate`** (no Stellar CLI for bindings).
+- Templates (`react-vite-counter`, `zk-starter`) on **`@stellar/stellar-sdk ^16.0.1`**; import path is package root (`./contracts/generated/<contract>`).
+- **`CAATINGA_MULTI_AUTH_REQUIRED`** for delegated AddressV2 / non-invoker auth entries.
 
 Highlights from the `2.x` line:
 
