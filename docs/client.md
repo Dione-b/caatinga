@@ -300,6 +300,14 @@ Caatinga adapts `CaatingaWalletAdapter.signTransaction({ xdr, networkPassphrase 
 
 If `@stellar/stellar-sdk generate` changes this generated shape, the compatibility fix belongs in the binding adapter/client integration layer, not in application code.
 
+## SDK v16 transaction submission
+
+`@caatinga/client` calls `assembledTx.signAndSend({ signTransaction })` on generated bindings. SDK v16 accepts optional `force`, `signTransaction`, and `watcher`; Caatinga passes only `signTransaction`.
+
+The return is a `SentTransaction<T>`. Caatinga normalizes `sendTransactionResponse.hash` → `transactionHash` and reads the `result` getter → `result` on invoke responses.
+
+Multi-auth: when a simulated transaction has unsigned non-invoker Soroban auth entries (delegated address credentials / "AddressV2"), signing raises `NeedsMoreSignaturesError`. Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED`. Full `signAuthEntry` orchestration is not yet provided by the browser wallet adapter — handle multi-signer flows in application code.
+
 ## Failure behavior
 
 Client failures use public `CAATINGA_*` codes. The most common are:
