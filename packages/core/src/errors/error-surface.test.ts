@@ -221,6 +221,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
   [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
     file: "packages/cli/src/commands/doctor-deploy-coverage.test.ts",
     trigger: "reportDeployCoverage("
+  },
+  [CaatingaErrorCode.MULTI_AUTH_REQUIRED]: {
+    file: "packages/client/src/client/transaction-submit.test.ts",
+    trigger: "submitTransaction("
   }
 };
 

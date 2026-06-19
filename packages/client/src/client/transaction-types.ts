@@ -1,12 +1,14 @@
 export type StellarSdkSignTransaction = (
   xdr: string,
-  opts?: { networkPassphrase?: string; address?: string }
-) => Promise<{ signedTxXdr: string }> | { signedTxXdr: string };
+  opts?: { networkPassphrase?: string; address?: string; submit?: boolean; submitUrl?: string }
+) => Promise<{ signedTxXdr: string; error?: unknown }> | { signedTxXdr: string; error?: unknown };
 
 export interface SubmitTransactionLike {
-  signAndSend?: (
-    input?: { signTransaction?: StellarSdkSignTransaction }
-  ) => Promise<unknown> | unknown;
+  signAndSend?: (input?: {
+    force?: boolean;
+    signTransaction?: StellarSdkSignTransaction;
+    watcher?: unknown;
+  }) => Promise<unknown> | unknown;
   send?: () => Promise<unknown> | unknown;
 }
 

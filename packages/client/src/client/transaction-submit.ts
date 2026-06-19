@@ -2,6 +2,26 @@ import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
 import { enrichReadCallInvokeError } from "./read-call-error.js";
 
+function isMultiAuthRequired(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const name = (error as { name?: string }).name;
+  const message = String((error as { message?: string }).message ?? "");
+  return name === "NeedsMoreSignaturesError" || /requires signatures from/i.test(message);
+}
+
+function multiAuthError(
+  contractName: string,
+  method: string,
+  cause: unknown
+): CaatingaError {
+  return new CaatingaError(
+    `"${contractName}.${method}" requires additional non-invoker signatures (delegated AddressV2 credentials).`,
+    CaatingaErrorCode.MULTI_AUTH_REQUIRED,
+    "The transaction has Soroban auth entries that must be signed by other accounts via signAuthEntry. Serialize, collect each signer's auth-entry signature, then re-submit.",
+    cause
+  );
+}
+
 export async function submitTransaction(
   transaction: unknown,
   signTransaction: StellarSdkSignTransaction,
@@ -19,6 +39,10 @@ export async function submitTransaction(
     } catch (error) {
       if (error instanceof CaatingaError) {
         throw error;
+      }
+
+      if (isMultiAuthRequired(error)) {
+        throw multiAuthError(contractName, method, error);
       }
 
       const readCallError = enrichReadCallInvokeError(error, contractName, method);
@@ -43,6 +67,10 @@ export async function submitTransaction(
     } catch (error) {
       if (error instanceof CaatingaError) {
         throw error;
+      }
+
+      if (isMultiAuthRequired(error)) {
+        throw multiAuthError(contractName, method, error);
       }
 
       const readCallError = enrichReadCallInvokeError(error, contractName, method);

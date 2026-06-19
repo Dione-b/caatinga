@@ -42,11 +42,16 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
             opts?: { networkPassphrase?: string; address?: string }
           ) => Promise<{ signedTxXdr: string }>;
         }) {
-          const signed = await input.signTransaction("AAAA_UNSIGNED", {
+          await input.signTransaction("AAAA_UNSIGNED", {
             networkPassphrase: "Test SDF Network ; September 2015",
             address: "GPUBLIC"
           });
-          return { txHash: `hash:${signed.signedTxXdr}`, result: 1 };
+          return {
+            sendTransactionResponse: { hash: "hash:AAAA_SIGNED", status: "PENDING" },
+            get result() {
+              return 1;
+            }
+          };
         }
       };
     }
