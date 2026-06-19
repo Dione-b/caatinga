@@ -87,7 +87,7 @@ Primary flow:
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter/src/index.js";
+import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const wallet = createStellarWalletsKitAdapter();

@@ -1,6 +1,6 @@
 # Stellar CLI Version Contract
 
-Caatinga shells out to Stellar CLI for current build, deploy, bindings, and invoke commands. Future XDR or doctor commands must follow the same version contract when implemented.
+Caatinga shells out to Stellar CLI for current build, deploy, and invoke commands. Binding generation uses `npx @stellar/stellar-sdk generate` (no Stellar CLI required). Future XDR or doctor commands must follow the same version contract when implemented.
 
 ## Hard Floor
 

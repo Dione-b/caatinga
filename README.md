@@ -293,7 +293,7 @@ npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter/src/index.js";
+import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({

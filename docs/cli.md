@@ -61,7 +61,7 @@ the recovery command `npx caatinga generate --network <network>`.
 
 ## `caatinga generate [contract] [--network testnet]`
 
-Generates TypeScript bindings from the deployed contract ID. The contract name is
+Generates TypeScript bindings from the deployed contract ID via `npx @stellar/stellar-sdk generate` (Stellar CLI is not required). The contract name is
 optional: omit it to generate bindings for every contract already deployed on the
 network (read from `caatinga.artifacts.json`), or pass a name to generate just that one.
 In all-contracts mode the command first prints the current freshness of each contract's

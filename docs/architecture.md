@@ -54,7 +54,7 @@ flowchart LR
   deploy["caatinga deploy<br/>(stellar contract deploy)"]
   artifacts["caatinga.artifacts.json<br/>networks[network].contracts[name].contractId"]
 
-  generate["caatinga generate<br/>(stellar contract bindings)"]
+  generate["caatinga generate<br/>(npx @stellar/stellar-sdk generate)"]
   bindings["contracts/generated/&lt;name&gt;.ts<br/>(Client, methods)"]
 
   invoke["caatinga invoke<br/>(stellar contract invoke)"]

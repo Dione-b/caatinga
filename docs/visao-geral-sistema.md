@@ -102,7 +102,7 @@ Cada subdiretório de `packages/core/src/` é uma camada com responsabilidade is
 |-------------------|----------------------------|
 | `build` | `stellar contract build` |
 | `deploy` | `stellar contract deploy` |
-| `generate` | `stellar contract bindings` |
+| `generate` | `npx @stellar/stellar-sdk generate` |
 | `invoke` | `stellar contract invoke` |
 
 ### Resiliência a drift de output

@@ -53,7 +53,7 @@ rather than the root `@caatinga/core` package entry.
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter/src/index.js";
+import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const wallet = createStellarWalletsKitAdapter();
@@ -164,7 +164,7 @@ Keep Caatinga client wiring in a dedicated module with **static imports**:
 // src/caatinga.ts — static imports only
 import { createCaatingaClient } from "@caatinga/client";
 import artifactsJson from "../caatinga.artifacts.json";
-import * as Counter from "./contracts/generated/counter/src/index.js";
+import * as Counter from "./contracts/generated/counter";
 import { stellarWalletAdapter } from "./wallet.js";
 
 export const caatingaClient = createCaatingaClient({ /* ... */ });
@@ -298,7 +298,7 @@ The default binding adapter expects generated bindings to:
 
 Caatinga adapts `CaatingaWalletAdapter.signTransaction({ xdr, networkPassphrase })` into generated transaction `signTransaction(xdr, opts)`, and does not parse XDR or serialize Soroban values.
 
-If Stellar CLI changes this generated shape, the compatibility fix belongs in the binding adapter/client integration layer, not in application code.
+If `@stellar/stellar-sdk generate` changes this generated shape, the compatibility fix belongs in the binding adapter/client integration layer, not in application code.
 
 ## Failure behavior
 
