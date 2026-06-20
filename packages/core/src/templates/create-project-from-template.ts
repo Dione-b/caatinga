@@ -41,8 +41,8 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
   await mkdir(targetDir, { recursive: true });
   await cp(templateDir, targetDir, {
     recursive: true,
-    force: mergeIntoExisting,
-    errorOnExist: !mergeIntoExisting,
+    force: true,
+    errorOnExist: false,
     filter: (source) => shouldCopyTemplateEntry(templateDir, source, options.filter),
   });
 
