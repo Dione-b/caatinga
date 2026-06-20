@@ -6,6 +6,8 @@ Caatinga counter dApp for Stellar/Soroban.
 
 ```bash
 npm install          # or: pnpm install
+npm test             # run Rust contract tests
+cargo test --manifest-path contracts/counter/Cargo.toml
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga generate counter --network testnet

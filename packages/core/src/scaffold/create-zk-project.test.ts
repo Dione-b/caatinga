@@ -61,6 +61,9 @@ describe("createZkProject", () => {
       "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}"
     );
     expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
+    expect(packageJson.scripts.test).toBe(
+      "cargo test --manifest-path contracts/verifier/Cargo.toml"
+    );
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
     expect(readme).toContain("npx caatinga deploy verifier --network testnet --source <identity>");

@@ -56,6 +56,7 @@ function packageJsonSource(projectName: string): string {
         build: "caatinga build app",
         deploy: "caatinga deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
         doctor: "caatinga doctor --network testnet",
+        test: "cargo test --manifest-path contracts/app/Cargo.toml",
         "read:hello":
           "caatinga read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
         "read:version":
@@ -80,11 +81,22 @@ Minimal Caatinga project with a Soroban contract stub (no frontend template).
 
 \`\`\`bash
 npm install
+npm test
 npx caatinga doctor
 npx caatinga build app
 npx caatinga deploy app --network testnet --source <identity>
 npx caatinga read app.version --network testnet
 npx caatinga read app.hello --network testnet
+\`\`\`
+
+## Tests
+
+Run the Rust contract tests from the project root:
+
+\`\`\`bash
+npm test
+# or directly:
+cargo test --manifest-path contracts/app/Cargo.toml
 \`\`\`
 
 ## Contract

@@ -69,6 +69,7 @@ function packageJsonSource(projectName: string): string {
         build: "caatinga build verifier",
         deploy: "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
         doctor: "caatinga doctor --network testnet",
+        test: "cargo test --manifest-path contracts/verifier/Cargo.toml",
       },
       devDependencies: {
         "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
@@ -89,10 +90,21 @@ Minimal Caatinga ZK project.
 
 \`\`\`bash
 npm install
+npm test
 npx caatinga zk build main
 npx caatinga build verifier
 npx caatinga deploy verifier --network testnet --source <identity>
 npx caatinga zk prove main
+\`\`\`
+
+## Tests
+
+Run the Rust verifier contract tests from the project root:
+
+\`\`\`bash
+npm test
+# or directly:
+cargo test --manifest-path contracts/verifier/Cargo.toml
 \`\`\`
 
 Replace \`circuits/main.circom\` with your circuit. Keep the entry point named \`main\`.

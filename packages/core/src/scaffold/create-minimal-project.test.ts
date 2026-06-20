@@ -43,6 +43,7 @@ describe("createMinimalProject", () => {
     expect(packageJson.scripts["read:hello"]).toContain("caatinga read app.hello");
     expect(packageJson.scripts["read:version"]).toContain("caatinga read app.version");
     expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
+    expect(packageJson.scripts.test).toBe("cargo test --manifest-path contracts/app/Cargo.toml");
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
     expect(readme).toContain("caatinga read app.hello");
