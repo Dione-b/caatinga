@@ -62,7 +62,7 @@ and utility files (`load-config.ts`, `init.command.ts`) and PascalCase only for 
 that require it (`CaatingaError.ts`). Preserve public error codes and package exports as
 compatibility contracts.
 
-No formatter config is currently committed; follow the existing two-space JSON style and conventional TypeScript formatting in nearby files.
+Run `pnpm format` before committing. The repository uses Prettier (`.prettierrc`) and ESLint (`eslint.config.js`) at the root; follow their rules and the existing two-space JSON style.
 
 ## Testing Guidelines
 
