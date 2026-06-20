@@ -10,6 +10,7 @@ export default tsEslint.config(
       "**/.turbo/**",
       "**/packed/**",
       "**/.pnpm-store/**",
+      "**/.worktrees/**",
       "**/coverage/**",
       "**/contracts/generated/**",
       "**/bindings/**",

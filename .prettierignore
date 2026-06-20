@@ -2,8 +2,10 @@
 **/dist/
 **/.pnpm-store/
 **/.turbo/
+**/.worktrees/
 **/packed/
 **/coverage/
+packages/cli/templates/
 **/contracts/generated/**
 **/bindings/**
 pnpm-lock.yaml
