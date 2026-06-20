@@ -39,6 +39,8 @@ overwrites them after deploy. The dev server serves `.artifacts/zk/main/*.json` 
 
 ```bash
 npm install
+npm test             # run Rust verifier contract tests
+cargo test --manifest-path contracts/verifier/Cargo.toml
 npm run caatinga:build
 npm run caatinga:zk:build
 npm run caatinga:deploy

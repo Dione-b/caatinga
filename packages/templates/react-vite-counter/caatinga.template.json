@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Minimal Vite + React + Soroban counter dApp.",
   "caatinga": {
-    "compatibleCore": "^3.0.0",
+    "compatibleCore": "^3.0.1",
     "templateVersion": 1
   },
   "frontend": {
