@@ -96,8 +96,18 @@ if [ "$DEPLOY_EXIT" -eq 0 ]; then
   npx caatinga generate counter --network testnet
   GENERATE_EXIT=$?
   echo "generate exit code: $GENERATE_EXIT"
+  if [ "$GENERATE_EXIT" -eq 0 ]; then
+    echo ""
+    echo "--- npm run build (vite binding resolve) ---"
+    npm run build
+    VITE_BUILD_EXIT=$?
+    echo "vite build exit code: $VITE_BUILD_EXIT"
+  else
+    VITE_BUILD_EXIT=skipped
+  fi
 else
   echo "Skipping generate (deploy failed)"
+  VITE_BUILD_EXIT=skipped
 fi
 
 echo ""
@@ -114,4 +124,5 @@ echo "INSTALL_EXIT=$INSTALL_EXIT"
 echo "BUILD_COUNTER_EXIT=$BUILD_COUNTER_EXIT"
 echo "DEPLOY_EXIT=$DEPLOY_EXIT"
 echo "GENERATE_EXIT=$GENERATE_EXIT"
+echo "VITE_BUILD_EXIT=${VITE_BUILD_EXIT:-skipped}"
 echo "LOG=$LOG"

@@ -33,23 +33,33 @@ The template ships a Vite + React dApp modeled after `react-vite-counter`:
 - connect a wallet and click **Verify proof on-chain** (`caatingaClient` + generated verifier bindings)
 
 Placeholder verifier bindings live under `src/bindings/verifier/` until `caatinga generate verifier`
-overwrites them after deploy. The dev server serves `.artifacts/zk/main/*.json` at `/zk-artifacts/*`.
+overwrites them after deploy.
+
+Proof artifacts are written to `.artifacts/zk/main/` (gitignored). The Vite dev server exposes them at
+`/zk-artifacts/*` — not under `public/zk-artifacts/`.
 
 ## Workflow
+
+First-time on-chain verification with the shipped `circuits/input.json` (`a=3`, `b=11`):
 
 ```bash
 npm install
 npm test             # run Rust verifier contract tests
 cargo test --manifest-path contracts/verifier/Cargo.toml
 npm run caatinga:build
-npm run caatinga:zk:build
+npm run caatinga:zk:setup   # zk build + prove → populates .artifacts/zk/main/
 npm run caatinga:deploy
 npm run caatinga:generate
 npm run dev
-# UI: set a/b → download input.json → save to circuits/input.json
-npm run caatinga:zk:prove
 # UI: connect wallet → Verify proof on-chain
 ```
+
+Hybrid flow after changing inputs in the browser:
+
+1. Set `a` / `b` in the UI and download `input.json`
+2. Save it to `circuits/input.json`
+3. Run `npm run caatinga:zk:prove` (or `npm run caatinga:zk:setup` after editing the circuit)
+4. Refresh artifacts in the UI, then **Verify proof on-chain**
 
 ## Trusted setup
 

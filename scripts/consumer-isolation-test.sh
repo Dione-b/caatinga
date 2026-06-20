@@ -326,7 +326,39 @@ echo "consumer-isolation: scaffolding zk-starter template as zk-starter-app..."
 "$CAATINGA_BIN" zk init zk-starter-app
 test -f zk-starter-app/src/caatinga.ts
 test -f zk-starter-app/src/components/CircuitCard.tsx
+test -f zk-starter-app/src/bindings/verifier/index.ts
 grep -q 'verify_proof' zk-starter-app/src/components/CircuitCard.tsx
 grep -q '/zk-artifacts' zk-starter-app/vite.config.ts
+grep -q 'caatinga:zk:setup' zk-starter-app/package.json
+
+cd zk-starter-app
+
+node --input-type=module -e "
+import { readFileSync, writeFileSync } from \"node:fs\";
+const pj = JSON.parse(readFileSync(\"package.json\", \"utf8\"));
+pj.dependencies[\"@caatinga/core\"] = process.env.CAATINGA_PATCH_CORE;
+pj.dependencies[\"@caatinga/client\"] = process.env.CAATINGA_PATCH_CLIENT;
+pj.dependencies[\"@caatinga/zk\"] = process.env.CAATINGA_PATCH_ZK;
+if (pj.devDependencies && Object.prototype.hasOwnProperty.call(pj.devDependencies, \"@caatinga/cli\")) {
+  pj.devDependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+if (pj.dependencies && Object.prototype.hasOwnProperty.call(pj.dependencies, \"@caatinga/cli\")) {
+  pj.dependencies[\"@caatinga/cli\"] = process.env.CAATINGA_PATCH_CLI;
+}
+pj.overrides = {
+  ...(pj.overrides ?? {}),
+  \"@caatinga/core\": process.env.CAATINGA_PATCH_CORE,
+  \"@caatinga/zk\": process.env.CAATINGA_PATCH_ZK,
+  \"@caatinga/client\": process.env.CAATINGA_PATCH_CLIENT,
+  \"@caatinga/cli\": process.env.CAATINGA_PATCH_CLI
+};
+writeFileSync(\"package.json\", JSON.stringify(pj, null, 2) + \"\\n\");
+"
+
+echo "consumer-isolation: npm install in zk-starter-app..."
+npm install --no-audit --fund=false --prefer-offline
+echo "consumer-isolation: npm run build in zk-starter-app..."
+npm run build
+cd "$TMP_DIR"
 
 echo "consumer-isolation: OK"

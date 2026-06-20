@@ -438,10 +438,14 @@ describe("createProjectFromTemplate", () => {
     await expect(
       readFile(path.join(templatePath, "src/bindings/verifier/src/index.ts"), "utf8")
     ).resolves.toContain("__caatingaPlaceholder");
+    await expect(
+      readFile(path.join(templatePath, "src/bindings/verifier/index.ts"), "utf8")
+    ).resolves.toContain('./src/index.js');
 
     expect(packageJson.dependencies?.react).toBeDefined();
     expect(packageJson.dependencies?.["@caatinga/zk"]).toBeDefined();
     expect(packageJson.scripts?.dev).toBe("vite");
+    expect(packageJson.scripts?.["caatinga:zk:setup"]).toContain("caatinga zk build main");
     expect(viteConfig).toContain("@vitejs/plugin-react");
     expect(viteConfig).toContain("/zk-artifacts");
   });

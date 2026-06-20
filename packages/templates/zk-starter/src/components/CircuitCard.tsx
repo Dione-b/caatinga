@@ -149,8 +149,10 @@ export function CircuitCard() {
 
       {artifactsReady === false ? (
         <pre className="counter-error" role="note">
-          {`Save input.json to circuits/input.json, then run:
-npx caatinga zk prove main`}
+          {`Proof artifacts are missing from .artifacts/zk/main/.
+Run:
+npm run caatinga:zk:setup
+Then refresh artifacts and verify again.`}
         </pre>
       ) : null}
 

@@ -12,7 +12,8 @@
     "caatinga:deploy": "npx caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
     "caatinga:generate": "npx caatinga generate verifier --network testnet",
     "caatinga:zk:build": "npx caatinga zk build main",
-    "caatinga:zk:prove": "npx caatinga zk prove main"
+    "caatinga:zk:prove": "npx caatinga zk prove main",
+    "caatinga:zk:setup": "npx caatinga zk build main && npx caatinga zk prove main"
   },
   "dependencies": {
     "@caatinga/client": "^3.1.0",

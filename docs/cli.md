@@ -72,6 +72,9 @@ recording the source `contractId`, `wasmHash`, and network. `status`, `doctor`, 
 use that marker to detect stale bindings after a redeploy. Deleting a bindings directory simply
 resets its state to `missing`.
 
+After generation, Caatinga patches each binding package's `package.json` so bundlers (Vite) resolve
+`./src/index.ts` directly — you do not need to run `tsc` inside the generated subpackage.
+
 ## `caatinga status [--network <name>] [--json]`
 
 Shows, per network, every configured contract with its deployed contract ID, WASM hash,

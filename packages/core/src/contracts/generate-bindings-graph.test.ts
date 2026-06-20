@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -61,16 +61,46 @@ async function writeDeployed(tmpDir: string, contracts: Record<string, string>):
   await writeArtifacts(artifacts, tmpDir);
 }
 
+async function writeSdkLikeBindingOutput(outputDir: string): Promise<void> {
+  await mkdir(path.join(outputDir, "src"), { recursive: true });
+  await writeFile(path.join(outputDir, "src", "index.ts"), "export class Client {}\n", "utf8");
+  await writeFile(
+    path.join(outputDir, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "counter",
+        version: "0.0.1",
+        type: "module",
+        main: "dist/index.js",
+        types: "dist/index.d.ts",
+        exports: { ".": "./dist/index.js" },
+      },
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+}
+
 describe("generateBindingsGraph", () => {
   let tmpDir: string;
 
   beforeEach(() => {
     runCommand.mockReset();
-    runCommand.mockImplementation(async () => ({
-      stdout: "generated",
-      stderr: "",
-      all: "generated",
-    }));
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "npx" && args.includes("generate")) {
+        const outputDirIndex = args.indexOf("--output-dir");
+        const outputDir = outputDirIndex >= 0 ? args[outputDirIndex + 1] : undefined;
+        if (outputDir) {
+          await writeSdkLikeBindingOutput(outputDir);
+        }
+      }
+      return {
+        stdout: "generated",
+        stderr: "",
+        all: "generated",
+      };
+    });
   });
 
   afterEach(async () => {

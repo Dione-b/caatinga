@@ -81,7 +81,8 @@ The default template frontend follows the same wallet-driven pattern as `react-v
 
 Serialization for browser verification uses `@caatinga/zk/browser` (`buildVerifyProofBindingArgs`). The
 dev server exposes proof artifacts at `/zk-artifacts/proof.json`, `/zk-artifacts/verification_key.json`,
-and `/zk-artifacts/public.json` after a local prove.
+and `/zk-artifacts/public.json` after a local prove. Files live under `.artifacts/zk/<circuit>/` on disk
+(gitignored) — not in `public/zk-artifacts/`.
 
 ## Circuit inputs
 

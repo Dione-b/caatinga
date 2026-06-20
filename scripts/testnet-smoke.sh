@@ -206,6 +206,7 @@ assert_counter_artifacts_contract_id
 
 run_step "generate-counter" "$CAATINGA_BIN" generate counter --network testnet
 run_step "generated-bindings-exists-counter" test -d src/contracts/generated
+run_step "vite-build-counter" npm run build
 
 INVOKE_OUT="$(mktemp)"
 set +e

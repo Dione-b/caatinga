@@ -2,6 +2,7 @@ import { access, mkdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { writeBindingMarker, type BindingMarker } from "../bindings/binding-marker.js";
+import { patchGeneratedBindingPackage } from "../bindings/patch-generated-binding-package.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -87,6 +88,8 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     options.config.frontend.bindingsOutput,
     options.contractName
   );
+
+  await patchGeneratedBindingPackage(outputDir);
 
   const marker: BindingMarker = {
     version: 1,
