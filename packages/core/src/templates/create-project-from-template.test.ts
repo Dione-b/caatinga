@@ -440,7 +440,7 @@ describe("createProjectFromTemplate", () => {
     ).resolves.toContain("__caatingaPlaceholder");
     await expect(
       readFile(path.join(templatePath, "src/bindings/verifier/index.ts"), "utf8")
-    ).resolves.toContain('./src/index.js');
+    ).resolves.toContain("./src/index.js");
 
     expect(packageJson.dependencies?.react).toBeDefined();
     expect(packageJson.dependencies?.["@caatinga/zk"]).toBeDefined();
