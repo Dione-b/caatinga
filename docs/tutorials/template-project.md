@@ -82,9 +82,9 @@ Restart the dev server after bindings change.
 
 The frontend reads `contractId` from `caatinga.artifacts.json`. Deploy before `npm run dev`.
 
-**`npm install` warnings from wallet SDK transitives:**
+**`npm install` warnings or audit findings from wallet SDK transitives:**
 
-The template ships npm `overrides` and optional `pnpm-workspace.yaml` blocks. See [Wallets](../wallets.md).
+The template ships npm `overrides` and optional `pnpm-workspace.yaml` blocks (**required**, not optional). The most common report is ~14 **high** findings from `ws` via Reown/viem — fixed by `"ws": "^8.21.0"`. Trezor/HOT are stubbed because Caatinga does not support hardware wallets yet. See [Templates — Install override contract](../templates.md#install-time-dependency-overrides-maintainer-contract) and [Wallets](../wallets.md#stellar-wallets-kit-bundler-workarounds).
 
 ## Next steps
 

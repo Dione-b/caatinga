@@ -250,7 +250,24 @@ advisories (Trezor) and NEAR/`elliptic` noise (HOT):
   `packages/templates/react-vite-counter/src/stubs/`).
 - pnpm: `"-"` path overrides in `pnpm-workspace.yaml`.
 
-Freighter, LOBSTR, WalletConnect, and the other modules are unaffected.
+Freighter, LOBSTR, WalletConnect, and the other modules are unaffected. Caatinga also filters Trezor and HOT out of the wallet modal (`createStellarWalletsKitAdapter()`).
+
+### `ws` npm override (Reown / viem audit findings)
+
+SWK 2.x → Reown AppKit → `viem` → `ws`. Versions of `ws` below **8.21.0** trigger high-severity DoS advisories ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)). npm audit typically reports **~14** duplicated findings across Reown packages — this is **not** Trezor/`protobufjs`.
+
+Pin at the **top level** of npm overrides (and in `pnpm-workspace.yaml`):
+
+```json
+"overrides": {
+  "ws": "^8.21.0"
+}
+```
+
+Use `walletStubOverrides()` from `@caatinga/client/vite` so the pin stays aligned with official
+templates. **Do not remove** without running `npm audit` on a scaffolded project and updating
+[`scripts/consumer-isolation-test.sh`](../scripts/consumer-isolation-test.sh). Details:
+[Templates — Install override contract](./templates.md#install-time-dependency-overrides-maintainer-contract).
 
 ### Safe / uuid overrides
 

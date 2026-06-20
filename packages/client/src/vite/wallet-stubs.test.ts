@@ -9,9 +9,13 @@ import {
 describe("wallet stub helpers", () => {
   it("should_expose_npm_overrides_for_stellar_wallets_kit", () => {
     const overrides = walletStubOverrides("./src/stubs") as {
+      ws: string;
+      "@trezor/connect-web": string;
       "@creit.tech/stellar-wallets-kit": Record<string, string>;
     };
 
+    expect(overrides.ws).toBe("^8.21.0");
+    expect(overrides["@trezor/connect-web"]).toBe("file:./src/stubs/empty-wallet-dep");
     expect(overrides["@creit.tech/stellar-wallets-kit"]["@hot-wallet/sdk"]).toBe(
       "file:./src/stubs/hot-wallet-sdk"
     );
@@ -26,6 +30,6 @@ describe("wallet stub helpers", () => {
 
   it("should_expose_pnpm_workspace_snippet", () => {
     expect(walletStubPnpmWorkspaceYaml()).toContain("allowBuilds:");
-    expect(walletStubPnpmWorkspaceYaml()).toContain("@hot-wallet/sdk");
+    expect(walletStubPnpmWorkspaceYaml()).toContain('ws: "^8.21.0"');
   });
 });

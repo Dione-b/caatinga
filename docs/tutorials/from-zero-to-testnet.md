@@ -164,10 +164,17 @@ default template, see [Wallets](../wallets.md).
   AppKit (via Stellar Wallets Kit). The official template blocks them with npm/pnpm overrides —
   regenerate from a current template or copy the Safe override block from
   [Templates](../templates.md#pnpm-1026--11x).
-- `npm audit` reports vulnerabilities after install: the official template blocks unused SWK deps
-  (Trezor/HOT/Safe) via overrides so **critical** `protobufjs` findings from Trezor should not appear.
-  Remaining low-severity items may still come from WalletConnect/Reown. Regenerate from a current
-  template or copy the override blocks from [Templates](../templates.md#pnpm-1026--11x).
+- `npm audit` reports **~14 high** vulnerabilities after install: the usual cause is transitive
+  **`ws@<8.21.0`** via `@creit.tech/stellar-wallets-kit` → Reown AppKit → `viem`
+  ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)), **not** Trezor.
+  Official templates pin `"ws": "^8.21.0"` in npm/pnpm overrides. Regenerate from a current
+  template or copy the override block from
+  [Templates — Install override contract](../templates.md#install-time-dependency-overrides-maintainer-contract).
+  Verify with `npm install && npm audit`.
+- `npm audit` reports **critical** `protobufjs` findings: Trezor Connect was not stubbed.
+  Official templates replace `@trezor/connect-web` with local stubs under `src/stubs/` — Caatinga
+  does not support hardware wallets yet. See the same
+  [override contract](../templates.md#install-time-dependency-overrides-maintainer-contract).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
   If you have `CARGO_TARGET_DIR` set, Stellar CLI writes the Wasm under that directory instead of `contracts/<name>/target`. Caatinga `2.4.1+` resolves the Wasm from `CARGO_TARGET_DIR` automatically, but if it still fails, unset `CARGO_TARGET_DIR` or update the `wasm` path in `caatinga.config.ts`.

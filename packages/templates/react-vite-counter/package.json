@@ -13,8 +13,8 @@
     "caatinga:generate": "npx caatinga generate counter --network testnet"
   },
   "dependencies": {
-    "@caatinga/client": "^3.1.1",
-    "@caatinga/core": "^3.1.1",
+    "@caatinga/client": "^3.1.2",
+    "@caatinga/core": "^3.1.2",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "@stellar/stellar-sdk": "^16.0.1",
     "buffer": "^6.0.3",
@@ -24,13 +24,17 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^3.1.1",
+    "@caatinga/cli": "^3.1.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"
   },
   "overrides": {
     "uuid": "^14.0.0",
+    "ws": "^8.21.0",
+    "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
+    "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
+    "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk",
     "@creit.tech/stellar-wallets-kit": {
       "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
       "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",

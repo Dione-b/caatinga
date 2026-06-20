@@ -151,11 +151,11 @@ export function createStellarWalletsKitAdapter(
 
 // SWK's HOT Wallet module (NEAR-based) pulls @hot-wallet/sdk → @near-js/crypto →
 // randombytes, which references the Node `global` and breaks in the browser.
-// Drop it from the wallet list; consumers should also alias @hot-wallet/sdk to a
-// stub in their bundler so the NEAR chain is never bundled (see template config).
+// Trezor is a direct SWK dependency but not a Caatinga target (hardware wallets).
+// Drop both from the wallet list; install-time stubs block their npm packages.
 function buildModules(walletConnectMetadata?: StellarWalletsKitMetadata): ModuleInterface[] {
   const modules = defaultModules({
-    filterBy: (module) => module.productId !== HOTWALLET_ID,
+    filterBy: (module) => module.productId !== HOTWALLET_ID && module.productId !== "TREZOR",
   });
 
   if (walletConnectMetadata) {

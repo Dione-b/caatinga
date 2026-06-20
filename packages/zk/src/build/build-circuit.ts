@@ -3,6 +3,7 @@ import path from "node:path";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash, randomBytes } from "node:crypto";
 import { ensureCircom, ensurePtau, ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
+import type { ZkInstallProgress } from "../install/install-progress.js";
 import { ptauSizeForConstraints } from "./detect-ptau-size.js";
 import { serializeVk, type SnarkjsVk } from "../serialization/serialize-vk.js";
 import { concatG1Bytes, concatG2Bytes } from "../serialization/curve-bytes.js";
@@ -12,6 +13,7 @@ export type BuildCircuitOptions = {
   circuitPath: string;
   artifactsDir: string;
   embedVk: boolean;
+  progress?: ZkInstallProgress;
 };
 
 const BYTES_PER_LINE = 16;
@@ -82,8 +84,9 @@ async function writeEmbeddedVk(vkPath: string, verifierSrcDir: string): Promise<
 }
 
 export async function buildCircuit(options: BuildCircuitOptions): Promise<void> {
-  const circom = await ensureCircom();
-  const snarkjs = await ensureSnarkjs();
+  const progress = options.progress;
+  const circom = await ensureCircom(progress);
+  const snarkjs = await ensureSnarkjs(progress);
   const circuitDir = path.resolve(options.circuitPath);
   const outDir = path.resolve(options.artifactsDir);
   const circuitFile = path.join(circuitDir, "main.circom");
@@ -94,6 +97,7 @@ export async function buildCircuit(options: BuildCircuitOptions): Promise<void> 
 
   await mkdir(outDir, { recursive: true });
 
+  progress?.onStatus?.(`Compiling ${circuitFile}...`);
   await runCommand(circom, [
     circuitFile,
     "--r1cs",
@@ -109,9 +113,10 @@ export async function buildCircuit(options: BuildCircuitOptions): Promise<void> 
   const constraintMatch = r1csInfo.stdout.match(/# of Constraints:\s+(\d+)/);
   const constraints = constraintMatch ? Number.parseInt(constraintMatch[1]!, 10) : 1;
   const ptauSize = ptauSizeForConstraints(constraints);
-  const ptauPath = await ensurePtau(ptauSize);
+  const ptauPath = await ensurePtau(ptauSize, progress);
   const entropy = createHash("sha256").update(randomBytes(32)).digest("hex");
 
+  progress?.onStatus?.("Running Groth16 trusted setup...");
   await runCommand(snarkjs, ["groth16", "setup", r1csPath, ptauPath, zkey0]);
   await runCommand(snarkjs, ["zkey", "contribute", zkey0, zkeyFinal, "-v"], {
     input: `caatinga-dev\n${entropy}\n`,

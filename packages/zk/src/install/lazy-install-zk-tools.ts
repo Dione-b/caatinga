@@ -4,10 +4,15 @@ import path from "node:path";
 import os from "node:os";
 import { createHash, randomBytes } from "node:crypto";
 import { ZkError } from "../errors/ZkError.js";
+import { downloadWithProgress } from "./download-with-progress.js";
+import type { ZkInstallProgress } from "./install-progress.js";
 
-const ZK_CACHE_DIR = path.join(os.homedir(), ".caatinga", "zk-tools");
 const SNARKJS_VERSION = "0.7.5";
 const CIRCOM_VERSION = "2.1.9";
+
+function zkCacheDir(): string {
+  return path.join(process.env.HOME ?? os.homedir(), ".caatinga", "zk-tools");
+}
 
 function circomAssetName(): string {
   const platform = process.platform;
@@ -25,35 +30,42 @@ function circomAssetName(): string {
   );
 }
 
-export async function ensureCircom(): Promise<string> {
-  const cached = path.join(ZK_CACHE_DIR, "circom", CIRCOM_VERSION, "circom");
+export async function ensureCircom(progress?: ZkInstallProgress): Promise<string> {
+  const asset = circomAssetName();
+  const installDir = path.join(zkCacheDir(), "circom", CIRCOM_VERSION);
+  const binaryPath = path.join(installDir, asset);
+
   try {
-    await access(cached);
-    return cached;
+    await access(binaryPath);
+    progress?.onStatus?.(`Using cached circom v${CIRCOM_VERSION}`);
+    return binaryPath;
   } catch {
     // Fall through to download.
   }
 
-  const asset = circomAssetName();
   const url = `https://github.com/iden3/circom/releases/download/v${CIRCOM_VERSION}/${asset}`;
-  const installDir = path.join(ZK_CACHE_DIR, "circom", CIRCOM_VERSION);
   await mkdir(installDir, { recursive: true });
 
-  const archivePath = path.join(installDir, asset);
-  await runCommand("curl", ["-fsSL", url, "-o", archivePath]);
-  await chmod(archivePath, 0o755);
+  progress?.onStatus?.(`Downloading circom v${CIRCOM_VERSION} (${asset})...`);
+  await downloadWithProgress(url, binaryPath, progress);
+  await chmod(binaryPath, 0o755);
+  progress?.onStatus?.(`circom installed → ${binaryPath}`);
 
-  return archivePath;
+  return binaryPath;
 }
 
-export async function ensureSnarkjs(): Promise<string> {
-  const installDir = path.join(ZK_CACHE_DIR, `snarkjs-${SNARKJS_VERSION}`);
+export async function ensureSnarkjs(progress?: ZkInstallProgress): Promise<string> {
+  const installDir = path.join(zkCacheDir(), `snarkjs-${SNARKJS_VERSION}`);
   const cliPath = path.join(installDir, "node_modules", ".bin", "snarkjs");
 
   try {
     await access(cliPath);
+    progress?.onStatus?.(`Using cached snarkjs v${SNARKJS_VERSION}`);
     return cliPath;
   } catch {
+    progress?.onStatus?.(
+      `Installing snarkjs v${SNARKJS_VERSION} into ${installDir} (first run only)...`
+    );
     await mkdir(installDir, { recursive: true });
     await writeFile(
       path.join(installDir, "package.json"),
@@ -67,21 +79,24 @@ export async function ensureSnarkjs(): Promise<string> {
         cwd: installDir,
       }
     );
+    progress?.onStatus?.(`snarkjs installed → ${cliPath}`);
     return cliPath;
   }
 }
 
-export async function ensurePtau(size: number): Promise<string> {
-  const ptauDir = path.join(ZK_CACHE_DIR, "ptau", "bls12-381");
+export async function ensurePtau(size: number, progress?: ZkInstallProgress): Promise<string> {
+  const ptauDir = path.join(zkCacheDir(), "ptau", "bls12-381");
   const finalPath = path.join(ptauDir, `pot${size}_final.ptau`);
   try {
     await access(finalPath);
+    progress?.onStatus?.(`Using cached powers-of-tau (bls12-381, size ${size})`);
     return finalPath;
   } catch {
     await mkdir(ptauDir, { recursive: true });
   }
 
-  const snarkjs = await ensureSnarkjs();
+  progress?.onStatus?.(`Generating dev powers-of-tau (bls12-381, size ${size})...`);
+  const snarkjs = await ensureSnarkjs(progress);
   const pot0 = path.join(ptauDir, `pot${size}_0000.ptau`);
   const pot1 = path.join(ptauDir, `pot${size}_0001.ptau`);
   const entropy = createHash("sha256").update(randomBytes(32)).digest("hex");
@@ -91,6 +106,7 @@ export async function ensurePtau(size: number): Promise<string> {
     input: `caatinga-dev\n${entropy}\n`,
   });
   await runCommand(snarkjs, ["powersoftau", "prepare", "phase2", pot1, finalPath, "-v"]);
+  progress?.onStatus?.(`powers-of-tau ready → ${finalPath}`);
 
   return finalPath;
 }

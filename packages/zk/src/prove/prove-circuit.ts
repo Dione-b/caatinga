@@ -2,6 +2,7 @@ import { runCommand } from "@caatinga/core";
 import path from "node:path";
 import { access, mkdir } from "node:fs/promises";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
+import type { ZkInstallProgress } from "../install/install-progress.js";
 
 export type ProveCircuitOptions = {
   circuitName: string;
@@ -9,6 +10,7 @@ export type ProveCircuitOptions = {
   artifactsDir: string;
   inputPath: string;
   debug: boolean;
+  progress?: ZkInstallProgress;
 };
 
 export function resolveCircuitWasmPath(artifactsDir: string): string {
@@ -16,7 +18,7 @@ export function resolveCircuitWasmPath(artifactsDir: string): string {
 }
 
 export async function proveCircuit(options: ProveCircuitOptions): Promise<void> {
-  const snarkjs = await ensureSnarkjs();
+  const snarkjs = await ensureSnarkjs(options.progress);
   const artifactsDir = path.resolve(options.artifactsDir);
   const wasmPath = resolveCircuitWasmPath(artifactsDir);
   const zkeyPath = path.join(artifactsDir, "circuit_final.zkey");

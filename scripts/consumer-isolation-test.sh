@@ -260,6 +260,8 @@ npm install --no-audit --fund=false --prefer-offline 2>&1 | tee "$TMP_DIR/test-a
 echo "consumer-isolation: test-app npm install done."
 assert_no_deprecated_install_warnings "$TMP_DIR/test-app-npm-install.log"
 assert_swk_version_at_least_2_3 "$TMP_DIR/test-app"
+echo "consumer-isolation: npm audit (high+) in test-app..."
+npm audit --audit-level=high
 echo "consumer-isolation: npm run build in test-app..."
 npm run build
 

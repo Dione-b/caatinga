@@ -1,5 +1,13 @@
 ## Breaking changes policy
 
+## 3.1.2
+
+### Patch Changes
+
+- Pin `ws@^8.21.0` and top-level Trezor/HOT stubs in official templates to clear ~14 high npm audit findings from the Reown/viem chain. Add ZK CLI install progress (circom download bar, phase messages), fix circom cache path reuse, and document the template override maintainer contract.
+- Updated dependencies
+  - @caatinga/core@3.1.2
+
 ## 3.1.1
 
 ### Patch Changes

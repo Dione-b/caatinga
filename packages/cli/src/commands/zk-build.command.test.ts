@@ -65,6 +65,11 @@ describe("zk build command", () => {
       circuitPath: "circuits",
       artifactsDir: ".artifacts/zk/main",
       embedVk: false,
+      progress: expect.objectContaining({
+        onStatus: expect.any(Function),
+        onDownloadProgress: expect.any(Function),
+        onDownloadComplete: expect.any(Function),
+      }),
     });
   });
 });

@@ -3,6 +3,7 @@ import { loadConfig } from "@caatinga/core";
 import { buildCircuit } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { createZkInstallProgress } from "../utils/zk-install-progress.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 
 export function registerZkBuildCommand(program: Command): void {
@@ -30,6 +31,7 @@ export function registerZkBuildCommand(program: Command): void {
           circuitPath: circuit.path,
           artifactsDir: `.artifacts/zk/${name}`,
           embedVk: Boolean(options.embedVk),
+          progress: createZkInstallProgress(),
         });
         logger.success(`Built circuit "${name}"`);
         logger.warn(

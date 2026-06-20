@@ -15,7 +15,7 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 Published on npm:
 
-- **`next`**: **`3.1.1`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
+- **`next`**: **`3.1.2`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
 - **`latest`**: **`2.2.1`** (previous stable line until promoted)
 
 Highlights from the `3.0.0` line:
@@ -94,6 +94,16 @@ Before committing changes that touch tooling, dependencies, or CI, verify that v
 - **Workspace packages**: When bumping published versions or internal `workspace:*` ranges, update all affected `package.json` files in the same change.
 
 When in doubt, grep for version pins (`packageManager`, `version:`, `node-version`, `engines`) before pushing.
+
+### Template install overrides
+
+Browser templates ship **required** npm/pnpm overrides for `ws`, Trezor/HOT stubs, Safe, and
+`uuid`. Removing them causes ~14 high `npm audit` findings (`ws` via Reown/viem) or critical
+Trezor/`protobufjs` noise. Canonical definitions live in
+`packages/client/src/vite/wallet-stubs.ts`; keep templates in sync. CI runs
+`npm audit --audit-level=high` in `scripts/consumer-isolation-test.sh`. Full maintainer
+contract:
+[docs/templates.md — Install override contract](docs/templates.md#install-time-dependency-overrides-maintainer-contract).
 
 ## Security & Configuration Tips
 

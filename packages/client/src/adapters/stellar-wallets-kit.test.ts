@@ -87,6 +87,17 @@ describe("createStellarWalletsKitAdapter", () => {
     );
   });
 
+  it("excludes hardware wallet modules from default registration", async () => {
+    const { defaultModules } = await import("@creit.tech/stellar-wallets-kit/modules/utils");
+    createStellarWalletsKitAdapter();
+    const options = vi.mocked(defaultModules).mock.calls.at(-1)?.[0];
+    const filterBy = options?.filterBy;
+    expect(filterBy).toBeTypeOf("function");
+    expect(filterBy?.({ productId: "TREZOR" } as never)).toBe(false);
+    expect(filterBy?.({ productId: "hot-wallet" } as never)).toBe(false);
+    expect(filterBy?.({ productId: "freighter" } as never)).toBe(true);
+  });
+
   it("fetches the public key from the kit address", async () => {
     const adapter = createStellarWalletsKitAdapter();
 

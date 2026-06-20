@@ -14,4 +14,5 @@ export {
   type InvokeVerifierResult,
 } from "./invoke/invoke-verifier.js";
 export { ptauSizeForConstraints } from "./build/detect-ptau-size.js";
+export type { ZkInstallProgress } from "./install/install-progress.js";
 export { ZkError } from "./errors/ZkError.js";

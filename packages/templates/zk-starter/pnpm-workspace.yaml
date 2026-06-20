@@ -9,6 +9,7 @@ ignoredOptionalDependencies:
 
 overrides:
   uuid: "^14.0.0"
+  ws: "^8.21.0"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
   "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"

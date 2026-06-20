@@ -1,5 +1,13 @@
 # counter-web
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.1.2
+  - @caatinga/client@3.1.2
+
 ## 0.0.13
 
 ### Patch Changes

@@ -4,6 +4,7 @@ import { loadConfig } from "@caatinga/core";
 import { proveCircuit } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { createZkInstallProgress } from "../utils/zk-install-progress.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 
 export function registerZkProveCommand(program: Command): void {
@@ -32,6 +33,7 @@ export function registerZkProveCommand(program: Command): void {
           artifactsDir,
           inputPath: path.join(circuit.path, "input.json"),
           debug: Boolean(options.debug),
+          progress: createZkInstallProgress(),
         });
         logger.success(`Generated proof for circuit "${name}"`);
         logger.info(`Proof written to: ${path.join(artifactsDir, "proof.json")}`);

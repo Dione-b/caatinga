@@ -379,6 +379,10 @@ describe("createProjectFromTemplate", () => {
 
     expect(packageJson.dependencies?.["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
     expect(packageJson.overrides?.uuid).toBe("^14.0.0");
+    expect(packageJson.overrides?.ws).toBe("^8.21.0");
+    expect(packageJson.overrides?.["@trezor/connect-web"]).toBe(
+      "file:./src/stubs/empty-wallet-dep"
+    );
     expect(packageJson.overrides?.["@creit.tech/stellar-wallets-kit"]).toEqual({
       "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
       "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
@@ -391,6 +395,7 @@ describe("createProjectFromTemplate", () => {
     expect(workspaceYaml).toContain("overrides:");
     expect(workspaceYaml).toContain("ignoredOptionalDependencies:");
     expect(workspaceYaml).toContain('uuid: "^14.0.0"');
+    expect(workspaceYaml).toContain('ws: "^8.21.0"');
 
     expect(viteConfig).toContain("@caatinga/client/vite");
     expect(viteConfig).toContain("walletStubViteAliases");
