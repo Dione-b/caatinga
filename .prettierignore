@@ -1,0 +1,10 @@
+**/node_modules/**
+**/dist/
+**/.pnpm-store/
+**/.turbo/
+**/packed/
+**/coverage/
+**/contracts/generated/**
+**/bindings/**
+pnpm-lock.yaml
+*.log

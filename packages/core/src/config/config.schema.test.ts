@@ -7,19 +7,19 @@ const minimalValid = {
   contracts: {
     counter: {
       path: "./contracts/counter",
-      wasm: "./target/wasm32v1-none/release/counter.wasm"
-    }
+      wasm: "./target/wasm32v1-none/release/counter.wasm",
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react" as const,
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 describe("CaatingaConfigSchema", () => {
@@ -31,22 +31,22 @@ describe("CaatingaConfigSchema", () => {
   });
 
   it("should_apply_default_network_when_omitted", () => {
-    const { defaultNetwork, ...rest } = minimalValid;
+    const { defaultNetwork: _defaultNetwork, ...rest } = minimalValid;
     const parsed = CaatingaConfigSchema.parse(rest);
     expect(parsed.defaultNetwork).toBe("testnet");
   });
 
   it("should_apply_default_framework_when_omitted", () => {
-    const { frontend, ...rest } = minimalValid;
+    const { frontend: _frontend, ...rest } = minimalValid;
     const parsed = CaatingaConfigSchema.parse({
       ...rest,
-      frontend: { bindingsOutput: "./out" }
+      frontend: { bindingsOutput: "./out" },
     });
     expect(parsed.frontend?.framework).toBe("vite-react");
   });
 
   it("accepts zk-only config without frontend", () => {
-    const { frontend, ...zkOnly } = {
+    const { frontend: _frontend, ...zkOnly } = {
       ...minimalValid,
       zk: {
         circuits: {
@@ -54,10 +54,10 @@ describe("CaatingaConfigSchema", () => {
             path: "./circuits",
             protocol: "groth16" as const,
             curve: "bls12381" as const,
-            verifierContract: "verifier"
-          }
-        }
-      }
+            verifierContract: "verifier",
+          },
+        },
+      },
     };
 
     const parsed = CaatingaConfigSchema.parse(zkOnly);
@@ -70,7 +70,7 @@ describe("CaatingaConfigSchema", () => {
     expect(() =>
       CaatingaConfigSchema.parse({
         ...minimalValid,
-        contracts: {}
+        contracts: {},
       })
     ).toThrow();
   });
@@ -79,7 +79,7 @@ describe("CaatingaConfigSchema", () => {
     expect(() =>
       CaatingaConfigSchema.parse({
         ...minimalValid,
-        networks: {}
+        networks: {},
       })
     ).toThrow();
   });
@@ -91,32 +91,32 @@ describe("CaatingaConfigSchema", () => {
       contracts: {
         token: {
           path: "./contracts/token",
-          wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm"
+          wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
         },
         marketplace: {
           path: "./contracts/marketplace",
           wasm: "./contracts/marketplace/target/wasm32v1-none/release/marketplace.wasm",
           dependsOn: ["token"],
           deployArgs: {
-            tokenContractId: "${contracts.token.contractId}"
-          }
-        }
+            tokenContractId: "${contracts.token.contractId}",
+          },
+        },
       },
       networks: {
         testnet: {
           rpcUrl: "https://soroban-testnet.stellar.org",
-          networkPassphrase: "Test SDF Network ; September 2015"
-        }
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
       },
       frontend: {
         framework: "vite-react",
-        bindingsOutput: "./src/contracts/generated"
-      }
+        bindingsOutput: "./src/contracts/generated",
+      },
     });
 
     expect(result.contracts.marketplace.dependsOn).toEqual(["token"]);
     expect(result.contracts.marketplace.deployArgs).toEqual({
-      tokenContractId: "${contracts.token.contractId}"
+      tokenContractId: "${contracts.token.contractId}",
     });
   });
 
@@ -129,10 +129,10 @@ describe("CaatingaConfigSchema", () => {
             path: "./circuits",
             protocol: "groth16",
             curve: "bls12381",
-            verifierContract: "verifier"
-          }
-        }
-      }
+            verifierContract: "verifier",
+          },
+        },
+      },
     });
 
     expect(result.zk?.circuits.main.curve).toBe("bls12381");
@@ -147,10 +147,10 @@ describe("CaatingaConfigSchema", () => {
             main: {
               path: "./circuits",
               protocol: "groth16",
-              curve: "bn128"
-            }
-          }
-        }
+              curve: "bn128",
+            },
+          },
+        },
       })
     ).toThrow();
   });

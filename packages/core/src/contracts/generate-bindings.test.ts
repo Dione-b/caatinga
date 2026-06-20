@@ -9,7 +9,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { generateBindings } from "./generate-bindings.js";
@@ -25,16 +25,16 @@ const baseConfig: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./rel/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" }
+  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" },
 };
 
 describe("generateBindings", () => {
@@ -69,10 +69,10 @@ describe("generateBindings", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -80,7 +80,7 @@ describe("generateBindings", () => {
       config: baseConfig,
       contractName: "counter",
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.outputDir).toBe(path.join(tmpDir, "src/gen/counter"));
@@ -90,7 +90,7 @@ describe("generateBindings", () => {
       version: 1,
       contractId: CONTRACT_ID,
       wasmHash: "abc",
-      network: "testnet"
+      network: "testnet",
     });
     await expect(readBindingMarker(result.outputDir)).resolves.toEqual(result.marker);
     expect(runCommand).toHaveBeenCalledWith(
@@ -107,7 +107,7 @@ describe("generateBindings", () => {
         "counter",
         "--overwrite",
         "--network",
-        "testnet"
+        "testnet",
       ]),
       { cwd: tmpDir, failureCode: CaatingaErrorCode.BINDINGS_FAILED }
     );
@@ -126,10 +126,10 @@ describe("generateBindings", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -141,7 +141,7 @@ describe("generateBindings", () => {
       config: baseConfig,
       contractName: "counter",
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.importPath).toBe("./src/gen/counter");
@@ -158,7 +158,7 @@ describe("generateBindings", () => {
         config: baseConfig,
         contractName: "counter",
         networkName: "testnet",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.ARTIFACT_NOT_FOUND });
   });
@@ -175,24 +175,24 @@ describe("generateBindings", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
-    const { frontend, ...zkOnlyConfig } = baseConfig;
+    const { frontend: _frontend, ...zkOnlyConfig } = baseConfig;
 
     await expect(
       generateBindings({
         config: zkOnlyConfig,
         contractName: "counter",
         networkName: "testnet",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVALID_CONFIG,
-      message: "Frontend bindings are not configured."
+      message: "Frontend bindings are not configured.",
     });
   });
 
@@ -209,10 +209,10 @@ describe("generateBindings", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -232,13 +232,11 @@ describe("generateBindings", () => {
         config: baseConfig,
         contractName: "counter",
         networkName: "testnet",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.BINDINGS_FAILED });
 
-    await expect(
-      readBindingMarker(path.join(tmpDir, "src/gen/counter"))
-    ).resolves.toBeNull();
+    await expect(readBindingMarker(path.join(tmpDir, "src/gen/counter"))).resolves.toBeNull();
   });
 
   it("should_propagate_CaatingaError_from_runCommand_unchanged", async () => {
@@ -254,10 +252,10 @@ describe("generateBindings", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -273,7 +271,7 @@ describe("generateBindings", () => {
         config: baseConfig,
         contractName: "counter",
         networkName: "testnet",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.BUILD_FAILED });
   });

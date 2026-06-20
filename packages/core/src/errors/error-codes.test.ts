@@ -13,27 +13,33 @@ const repoRoot = path.resolve(__dirname, "../../../..");
 const INLINE_UNPREFIXED_ERROR_CODE_PATTERN =
   /new\s+CaatingaError\s*\([\s\S]*?,\s*["']([A-Z][A-Z0-9_]+)["']/g;
 const DOCUMENTED_TABLE_ROW_PATTERN = /^\|\s*`(CAATINGA_[A-Z0-9_]+)`\s*\|(.+)$/gm;
-const REQUIRED_ERROR_DOCS_HEADER =
-  "| Code | Meaning | Common cause | User action | CI/release action | Versioning note |";
+const REQUIRED_ERROR_DOCS_HEADER_PATTERN =
+  /^\|\s*Code\s*\|\s*Meaning\s*\|\s*Common cause\s*\|\s*User action\s*\|\s*CI\/release action\s*\|\s*Versioning note\s*\|/m;
 const REQUIRED_VERSIONING_NOTE =
   "Public code; adding a new code is minor, removal/rename/meaning change is major.";
 
 describe("CaatingaErrorCode", () => {
   it("should_expose_only_namespaced_public_error_codes", () => {
-    expect(Object.values(CaatingaErrorCode).every((code) => code.startsWith("CAATINGA_"))).toBe(true);
+    expect(Object.values(CaatingaErrorCode).every((code) => code.startsWith("CAATINGA_"))).toBe(
+      true
+    );
   });
 
   it("should_document_every_public_error_code", async () => {
     const docsPath = path.join(repoRoot, "docs/errors.md");
     const docs = await readFile(docsPath, "utf8");
-    const missingCodes = Object.values(CaatingaErrorCode).filter((code) => !docs.includes(`\`${code}\``));
+    const missingCodes = Object.values(CaatingaErrorCode).filter(
+      (code) => !docs.includes(`\`${code}\``)
+    );
 
     expect(missingCodes).toEqual([]);
   });
 
   it("should_reference_only_exported_public_error_codes_in_docs", () => {
     const docs = readFileSync(path.join(repoRoot, "docs/errors.md"), "utf8");
-    const documentedCodes = [...docs.matchAll(DOCUMENTED_TABLE_ROW_PATTERN)].map((match) => match[1]);
+    const documentedCodes = [...docs.matchAll(DOCUMENTED_TABLE_ROW_PATTERN)].map(
+      (match) => match[1]
+    );
     const codeValues = new Set(Object.values(CaatingaErrorCode));
 
     for (const documentedCode of documentedCodes) {
@@ -47,7 +53,7 @@ describe("CaatingaErrorCode", () => {
     const documentedRows = [...docs.matchAll(DOCUMENTED_TABLE_ROW_PATTERN)];
     const documentedRowCodes = documentedRows.map((match) => match[1]);
 
-    expect(docs).toContain(REQUIRED_ERROR_DOCS_HEADER);
+    expect(docs).toMatch(REQUIRED_ERROR_DOCS_HEADER_PATTERN);
     expect(documentedRowCodes.sort()).toEqual([...exportedCodes].sort());
 
     for (const [, code, remainingColumns] of documentedRows) {

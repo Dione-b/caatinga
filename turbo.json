@@ -11,6 +11,8 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "lint": {},
+    "format:check": {},
     "@caatinga/client#typecheck": {
       "dependsOn": ["@caatinga/core#build"]
     },
