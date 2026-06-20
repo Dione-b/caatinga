@@ -18,11 +18,11 @@ as versões de dependências dos templates com a versão atual do monorepo (`^3.
 
 ### 1. Templates oficiais (3 templates)
 
-| Template | Arquivos alterados |
-|---|---|
-| `react-vite-counter` | `package.json`, `caatinga.template.json`, `README.md` |
+| Template                 | Arquivos alterados                                    |
+| ------------------------ | ----------------------------------------------------- |
+| `react-vite-counter`     | `package.json`, `caatinga.template.json`, `README.md` |
 | `marketplace-with-token` | `package.json`, `caatinga.template.json`, `README.md` |
-| `zk-starter` | `package.json`, `caatinga.template.json`, `README.md` |
+| `zk-starter`             | `package.json`, `caatinga.template.json`, `README.md` |
 
 **Em todos os templates:**
 
@@ -42,28 +42,28 @@ as versões de dependências dos templates com a versão atual do monorepo (`^3.
 
 ### 2. Scaffolds (geração de projetos)
 
-| Arquivo | Alteração |
-|---|---|
+| Arquivo                                                | Alteração                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `packages/core/src/scaffold/create-minimal-project.ts` | Adicionado script `test` no `packageJsonSource()` e seção "Tests" no `readmeSource()` |
-| `packages/core/src/scaffold/create-zk-project.ts` | Adicionado script `test` no `packageJsonSource()` e seção "Tests" no `readmeSource()` |
+| `packages/core/src/scaffold/create-zk-project.ts`      | Adicionado script `test` no `packageJsonSource()` e seção "Tests" no `readmeSource()` |
 
 Projetos gerados via `caatinga init` ou `caatinga zk init` agora incluem automaticamente
 o script `test` e documentação de teste no README.
 
 ### 3. Testes
 
-| Arquivo | Tipo | Descrição |
-|---|---|---|
-| `packages/cli/src/templates/template-scripts.test.ts` | **Novo** | Valida que todos os templates oficiais possuem script `test` com `cargo test` correto para cada contract |
-| `packages/core/src/scaffold/create-minimal-project.test.ts` | Atualizado | Atualizado fixture para incluir script `test` |
-| `packages/core/src/scaffold/create-zk-project.test.ts` | Atualizado | Atualizado fixture para incluir script `test` |
+| Arquivo                                                     | Tipo       | Descrição                                                                                                |
+| ----------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `packages/cli/src/templates/template-scripts.test.ts`       | **Novo**   | Valida que todos os templates oficiais possuem script `test` com `cargo test` correto para cada contract |
+| `packages/core/src/scaffold/create-minimal-project.test.ts` | Atualizado | Atualizado fixture para incluir script `test`                                                            |
+| `packages/core/src/scaffold/create-zk-project.test.ts`      | Atualizado | Atualizado fixture para incluir script `test`                                                            |
 
 ---
 
 ## Bugs corrigidos durante a implementação
 
 1. **Backticks não escapados em `create-zk-project.ts`**: O edit original trocou
-   `` \`\`\` `` (escaped) por `` ``` `` (raw) dentro de um template literal TypeScript,
+   `` \`\`\` `` (escaped) por ` ``` ` (raw) dentro de um template literal TypeScript,
    quebrando o esbuild. Corrigido restaurando o escape.
 
 2. **Caracteres `\n` literais em `create-minimal-project.ts`**: `\n` foi adicionado
@@ -80,12 +80,12 @@ o script `test` e documentação de teste no README.
 
 ## Verificação
 
-| Check | Status |
-|---|---|
-| `pnpm test` | 420 testes passando (core: 253, cli: 61, client: 91, zk: 15) |
-| `pnpm typecheck` | Limpo |
-| `pnpm lint` | Limpo |
-| `pnpm format:check` | Limpo |
+| Check               | Status                                                       |
+| ------------------- | ------------------------------------------------------------ |
+| `pnpm test`         | 420 testes passando (core: 253, cli: 61, client: 91, zk: 15) |
+| `pnpm typecheck`    | Limpo                                                        |
+| `pnpm lint`         | Limpo                                                        |
+| `pnpm format:check` | Limpo                                                        |
 
 ---
 
