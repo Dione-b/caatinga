@@ -4,7 +4,7 @@ import { parseStellarCliVersion } from "./version.js";
 import {
   STELLAR_CLI_LAST_TESTED_VERSION,
   STELLAR_CLI_MIN_VERSION,
-  evaluateStellarCliCompatibility
+  evaluateStellarCliCompatibility,
 } from "./compat.js";
 
 describe("evaluateStellarCliCompatibility", () => {
@@ -21,7 +21,7 @@ describe("evaluateStellarCliCompatibility", () => {
       status: "supported",
       minVersion: "23.0.0",
       lastTestedVersion: "25.2.0",
-      warnings: []
+      warnings: [],
     });
   });
 
@@ -39,8 +39,8 @@ describe("evaluateStellarCliCompatibility", () => {
     expect(report.warnings).toEqual([
       expect.objectContaining({
         code: "STELLAR_CLI_UNTESTED_VERSION",
-        message: expect.stringContaining("Stellar CLI 26.0.0 is newer than the last-tested 25.2.0")
-      })
+        message: expect.stringContaining("Stellar CLI 26.0.0 is newer than the last-tested 25.2.0"),
+      }),
     ]);
   });
 
@@ -59,7 +59,7 @@ describe("evaluateStellarCliCompatibility", () => {
     expect(() => evaluateStellarCliCompatibility({ version: "22.8.1" })).toThrowError(
       expect.objectContaining({
         code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
-        message: expect.stringContaining("below the supported minimum 23.0.0")
+        message: expect.stringContaining("below the supported minimum 23.0.0"),
       })
     );
   });
@@ -67,7 +67,7 @@ describe("evaluateStellarCliCompatibility", () => {
   it("throws UNSUPPORTED_CLI_VERSION for prereleases below the hard floor", () => {
     expect(() => evaluateStellarCliCompatibility({ version: "22.0.0-rc.1" })).toThrowError(
       expect.objectContaining({
-        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
+        code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
       })
     );
   });
@@ -75,7 +75,7 @@ describe("evaluateStellarCliCompatibility", () => {
   it("throws STELLAR_CLI_VERSION_PARSE_FAILED for unparseable input", () => {
     expect(() => evaluateStellarCliCompatibility({ version: "not-a-version" })).toThrowError(
       expect.objectContaining({
-        code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED
+        code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED,
       })
     );
   });
@@ -83,7 +83,7 @@ describe("evaluateStellarCliCompatibility", () => {
   it("uses the lastTestedVersion override for the untested boundary", () => {
     const report = evaluateStellarCliCompatibility({
       version: "25.2.0",
-      lastTestedVersion: "24.0.0"
+      lastTestedVersion: "24.0.0",
     });
 
     expect(report.status).toBe("untested");
@@ -93,7 +93,7 @@ describe("evaluateStellarCliCompatibility", () => {
   it("falls back to the package default when the lastTestedVersion override is invalid", () => {
     const report = evaluateStellarCliCompatibility({
       version: "25.2.0",
-      lastTestedVersion: "garbage"
+      lastTestedVersion: "garbage",
     });
 
     expect(report.lastTestedVersion).toBe(STELLAR_CLI_LAST_TESTED_VERSION);
@@ -102,22 +102,22 @@ describe("evaluateStellarCliCompatibility", () => {
   it("downgrades to untested when a required feature is missing", () => {
     const report = evaluateStellarCliCompatibility({
       version: "25.2.0",
-      features: ["contract-invoke-sign"]
+      features: ["contract-invoke-sign"],
     });
 
     expect(report.status).toBe("untested");
     expect(report.warnings).toEqual([
       expect.objectContaining({
         code: "STELLAR_CLI_MISSING_FEATURE",
-        message: expect.stringContaining("contract-invoke-sign")
-      })
+        message: expect.stringContaining("contract-invoke-sign"),
+      }),
     ]);
   });
 
   it("ignores empty feature entries", () => {
     const report = evaluateStellarCliCompatibility({
       version: "25.2.0",
-      features: [""]
+      features: [""],
     });
 
     expect(report.status).toBe("supported");

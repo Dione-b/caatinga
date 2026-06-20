@@ -5,9 +5,8 @@ import { describe, expect, it } from "vitest";
 const packages = ["core", "client"];
 const repoRoot = join(__dirname, "../../../..");
 const monorepoOnlyDependencyPattern = /(?:workspace|link|file):/;
-const coreVersion = JSON.parse(
-  readFileSync(join(repoRoot, "packages/core/package.json"), "utf8")
-).version as string;
+const coreVersion = JSON.parse(readFileSync(join(repoRoot, "packages/core/package.json"), "utf8"))
+  .version as string;
 const coreVersionRange = `^${coreVersion}`;
 
 describe("publish package manifests", () => {
@@ -24,18 +23,18 @@ describe("publish package manifests", () => {
       expect(packageJson.exports["."]).toEqual({
         types: "./dist/index.d.ts",
         import: "./dist/index.js",
-        require: "./dist/index.cjs"
+        require: "./dist/index.cjs",
       });
       if (packageName === "core") {
         expect(packageJson.exports["./browser"]).toEqual({
           types: "./dist/browser.d.ts",
           import: "./dist/browser.js",
-          require: "./dist/browser.cjs"
+          require: "./dist/browser.cjs",
         });
         expect(packageJson.scripts.build).toBe("tsup");
-        expect(
-          readFileSync(join(repoRoot, "packages/core/tsup.config.ts"), "utf8")
-        ).toContain("src/browser.ts");
+        expect(readFileSync(join(repoRoot, "packages/core/tsup.config.ts"), "utf8")).toContain(
+          "src/browser.ts"
+        );
         expect(packageJson.files).toContain("scaffolds");
       }
       expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "README.md", "LICENSE"]));
@@ -48,7 +47,9 @@ describe("publish package manifests", () => {
   }
 
   it("cli exposes caatinga bin", () => {
-    const packageJson = JSON.parse(readFileSync(join(repoRoot, "packages/cli/package.json"), "utf8"));
+    const packageJson = JSON.parse(
+      readFileSync(join(repoRoot, "packages/cli/package.json"), "utf8")
+    );
     expect(packageJson.bin).toEqual({ caatinga: "./dist/index.js" });
     expect(packageJson.main).toBe("./dist/index.js");
     expect(packageJson.module).toBe("./dist/index.js");
@@ -56,10 +57,12 @@ describe("publish package manifests", () => {
     expect(packageJson.exports).toEqual({
       ".": {
         types: "./dist/index.d.ts",
-        import: "./dist/index.js"
-      }
+        import: "./dist/index.js",
+      },
     });
-    expect(packageJson.files).toEqual(expect.arrayContaining(["dist", "templates", "README.md", "LICENSE"]));
+    expect(packageJson.files).toEqual(
+      expect.arrayContaining(["dist", "templates", "README.md", "LICENSE"])
+    );
     expect(packageJson.dependencies["@caatinga/core"]).toBe(coreVersionRange);
     expect(packageJson.scripts.build).toContain("tsup src/index.ts");
     expect(JSON.stringify(packageJson)).not.toMatch(monorepoOnlyDependencyPattern);
@@ -72,7 +75,7 @@ describe("publish package manifests", () => {
     expect(packageJson.exports["./freighter"]).toEqual({
       types: "./dist/freighter.d.ts",
       import: "./dist/freighter.js",
-      require: "./dist/freighter.cjs"
+      require: "./dist/freighter.cjs",
     });
   });
 
@@ -83,12 +86,12 @@ describe("publish package manifests", () => {
     expect(packageJson.exports["./stellar-wallets-kit"]).toEqual({
       types: "./dist/stellar-wallets-kit.d.ts",
       import: "./dist/stellar-wallets-kit.js",
-      require: "./dist/stellar-wallets-kit.cjs"
+      require: "./dist/stellar-wallets-kit.cjs",
     });
     expect(packageJson.scripts.build).toContain("src/stellar-wallets-kit.ts");
     expect(packageJson.peerDependencies["@creit.tech/stellar-wallets-kit"]).toBe("^2.3.0");
     expect(packageJson.peerDependenciesMeta["@creit.tech/stellar-wallets-kit"]).toEqual({
-      optional: true
+      optional: true,
     });
   });
 
@@ -99,7 +102,7 @@ describe("publish package manifests", () => {
     expect(packageJson.exports["./react"]).toEqual({
       types: "./dist/react.d.ts",
       import: "./dist/react.js",
-      require: "./dist/react.cjs"
+      require: "./dist/react.cjs",
     });
     expect(packageJson.scripts.build).toContain("src/react.ts");
     expect(packageJson.peerDependencies.react).toBe(">=18");

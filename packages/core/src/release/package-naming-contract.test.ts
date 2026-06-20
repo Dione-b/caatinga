@@ -14,9 +14,7 @@ describe("package naming contract", () => {
 
   it("should_use_filter_name_matching_cli_package_json", async () => {
     const rootPkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
-    const cliPkg = JSON.parse(
-      await readFile(path.join(root, "packages/cli/package.json"), "utf8")
-    );
+    const cliPkg = JSON.parse(await readFile(path.join(root, "packages/cli/package.json"), "utf8"));
     const filter = rootPkg.scripts.dev.match(/--filter\s+(\S+)/)?.[1];
     expect(filter).toBe(cliPkg.name);
   });

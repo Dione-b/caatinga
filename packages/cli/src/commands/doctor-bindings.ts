@@ -3,7 +3,7 @@ import {
   loadConfig,
   readArtifacts,
   resolveNetwork,
-  type BindingFreshnessStatus
+  type BindingFreshnessStatus,
 } from "@caatinga/core";
 
 export type BindingCoverageLine = {
@@ -26,7 +26,7 @@ export async function evaluateBindingCoverage(options: {
     config,
     artifacts,
     networkName: network.name,
-    cwd
+    cwd,
   });
 
   const lines: BindingCoverageLine[] = freshness.map((entry) => ({
@@ -35,7 +35,7 @@ export async function evaluateBindingCoverage(options: {
     reason: entry.reason,
     ...(entry.status === "fresh"
       ? {}
-      : { fix: `Run: caatinga generate ${entry.contractName} --network ${network.name}` })
+      : { fix: `Run: caatinga generate ${entry.contractName} --network ${network.name}` }),
   }));
 
   return { lines, allFresh: lines.every((line) => line.status === "fresh") };

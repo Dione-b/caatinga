@@ -32,15 +32,15 @@ Without a global CLI install, use `npx caatinga@latest init my-dapp`.
 
 ## What gets generated
 
-| Path / file | Purpose |
-| --- | --- |
-| `caatinga.config.ts` | Contracts, WASM paths, networks, `frontend.bindingsOutput` |
-| `caatinga.artifacts.json` | Per-network deployed contract IDs (empty until deploy) |
-| `contracts/<name>/` | Rust Soroban contract source |
-| `src/` | Vite + React app, wallet adapter, `caatinga.ts` client wiring |
-| `src/contracts/generated/` | Placeholder bindings until deploy generates real ones |
-| `src/stubs/` | Wallet SDK stubs (Trezor, HOT, Safe) for clean browser bundles |
-| `vite.config.ts`, `tsconfig.json` | Frontend toolchain |
+| Path / file                       | Purpose                                                        |
+| --------------------------------- | -------------------------------------------------------------- |
+| `caatinga.config.ts`              | Contracts, WASM paths, networks, `frontend.bindingsOutput`     |
+| `caatinga.artifacts.json`         | Per-network deployed contract IDs (empty until deploy)         |
+| `contracts/<name>/`               | Rust Soroban contract source                                   |
+| `src/`                            | Vite + React app, wallet adapter, `caatinga.ts` client wiring  |
+| `src/contracts/generated/`        | Placeholder bindings until deploy generates real ones          |
+| `src/stubs/`                      | Wallet SDK stubs (Trezor, HOT, Safe) for clean browser bundles |
+| `vite.config.ts`, `tsconfig.json` | Frontend toolchain                                             |
 
 The default contract is `counter` in `react-vite-counter`. `marketplace-with-token` ships `token` and `marketplace` with a `dependsOn` graph.
 

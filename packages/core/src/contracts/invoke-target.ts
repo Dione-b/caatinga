@@ -31,7 +31,7 @@ export function buildReadCallHint(target: InvokeTarget, networkName: string): st
     `  client.contract("${target.contractName}").read("${target.method}")`,
     `  client.contract("${target.contractName}").simulate("${target.method}")`,
     "Pass method args as the second argument to read() when the contract method takes parameters.",
-    "Only pass Stellar CLI --force when you intentionally need a signed read simulation."
+    "Only pass Stellar CLI --force when you intentionally need a signed read simulation.",
   ].join("\n");
 }
 

@@ -47,16 +47,20 @@ describe("parseContractId", () => {
   it("should_throw_when_output_has_no_contract_id", async () => {
     const output = await fixture("unknown/deploy-success-no-contract-id.txt");
 
-    expect(() => parseContractId(output)).toThrow(expect.objectContaining({
-      code: CaatingaErrorCode.CONTRACT_ID_NOT_FOUND
-    }));
+    expect(() => parseContractId(output)).toThrow(
+      expect.objectContaining({
+        code: CaatingaErrorCode.CONTRACT_ID_NOT_FOUND,
+      })
+    );
   });
 
   it("should_throw_when_v25_2_deploy_output_has_no_contract_id", async () => {
     const output = await fixture("v25.2.0/deploy.v25.2.0.no-contract-id.fixture.txt");
 
-    expect(() => parseContractId(output)).toThrow(expect.objectContaining({
-      code: CaatingaErrorCode.CONTRACT_ID_NOT_FOUND
-    }));
+    expect(() => parseContractId(output)).toThrow(
+      expect.objectContaining({
+        code: CaatingaErrorCode.CONTRACT_ID_NOT_FOUND,
+      })
+    );
   });
 });

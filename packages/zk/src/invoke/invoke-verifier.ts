@@ -66,17 +66,21 @@ export type InvokeVerifierResult = {
   verified: true;
 };
 
-export async function invokeVerifier(options: InvokeVerifierOptions): Promise<InvokeVerifierResult> {
+export async function invokeVerifier(
+  options: InvokeVerifierOptions
+): Promise<InvokeVerifierResult> {
   const cwd = options.cwd ?? process.cwd();
-  const config = options.config ?? await loadConfig({ cwd });
-  const proof = JSON.parse(await readFile(path.resolve(cwd, options.proofPath), "utf8")) as SnarkjsProof;
+  const config = options.config ?? (await loadConfig({ cwd }));
+  const proof = JSON.parse(
+    await readFile(path.resolve(cwd, options.proofPath), "utf8")
+  ) as SnarkjsProof;
   const publicSignals = JSON.parse(
     await readFile(path.resolve(cwd, options.publicSignalsPath), "utf8")
   ) as string[];
 
   const vk = options.embedVk
     ? undefined
-    : JSON.parse(await readFile(path.resolve(cwd, options.vkPath), "utf8")) as SnarkjsVk;
+    : (JSON.parse(await readFile(path.resolve(cwd, options.vkPath), "utf8")) as SnarkjsVk);
 
   const args = buildStellarVerifyProofArgs({
     proof,
@@ -100,14 +104,12 @@ export async function invokeVerifier(options: InvokeVerifierOptions): Promise<In
   }
 
   if (result.result.trim().toLowerCase() !== "true") {
-    throw new ZkError(
-      `Verifier returned ${result.result.trim()}.`,
-      "ZK_VERIFY_FAILED"
-    );
+    throw new ZkError(`Verifier returned ${result.result.trim()}.`, "ZK_VERIFY_FAILED");
   }
 
   const artifacts = await readArtifacts(cwd);
-  const contractId = artifacts.networks[options.network]?.contracts[options.verifierContract]?.contractId;
+  const contractId =
+    artifacts.networks[options.network]?.contracts[options.verifierContract]?.contractId;
 
   if (!contractId) {
     throw new ZkError(

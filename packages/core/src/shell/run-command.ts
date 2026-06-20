@@ -33,13 +33,13 @@ export async function runCommand(
       env: resolveSubprocessEnv(options.env ?? {}),
       input: options.input,
       all: true,
-      reject: true
+      reject: true,
     } satisfies Options);
 
     return {
       stdout: result.stdout,
       stderr: result.stderr,
-      all: result.all ?? ""
+      all: result.all ?? "",
     };
   } catch (error) {
     if (error instanceof CaatingaError) {
@@ -61,7 +61,8 @@ export async function runCommand(
       );
     }
 
-    const output = typeof error === "object" && error && "all" in error ? String(error.all) : undefined;
+    const output =
+      typeof error === "object" && error && "all" in error ? String(error.all) : undefined;
     throw new CaatingaError(
       `Command failed: ${command} ${args.join(" ")}`,
       options.failureCode ?? CaatingaErrorCode.COMMAND_FAILED,

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   splitArgsAndOptions,
   splitInvokeArgsAndOptions,
-  splitReadArgsAndOptions
+  splitReadArgsAndOptions,
 } from "./invoke-args.js";
 
 describe("splitInvokeArgsAndOptions", () => {
@@ -12,7 +12,7 @@ describe("splitInvokeArgsAndOptions", () => {
     expect(parsed).toEqual({
       args: undefined,
       debugXdr: true,
-      debugRaw: true
+      debugRaw: true,
     });
   });
 
@@ -22,7 +22,7 @@ describe("splitInvokeArgsAndOptions", () => {
     expect(parsed).toEqual({
       args: { count: 1 },
       debugXdr: false,
-      debugRaw: true
+      debugRaw: true,
     });
   });
 });
@@ -33,7 +33,7 @@ describe("splitReadArgsAndOptions", () => {
 
     expect(parsed).toEqual({
       args: undefined,
-      debugRaw: true
+      debugRaw: true,
     });
   });
 });
@@ -42,7 +42,7 @@ describe("splitArgsAndOptions", () => {
   it("should_default_debugRaw_to_false", () => {
     expect(splitArgsAndOptions({ value: 1 })).toEqual({
       args: { value: 1 },
-      debugRaw: false
+      debugRaw: false,
     });
   });
 });

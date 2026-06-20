@@ -10,31 +10,41 @@ export function registerInvokeCommand(program: Command): void {
     .argument("<target>", "Invoke target in contract.method format")
     .argument("[args...]", "Arguments forwarded to Stellar CLI after the method name")
     .option("-n, --network <network>", "Configured network name")
-    .requiredOption("-s, --source <source>", "Stellar CLI identity alias that can sign (for example alice)")
+    .requiredOption(
+      "-s, --source <source>",
+      "Stellar CLI identity alias that can sign (for example alice)"
+    )
     .allowUnknownOption(true)
     .allowExcessArguments(true)
-    .action((target: string, args: string[], options: {
-      network?: string;
-      source: string;
-    }) => runCliAction(async () => {
-      const config = await loadConfig();
-      const result = await invokeContract({
-        config,
-        target,
-        args,
-        networkName: options.network,
-        source: options.source
-      });
+    .action(
+      (
+        target: string,
+        args: string[],
+        options: {
+          network?: string;
+          source: string;
+        }
+      ) =>
+        runCliAction(async () => {
+          const config = await loadConfig();
+          const result = await invokeContract({
+            config,
+            target,
+            args,
+            networkName: options.network,
+            source: options.source,
+          });
 
-      logger.success("Invoke complete");
-      logger.info("");
-      logger.info(`Network: ${result.network.name}`);
-      logger.info(`Contract: ${result.target.contractName}`);
-      logger.info(`Method: ${result.target.method}`);
+          logger.success("Invoke complete");
+          logger.info("");
+          logger.info(`Network: ${result.network.name}`);
+          logger.info(`Contract: ${result.target.contractName}`);
+          logger.info(`Method: ${result.target.method}`);
 
-      if (result.result) {
-        logger.info("");
-        logger.info(result.result);
-      }
-    }));
+          if (result.result) {
+            logger.info("");
+            logger.info(result.result);
+          }
+        })
+    );
 }

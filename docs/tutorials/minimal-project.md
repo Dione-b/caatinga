@@ -26,12 +26,12 @@ npx caatinga doctor
 
 ## What gets generated
 
-| Path / file | Purpose |
-| --- | --- |
-| `caatinga.config.ts` | Contract `app`, networks — **no** `frontend` block |
-| `caatinga.artifacts.json` | Empty testnet entry until deploy |
-| `contracts/app/` | Soroban stub: `hello()`, `version()` |
-| `package.json` | Scripts: `build`, `deploy`, `doctor`, `read:hello`, `read:version` |
+| Path / file               | Purpose                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `caatinga.config.ts`      | Contract `app`, networks — **no** `frontend` block                 |
+| `caatinga.artifacts.json` | Empty testnet entry until deploy                                   |
+| `contracts/app/`          | Soroban stub: `hello()`, `version()`                               |
+| `package.json`            | Scripts: `build`, `deploy`, `doctor`, `read:hello`, `read:version` |
 
 **Not included:** `src/`, Vite, React, wallet stubs, or TypeScript bindings.
 

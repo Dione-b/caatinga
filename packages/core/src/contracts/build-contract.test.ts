@@ -8,7 +8,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { buildContract } from "./build-contract.js";
@@ -22,16 +22,16 @@ const baseConfig: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./rel/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./out" }
+  frontend: { framework: "vite-react", bindingsOutput: "./out" },
 };
 
 describe("buildContract", () => {
@@ -59,12 +59,12 @@ describe("buildContract", () => {
     await buildContract({
       config: baseConfig,
       contractName: "counter",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(runCommand).toHaveBeenCalledWith("stellar", ["contract", "build"], {
       cwd: sourceDir,
-      failureCode: CaatingaErrorCode.BUILD_FAILED
+      failureCode: CaatingaErrorCode.BUILD_FAILED,
     });
   });
 
@@ -79,7 +79,9 @@ describe("buildContract", () => {
           "Command failed: stellar contract build",
           CaatingaErrorCode.BUILD_FAILED,
           "the wasm32v1-none target may not be installed",
-          new Error("error: the wasm32v1-none target is not installed. run `rustup target add wasm32v1-none`")
+          new Error(
+            "error: the wasm32v1-none target is not installed. run `rustup target add wasm32v1-none`"
+          )
         );
       }
 
@@ -90,10 +92,10 @@ describe("buildContract", () => {
       buildContract({
         config: baseConfig,
         contractName: "counter",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({
-      code: CaatingaErrorCode.RUST_TARGET_NOT_FOUND
+      code: CaatingaErrorCode.RUST_TARGET_NOT_FOUND,
     });
   });
 
@@ -119,10 +121,10 @@ describe("buildContract", () => {
       buildContract({
         config: baseConfig,
         contractName: "counter",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({
-      code: CaatingaErrorCode.BUILD_FAILED
+      code: CaatingaErrorCode.BUILD_FAILED,
     });
   });
 
@@ -153,9 +155,9 @@ describe("buildContract", () => {
         counter: {
           ...baseConfig.contracts.counter,
           path: "./contracts/counter",
-          wasm: "./contracts/counter/target/wasm32-unknown-unknown/release/counter.wasm"
-        }
-      }
+          wasm: "./contracts/counter/target/wasm32-unknown-unknown/release/counter.wasm",
+        },
+      },
     };
 
     await mkdir(sourceDir, { recursive: true });
@@ -165,7 +167,7 @@ describe("buildContract", () => {
     const result = await buildContract({
       config,
       contractName: "counter",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.contract.wasmPath).toBe(currentWasmPath);
@@ -197,9 +199,9 @@ describe("buildContract", () => {
         counter: {
           ...baseConfig.contracts.counter,
           path: "./contracts/counter",
-          wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"
-        }
-      }
+          wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+        },
+      },
     };
 
     await mkdir(sourceDir, { recursive: true });
@@ -212,7 +214,7 @@ describe("buildContract", () => {
       const result = await buildContract({
         config,
         contractName: "counter",
-        cwd: tmpDir
+        cwd: tmpDir,
       });
 
       expect(result.contract.wasmPath).toBe(actualWasmPath);
@@ -241,12 +243,14 @@ describe("buildContract", () => {
       return { stdout: "ok", stderr: "", all: "ok" };
     });
 
-    await expect(buildContract({
-      config: baseConfig,
-      contractName: "counter",
-      cwd: tmpDir
-    })).rejects.toMatchObject({
-      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
+    await expect(
+      buildContract({
+        config: baseConfig,
+        contractName: "counter",
+        cwd: tmpDir,
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
     });
   });
 });

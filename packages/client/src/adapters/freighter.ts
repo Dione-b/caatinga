@@ -10,5 +10,5 @@ export const freighterWalletAdapter: CaatingaWalletAdapter = {
   async signTransaction({ xdr, networkPassphrase }) {
     const response = await signTransaction(xdr, { networkPassphrase });
     return response.signedTxXdr;
-  }
+  },
 };

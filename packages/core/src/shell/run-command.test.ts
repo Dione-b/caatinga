@@ -18,20 +18,18 @@ describe("runCommand failureCode", () => {
     await expect(
       runCommand("false", [], {
         skipStellarVersionCheck: true,
-        failureCode: CaatingaErrorCode.BUILD_FAILED
+        failureCode: CaatingaErrorCode.BUILD_FAILED,
       })
     ).rejects.toMatchObject({
-      code: CaatingaErrorCode.BUILD_FAILED
+      code: CaatingaErrorCode.BUILD_FAILED,
     });
   });
 
   it("should_default_to_COMMAND_FAILED_when_failureCode_is_absent", async () => {
     execaMock.mockRejectedValueOnce({ all: "boom", code: 1 });
 
-    await expect(
-      runCommand("false", [], { skipStellarVersionCheck: true })
-    ).rejects.toMatchObject({
-      code: CaatingaErrorCode.COMMAND_FAILED
+    await expect(runCommand("false", [], { skipStellarVersionCheck: true })).rejects.toMatchObject({
+      code: CaatingaErrorCode.COMMAND_FAILED,
     });
   });
 });

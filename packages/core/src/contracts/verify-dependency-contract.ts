@@ -11,19 +11,26 @@ export async function verifyDependencyContract(options: {
   cwd?: string;
 }): Promise<void> {
   try {
-    await runCommand("stellar", [
-      "contract",
-      "info",
-      "interface",
-      "--contract-id",
-      options.contractId,
-      ...buildStellarNetworkArgs(options.network)
-    ], {
-      cwd: options.cwd,
-      failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND
-    });
+    await runCommand(
+      "stellar",
+      [
+        "contract",
+        "info",
+        "interface",
+        "--contract-id",
+        options.contractId,
+        ...buildStellarNetworkArgs(options.network),
+      ],
+      {
+        cwd: options.cwd,
+        failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
+      }
+    );
   } catch (error) {
-    if (error instanceof CaatingaError && error.code === CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND) {
+    if (
+      error instanceof CaatingaError &&
+      error.code === CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND
+    ) {
       throw new CaatingaError(
         `Dependency "${options.dependencyName}" is not deployed on "${options.network.name}" (contract ID ${options.contractId}).`,
         CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
@@ -43,7 +50,8 @@ export async function verifyDependencyContracts(options: {
   cwd?: string;
 }): Promise<void> {
   for (const dependencyName of options.dependencies) {
-    const contractArtifact = options.artifacts.networks[options.network.name]?.contracts[dependencyName];
+    const contractArtifact =
+      options.artifacts.networks[options.network.name]?.contracts[dependencyName];
 
     if (!contractArtifact?.contractId) {
       throw new CaatingaError(
@@ -57,7 +65,7 @@ export async function verifyDependencyContracts(options: {
       dependencyName,
       contractId: contractArtifact.contractId,
       network: options.network,
-      cwd: options.cwd
+      cwd: options.cwd,
     });
   }
 }

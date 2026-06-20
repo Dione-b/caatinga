@@ -10,9 +10,9 @@ labels: bug
 
 ## Steps to Reproduce
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Expected Behavior
 
@@ -30,14 +30,14 @@ labels: bug
 
 <!-- Fill in ALL fields. Issues missing this info may be closed without investigation. -->
 
-| Field | Value |
-|---|---|
-| OS | <!-- e.g. Ubuntu 24.04 / macOS 14.5 / Windows 11 --> |
-| Architecture | <!-- e.g. x64 / arm64 --> |
-| Node.js (`node -v`) | |
-| pnpm (`pnpm -v`) | |
-| Stellar CLI (`stellar --version`) | |
-| Caatinga (`caatinga --version`) | |
+| Field                             | Value                                                |
+| --------------------------------- | ---------------------------------------------------- |
+| OS                                | <!-- e.g. Ubuntu 24.04 / macOS 14.5 / Windows 11 --> |
+| Architecture                      | <!-- e.g. x64 / arm64 -->                            |
+| Node.js (`node -v`)               |                                                      |
+| pnpm (`pnpm -v`)                  |                                                      |
+| Stellar CLI (`stellar --version`) |                                                      |
+| Caatinga (`caatinga --version`)   |                                                      |
 
 ## Additional Context
 

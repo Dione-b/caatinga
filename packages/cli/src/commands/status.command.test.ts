@@ -12,7 +12,7 @@ vi.mock("@caatinga/core", async () => {
   return {
     ...actual,
     collectProjectStatus: collectProjectStatusMock,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
   };
 });
 
@@ -22,15 +22,20 @@ const config: CaatingaConfig = {
   project: "counter-app",
   defaultNetwork: "testnet",
   contracts: {
-    counter: { path: "./contracts/counter", wasm: "./rel/counter.wasm", dependsOn: [], deployArgs: {} }
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./rel/counter.wasm",
+      dependsOn: [],
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" }
+  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" },
 };
 
 const status: ProjectStatus = {
@@ -51,8 +56,8 @@ const status: ProjectStatus = {
             status: "stale",
             outputDir: "/tmp/counter",
             marker: null,
-            reason: "wasmHash changed since last generate"
-          }
+            reason: "wasmHash changed since last generate",
+          },
         },
         {
           name: "token",
@@ -63,12 +68,12 @@ const status: ProjectStatus = {
             status: "missing",
             outputDir: "/tmp/token",
             marker: null,
-            reason: "not deployed on \"testnet\""
-          }
-        }
-      ]
-    }
-  ]
+            reason: 'not deployed on "testnet"',
+          },
+        },
+      ],
+    },
+  ],
 };
 
 function createStatusProgram(): Command {
@@ -117,12 +122,16 @@ describe("status command", () => {
 
     try {
       await createStatusProgram().parseAsync([
-        "node", "caatinga", "status", "--network", "testnet"
+        "node",
+        "caatinga",
+        "status",
+        "--network",
+        "testnet",
       ]);
 
       expect(collectProjectStatus).toHaveBeenCalledWith({
         config,
-        networkName: "testnet"
+        networkName: "testnet",
       });
     } finally {
       logSpy.mockRestore();

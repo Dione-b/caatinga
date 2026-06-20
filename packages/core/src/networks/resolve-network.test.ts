@@ -7,19 +7,19 @@ const baseConfig: CaatingaConfig = {
   project: "app",
   defaultNetwork: "testnet",
   contracts: {
-    counter: { path: "./c", wasm: "./w.wasm", dependsOn: [], deployArgs: {} }
+    counter: { path: "./c", wasm: "./w.wasm", dependsOn: [], deployArgs: {} },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
     mainnet: {
       rpcUrl: "https://mainnet.sorobanrpc.com",
-      networkPassphrase: "Public Global Stellar Network ; September 2015"
-    }
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./out" }
+  frontend: { framework: "vite-react", bindingsOutput: "./out" },
 };
 
 describe("resolveNetwork", () => {

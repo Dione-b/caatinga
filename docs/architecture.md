@@ -10,11 +10,11 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 
 ## What Caatinga is (and is not)
 
-| Caatinga is | Caatinga is not |
-|------------|----------------|
-| Convention + orchestration + artifacts + frontend/client integration | A second Soroban/Stellar SDK |
-| A thin CLI over `@caatinga/core` | A place to store private keys or run silent signing |
-| Template-driven project scaffolding | A hosted registry required for core workflows (future registries are optional) |
+| Caatinga is                                                          | Caatinga is not                                                                |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Convention + orchestration + artifacts + frontend/client integration | A second Soroban/Stellar SDK                                                   |
+| A thin CLI over `@caatinga/core`                                     | A place to store private keys or run silent signing                            |
+| Template-driven project scaffolding                                  | A hosted registry required for core workflows (future registries are optional) |
 
 **Primary competitor today:** ad-hoc `package.json` scripts.
 
@@ -24,13 +24,13 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 
 ### Caatinga vs Scaffold Stellar
 
-| Dimension | Caatinga | Scaffold Stellar |
-|-----------|----------|------------------|
-| Entry point | `npm install -g @caatinga/cli` | Stellar CLI plugins (`stellar scaffold`, `stellar registry`) |
-| Config contract | `caatinga.config.ts` + `caatinga.artifacts.json` | `environments.toml` + registry naming |
-| Deploy model | Stellar CLI subprocess + per-network artifacts file | On-chain registry publish/deploy workflow |
-| Browser integration | `@caatinga/client` with pluggable wallet adapters | Generated TS clients + Vite/React template |
-| Error surface | Stable `CAATINGA_*` codes for automation | Stellar CLI / plugin errors |
+| Dimension           | Caatinga                                            | Scaffold Stellar                                             |
+| ------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| Entry point         | `npm install -g @caatinga/cli`                      | Stellar CLI plugins (`stellar scaffold`, `stellar registry`) |
+| Config contract     | `caatinga.config.ts` + `caatinga.artifacts.json`    | `environments.toml` + registry naming                        |
+| Deploy model        | Stellar CLI subprocess + per-network artifacts file | On-chain registry publish/deploy workflow                    |
+| Browser integration | `@caatinga/client` with pluggable wallet adapters   | Generated TS clients + Vite/React template                   |
+| Error surface       | Stable `CAATINGA_*` codes for automation            | Stellar CLI / plugin errors                                  |
 
 **What Caatinga should do unusually well:** standardize Stellar/Soroban steps, persist **per-network** deployment facts, generate frontend integration from deployed contracts, avoid manual `contractId` wiring in the app, make XDR visible when debugging, support **multi-contract** reproducible deploys later, and lower friction for JS/TS teams.
 
@@ -233,13 +233,13 @@ Semver applies to monorepo packages **and** to serialized formats (`caatinga.art
 
 ## Architecture Decision Records
 
-| ADR | Status | Topic |
-|-----|--------|--------|
-| [0001](./adr/0001-stable-workflow-over-stellar-cli.md) | Accepted | Stable Caatinga workflow while encapsulating Stellar CLI churn |
+| ADR                                                      | Status   | Topic                                                                     |
+| -------------------------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| [0001](./adr/0001-stable-workflow-over-stellar-cli.md)   | Accepted | Stable Caatinga workflow while encapsulating Stellar CLI churn            |
 | [0002](./adr/0002-local-artifacts-as-source-of-truth.md) | Accepted | Local artifacts and config as source of truth; no central registry in MVP |
-| [0003](./adr/0003-template-manifest-compatibility.md) | Accepted | Template manifest and core compatibility |
-| [0004](./adr/0004-error-codes-as-public-api.md) | Accepted | Stable `CAATINGA_*` error codes and migration |
-| [0005](./adr/0005-multi-contract-dependency-deploy.md) | Accepted | Multi-contract `dependsOn` and contractId injection |
+| [0003](./adr/0003-template-manifest-compatibility.md)    | Accepted | Template manifest and core compatibility                                  |
+| [0004](./adr/0004-error-codes-as-public-api.md)          | Accepted | Stable `CAATINGA_*` error codes and migration                             |
+| [0005](./adr/0005-multi-contract-dependency-deploy.md)   | Accepted | Multi-contract `dependsOn` and contractId injection                       |
 
 **0001–0005** are ratified; multi-contract deploy sequencing and placeholder resolution are implemented in `@caatinga/core` and documented in ADR 0005.
 

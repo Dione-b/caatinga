@@ -2,12 +2,12 @@
 import {
   createStellarWalletsKitAdapter,
   WalletNetwork,
-  type StellarWalletsKitMetadata
+  type StellarWalletsKitMetadata,
 } from "@caatinga/client/stellar-wallets-kit";
 
 export const stellarWalletAdapter = createStellarWalletsKitAdapter({
   network: WalletNetwork.TESTNET,
-  walletConnectMetadata: getWalletConnectMetadata()
+  walletConnectMetadata: getWalletConnectMetadata(),
 });
 
 export { WalletNetwork };
@@ -23,6 +23,6 @@ function getWalletConnectMetadata(): StellarWalletsKitMetadata | undefined {
     name: import.meta.env.VITE_APP_NAME ?? "Counter Web",
     description: import.meta.env.VITE_APP_DESCRIPTION ?? "Caatinga counter web example",
     url: import.meta.env.VITE_APP_URL ?? window.location.origin,
-    icons: [import.meta.env.VITE_APP_ICON_URL ?? `${window.location.origin}/icon.png`]
+    icons: [import.meta.env.VITE_APP_ICON_URL ?? `${window.location.origin}/icon.png`],
   };
 }

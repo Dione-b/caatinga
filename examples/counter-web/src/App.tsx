@@ -47,13 +47,13 @@ function AppBody() {
     setStatus((current) => ({ ...current, error: undefined }));
     try {
       const result = await caatinga.contract("counter").invoke<number>("increment", {
-        debugXdr: true
+        debugXdr: true,
       });
-      const value = result.result ?? await caatinga.contract("counter").read<number>("get");
+      const value = result.result ?? (await caatinga.contract("counter").read<number>("get"));
       setStatus((current) => ({
         ...current,
         transactionHash: result.transactionHash ?? "submitted",
-        value: JSON.stringify(value)
+        value: JSON.stringify(value),
       }));
     } catch (error) {
       setStatus((current) => ({ ...current, error: formatError(error) }));
@@ -69,7 +69,7 @@ function AppBody() {
       const result = await caatinga.contract("counter").read("get");
       setStatus((current) => ({
         ...current,
-        value: JSON.stringify(result)
+        value: JSON.stringify(result),
       }));
     } catch (error) {
       setStatus((current) => ({ ...current, error: formatError(error) }));
@@ -87,8 +87,8 @@ function AppBody() {
         <p className="eyebrow">Caatinga example</p>
         <h1>Counter Web</h1>
         <p>
-          Minimal Vite + React example showing `@caatinga/client`, generated bindings,
-          artifacts, and a Stellar Wallets Kit adapter in one browser flow.
+          Minimal Vite + React example showing `@caatinga/client`, generated bindings, artifacts,
+          and a Stellar Wallets Kit adapter in one browser flow.
         </p>
       </section>
 

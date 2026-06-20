@@ -3,7 +3,7 @@ import {
   Networks,
   type ISupportedWallet,
   type ModuleInterface,
-  type StellarWalletsKitInitParams
+  type StellarWalletsKitInitParams,
 } from "@creit.tech/stellar-wallets-kit/types";
 import { defaultModules } from "@creit.tech/stellar-wallets-kit/modules/utils";
 import { FREIGHTER_ID } from "@creit.tech/stellar-wallets-kit/modules/freighter";
@@ -75,7 +75,7 @@ export function createStellarWalletsKitAdapter(
       network,
       selectedWalletId: options.selectedWalletId ?? FREIGHTER_ID,
       modules: options.modules ?? buildModules(options.walletConnectMetadata),
-      ...options.initParams
+      ...options.initParams,
     });
     kitInitialized = true;
   } else if (options.network !== undefined) {
@@ -112,8 +112,7 @@ export function createStellarWalletsKitAdapter(
         address = result.address;
         return result.address;
       } catch (error) {
-        const normalized =
-          error instanceof Error ? error : new Error(String(error));
+        const normalized = error instanceof Error ? error : new Error(String(error));
         modalOptions.onClosed?.(normalized);
         throw normalized;
       }
@@ -138,7 +137,7 @@ export function createStellarWalletsKitAdapter(
     async signTransaction({ xdr, networkPassphrase }) {
       const result = await StellarWalletsKit.signTransaction(xdr, {
         networkPassphrase,
-        ...(address ? { address } : {})
+        ...(address ? { address } : {}),
       });
       return result.signedTxXdr;
     },
@@ -146,7 +145,7 @@ export function createStellarWalletsKitAdapter(
     async disconnect() {
       await StellarWalletsKit.disconnect();
       address = undefined;
-    }
+    },
   };
 }
 
@@ -156,7 +155,7 @@ export function createStellarWalletsKitAdapter(
 // stub in their bundler so the NEAR chain is never bundled (see template config).
 function buildModules(walletConnectMetadata?: StellarWalletsKitMetadata): ModuleInterface[] {
   const modules = defaultModules({
-    filterBy: (module) => module.productId !== HOTWALLET_ID
+    filterBy: (module) => module.productId !== HOTWALLET_ID,
   });
 
   if (walletConnectMetadata) {
@@ -164,7 +163,7 @@ function buildModules(walletConnectMetadata?: StellarWalletsKitMetadata): Module
     modules.push(
       new WalletConnectModule({
         projectId,
-        metadata: { name, description, url, icons }
+        metadata: { name, description, url, icons },
       })
     );
   }

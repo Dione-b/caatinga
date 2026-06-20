@@ -12,7 +12,7 @@ vi.mock("@caatinga/core", async () => {
     ...actual,
     loadConfig: loadConfigMock,
     readArtifacts: readArtifactsMock,
-    evaluateBindingsFreshness: evaluateBindingsFreshnessMock
+    evaluateBindingsFreshness: evaluateBindingsFreshnessMock,
   };
 });
 
@@ -20,15 +20,20 @@ const config: CaatingaConfig = {
   project: "app",
   defaultNetwork: "testnet",
   contracts: {
-    counter: { path: "./contracts/counter", wasm: "./rel/counter.wasm", dependsOn: [], deployArgs: {} }
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./rel/counter.wasm",
+      dependsOn: [],
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" }
+  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" },
 };
 
 describe("evaluateBindingCoverage", () => {
@@ -42,7 +47,7 @@ describe("evaluateBindingCoverage", () => {
 
   it("reports allFresh when every contract has fresh bindings", async () => {
     evaluateBindingsFreshnessMock.mockResolvedValue([
-      { contractName: "counter", status: "fresh", outputDir: "/x", marker: null }
+      { contractName: "counter", status: "fresh", outputDir: "/x", marker: null },
     ]);
 
     const coverage = await evaluateBindingCoverage({ networkName: "testnet" });
@@ -58,9 +63,9 @@ describe("evaluateBindingCoverage", () => {
         status: "stale",
         outputDir: "/x",
         marker: null,
-        reason: "wasmHash changed since last generate"
+        reason: "wasmHash changed since last generate",
       },
-      { contractName: "token", status: "missing", outputDir: "/y", marker: null }
+      { contractName: "token", status: "missing", outputDir: "/y", marker: null },
     ]);
 
     const coverage = await evaluateBindingCoverage({ networkName: "testnet" });
@@ -69,12 +74,12 @@ describe("evaluateBindingCoverage", () => {
     expect(coverage.lines[0]).toMatchObject({
       name: "counter",
       status: "stale",
-      fix: "Run: caatinga generate counter --network testnet"
+      fix: "Run: caatinga generate counter --network testnet",
     });
     expect(coverage.lines[1]).toMatchObject({
       name: "token",
       status: "missing",
-      fix: "Run: caatinga generate token --network testnet"
+      fix: "Run: caatinga generate token --network testnet",
     });
   });
 

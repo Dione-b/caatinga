@@ -9,7 +9,7 @@ export default defineConfig({
       // Stellar Wallets Kit drags NEAR's @hot-wallet/sdk (Node-only crypto) into
       // the browser bundle. The adapter filters HOT Wallet out, so stub the SDK
       // to keep the NEAR chain out of the build. See src/stubs/hot-wallet.ts.
-      "@hot-wallet/sdk": fileURLToPath(new URL("./src/stubs/hot-wallet.ts", import.meta.url))
-    }
-  }
+      "@hot-wallet/sdk": fileURLToPath(new URL("./src/stubs/hot-wallet.ts", import.meta.url)),
+    },
+  },
 });

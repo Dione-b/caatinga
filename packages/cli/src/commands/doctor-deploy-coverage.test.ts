@@ -14,7 +14,7 @@ vi.mock("@caatinga/core", async () => {
     ...actual,
     loadConfig: loadConfigMock,
     readArtifacts: readArtifactsMock,
-    resolveNetwork: resolveNetworkMock
+    resolveNetwork: resolveNetworkMock,
   };
 });
 
@@ -26,27 +26,27 @@ const config: CaatingaConfig = {
       path: "./contracts/token",
       wasm: "./token.wasm",
       dependsOn: [],
-      deployArgs: {}
+      deployArgs: {},
     },
     marketplace: {
       path: "./contracts/marketplace",
       wasm: "./marketplace.wasm",
       dependsOn: ["token"],
       deployArgs: {
-        tokenContractId: "${contracts.token.contractId}"
-      }
-    }
+        tokenContractId: "${contracts.token.contractId}",
+      },
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 const tokenContractId = "C".padEnd(56, "T");
@@ -61,7 +61,7 @@ describe("evaluateDeployCoverage", () => {
     resolveNetworkMock.mockReturnValue({
       name: "testnet",
       rpcUrl: config.networks.testnet.rpcUrl,
-      networkPassphrase: config.networks.testnet.networkPassphrase
+      networkPassphrase: config.networks.testnet.networkPassphrase,
     });
   });
 
@@ -73,11 +73,11 @@ describe("evaluateDeployCoverage", () => {
         testnet: {
           contracts: {
             token: { contractId: tokenContractId },
-            marketplace: { contractId: "C".padEnd(56, "M") }
+            marketplace: { contractId: "C".padEnd(56, "M") },
           },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
 
     const result = await evaluateDeployCoverage({ networkName: "testnet" });
@@ -85,7 +85,7 @@ describe("evaluateDeployCoverage", () => {
     expect(result.complete).toBe(true);
     expect(result.lines).toEqual([
       { name: "token", ok: true, contractId: tokenContractId },
-      { name: "marketplace", ok: true, contractId: "C".padEnd(56, "M") }
+      { name: "marketplace", ok: true, contractId: "C".padEnd(56, "M") },
     ]);
   });
 
@@ -96,11 +96,11 @@ describe("evaluateDeployCoverage", () => {
       networks: {
         testnet: {
           contracts: {
-            token: { contractId: tokenContractId }
+            token: { contractId: tokenContractId },
           },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
 
     const result = await evaluateDeployCoverage({ networkName: "testnet" });
@@ -111,8 +111,8 @@ describe("evaluateDeployCoverage", () => {
       {
         name: "marketplace",
         ok: false,
-        fix: "Run: caatinga deploy marketplace --network testnet --source <identity>"
-      }
+        fix: "Run: caatinga deploy marketplace --network testnet --source <identity>",
+      },
     ]);
   });
 });
@@ -127,7 +127,7 @@ describe("reportDeployCoverage", () => {
     resolveNetworkMock.mockReturnValue({
       name: "testnet",
       rpcUrl: config.networks.testnet.rpcUrl,
-      networkPassphrase: config.networks.testnet.networkPassphrase
+      networkPassphrase: config.networks.testnet.networkPassphrase,
     });
   });
 
@@ -138,15 +138,15 @@ describe("reportDeployCoverage", () => {
       networks: {
         testnet: {
           contracts: {
-            token: { contractId: tokenContractId }
+            token: { contractId: tokenContractId },
           },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
 
     await expect(reportDeployCoverage("testnet")).rejects.toMatchObject({
-      code: CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY
+      code: CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY,
     });
     await expect(reportDeployCoverage("testnet")).rejects.toBeInstanceOf(CaatingaError);
   });

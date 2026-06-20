@@ -9,8 +9,9 @@ export function ContractNotDeployed() {
         <span className="network-pill">testnet</span>
       </div>
       <p>
-        The Groth16 verifier has no on-chain ID yet. Build and deploy first — the dApp reads the contract
-        ID from <code>caatinga.artifacts.json</code>. Deploy also generates TypeScript bindings automatically.
+        The Groth16 verifier has no on-chain ID yet. Build and deploy first — the dApp reads the
+        contract ID from <code>caatinga.artifacts.json</code>. Deploy also generates TypeScript
+        bindings automatically.
       </p>
       <pre className="counter-error" role="note">
         {`npx caatinga build verifier

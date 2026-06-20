@@ -15,12 +15,12 @@ const artifacts: CaatingaArtifacts = {
           sourcePath: "contracts/counter",
           wasmPath: "target/wasm32v1-none/release/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
-    }
-  }
+      dependencyGraph: {},
+    },
+  },
 };
 
 describe("resolveContractId", () => {
@@ -29,7 +29,7 @@ describe("resolveContractId", () => {
       artifacts,
       network: "testnet",
       contract: "counter",
-      explicitContractId: "CEXPLICIT00000000000000000000000000000000000000000000000"
+      explicitContractId: "CEXPLICIT00000000000000000000000000000000000000000000000",
     });
 
     expect(contractId).toBe("CEXPLICIT00000000000000000000000000000000000000000000000");
@@ -39,7 +39,7 @@ describe("resolveContractId", () => {
     const contractId = resolveContractId({
       artifacts,
       network: "testnet",
-      contract: "counter"
+      contract: "counter",
     });
 
     expect(contractId).toBe("CCOUNTER000000000000000000000000000000000000000000000000");
@@ -50,7 +50,7 @@ describe("resolveContractId", () => {
       resolveContractId({
         artifacts,
         network: "testnet",
-        contract: "token"
+        contract: "token",
       })
     ).toThrowError(CaatingaError);
 
@@ -66,20 +66,24 @@ describe("resolveContractId", () => {
     const emptyArtifacts: CaatingaArtifacts = {
       project: "counter-app",
       version: 1,
-      networks: {}
+      networks: {},
     };
 
-    expect(() => resolveContractId({
-      artifacts: emptyArtifacts,
-      network: "testnet",
-      contract: "counter"
-    })).toThrowError(/No contract artifact found/);
+    expect(() =>
+      resolveContractId({
+        artifacts: emptyArtifacts,
+        network: "testnet",
+        contract: "counter",
+      })
+    ).toThrowError(/No contract artifact found/);
 
     try {
       resolveContractId({ artifacts: emptyArtifacts, network: "testnet", contract: "counter" });
     } catch (error) {
       expect((error as CaatingaError).hint).toContain("caatinga doctor --network testnet");
-      expect((error as CaatingaError).hint).toContain("caatinga build does not register a contract ID");
+      expect((error as CaatingaError).hint).toContain(
+        "caatinga build does not register a contract ID"
+      );
     }
   });
 
@@ -87,8 +91,12 @@ describe("resolveContractId", () => {
     try {
       resolveContractId({ artifacts, network: "mainnet", contract: "counter" });
     } catch (error) {
-      expect((error as CaatingaError).hint).toContain("caatinga deploy counter --network mainnet --source <identity>");
-      expect((error as CaatingaError).hint).toContain("caatinga build does not register a contract ID");
+      expect((error as CaatingaError).hint).toContain(
+        "caatinga deploy counter --network mainnet --source <identity>"
+      );
+      expect((error as CaatingaError).hint).toContain(
+        "caatinga build does not register a contract ID"
+      );
     }
   });
 
@@ -96,7 +104,9 @@ describe("resolveContractId", () => {
     try {
       resolveContractId({ artifacts, network: "testnet", contract: "token" });
     } catch (error) {
-      expect((error as CaatingaError).hint).toContain("Contract \"token\" is not deployed on \"testnet\"");
+      expect((error as CaatingaError).hint).toContain(
+        'Contract "token" is not deployed on "testnet"'
+      );
       expect((error as CaatingaError).hint).toContain("pass contractId in the client registration");
     }
   });

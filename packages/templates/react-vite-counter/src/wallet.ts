@@ -2,20 +2,20 @@
 import {
   createStellarWalletsKitAdapter,
   WalletNetwork,
-  type StellarWalletsKitMetadata
+  type StellarWalletsKitMetadata,
 } from "@caatinga/client/stellar-wallets-kit";
 import { requestWalletSelection } from "./wallet-modal-controller.js";
 
 const baseWalletAdapter = createStellarWalletsKitAdapter({
   network: WalletNetwork.TESTNET,
-  walletConnectMetadata: getWalletConnectMetadata()
+  walletConnectMetadata: getWalletConnectMetadata(),
 });
 
 // Route connect() through the custom <WalletModal> instead of SWK's built-in
 // authModal. Everything else (persistence, restore, signing) is untouched.
 export const stellarWalletAdapter = {
   ...baseWalletAdapter,
-  openModal: () => requestWalletSelection()
+  openModal: () => requestWalletSelection(),
 };
 
 export { WalletNetwork };
@@ -31,6 +31,6 @@ function getWalletConnectMetadata(): StellarWalletsKitMetadata | undefined {
     name: import.meta.env.VITE_APP_NAME ?? "__PROJECT_NAME__",
     description: import.meta.env.VITE_APP_DESCRIPTION ?? "Caatinga counter dApp",
     url: import.meta.env.VITE_APP_URL ?? window.location.origin,
-    icons: [import.meta.env.VITE_APP_ICON_URL ?? `${window.location.origin}/icon.png`]
+    icons: [import.meta.env.VITE_APP_ICON_URL ?? `${window.location.origin}/icon.png`],
   };
 }

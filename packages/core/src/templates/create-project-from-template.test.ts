@@ -22,7 +22,7 @@ function collectInternalDependencies(packageJson: {
     "dependencies",
     "devDependencies",
     "peerDependencies",
-    "optionalDependencies"
+    "optionalDependencies",
   ] as const;
   const expectations: Record<string, { section: string; value: string }> = {};
 
@@ -54,7 +54,7 @@ describe("createProjectFromTemplate", () => {
     const result = await createProjectFromTemplate({
       projectName: "my-dapp",
       targetDir,
-      templateDir
+      templateDir,
     });
 
     expect(result.template.name).toBe("react-vite-counter");
@@ -68,7 +68,10 @@ describe("createProjectFromTemplate", () => {
     const artifacts = JSON.parse(artifactsText) as {
       project: string;
       version: number;
-      networks: Record<string, { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }>;
+      networks: Record<
+        string,
+        { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }
+      >;
     };
     expect(artifacts.project).toBe("my-dapp");
     expect(artifacts.version).toBe(1);
@@ -82,63 +85,74 @@ describe("createProjectFromTemplate", () => {
     const templateDir = path.join(tmpDir, "template");
     const targetDir = path.join(tmpDir, "my-dapp");
     await mkdir(templateDir);
-    await writeFile(path.join(templateDir, "caatinga.template.json"), JSON.stringify({
-      name: "no-artifacts-template",
-      version: "0.1.0",
-      caatinga: {
-        compatibleCore: "^3.0.0",
-        templateVersion: 1
-      },
-      frontend: {
-        framework: "vite-react",
-        packageManager: "npm"
-      },
-      contracts: {
-        path: "contracts",
-        default: "counter"
-      },
-      files: {
-        config: "caatinga.config.ts",
-        artifacts: "caatinga.artifacts.json"
-      }
-    }), "utf8");
-    await writeFile(path.join(templateDir, "caatinga.config.ts"), [
-      "import { defineConfig } from \"@caatinga/core\";",
-      "",
-      "export default defineConfig({",
-      "  project: \"__PROJECT_NAME__\",",
-      "  defaultNetwork: \"testnet\",",
-      "  contracts: {",
-      "    counter: {",
-      "      path: \"./contracts/counter\",",
-      "      wasm: \"./contracts/counter/target/wasm32v1-none/release/counter.wasm\"",
-      "    }",
-      "  },",
-      "  networks: {",
-      "    testnet: {",
-      "      rpcUrl: \"https://soroban-testnet.stellar.org\",",
-      "      networkPassphrase: \"Test SDF Network ; September 2015\"",
-      "    }",
-      "  },",
-      "  frontend: {",
-      "    framework: \"vite-react\",",
-      "    bindingsOutput: \"./src/contracts/generated\"",
-      "  }",
-      "});",
-      ""
-    ].join("\n"), "utf8");
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "no-artifacts-template",
+        version: "0.1.0",
+        caatinga: {
+          compatibleCore: "^3.0.0",
+          templateVersion: 1,
+        },
+        frontend: {
+          framework: "vite-react",
+          packageManager: "npm",
+        },
+        contracts: {
+          path: "contracts",
+          default: "counter",
+        },
+        files: {
+          config: "caatinga.config.ts",
+          artifacts: "caatinga.artifacts.json",
+        },
+      }),
+      "utf8"
+    );
+    await writeFile(
+      path.join(templateDir, "caatinga.config.ts"),
+      [
+        'import { defineConfig } from "@caatinga/core";',
+        "",
+        "export default defineConfig({",
+        '  project: "__PROJECT_NAME__",',
+        '  defaultNetwork: "testnet",',
+        "  contracts: {",
+        "    counter: {",
+        '      path: "./contracts/counter",',
+        '      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"',
+        "    }",
+        "  },",
+        "  networks: {",
+        "    testnet: {",
+        '      rpcUrl: "https://soroban-testnet.stellar.org",',
+        '      networkPassphrase: "Test SDF Network ; September 2015"',
+        "    }",
+        "  },",
+        "  frontend: {",
+        '    framework: "vite-react",',
+        '    bindingsOutput: "./src/contracts/generated"',
+        "  }",
+        "});",
+        "",
+      ].join("\n"),
+      "utf8"
+    );
 
     await createProjectFromTemplate({
       projectName: "my-dapp",
       targetDir,
-      templateDir
+      templateDir,
     });
 
     const artifacts = JSON.parse(
       await readFile(path.join(targetDir, "caatinga.artifacts.json"), "utf8")
     ) as {
       project: string;
-      networks: Record<string, { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }>;
+      networks: Record<
+        string,
+        { contracts: Record<string, unknown>; dependencyGraph: Record<string, string[]> }
+      >;
     };
 
     expect(artifacts.project).toBe("my-dapp");
@@ -151,12 +165,14 @@ describe("createProjectFromTemplate", () => {
     const templateDir = path.join(tmpDir, "template");
     await mkdir(templateDir);
 
-    await expect(createProjectFromTemplate({
-      projectName: "my-dapp",
-      targetDir: path.join(tmpDir, "my-dapp"),
-      templateDir
-    })).rejects.toMatchObject({
-      code: CaatingaErrorCode.TEMPLATE_MANIFEST_NOT_FOUND
+    await expect(
+      createProjectFromTemplate({
+        projectName: "my-dapp",
+        targetDir: path.join(tmpDir, "my-dapp"),
+        templateDir,
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.TEMPLATE_MANIFEST_NOT_FOUND,
     });
   });
 
@@ -164,32 +180,38 @@ describe("createProjectFromTemplate", () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
     const templateDir = path.join(tmpDir, "template");
     await mkdir(templateDir);
-    await writeFile(path.join(templateDir, "caatinga.template.json"), JSON.stringify({
-      name: "future-template",
-      version: "1.0.0",
-      caatinga: {
-        compatibleCore: "^99.0.0",
-        templateVersion: 1
-      },
-      frontend: {
-        framework: "vite-react",
-        packageManager: "npm"
-      },
-      contracts: {
-        path: "contracts"
-      },
-      files: {
-        config: "caatinga.config.ts",
-        artifacts: "caatinga.artifacts.json"
-      }
-    }), "utf8");
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "future-template",
+        version: "1.0.0",
+        caatinga: {
+          compatibleCore: "^99.0.0",
+          templateVersion: 1,
+        },
+        frontend: {
+          framework: "vite-react",
+          packageManager: "npm",
+        },
+        contracts: {
+          path: "contracts",
+        },
+        files: {
+          config: "caatinga.config.ts",
+          artifacts: "caatinga.artifacts.json",
+        },
+      }),
+      "utf8"
+    );
 
-    await expect(createProjectFromTemplate({
-      projectName: "my-dapp",
-      targetDir: path.join(tmpDir, "my-dapp"),
-      templateDir
-    })).rejects.toMatchObject({
-      code: CaatingaErrorCode.TEMPLATE_INCOMPATIBLE
+    await expect(
+      createProjectFromTemplate({
+        projectName: "my-dapp",
+        targetDir: path.join(tmpDir, "my-dapp"),
+        templateDir,
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.TEMPLATE_INCOMPATIBLE,
     });
   });
 
@@ -199,13 +221,15 @@ describe("createProjectFromTemplate", () => {
     await mkdir(templateDir);
     await writeFile(path.join(templateDir, "caatinga.template.json"), "{ not json", "utf8");
 
-    await expect(createProjectFromTemplate({
-      projectName: "my-dapp",
-      targetDir: path.join(tmpDir, "my-dapp"),
-      templateDir
-    })).rejects.toMatchObject({
+    await expect(
+      createProjectFromTemplate({
+        projectName: "my-dapp",
+        targetDir: path.join(tmpDir, "my-dapp"),
+        templateDir,
+      })
+    ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVALID_TEMPLATE_MANIFEST,
-      message: "Template manifest is invalid."
+      message: "Template manifest is invalid.",
     });
   });
 
@@ -213,29 +237,40 @@ describe("createProjectFromTemplate", () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
     const templateDir = path.join(tmpDir, "template");
     await mkdir(templateDir);
-    await writeFile(path.join(templateDir, "caatinga.template.json"), JSON.stringify({
-      name: "",
-      version: "1.0.0"
-    }), "utf8");
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "",
+        version: "1.0.0",
+      }),
+      "utf8"
+    );
 
-    await expect(createProjectFromTemplate({
-      projectName: "my-dapp",
-      targetDir: path.join(tmpDir, "my-dapp"),
-      templateDir
-    })).rejects.toMatchObject({
+    await expect(
+      createProjectFromTemplate({
+        projectName: "my-dapp",
+        targetDir: path.join(tmpDir, "my-dapp"),
+        templateDir,
+      })
+    ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVALID_TEMPLATE_MANIFEST,
-      message: "Template manifest is invalid."
+      message: "Template manifest is invalid.",
     });
   });
 
   it("ships marketplace-with-token as a multi-contract dependency template", async () => {
     const templateRoot = path.resolve(__dirname, "../../../templates");
     const templatePath = path.join(templateRoot, "marketplace-with-token");
-    const manifest = JSON.parse(await readFile(path.join(templatePath, "caatinga.template.json"), "utf8"));
+    const manifest = JSON.parse(
+      await readFile(path.join(templatePath, "caatinga.template.json"), "utf8")
+    );
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
     const mainSource = await readFile(path.join(templatePath, "src/main.ts"), "utf8");
     const appSource = await readFile(path.join(templatePath, "src/App.tsx"), "utf8");
-    const marketplaceSource = await readFile(path.join(templatePath, "contracts/marketplace/src/lib.rs"), "utf8");
+    const marketplaceSource = await readFile(
+      path.join(templatePath, "contracts/marketplace/src/lib.rs"),
+      "utf8"
+    );
     const packageJson = await readPackageJson<{
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
@@ -243,8 +278,8 @@ describe("createProjectFromTemplate", () => {
     }>(path.join(templatePath, "package.json"));
 
     expect(manifest.name).toBe("marketplace-with-token");
-    expect(config).toContain("dependsOn: [\"token\"]");
-    expect(config).toContain("tokenContractId: \"${contracts.token.contractId}\"");
+    expect(config).toContain('dependsOn: ["token"]');
+    expect(config).toContain('tokenContractId: "${contracts.token.contractId}"');
     expect(mainSource).not.toContain("placeholder");
     expect(appSource).toContain("__constructor");
     expect(packageJson.dependencies?.["@caatinga/client"]).toEqual(expect.any(String));
@@ -253,8 +288,12 @@ describe("createProjectFromTemplate", () => {
     expect(packageJson.scripts?.build).toContain("vite build");
     expect(marketplaceSource).toContain("pub fn __constructor");
     expect(marketplaceSource).toContain("pub fn token_contract_id");
-    await expect(readFile(path.join(templatePath, "contracts/token/src/lib.rs"), "utf8")).resolves.toBeTruthy();
-    await expect(readFile(path.join(templatePath, "contracts/marketplace/src/lib.rs"), "utf8")).resolves.toBeTruthy();
+    await expect(
+      readFile(path.join(templatePath, "contracts/token/src/lib.rs"), "utf8")
+    ).resolves.toBeTruthy();
+    await expect(
+      readFile(path.join(templatePath, "contracts/marketplace/src/lib.rs"), "utf8")
+    ).resolves.toBeTruthy();
   });
 
   it("should_pin_internal_dependency_ranges_for_official_templates", async () => {
@@ -263,48 +302,48 @@ describe("createProjectFromTemplate", () => {
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../client/package.json")),
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../package.json")),
       readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../cli/package.json")),
-      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../zk/package.json"))
+      readPackageJson<{ version: string }>(path.resolve(__dirname, "../../../zk/package.json")),
     ]);
     const [clientPackageJson, corePackageJson, cliPackageJson, zkPackageJson] = packageVersions;
     const expectedInternalDependencies = {
       "@caatinga/client": {
         section: "dependencies",
-        value: `^${clientPackageJson.version}`
+        value: `^${clientPackageJson.version}`,
       },
       "@caatinga/core": {
         section: "dependencies",
-        value: `^${corePackageJson.version}`
+        value: `^${corePackageJson.version}`,
       },
       "@caatinga/cli": {
         section: "devDependencies",
-        value: `^${cliPackageJson.version}`
-      }
+        value: `^${cliPackageJson.version}`,
+      },
     } satisfies Record<string, { section: string; value: string }>;
     const expectedZkStarterDependencies = {
       ...expectedInternalDependencies,
       "@caatinga/zk": {
         section: "dependencies",
-        value: `^${zkPackageJson.version}`
-      }
+        value: `^${zkPackageJson.version}`,
+      },
     };
 
     const templateExpectations = [
       {
         template: "react-vite-counter",
-        expected: expectedInternalDependencies
+        expected: expectedInternalDependencies,
       },
       {
         template: "marketplace-with-token",
         expected: {
           "@caatinga/client": expectedInternalDependencies["@caatinga/client"],
           "@caatinga/core": expectedInternalDependencies["@caatinga/core"],
-          "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"]
-        }
+          "@caatinga/cli": expectedInternalDependencies["@caatinga/cli"],
+        },
       },
       {
         template: "zk-starter",
-        expected: expectedZkStarterDependencies
-      }
+        expected: expectedZkStarterDependencies,
+      },
     ];
 
     for (const { template, expected } of templateExpectations) {
@@ -343,7 +382,7 @@ describe("createProjectFromTemplate", () => {
     expect(packageJson.overrides?.["@creit.tech/stellar-wallets-kit"]).toEqual({
       "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
       "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
-      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk"
+      "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk",
     });
 
     const workspaceYaml = await readFile(path.join(templateRoot, "pnpm-workspace.yaml"), "utf8");
@@ -360,7 +399,10 @@ describe("createProjectFromTemplate", () => {
   it("ships a counter contract compatible with the supported wasm32v1-none build target", async () => {
     const templatePath = path.resolve(__dirname, "../../../templates/react-vite-counter");
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
-    const cargoToml = await readFile(path.join(templatePath, "contracts/counter/Cargo.toml"), "utf8");
+    const cargoToml = await readFile(
+      path.join(templatePath, "contracts/counter/Cargo.toml"),
+      "utf8"
+    );
 
     expect(config).toContain("target/wasm32v1-none/release/counter.wasm");
     expect(cargoToml).toContain('soroban-sdk = "22.0.1"');
@@ -375,14 +417,24 @@ describe("createProjectFromTemplate", () => {
       scripts?: Record<string, string>;
     }>(path.join(templatePath, "package.json"));
 
-    await expect(readFile(path.join(templatePath, "index.html"), "utf8")).resolves.toContain('id="root"');
-    await expect(readFile(path.join(templatePath, "src/main.tsx"), "utf8")).resolves.toContain("ReactDOM.createRoot");
-    await expect(readFile(path.join(templatePath, "src/App.tsx"), "utf8")).resolves.toContain("WalletProvider");
-    await expect(readFile(path.join(templatePath, "src/caatinga.ts"), "utf8")).resolves.toContain("createCaatingaClient");
-    await expect(readFile(path.join(templatePath, "src/components/CircuitCard.tsx"), "utf8")).resolves.toContain(
-      "verify_proof"
+    await expect(readFile(path.join(templatePath, "index.html"), "utf8")).resolves.toContain(
+      'id="root"'
     );
-    await expect(readFile(path.join(templatePath, "src/components/LoadingModal.tsx"), "utf8")).resolves.toBeTruthy();
+    await expect(readFile(path.join(templatePath, "src/main.tsx"), "utf8")).resolves.toContain(
+      "ReactDOM.createRoot"
+    );
+    await expect(readFile(path.join(templatePath, "src/App.tsx"), "utf8")).resolves.toContain(
+      "WalletProvider"
+    );
+    await expect(readFile(path.join(templatePath, "src/caatinga.ts"), "utf8")).resolves.toContain(
+      "createCaatingaClient"
+    );
+    await expect(
+      readFile(path.join(templatePath, "src/components/CircuitCard.tsx"), "utf8")
+    ).resolves.toContain("verify_proof");
+    await expect(
+      readFile(path.join(templatePath, "src/components/LoadingModal.tsx"), "utf8")
+    ).resolves.toBeTruthy();
     await expect(
       readFile(path.join(templatePath, "src/bindings/verifier/src/index.ts"), "utf8")
     ).resolves.toContain("__caatingaPlaceholder");
@@ -397,7 +449,10 @@ describe("createProjectFromTemplate", () => {
   it("ships zk-starter with wasm32v1-none verifier config", async () => {
     const templatePath = path.resolve(__dirname, "../../../templates/zk-starter");
     const config = await readFile(path.join(templatePath, "caatinga.config.ts"), "utf8");
-    const cargoToml = await readFile(path.join(templatePath, "contracts/verifier/Cargo.toml"), "utf8");
+    const cargoToml = await readFile(
+      path.join(templatePath, "contracts/verifier/Cargo.toml"),
+      "utf8"
+    );
     const inputJson = JSON.parse(
       await readFile(path.join(templatePath, "circuits/input.json"), "utf8")
     ) as Record<string, string>;
@@ -408,14 +463,12 @@ describe("createProjectFromTemplate", () => {
   });
 
   it("keeps zk-starter verifier files aligned with the canonical scaffold", async () => {
-    const templatePath = path.resolve(__dirname, "../../../templates/zk-starter/contracts/verifier");
+    const templatePath = path.resolve(
+      __dirname,
+      "../../../templates/zk-starter/contracts/verifier"
+    );
     const scaffoldPath = path.resolve(__dirname, "../../scaffolds/zk-verifier");
-    const verifierFiles = [
-      "Cargo.toml",
-      "Cargo.lock",
-      "src/lib.rs",
-      "src/test.rs"
-    ];
+    const verifierFiles = ["Cargo.toml", "Cargo.lock", "src/lib.rs", "src/test.rs"];
 
     for (const file of verifierFiles) {
       await expect(readFile(path.join(templatePath, file), "utf8")).resolves.toBe(
@@ -429,13 +482,15 @@ describe("createProjectFromTemplate", () => {
       "../../../templates/react-vite-counter/contracts/counter/Cargo.lock",
       "../../../templates/marketplace-with-token/contracts/token/Cargo.lock",
       "../../../templates/marketplace-with-token/contracts/marketplace/Cargo.lock",
-      "../../../templates/zk-starter/contracts/verifier/Cargo.lock"
+      "../../../templates/zk-starter/contracts/verifier/Cargo.lock",
     ];
 
-    await Promise.all(templateContracts.map(async templateContractLockPath => {
-      await expect(
-        readFile(path.resolve(__dirname, templateContractLockPath), "utf8")
-      ).resolves.toContain("[[package]]");
-    }));
+    await Promise.all(
+      templateContracts.map(async (templateContractLockPath) => {
+        await expect(
+          readFile(path.resolve(__dirname, templateContractLockPath), "utf8")
+        ).resolves.toContain("[[package]]");
+      })
+    );
   });
 });

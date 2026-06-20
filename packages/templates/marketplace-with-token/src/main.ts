@@ -7,6 +7,6 @@ export function describeDeployFlow(): string {
     "3. caatinga deploy --network testnet --source <identity>",
     "4. caatinga generate token",
     "5. caatinga generate marketplace",
-    "marketplace.deployArgs.tokenContractId resolves from caatinga.artifacts.json and is passed to __constructor"
+    "marketplace.deployArgs.tokenContractId resolves from caatinga.artifacts.json and is passed to __constructor",
   ].join("\n");
 }

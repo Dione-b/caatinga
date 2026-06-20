@@ -13,7 +13,7 @@ function getRepoSourceRootDirs(repoRoot: string): string[] {
   return [
     path.join(repoRoot, "packages/cli/src"),
     path.join(repoRoot, "packages/core/src"),
-    path.join(repoRoot, "packages/client/src")
+    path.join(repoRoot, "packages/client/src"),
   ];
 }
 

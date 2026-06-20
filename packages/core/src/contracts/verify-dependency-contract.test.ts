@@ -4,26 +4,28 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { ResolvedNetwork } from "../networks/resolve-network.js";
 import {
   verifyDependencyContract,
-  verifyDependencyContracts
+  verifyDependencyContracts,
 } from "./verify-dependency-contract.js";
 
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 const network: ResolvedNetwork = {
   name: "testnet",
   config: {
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
-  }
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
 };
 
 const tokenId = "C".padEnd(56, "A");
 
-function createTokenArtifact(contractId: string): CaatingaArtifacts["networks"][string]["contracts"][string] {
+function createTokenArtifact(
+  contractId: string
+): CaatingaArtifacts["networks"][string]["contracts"][string] {
   return {
     contractId,
     wasmHash: "a".repeat(64),
@@ -31,7 +33,7 @@ function createTokenArtifact(contractId: string): CaatingaArtifacts["networks"][
     sourcePath: "./contracts/token",
     wasmPath: "./contracts/token/target/wasm32v1-none/release/token.wasm",
     dependencies: [],
-    resolvedDeployArgs: {}
+    resolvedDeployArgs: {},
   };
 }
 
@@ -41,11 +43,11 @@ const artifacts: CaatingaArtifacts = {
   networks: {
     testnet: {
       contracts: {
-        token: createTokenArtifact(tokenId)
+        token: createTokenArtifact(tokenId),
       },
-      dependencyGraph: {}
-    }
-  }
+      dependencyGraph: {},
+    },
+  },
 };
 
 describe("verifyDependencyContract", () => {
@@ -59,23 +61,15 @@ describe("verifyDependencyContract", () => {
       dependencyName: "token",
       contractId: tokenId,
       network,
-      cwd: "/tmp/app"
+      cwd: "/tmp/app",
     });
 
     expect(runCommand).toHaveBeenCalledWith(
       "stellar",
-      [
-        "contract",
-        "info",
-        "interface",
-        "--contract-id",
-        tokenId,
-        "--network",
-        "testnet"
-      ],
+      ["contract", "info", "interface", "--contract-id", tokenId, "--network", "testnet"],
       expect.objectContaining({
         cwd: "/tmp/app",
-        failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND
+        failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
       })
     );
   });
@@ -93,11 +87,11 @@ describe("verifyDependencyContract", () => {
       verifyDependencyContract({
         dependencyName: "token",
         contractId: tokenId,
-        network
+        network,
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-      message: expect.stringContaining("token")
+      message: expect.stringContaining("token"),
     });
   });
 });
@@ -113,7 +107,7 @@ describe("verifyDependencyContracts", () => {
       dependencies: ["token"],
       artifacts,
       network,
-      cwd: "/tmp/app"
+      cwd: "/tmp/app",
     });
 
     expect(runCommand).toHaveBeenCalledTimes(1);
@@ -126,9 +120,9 @@ describe("verifyDependencyContracts", () => {
         artifacts: {
           project: "marketplace-app",
           version: 1,
-          networks: { testnet: { contracts: {}, dependencyGraph: {} } }
+          networks: { testnet: { contracts: {}, dependencyGraph: {} } },
         },
-        network
+        network,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND });
   });

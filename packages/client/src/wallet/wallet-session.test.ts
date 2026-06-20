@@ -4,7 +4,7 @@ import {
   createWalletSession,
   WALLET_SESSION_STORAGE_KEY,
   type CaatingaWalletCapabilities,
-  type WalletSessionStorage
+  type WalletSessionStorage,
 } from "./wallet-session.js";
 
 const PUBLIC_KEY = "GPUBLIC";
@@ -15,7 +15,7 @@ function createAdapter(
   return {
     getPublicKey: vi.fn().mockResolvedValue(PUBLIC_KEY),
     signTransaction: vi.fn().mockResolvedValue("AAAA_SIGNED"),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -29,7 +29,7 @@ function createMemoryStorage(): WalletSessionStorage & { data: Map<string, strin
     },
     removeItem: (key) => {
       data.delete(key);
-    }
+    },
   };
 }
 
@@ -44,7 +44,7 @@ describe("createWalletSession", () => {
     expect(session.getState()).toEqual({
       status: "disconnected",
       publicKey: null,
-      error: null
+      error: null,
     });
     expect(session.getState()).toBe(session.getState());
   });
@@ -61,7 +61,7 @@ describe("createWalletSession", () => {
     expect(session.getState()).toEqual({
       status: "connected",
       publicKey: PUBLIC_KEY,
-      error: null
+      error: null,
     });
   });
 
@@ -101,7 +101,7 @@ describe("createWalletSession", () => {
   it("records the rejection and rethrows when connect fails", async () => {
     const rejection = new Error("User dismissed");
     const adapter = createAdapter({
-      getPublicKey: vi.fn().mockRejectedValue(rejection)
+      getPublicKey: vi.fn().mockRejectedValue(rejection),
     });
     const session = createWalletSession(adapter);
 
@@ -110,20 +110,20 @@ describe("createWalletSession", () => {
     expect(session.getState()).toEqual({
       status: "disconnected",
       publicKey: null,
-      error: rejection
+      error: rejection,
     });
   });
 
   it("enforces the configured timeout with the existing wallet timeout error", async () => {
     vi.useFakeTimers();
     const adapter = createAdapter({
-      getPublicKey: vi.fn().mockImplementation(() => new Promise(() => {}))
+      getPublicKey: vi.fn().mockImplementation(() => new Promise(() => {})),
     });
     const session = createWalletSession(adapter, { timeout: 50 });
 
     const pending = session.connect();
     const assertion = expect(pending).rejects.toMatchObject({
-      code: "CAATINGA_WALLET_TIMEOUT"
+      code: "CAATINGA_WALLET_TIMEOUT",
     });
     await vi.advanceTimersByTimeAsync(60);
     await assertion;
@@ -138,7 +138,7 @@ describe("createWalletSession", () => {
     const adapter = createAdapter({
       openModal: vi.fn().mockResolvedValue(PUBLIC_KEY),
       getWalletId: vi.fn().mockReturnValue("freighter"),
-      setWallet
+      setWallet,
     });
     const session = createWalletSession(adapter, { persist: true, storage });
 
@@ -146,7 +146,7 @@ describe("createWalletSession", () => {
 
     expect(JSON.parse(storage.data.get(WALLET_SESSION_STORAGE_KEY)!)).toEqual({
       v: 1,
-      walletId: "freighter"
+      walletId: "freighter",
     });
 
     const nextSession = createWalletSession(adapter, { persist: true, storage });
@@ -161,7 +161,7 @@ describe("createWalletSession", () => {
     const adapter = createAdapter();
     const session = createWalletSession(adapter, {
       persist: true,
-      storage: createMemoryStorage()
+      storage: createMemoryStorage(),
     });
 
     await expect(session.restore()).resolves.toBeNull();
@@ -174,7 +174,7 @@ describe("createWalletSession", () => {
     const storage = createMemoryStorage();
     storage.setItem(WALLET_SESSION_STORAGE_KEY, JSON.stringify({ v: 1 }));
     const adapter = createAdapter({
-      getPublicKey: vi.fn().mockRejectedValue(new Error("locked"))
+      getPublicKey: vi.fn().mockRejectedValue(new Error("locked")),
     });
     const session = createWalletSession(adapter, { persist: true, storage });
 
@@ -184,7 +184,7 @@ describe("createWalletSession", () => {
     expect(session.getState()).toEqual({
       status: "disconnected",
       publicKey: null,
-      error: null
+      error: null,
     });
   });
 
@@ -203,7 +203,7 @@ describe("createWalletSession", () => {
     const disconnect = vi.fn().mockResolvedValue(undefined);
     const adapter = createAdapter({
       openModal: vi.fn().mockResolvedValue(PUBLIC_KEY),
-      disconnect
+      disconnect,
     });
     const session = createWalletSession(adapter, { persist: true, storage });
     await session.connect();
@@ -215,7 +215,7 @@ describe("createWalletSession", () => {
     expect(session.getState()).toEqual({
       status: "disconnected",
       publicKey: null,
-      error: null
+      error: null,
     });
   });
 

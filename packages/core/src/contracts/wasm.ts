@@ -79,8 +79,12 @@ function buildAlternateWasmCandidates(
   }
 
   if (options?.sourcePath) {
-    addCandidate(path.join(options.sourcePath, "target", CURRENT_RUST_WASM_TARGET, "release", fileName));
-    addCandidate(path.join(options.sourcePath, "target", LEGACY_RUST_WASM_TARGET, "release", fileName));
+    addCandidate(
+      path.join(options.sourcePath, "target", CURRENT_RUST_WASM_TARGET, "release", fileName)
+    );
+    addCandidate(
+      path.join(options.sourcePath, "target", LEGACY_RUST_WASM_TARGET, "release", fileName)
+    );
   }
 
   return candidates;
@@ -125,7 +129,7 @@ export async function resolveWasmArtifactPath(
     }
 
     throw wasmNotFoundError(resolvedConfiguredPath, {
-      migratedPath: currentTargetPath !== resolvedConfiguredPath ? currentTargetPath : undefined
+      migratedPath: currentTargetPath !== resolvedConfiguredPath ? currentTargetPath : undefined,
     });
   }
 }

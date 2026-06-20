@@ -12,15 +12,15 @@ export function walletStubOverrides(stubsDir = "./src/stubs"): Record<string, un
     "@creit.tech/stellar-wallets-kit": {
       "@trezor/connect-web": `file:${posixStubsDir}/empty-wallet-dep`,
       "@trezor/connect-plugin-stellar": `file:${posixStubsDir}/empty-wallet-dep`,
-      "@hot-wallet/sdk": `file:${posixStubsDir}/hot-wallet-sdk`
+      "@hot-wallet/sdk": `file:${posixStubsDir}/hot-wallet-sdk`,
     },
     "@reown/appkit-utils": {
       "@safe-global/safe-apps-sdk": "-",
-      "@safe-global/safe-apps-provider": "-"
+      "@safe-global/safe-apps-provider": "-",
     },
     "@safe-global/safe-apps-sdk": {
-      "@safe-global/safe-gateway-typescript-sdk": "-"
-    }
+      "@safe-global/safe-gateway-typescript-sdk": "-",
+    },
   };
 }
 
@@ -33,7 +33,7 @@ export function walletStubViteAliases(stubsDir: string): Record<string, string> 
     "@trezor/connect-plugin-stellar": emptyStub,
     "@safe-global/safe-apps-sdk": emptyStub,
     "@safe-global/safe-apps-provider": emptyStub,
-    "@safe-global/safe-gateway-typescript-sdk": emptyStub
+    "@safe-global/safe-gateway-typescript-sdk": emptyStub,
   };
 }
 

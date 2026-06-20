@@ -18,7 +18,7 @@ const moduleDir =
 function scaffoldRoot(): string {
   const candidates = [
     path.resolve(moduleDir, "../../scaffolds"),
-    path.resolve(moduleDir, "../scaffolds")
+    path.resolve(moduleDir, "../scaffolds"),
   ];
   const found = candidates.find((candidate) => existsSync(candidate));
   return found ?? candidates[0];
@@ -57,23 +57,27 @@ export default defineConfig({
 }
 
 function packageJsonSource(projectName: string): string {
-  return `${JSON.stringify({
-    name: projectName,
-    version: "0.1.0",
-    private: true,
-    type: "module",
-    scripts: {
-      "zk:build": "caatinga zk build main",
-      "zk:prove": "caatinga zk prove main",
-      build: "caatinga build verifier",
-      deploy: "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
-      doctor: "caatinga doctor --network testnet"
+  return `${JSON.stringify(
+    {
+      name: projectName,
+      version: "0.1.0",
+      private: true,
+      type: "module",
+      scripts: {
+        "zk:build": "caatinga zk build main",
+        "zk:prove": "caatinga zk prove main",
+        build: "caatinga build verifier",
+        deploy: "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "caatinga doctor --network testnet",
+      },
+      devDependencies: {
+        "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
+        "@caatinga/core": `^${CAATINGA_CORE_VERSION}`,
+      },
     },
-    devDependencies: {
-      "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
-      "@caatinga/core": `^${CAATINGA_CORE_VERSION}`
-    }
-  }, null, 2)}\n`;
+    null,
+    2
+  )}\n`;
 }
 
 function readmeSource(projectName: string): string {
@@ -103,10 +107,22 @@ export async function createZkProject(options: CreateZkProjectOptions) {
   await mkdir(targetDir, { recursive: true });
   if (projectFiles) {
     await Promise.all([
-      writeFile(path.join(targetDir, "caatinga.config.ts"), configSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" }),
-      writeFile(path.join(targetDir, "package.json"), packageJsonSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" }),
-      writeFile(path.join(targetDir, ".gitignore"), "node_modules\n.artifacts\ntarget\n", { encoding: "utf8", flag: force ? "w" : "wx" }),
-      writeFile(path.join(targetDir, "README.md"), readmeSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" })
+      writeFile(path.join(targetDir, "caatinga.config.ts"), configSource(options.projectName), {
+        encoding: "utf8",
+        flag: force ? "w" : "wx",
+      }),
+      writeFile(path.join(targetDir, "package.json"), packageJsonSource(options.projectName), {
+        encoding: "utf8",
+        flag: force ? "w" : "wx",
+      }),
+      writeFile(path.join(targetDir, ".gitignore"), "node_modules\n.artifacts\ntarget\n", {
+        encoding: "utf8",
+        flag: force ? "w" : "wx",
+      }),
+      writeFile(path.join(targetDir, "README.md"), readmeSource(options.projectName), {
+        encoding: "utf8",
+        flag: force ? "w" : "wx",
+      }),
     ]);
   }
 
@@ -114,15 +130,22 @@ export async function createZkProject(options: CreateZkProjectOptions) {
   await cp(path.join(scaffoldRoot(), "zk-circuit-stub"), path.join(targetDir, "circuits"), {
     recursive: true,
     force,
-    errorOnExist: !force
+    errorOnExist: !force,
   });
-  await cp(path.join(scaffoldRoot(), "zk-verifier"), path.join(targetDir, "contracts", "verifier"), {
-    recursive: true,
-    force,
-    errorOnExist: !force
-  });
+  await cp(
+    path.join(scaffoldRoot(), "zk-verifier"),
+    path.join(targetDir, "contracts", "verifier"),
+    {
+      recursive: true,
+      force,
+      errorOnExist: !force,
+    }
+  );
   if (projectFiles) {
-    await writeArtifacts(createInitialArtifacts(options.projectName, { networks: ["testnet"] }), targetDir);
+    await writeArtifacts(
+      createInitialArtifacts(options.projectName, { networks: ["testnet"] }),
+      targetDir
+    );
   }
 
   return { targetDir };

@@ -3,7 +3,7 @@ import { CaatingaErrorCode } from "@caatinga/core/browser";
 import {
   assertSubmitResultRecognized,
   normalizeSubmitResult,
-  submitTransaction
+  submitTransaction,
 } from "./transaction-submit.js";
 
 describe("normalizeSubmitResult", () => {
@@ -11,7 +11,7 @@ describe("normalizeSubmitResult", () => {
     const normalized = normalizeSubmitResult({
       txHash: "tx-primary",
       transactionHash: "tx-secondary",
-      hash: "tx-tertiary"
+      hash: "tx-tertiary",
     });
 
     expect(normalized.transactionHash).toBe("tx-primary");
@@ -19,7 +19,7 @@ describe("normalizeSubmitResult", () => {
 
   it("should_read_nested_sendTransactionResponse_hash", () => {
     const normalized = normalizeSubmitResult({
-      sendTransactionResponse: { hash: "nested-hash" }
+      sendTransactionResponse: { hash: "nested-hash" },
     });
 
     expect(normalized.transactionHash).toBe("nested-hash");
@@ -28,7 +28,7 @@ describe("normalizeSubmitResult", () => {
   it("should_preserve_result_field", () => {
     const normalized = normalizeSubmitResult<{ value: number }>({
       result: { value: 42 },
-      hash: "abc"
+      hash: "abc",
     });
 
     expect(normalized.result).toEqual({ value: 42 });
@@ -50,7 +50,7 @@ function makeSentTransaction(hash: string, result: unknown): unknown {
     getTransactionResponse: { status: "SUCCESS" },
     get result() {
       return result;
-    }
+    },
   };
 }
 
@@ -61,7 +61,7 @@ describe("submitTransaction — SDK v16 SentTransaction", () => {
     const tx = {
       async signAndSend() {
         return makeSentTransaction("abc123", 42);
-      }
+      },
     };
     const raw = await submitTransaction(
       tx,
@@ -87,7 +87,7 @@ describe("submitTransaction — SDK v16 SentTransaction", () => {
         const err = new Error("Transaction requires signatures from GOTHER…");
         err.name = "NeedsMoreSignaturesError";
         throw err;
-      }
+      },
     };
     await expect(
       submitTransaction(tx, signTransaction, "counter", "increment", "https://rpc.example")

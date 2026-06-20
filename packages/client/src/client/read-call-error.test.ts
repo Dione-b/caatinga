@@ -14,7 +14,7 @@ describe("enrichReadCallInvokeError", () => {
 
     expect(enriched).toMatchObject({
       code: CaatingaErrorCode.XDR_SUBMIT_FAILED,
-      hint: expect.stringContaining('client.contract("app").read("greet")')
+      hint: expect.stringContaining('client.contract("app").read("greet")'),
     });
     expect(enriched?.hint).toContain("Pass method args as the second argument to read()");
   });

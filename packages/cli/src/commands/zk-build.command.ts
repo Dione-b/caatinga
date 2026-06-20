@@ -32,7 +32,9 @@ export function registerZkBuildCommand(program: Command): void {
           embedVk: Boolean(options.embedVk),
         });
         logger.success(`Built circuit "${name}"`);
-        logger.warn("This is a single-party development trusted setup. Do not use it in production.");
+        logger.warn(
+          "This is a single-party development trusted setup. Do not use it in production."
+        );
       });
     });
 }

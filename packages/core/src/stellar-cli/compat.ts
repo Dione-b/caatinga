@@ -45,8 +45,9 @@ export function evaluateStellarCliCompatibility(
     );
   }
 
-  const lastTestedVersion = semver.valid(input.lastTestedVersion ?? STELLAR_CLI_LAST_TESTED_VERSION)
-    ?? STELLAR_CLI_LAST_TESTED_VERSION;
+  const lastTestedVersion =
+    semver.valid(input.lastTestedVersion ?? STELLAR_CLI_LAST_TESTED_VERSION) ??
+    STELLAR_CLI_LAST_TESTED_VERSION;
 
   const warnings: CompatibilityWarning[] = [];
   let status: CompatibilityStatus = "supported";
@@ -64,7 +65,8 @@ export function evaluateStellarCliCompatibility(
     warnings.push({
       code: "STELLAR_CLI_UNTESTED_VERSION",
       message: `Stellar CLI ${input.version} is newer than the last-tested ${lastTestedVersion}; proceeding without compatibility guarantees.`,
-      remediation: "Pin Stellar CLI to the last-tested version, or update Caatinga after re-running the parser fixtures."
+      remediation:
+        "Pin Stellar CLI to the last-tested version, or update Caatinga after re-running the parser fixtures.",
     });
   }
 
@@ -77,7 +79,7 @@ export function evaluateStellarCliCompatibility(
       warnings.push({
         code: "STELLAR_CLI_MISSING_FEATURE",
         message: `Stellar CLI ${input.version} did not advertise the required feature "${feature}".`,
-        remediation: "Upgrade Stellar CLI or run `caatinga doctor` for diagnostics."
+        remediation: "Upgrade Stellar CLI or run `caatinga doctor` for diagnostics.",
       });
     }
   }
@@ -87,6 +89,6 @@ export function evaluateStellarCliCompatibility(
     status,
     minVersion: STELLAR_CLI_MIN_VERSION,
     lastTestedVersion,
-    warnings
+    warnings,
   };
 }

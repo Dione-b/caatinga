@@ -18,9 +18,9 @@ export function updateArtifact(
         dependencyGraph: networkExtras?.dependencyGraph ?? existingNetwork.dependencyGraph ?? {},
         contracts: {
           ...existingNetwork.contracts,
-          [contractName]: contractArtifact
-        }
-      }
-    }
+          [contractName]: contractArtifact,
+        },
+      },
+    },
   };
 }

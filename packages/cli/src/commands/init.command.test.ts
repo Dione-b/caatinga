@@ -10,12 +10,12 @@ vi.mock("@caatinga/core", async () => {
   return {
     ...actual,
     createProjectFromTemplate: createProjectMock,
-    createMinimalProject: createMinimalProjectMock
+    createMinimalProject: createMinimalProjectMock,
   };
 });
 
 vi.mock("../utils/template-path.js", () => ({
-  resolveTemplateDir: vi.fn().mockResolvedValue("/fake/templates/react-vite-counter")
+  resolveTemplateDir: vi.fn().mockResolvedValue("/fake/templates/react-vite-counter"),
 }));
 
 function createInitProgram(): Command {
@@ -34,8 +34,8 @@ describe("init command", () => {
       template: {
         name: "react-vite-counter",
         version: "0.1.0",
-        contracts: { default: "counter" }
-      }
+        contracts: { default: "counter" },
+      },
     });
   });
 
@@ -48,7 +48,9 @@ describe("init command", () => {
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("npm install");
       expect(output).toContain("npx caatinga build    counter");
-      expect(output).toContain("npx caatinga deploy   counter --network testnet --source <identity>");
+      expect(output).toContain(
+        "npx caatinga deploy   counter --network testnet --source <identity>"
+      );
       expect(output).not.toContain("npx caatinga generate counter");
       expect(output).toContain("npm run dev");
       expect(output).toContain(
@@ -66,7 +68,7 @@ describe("init command", () => {
   it("falls back to bare commands and still prints the note when no default contract", async () => {
     createProjectMock.mockResolvedValue({
       targetDir: "/abs/my-dapp",
-      template: { name: "blank", version: "0.1.0", contracts: {} }
+      template: { name: "blank", version: "0.1.0", contracts: {} },
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -93,7 +95,7 @@ describe("init command", () => {
 
       expect(createMinimalProjectMock).toHaveBeenCalledWith({
         projectName: "my-app",
-        targetDir: expect.stringContaining("my-app")
+        targetDir: expect.stringContaining("my-app"),
       });
       expect(createProjectMock).not.toHaveBeenCalled();
 

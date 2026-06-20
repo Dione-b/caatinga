@@ -13,32 +13,32 @@ describe("checkStellarCliVersion", () => {
 
   it("checks stellar --version and returns a compatibility report", async () => {
     vi.doMock("../shell/run-command.js", () => ({
-      runCommand: runCommandMock
+      runCommand: runCommandMock,
     }));
     const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 25.2.0",
       stderr: "",
-      all: "stellar 25.2.0"
+      all: "stellar 25.2.0",
     });
 
     const report = await checkStellarCliVersion();
     expect(report.status).toBe("supported");
     expect(report.version).toBe("25.2.0");
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
-      skipStellarVersionCheck: true
+      skipStellarVersionCheck: true,
     });
   });
 
   it("normalizes missing stellar binary to CAATINGA_STELLAR_CLI_NOT_FOUND", async () => {
     vi.doMock("../shell/run-command.js", () => ({
-      runCommand: runCommandMock
+      runCommand: runCommandMock,
     }));
     const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
     runCommandMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
-      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
+      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
     });
   });
 });
@@ -50,10 +50,10 @@ describe("runCommand Stellar CLI version gate", () => {
     checkStellarCliVersionMock.mockReset();
     vi.doUnmock("../shell/run-command.js");
     vi.doMock("execa", () => ({
-      execa: execaMock
+      execa: execaMock,
     }));
     vi.doMock("./check-stellar-cli-version.js", () => ({
-      checkStellarCliVersion: checkStellarCliVersionMock
+      checkStellarCliVersion: checkStellarCliVersionMock,
     }));
   });
 
@@ -64,14 +64,14 @@ describe("runCommand Stellar CLI version gate", () => {
       status: "supported",
       minVersion: "23.0.0",
       lastTestedVersion: "25.2.0",
-      warnings: []
+      warnings: [],
     });
     execaMock.mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" });
 
     await expect(runCommand("stellar", ["contract", "build"])).resolves.toEqual({
       stdout: "ok",
       stderr: "",
-      all: "ok"
+      all: "ok",
     });
 
     expect(checkStellarCliVersionMock).toHaveBeenCalledWith();
@@ -79,16 +79,20 @@ describe("runCommand Stellar CLI version gate", () => {
       cwd: undefined,
       env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
-      reject: true
+      reject: true,
     });
   });
 
   it("skips the Stellar CLI version gate when requested by the version check itself", async () => {
     const { runCommand } = await import("../shell/run-command.js");
-    execaMock.mockResolvedValueOnce({ stdout: "stellar 22.0.1", stderr: "", all: "stellar 22.0.1" });
+    execaMock.mockResolvedValueOnce({
+      stdout: "stellar 22.0.1",
+      stderr: "",
+      all: "stellar 22.0.1",
+    });
 
     await runCommand("stellar", ["--version"], {
-      skipStellarVersionCheck: true
+      skipStellarVersionCheck: true,
     });
 
     expect(checkStellarCliVersionMock).not.toHaveBeenCalled();
@@ -101,12 +105,12 @@ describe("runCommand Stellar CLI version gate", () => {
       status: "supported",
       minVersion: "23.0.0",
       lastTestedVersion: "25.2.0",
-      warnings: []
+      warnings: [],
     });
     execaMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
 
     await expect(runCommand("stellar", ["contract", "build"])).rejects.toMatchObject({
-      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
+      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
     });
   });
 
@@ -121,7 +125,7 @@ describe("runCommand Stellar CLI version gate", () => {
     );
 
     await expect(runCommand("stellar", ["contract", "build"])).rejects.toMatchObject({
-      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION
+      code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
     });
     expect(execaMock).not.toHaveBeenCalled();
   });
@@ -132,12 +136,12 @@ describe("runCommand Stellar CLI version gate", () => {
     execaMock.mockResolvedValueOnce({
       stdout: "stellar 22.0.1",
       stderr: "",
-      all: "stellar 22.0.1"
+      all: "stellar 22.0.1",
     });
 
     await expect(runCommand("stellar", ["contract", "deploy"])).rejects.toMatchObject({
       code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
-      message: expect.stringContaining("below the supported minimum 23.0.0")
+      message: expect.stringContaining("below the supported minimum 23.0.0"),
     });
 
     expect(execaMock).toHaveBeenCalledTimes(1);
@@ -145,7 +149,7 @@ describe("runCommand Stellar CLI version gate", () => {
       cwd: undefined,
       env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
-      reject: true
+      reject: true,
     });
   });
 });

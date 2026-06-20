@@ -9,7 +9,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { invokeContract, parseInvokeTarget } from "./invoke-contract.js";
@@ -24,23 +24,23 @@ const baseConfig: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./rel/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./out" }
+  frontend: { framework: "vite-react", bindingsOutput: "./out" },
 };
 
 describe("parseInvokeTarget", () => {
   it("parses contract.method targets", () => {
     expect(parseInvokeTarget("counter.increment")).toEqual({
       contractName: "counter",
-      method: "increment"
+      method: "increment",
     });
   });
 
@@ -86,10 +86,10 @@ describe("invokeContract", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -99,7 +99,7 @@ describe("invokeContract", () => {
       args: ["--arg1", "x"],
       networkName: "testnet",
       source: "alice",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.result).toContain("42");
@@ -117,7 +117,7 @@ describe("invokeContract", () => {
         "--",
         "increment",
         "--arg1",
-        "x"
+        "x",
       ]),
       { cwd: tmpDir, failureCode: CaatingaErrorCode.INVOKE_FAILED }
     );
@@ -136,10 +136,10 @@ describe("invokeContract", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -160,7 +160,7 @@ describe("invokeContract", () => {
         target: "counter.increment",
         networkName: "testnet",
         source: "alice",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.INVOKE_FAILED });
   });
@@ -178,10 +178,10 @@ describe("invokeContract", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -202,11 +202,11 @@ describe("invokeContract", () => {
         target: "counter.increment",
         networkName: "testnet",
         source: "alice",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVOKE_FAILED,
-      hint: expect.stringContaining("Stellar CLI 22.x")
+      hint: expect.stringContaining("Stellar CLI 22.x"),
     });
   });
 
@@ -223,10 +223,10 @@ describe("invokeContract", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
+      dependencyGraph: {},
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -247,11 +247,11 @@ describe("invokeContract", () => {
         target: "counter.get",
         networkName: "testnet",
         source: "alice",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVOKE_FAILED,
-      hint: expect.stringMatching(/caatinga read counter\.get/)
+      hint: expect.stringMatching(/caatinga read counter\.get/),
     });
   });
 });

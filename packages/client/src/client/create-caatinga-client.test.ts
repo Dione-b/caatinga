@@ -16,18 +16,18 @@ const artifacts: CaatingaArtifacts = {
           sourcePath: "contracts/counter",
           wasmPath: "target/wasm32v1-none/release/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
-    }
-  }
+      dependencyGraph: {},
+    },
+  },
 };
 
 function createClientConfig(overrides: Record<string, unknown> = {}) {
   const wallet = {
     getPublicKey: vi.fn(async () => "GPUBLIC"),
-    signTransaction: vi.fn(async () => "AAAA_SIGNED")
+    signTransaction: vi.fn(async () => "AAAA_SIGNED"),
   };
 
   class Client {
@@ -44,15 +44,15 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         }) {
           await input.signTransaction("AAAA_UNSIGNED", {
             networkPassphrase: "Test SDF Network ; September 2015",
-            address: "GPUBLIC"
+            address: "GPUBLIC",
           });
           return {
             sendTransactionResponse: { hash: "hash:AAAA_SIGNED", status: "PENDING" },
             get result() {
               return 1;
-            }
+            },
           };
-        }
+        },
       };
     }
   }
@@ -61,17 +61,17 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
     network: {
       name: "testnet",
       rpcUrl: "https://rpc.example",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
     artifacts,
     wallet,
     contracts: {
       counter: {
         binding: { Client },
-        ...(overrides.contractRegistration as object | undefined)
-      }
+        ...(overrides.contractRegistration as object | undefined),
+      },
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -93,7 +93,7 @@ describe("createCaatingaClient", () => {
     expect(config.wallet.getPublicKey).toHaveBeenCalledOnce();
     expect(config.wallet.signTransaction).toHaveBeenCalledWith({
       xdr: "AAAA_UNSIGNED",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     });
     expect(result).toEqual({
       status: "confirmed",
@@ -101,7 +101,7 @@ describe("createCaatingaClient", () => {
       method: "increment",
       contractId: "CCOUNTER000000000000000000000000000000000000000000000000",
       transactionHash: "hash:AAAA_SIGNED",
-      result: 1
+      result: 1,
     });
   });
 
@@ -114,12 +114,14 @@ describe("createCaatingaClient", () => {
   it("includes xdr when debugXdr is enabled", async () => {
     const client = createCaatingaClient(createClientConfig());
 
-    await expect(client.contract("counter").invoke("increment", { debugXdr: true })).resolves.toMatchObject({
+    await expect(
+      client.contract("counter").invoke("increment", { debugXdr: true })
+    ).resolves.toMatchObject({
       xdr: {
         unsigned: "AAAA_UNSIGNED",
         prepared: "AAAA_UNSIGNED",
-        signed: "AAAA_SIGNED"
-      }
+        signed: "AAAA_SIGNED",
+      },
     });
   });
 
@@ -132,7 +134,7 @@ describe("createCaatingaClient", () => {
       method: "increment",
       contractId: "CCOUNTER000000000000000000000000000000000000000000000000",
       unsignedXdr: "AAAA_UNSIGNED",
-      preparedXdr: "AAAA_UNSIGNED"
+      preparedXdr: "AAAA_UNSIGNED",
     });
     expect(config.wallet.signTransaction).not.toHaveBeenCalled();
   });
@@ -143,13 +145,13 @@ describe("createCaatingaClient", () => {
       walletTimeout: 50,
       wallet: {
         getPublicKey: vi.fn(async () => "GPUBLIC"),
-        signTransaction: vi.fn(() => new Promise(() => {}))
-      }
+        signTransaction: vi.fn(() => new Promise(() => {})),
+      },
     });
     const client = createCaatingaClient(config);
     const promise = client.contract("counter").invoke("increment");
     const assertion = expect(promise).rejects.toMatchObject({
-      code: CaatingaErrorCode.WALLET_TIMEOUT
+      code: CaatingaErrorCode.WALLET_TIMEOUT,
     });
     await vi.advanceTimersByTimeAsync(50);
     await assertion;
@@ -162,13 +164,13 @@ describe("createCaatingaClient", () => {
         getPublicKey: vi.fn(async () => "GPUBLIC"),
         signTransaction: vi.fn(async () => {
           throw new Error("wallet rejected");
-        })
-      }
+        }),
+      },
     });
     const client = createCaatingaClient(config);
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_SIGN_FAILED
+      code: CaatingaErrorCode.XDR_SIGN_FAILED,
     });
   });
 
@@ -183,12 +185,12 @@ describe("createCaatingaClient", () => {
     const client = createCaatingaClient({
       ...base,
       contracts: {
-        counter: { binding: { Client: ClientWithoutXdr } }
-      }
+        counter: { binding: { Client: ClientWithoutXdr } },
+      },
     } as CaatingaClientConfig);
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_BUILD_FAILED
+      code: CaatingaErrorCode.XDR_BUILD_FAILED,
     });
   });
 
@@ -198,7 +200,7 @@ describe("createCaatingaClient", () => {
         return {
           toXDR() {
             return "AAAA_UNSIGNED";
-          }
+          },
         };
       }
     }
@@ -207,12 +209,12 @@ describe("createCaatingaClient", () => {
     const client = createCaatingaClient({
       ...base,
       contracts: {
-        counter: { binding: { Client: ClientWithoutSubmit } }
-      }
+        counter: { binding: { Client: ClientWithoutSubmit } },
+      },
     } as CaatingaClientConfig);
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_SUBMIT_FAILED
+      code: CaatingaErrorCode.XDR_SUBMIT_FAILED,
     });
   });
 
@@ -225,7 +227,7 @@ describe("createCaatingaClient", () => {
           },
           async signAndSend() {
             throw new Error("rpc rejected");
-          }
+          },
         };
       }
     }
@@ -234,12 +236,12 @@ describe("createCaatingaClient", () => {
     const client = createCaatingaClient({
       ...base,
       contracts: {
-        counter: { binding: { Client: ClientWithFailingSubmit } }
-      }
+        counter: { binding: { Client: ClientWithFailingSubmit } },
+      },
     } as CaatingaClientConfig);
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_SUBMIT_FAILED
+      code: CaatingaErrorCode.XDR_SUBMIT_FAILED,
     });
   });
 });

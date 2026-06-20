@@ -21,9 +21,7 @@ describe("isTransientTestnetSmokeFailure", () => {
   });
 
   it("should_return_false_when_log_contains_version_parse_failure", () => {
-    expect(
-      isTransientTestnetSmokeFailure("CAATINGA_STELLAR_CLI_VERSION_PARSE_FAILED")
-    ).toBe(false);
+    expect(isTransientTestnetSmokeFailure("CAATINGA_STELLAR_CLI_VERSION_PARSE_FAILED")).toBe(false);
   });
 
   it("should_return_false_when_log_contains_invalid_config", () => {

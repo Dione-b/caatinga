@@ -6,17 +6,13 @@ describe("assertSafeSourceAccount", () => {
   it("should_throw_SOURCE_IS_PUBLIC_KEY_when_G_address", () => {
     expect(() =>
       assertSafeSourceAccount("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF")
-    ).toThrowError(
-      expect.objectContaining({ code: CaatingaErrorCode.SOURCE_IS_PUBLIC_KEY })
-    );
+    ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.SOURCE_IS_PUBLIC_KEY }));
   });
 
   it("should_throw_SOURCE_IS_SECRET_KEY_when_S_address", () => {
     expect(() =>
       assertSafeSourceAccount("SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    ).toThrowError(
-      expect.objectContaining({ code: CaatingaErrorCode.SOURCE_IS_SECRET_KEY })
-    );
+    ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.SOURCE_IS_SECRET_KEY }));
   });
 
   it("should_throw_SOURCE_IS_SEED_PHRASE_when_input_has_spaces", () => {

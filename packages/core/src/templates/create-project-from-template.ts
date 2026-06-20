@@ -9,15 +9,10 @@ import {
   formatTemplateCompatibilityHint,
   formatTemplateCompatibilityMessage,
   getTemplateCompatibilityIssue,
-  type TemplateManifest
+  type TemplateManifest,
 } from "./template-manifest.schema.js";
 
-const TEMPLATE_COPY_EXCLUDED_DIRS = new Set([
-  "target",
-  "test_snapshots",
-  "node_modules",
-  ".git"
-]);
+const TEMPLATE_COPY_EXCLUDED_DIRS = new Set(["target", "test_snapshots", "node_modules", ".git"]);
 
 export type CreateProjectFromTemplateOptions = {
   projectName: string;
@@ -48,7 +43,7 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
     recursive: true,
     force: mergeIntoExisting,
     errorOnExist: !mergeIntoExisting,
-    filter: (source) => shouldCopyTemplateEntry(templateDir, source, options.filter)
+    filter: (source) => shouldCopyTemplateEntry(templateDir, source, options.filter),
   });
 
   await replaceTemplateVariables(targetDir, options.projectName);
@@ -65,7 +60,10 @@ async function ensureArtifacts(targetDir: string, projectName: string): Promise<
     await writeArtifacts({ ...artifacts, project: projectName }, targetDir);
   } catch (error) {
     if (error instanceof CaatingaError && error.code === CaatingaErrorCode.ARTIFACT_NOT_FOUND) {
-      await writeArtifacts(createInitialArtifacts(projectName, { networks: ["testnet"] }), targetDir);
+      await writeArtifacts(
+        createInitialArtifacts(projectName, { networks: ["testnet"] }),
+        targetDir
+      );
       return;
     }
 
@@ -118,22 +116,24 @@ async function readTemplateManifest(templateDir: string): Promise<TemplateManife
 async function replaceTemplateVariables(dir: string, projectName: string): Promise<void> {
   const entries = await readdir(dir);
 
-  await Promise.all(entries.map(async (entry) => {
-    const entryPath = path.join(dir, entry);
-    const entryStat = await stat(entryPath);
+  await Promise.all(
+    entries.map(async (entry) => {
+      const entryPath = path.join(dir, entry);
+      const entryStat = await stat(entryPath);
 
-    if (entryStat.isDirectory()) {
-      await replaceTemplateVariables(entryPath, projectName);
-      return;
-    }
+      if (entryStat.isDirectory()) {
+        await replaceTemplateVariables(entryPath, projectName);
+        return;
+      }
 
-    if (!isTextTemplateFile(entryPath)) {
-      return;
-    }
+      if (!isTextTemplateFile(entryPath)) {
+        return;
+      }
 
-    const content = await readFile(entryPath, "utf8");
-    await writeFile(entryPath, content.replaceAll("__PROJECT_NAME__", projectName), "utf8");
-  }));
+      const content = await readFile(entryPath, "utf8");
+      await writeFile(entryPath, content.replaceAll("__PROJECT_NAME__", projectName), "utf8");
+    })
+  );
 }
 
 function shouldCopyTemplateEntry(
@@ -155,14 +155,7 @@ function shouldCopyTemplateEntry(
 }
 
 function isTextTemplateFile(filePath: string): boolean {
-  return [
-    ".json",
-    ".md",
-    ".rs",
-    ".toml",
-    ".ts",
-    ".tsx",
-    ".css",
-    ".html"
-  ].includes(path.extname(filePath));
+  return [".json", ".md", ".rs", ".toml", ".ts", ".tsx", ".css", ".html"].includes(
+    path.extname(filePath)
+  );
 }

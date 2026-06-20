@@ -3,8 +3,7 @@
   background:
     radial-gradient(circle at top, rgba(255, 208, 118, 0.22), transparent 32%),
     linear-gradient(180deg, #f7f1e4 0%, #efe7d2 100%);
-  font-family:
-    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }

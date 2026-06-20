@@ -61,22 +61,26 @@ export async function generateBindings(options: GenerateBindingsOptions) {
   const outputDir = path.resolve(cwd, options.config.frontend.bindingsOutput, options.contractName);
   await mkdir(outputDir, { recursive: true });
 
-  const result = await runCommand("npx", [
-    "--yes",
-    "@stellar/stellar-sdk",
-    "generate",
-    "--contract-id",
-    contractArtifact.contractId,
-    "--output-dir",
-    outputDir,
-    "--contract-name",
-    options.contractName,
-    "--overwrite",
-    ...buildGenerateNetworkArgs(network)
-  ], {
-    cwd,
-    failureCode: CaatingaErrorCode.BINDINGS_FAILED
-  });
+  const result = await runCommand(
+    "npx",
+    [
+      "--yes",
+      "@stellar/stellar-sdk",
+      "generate",
+      "--contract-id",
+      contractArtifact.contractId,
+      "--output-dir",
+      outputDir,
+      "--contract-name",
+      options.contractName,
+      "--overwrite",
+      ...buildGenerateNetworkArgs(network),
+    ],
+    {
+      cwd,
+      failureCode: CaatingaErrorCode.BINDINGS_FAILED,
+    }
+  );
 
   const legacyStubRemoved = await removeLegacyBindingStub(
     cwd,
@@ -89,7 +93,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     contractId: contractArtifact.contractId,
     wasmHash: contractArtifact.wasmHash,
     network: network.name,
-    generatedAt: new Date().toISOString()
+    generatedAt: new Date().toISOString(),
   };
   await writeBindingMarker(outputDir, marker);
 
@@ -100,6 +104,6 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     importPath: toBindingImportPath(options.config.frontend.bindingsOutput, options.contractName),
     legacyStubRemoved,
     marker,
-    output: result.all || result.stdout
+    output: result.all || result.stdout,
   };
 }

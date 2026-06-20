@@ -6,7 +6,7 @@ describe("isDependenciesNotInstalledError", () => {
     expect(
       isDependenciesNotInstalledError({
         code: "ERR_MODULE_NOT_FOUND",
-        message: "Cannot find package '@caatinga/core'"
+        message: "Cannot find package '@caatinga/core'",
       })
     ).toBe(true);
   });
@@ -17,8 +17,8 @@ describe("isDependenciesNotInstalledError", () => {
         message: "Failed to load config",
         cause: {
           code: "ERR_MODULE_NOT_FOUND",
-          message: "Cannot find package '@caatinga/core'"
-        }
+          message: "Cannot find package '@caatinga/core'",
+        },
       })
     ).toBe(true);
   });
@@ -27,7 +27,7 @@ describe("isDependenciesNotInstalledError", () => {
     expect(
       isDependenciesNotInstalledError({
         code: "ERR_MODULE_NOT_FOUND",
-        message: "Cannot find package 'react'"
+        message: "Cannot find package 'react'",
       })
     ).toBe(false);
   });

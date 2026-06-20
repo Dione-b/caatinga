@@ -7,9 +7,7 @@ const cliRoot = fileURLToPath(new URL("..", import.meta.url));
 
 describe("CLI dev module resolution", () => {
   it("should_not_map_caatinga_core_to_dist_dts_in_tsconfig_paths", () => {
-    const tsconfig = JSON.parse(
-      readFileSync(join(cliRoot, "tsconfig.json"), "utf8")
-    ) as {
+    const tsconfig = JSON.parse(readFileSync(join(cliRoot, "tsconfig.json"), "utf8")) as {
       compilerOptions?: { paths?: Record<string, string[]> };
     };
 

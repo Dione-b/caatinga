@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   walletStubOverrides,
   walletStubPnpmWorkspaceYaml,
-  walletStubViteAliases
+  walletStubViteAliases,
 } from "./wallet-stubs.js";
 
 describe("wallet stub helpers", () => {

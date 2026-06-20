@@ -14,7 +14,7 @@ vi.mock("@caatinga/core", async () => {
     ...actual,
     deployContractGraph: deployContractGraphMock,
     generateBindingsGraph: generateBindingsGraphMock,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
   };
 });
 
@@ -28,26 +28,26 @@ const config: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 const deployResult = {
   network: { name: "testnet" },
   deployedContracts: [{ name: "counter", contractId: CONTRACT_ID }],
   skippedContracts: [],
-  staleWasmWarnings: []
+  staleWasmWarnings: [],
 };
 
 const generateResult = {
@@ -59,9 +59,9 @@ const generateResult = {
       outputDir: "/tmp/counter",
       importPath: "./src/contracts/generated/counter",
       legacyStubRemoved: false,
-      output: "generated"
-    }
-  ]
+      output: "generated",
+    },
+  ],
 };
 
 function createDeployProgram(): Command {
@@ -86,14 +86,12 @@ describe("deploy command", () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
-      await createDeployProgram().parseAsync([
-        "node", "caatinga", "deploy", "--source", "alice"
-      ]);
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
 
       expect(generateBindingsGraph).toHaveBeenCalledWith({
         config,
         contractNames: ["counter"],
-        networkName: "testnet"
+        networkName: "testnet",
       });
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
@@ -111,7 +109,12 @@ describe("deploy command", () => {
 
     try {
       await createDeployProgram().parseAsync([
-        "node", "caatinga", "deploy", "--source", "alice", "--no-generate"
+        "node",
+        "caatinga",
+        "deploy",
+        "--source",
+        "alice",
+        "--no-generate",
       ]);
 
       expect(generateBindingsGraph).not.toHaveBeenCalled();
@@ -136,9 +139,7 @@ describe("deploy command", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     try {
-      await createDeployProgram().parseAsync([
-        "node", "caatinga", "deploy", "--source", "alice"
-      ]);
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
 
       expect(process.exitCode).toBeUndefined();
 
@@ -158,14 +159,12 @@ describe("deploy command", () => {
     deployContractGraphMock.mockResolvedValue({
       ...deployResult,
       deployedContracts: [],
-      skippedContracts: [{ name: "counter", contractId: CONTRACT_ID }]
+      skippedContracts: [{ name: "counter", contractId: CONTRACT_ID }],
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
-      await createDeployProgram().parseAsync([
-        "node", "caatinga", "deploy", "--source", "alice"
-      ]);
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
 
       expect(generateBindingsGraph).not.toHaveBeenCalled();
     } finally {
@@ -178,16 +177,14 @@ describe("deploy command", () => {
       project: "minimal-app",
       defaultNetwork: "testnet",
       contracts: config.contracts,
-      networks: config.networks
+      networks: config.networks,
     };
     loadConfigMock.mockResolvedValue(minimalConfig);
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     try {
-      await createDeployProgram().parseAsync([
-        "node", "caatinga", "deploy", "--source", "alice"
-      ]);
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
 
       expect(generateBindingsGraph).not.toHaveBeenCalled();
       expect(process.exitCode).toBeUndefined();

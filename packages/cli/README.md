@@ -43,16 +43,16 @@ npx caatinga invoke counter.increment --network testnet --source alice
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `caatinga init <projectName>` | Create a project from a bundled template and write `caatinga.artifacts.json` |
+| Command                                                       | What it does                                                                               |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `caatinga init <projectName>`                                 | Create a project from a bundled template and write `caatinga.artifacts.json`               |
 | `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
-| `caatinga build [contract]` | Compile contract WASM through Stellar CLI (default contract: `counter`) |
-| `caatinga deploy [contract]` | Deploy one contract or the full configured graph; record IDs in artifacts |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts |
-| `caatinga status [--network <name>] [--json]` | Show deployed contracts and binding freshness per network |
-| `caatinga invoke <contract.method>` | Invoke a deployed contract method; extra args forward to Stellar CLI |
-| `caatinga read <contract.method>` | Simulate a read-only contract method (no signing or submission) |
+| `caatinga build [contract]`                                   | Compile contract WASM through Stellar CLI (default contract: `counter`)                    |
+| `caatinga deploy [contract]`                                  | Deploy one contract or the full configured graph; record IDs in artifacts                  |
+| `caatinga generate [contract]`                                | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts     |
+| `caatinga status [--network <name>] [--json]`                 | Show deployed contracts and binding freshness per network                                  |
+| `caatinga invoke <contract.method>`                           | Invoke a deployed contract method; extra args forward to Stellar CLI                       |
+| `caatinga read <contract.method>`                             | Simulate a read-only contract method (no signing or submission)                            |
 
 The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> invoke`.
 

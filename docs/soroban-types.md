@@ -14,12 +14,12 @@ Generated bindings expose `Symbol` parameters as TypeScript `string`. The compil
 
 ### Examples
 
-| Value | Valid as Soroban Symbol? |
-| --- | --- |
-| `"hello"` | Yes |
-| `"Hello_World"` | Yes |
-| `"Hello, World!"` | No (comma and space) |
-| `"transfer"` | Yes |
+| Value             | Valid as Soroban Symbol? |
+| ----------------- | ------------------------ |
+| `"hello"`         | Yes                      |
+| `"Hello_World"`   | Yes                      |
+| `"Hello, World!"` | No (comma and space)     |
+| `"transfer"`      | Yes                      |
 
 ### What to do in app code
 
@@ -36,12 +36,12 @@ Caatinga does not rewrite Stellar CLI binding output. Add validation at your app
 
 ## Other common mappings
 
-| Soroban type | TypeScript binding (typical) |
-| --- | --- |
-| `u32`, `i32`, `u64`, `i64` | `number` or `bigint` (depends on binding version) |
-| `Address` | `string` |
-| `Bytes` / `BytesN` | `Buffer` or `Uint8Array` |
-| `Vec<T>` | `Array<T>` |
-| `Map<K,V>` | `Map` or plain object (depends on binding version) |
+| Soroban type               | TypeScript binding (typical)                       |
+| -------------------------- | -------------------------------------------------- |
+| `u32`, `i32`, `u64`, `i64` | `number` or `bigint` (depends on binding version)  |
+| `Address`                  | `string`                                           |
+| `Bytes` / `BytesN`         | `Buffer` or `Uint8Array`                           |
+| `Vec<T>`                   | `Array<T>`                                         |
+| `Map<K,V>`                 | `Map` or plain object (depends on binding version) |
 
 When in doubt, inspect the generated method signature under `frontend.bindingsOutput` after `caatinga generate`.

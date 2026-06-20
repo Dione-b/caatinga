@@ -85,14 +85,14 @@ export function createWalletSession(
   options: WalletSessionOptions = {}
 ): WalletSession {
   const capabilities = adapter as CaatingaWalletAdapter & CaatingaWalletCapabilities;
-  const storage = options.persist ? options.storage ?? defaultStorage() : undefined;
+  const storage = options.persist ? (options.storage ?? defaultStorage()) : undefined;
   const storageKey = options.storageKey ?? WALLET_SESSION_STORAGE_KEY;
   const listeners = new Set<() => void>();
 
   let state: WalletSessionState = {
     status: "disconnected",
     publicKey: null,
-    error: null
+    error: null,
   };
 
   function setState(next: WalletSessionState): void {
@@ -143,9 +143,10 @@ export function createWalletSession(
   }
 
   async function requestPublicKey(label: string, viaModal: boolean): Promise<string> {
-    const request = viaModal && capabilities.openModal
-      ? () => capabilities.openModal!()
-      : () => adapter.getPublicKey();
+    const request =
+      viaModal && capabilities.openModal
+        ? () => capabilities.openModal!()
+        : () => adapter.getPublicKey();
     return withWalletTimeout(label, options.timeout, request);
   }
 
@@ -207,6 +208,6 @@ export function createWalletSession(
     },
     connect,
     disconnect,
-    restore
+    restore,
   };
 }

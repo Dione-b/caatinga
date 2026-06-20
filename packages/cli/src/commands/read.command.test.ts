@@ -12,7 +12,7 @@ vi.mock("@caatinga/core", async () => {
   return {
     ...actual,
     readContract: readContractMock,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
   };
 });
 
@@ -24,15 +24,15 @@ const config: CaatingaConfig = {
       path: "./contracts/app",
       wasm: "./contracts/app/target/wasm32v1-none/release/app.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
-  }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
 };
 
 function createReadProgram(): Command {
@@ -50,7 +50,7 @@ describe("read command", () => {
     readContractMock.mockResolvedValue({
       network: { name: "testnet" },
       target: { contractName: "app", method: "version" },
-      result: "1\n"
+      result: "1\n",
     });
   });
 
@@ -58,14 +58,21 @@ describe("read command", () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
-      await createReadProgram().parseAsync(["node", "caatinga", "read", "app.version", "--network", "testnet"]);
+      await createReadProgram().parseAsync([
+        "node",
+        "caatinga",
+        "read",
+        "app.version",
+        "--network",
+        "testnet",
+      ]);
 
       expect(readContract).toHaveBeenCalledWith({
         config,
         target: "app.version",
         args: [],
         networkName: "testnet",
-        source: undefined
+        source: undefined,
       });
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Read complete");

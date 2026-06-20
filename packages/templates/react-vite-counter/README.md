@@ -1,4 +1,4 @@
-# __PROJECT_NAME__
+# **PROJECT_NAME**
 
 Caatinga counter dApp for Stellar/Soroban.
 
@@ -49,15 +49,15 @@ export const caatingaClient = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet,
   contracts: {
     counter: {
-      binding: Counter
-    }
-  }
+      binding: Counter,
+    },
+  },
 });
 ```
 
@@ -79,7 +79,7 @@ Invoke through a connected wallet:
 
 ```ts
 const result = await caatingaClient.contract("counter").invoke("increment", {
-  debugXdr: true
+  debugXdr: true,
 });
 console.log(result.transactionHash);
 ```

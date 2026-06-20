@@ -6,12 +6,12 @@ Install the CLI and prerequisites first — see [Getting started — Prerequisit
 
 ## Quick comparison
 
-| Path | Command | Frontend | Soroban contract | ZK (Circom/Groth16) | Best for |
-| --- | --- | --- | --- | --- | --- |
-| **Template** | `caatinga init <dir>` | Yes (Vite + React) | Yes (template default) | No | First dApp, wallet + bindings pre-wired |
-| **Minimal** | `caatinga init <dir> --minimal` | No | Yes (`app` stub) | No | CLI-first; you pick the UI stack later |
-| **ZK template** | `caatinga zk init <dir>` | Yes (`zk-starter`) | Verifier contract | Yes (multiplier example) | ZK dApp with hybrid CLI + browser flow |
-| **ZK minimal** | `caatinga zk init <dir> --minimal` | No | Verifier contract | Yes (identity circuit) | ZK toolchain only; add UI yourself |
+| Path            | Command                            | Frontend           | Soroban contract       | ZK (Circom/Groth16)      | Best for                                |
+| --------------- | ---------------------------------- | ------------------ | ---------------------- | ------------------------ | --------------------------------------- |
+| **Template**    | `caatinga init <dir>`              | Yes (Vite + React) | Yes (template default) | No                       | First dApp, wallet + bindings pre-wired |
+| **Minimal**     | `caatinga init <dir> --minimal`    | No                 | Yes (`app` stub)       | No                       | CLI-first; you pick the UI stack later  |
+| **ZK template** | `caatinga zk init <dir>`           | Yes (`zk-starter`) | Verifier contract      | Yes (multiplier example) | ZK dApp with hybrid CLI + browser flow  |
+| **ZK minimal**  | `caatinga zk init <dir> --minimal` | No                 | Verifier contract      | Yes (identity circuit)   | ZK toolchain only; add UI yourself      |
 
 Aliases:
 
@@ -28,21 +28,21 @@ Aliases:
 
 ## Official templates
 
-| Template | Command | Status |
-| --- | --- | --- |
-| `react-vite-counter` (default) | `npx caatinga init my-dapp` | Stable — recommended for first walkthrough |
-| `marketplace-with-token` | `npx caatinga init my-dapp -t marketplace-with-token` | Experimental — multi-contract `dependsOn` demo |
-| `zk-starter` | `npx caatinga zk init my-zk-dapp` | Stable ZK example with Vite + React shell |
+| Template                       | Command                                               | Status                                         |
+| ------------------------------ | ----------------------------------------------------- | ---------------------------------------------- |
+| `react-vite-counter` (default) | `npx caatinga init my-dapp`                           | Stable — recommended for first walkthrough     |
+| `marketplace-with-token`       | `npx caatinga init my-dapp -t marketplace-with-token` | Experimental — multi-contract `dependsOn` demo |
+| `zk-starter`                   | `npx caatinga zk init my-zk-dapp`                     | Stable ZK example with Vite + React shell      |
 
 See [Templates](../templates.md) for manifest details and package-manager notes.
 
 ## Step-by-step guides
 
-| Guide | What it covers |
-| --- | --- |
-| [Template project](./template-project.md) | `caatinga init` — full dApp scaffold |
-| [Minimal project](./minimal-project.md) | `caatinga init --minimal` — CLI + contract only |
-| [ZK project](./zk-project.md) | `caatinga zk init` — circuits, prove, on-chain verify |
+| Guide                                     | What it covers                                        |
+| ----------------------------------------- | ----------------------------------------------------- |
+| [Template project](./template-project.md) | `caatinga init` — full dApp scaffold                  |
+| [Minimal project](./minimal-project.md)   | `caatinga init --minimal` — CLI + contract only       |
+| [ZK project](./zk-project.md)             | `caatinga zk init` — circuits, prove, on-chain verify |
 
 ## Related docs
 

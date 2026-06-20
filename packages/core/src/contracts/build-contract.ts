@@ -16,7 +16,7 @@ const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
   "not found",
   "needs to be installed",
   "add the",
-  "rustup target"
+  "rustup target",
 ] as const;
 
 function isMissingRustWasmTargetError(error: unknown): boolean {
@@ -27,7 +27,7 @@ function isMissingRustWasmTargetError(error: unknown): boolean {
   const parts = [
     error.message,
     error.hint ?? "",
-    error.cause === undefined ? "" : String(error.cause)
+    error.cause === undefined ? "" : String(error.cause),
   ];
   const haystack = parts.join("\n").toLowerCase();
 
@@ -35,7 +35,7 @@ function isMissingRustWasmTargetError(error: unknown): boolean {
     return false;
   }
 
-  return MISSING_WASM_TARGET_HINT_SUBSTRINGS.some(needle => haystack.includes(needle));
+  return MISSING_WASM_TARGET_HINT_SUBSTRINGS.some((needle) => haystack.includes(needle));
 }
 
 export async function buildContract(options: BuildContractOptions) {
@@ -49,7 +49,7 @@ export async function buildContract(options: BuildContractOptions) {
   try {
     result = await runCommand("stellar", ["contract", "build"], {
       cwd: contract.sourcePath,
-      failureCode: CaatingaErrorCode.BUILD_FAILED
+      failureCode: CaatingaErrorCode.BUILD_FAILED,
     });
   } catch (error) {
     if (
@@ -68,14 +68,14 @@ export async function buildContract(options: BuildContractOptions) {
   }
 
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
-    sourcePath: contract.sourcePath
+    sourcePath: contract.sourcePath,
   });
 
   return {
     contract: {
       ...contract,
-      wasmPath
+      wasmPath,
     },
-    output: result.all || result.stdout
+    output: result.all || result.stdout,
   };
 }

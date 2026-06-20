@@ -8,11 +8,7 @@ import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-ar
 import { resolveCliSource } from "./source-account.js";
 import { parseInvokeTarget } from "./invoke-target.js";
 
-export {
-  buildReadCallHint,
-  isReadCallFailure,
-  READ_CALL_FAILURE_REGEX
-} from "./invoke-target.js";
+export { buildReadCallHint, isReadCallFailure, READ_CALL_FAILURE_REGEX } from "./invoke-target.js";
 
 export type ReadContractOptions = {
   config: CaatingaConfig;
@@ -51,17 +47,17 @@ export async function readContract(options: ReadContractOptions) {
     ...buildStellarNetworkArgs(network),
     "--",
     target.method,
-    ...(options.args ?? [])
+    ...(options.args ?? []),
   ];
 
   const result = await runCommand("stellar", stellarArgs, {
     cwd,
-    failureCode: CaatingaErrorCode.INVOKE_FAILED
+    failureCode: CaatingaErrorCode.INVOKE_FAILED,
   });
 
   return {
     target,
     network,
-    result: result.stdout || result.all
+    result: result.stdout || result.all,
   };
 }

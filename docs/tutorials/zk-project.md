@@ -24,11 +24,11 @@ See [ZK module — Requirements](../zk.md#requirements) for details.
 
 ## Three ways to scaffold
 
-| Mode | Command | Result |
-| --- | --- | --- |
-| Full template | `npx caatinga zk init my-zk-dapp` | `zk-starter`: multiplier circuit + Vite UI + verifier |
-| ZK minimal | `npx caatinga zk init my-zk-dapp --minimal` | Identity circuit + verifier, no frontend |
-| Add to existing project | `cd my-app && npx caatinga zk init` | Copies `circuits/` + `contracts/verifier`, merges `zk` into config |
+| Mode                    | Command                                     | Result                                                             |
+| ----------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| Full template           | `npx caatinga zk init my-zk-dapp`           | `zk-starter`: multiplier circuit + Vite UI + verifier              |
+| ZK minimal              | `npx caatinga zk init my-zk-dapp --minimal` | Identity circuit + verifier, no frontend                           |
+| Add to existing project | `cd my-app && npx caatinga zk init`         | Copies `circuits/` + `contracts/verifier`, merges `zk` into config |
 
 Re-run `caatinga zk init` in an existing directory with `--force` to overwrite conflicting scaffold files.
 
@@ -67,10 +67,10 @@ Step by step:
 
 ## Template vs minimal
 
-| | `zk init` (zk-starter) | `zk init --minimal` |
-| --- | --- | --- |
-| Frontend | Vite + React shell | None |
-| Circuit | Multiplier example (`a * b = c`) | Identity `template Main()` |
+|          | `zk init` (zk-starter)                  | `zk init --minimal`                  |
+| -------- | --------------------------------------- | ------------------------------------ |
+| Frontend | Vite + React shell                      | None                                 |
+| Circuit  | Multiplier example (`a * b = c`)        | Identity `template Main()`           |
 | Best for | Learning end-to-end ZK + browser verify | CI, custom UI, headless prove/invoke |
 
 The `zk-starter` UI follows a hybrid pattern:

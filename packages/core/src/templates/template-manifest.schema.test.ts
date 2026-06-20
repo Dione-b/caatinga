@@ -7,7 +7,7 @@ import {
   formatTemplateCompatibilityHint,
   formatTemplateCompatibilityMessage,
   getTemplateCompatibilityIssue,
-  isCoreVersionCompatible
+  isCoreVersionCompatible,
 } from "./template-manifest.schema.js";
 
 describe("isCoreVersionCompatible", () => {
@@ -43,30 +43,33 @@ describe("defaultCompatibleCoreRange", () => {
 
 describe("getTemplateCompatibilityIssue", () => {
   it("should_describe_core_range_mismatch", () => {
-    const issue = getTemplateCompatibilityIssue({
-      name: "demo",
-      version: "0.1.0",
-      caatinga: {
-        compatibleCore: "^0.1.0",
-        templateVersion: 1
+    const issue = getTemplateCompatibilityIssue(
+      {
+        name: "demo",
+        version: "0.1.0",
+        caatinga: {
+          compatibleCore: "^0.1.0",
+          templateVersion: 1,
+        },
+        frontend: {
+          framework: "vite-react",
+          packageManager: "npm",
+        },
+        contracts: {
+          path: "contracts",
+        },
+        files: {
+          config: "caatinga.config.ts",
+          artifacts: "caatinga.artifacts.json",
+        },
       },
-      frontend: {
-        framework: "vite-react",
-        packageManager: "npm"
-      },
-      contracts: {
-        path: "contracts"
-      },
-      files: {
-        config: "caatinga.config.ts",
-        artifacts: "caatinga.artifacts.json"
-      }
-    }, "0.2.0");
+      "0.2.0"
+    );
 
     expect(issue).toEqual({
       kind: "core-range",
       requiredRange: "^0.1.0",
-      runningVersion: "0.2.0"
+      runningVersion: "0.2.0",
     });
     expect(formatTemplateCompatibilityMessage(issue!)).toContain("^0.1.0");
     expect(formatTemplateCompatibilityMessage(issue!)).toContain("0.2.0");

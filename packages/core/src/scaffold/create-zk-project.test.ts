@@ -20,7 +20,7 @@ describe("createZkProject", () => {
 
     const result = await createZkProject({
       projectName: "my-zk-app",
-      targetDir
+      targetDir,
     });
 
     expect(result.targetDir).toBe(targetDir);
@@ -28,12 +28,16 @@ describe("createZkProject", () => {
     await expect(access(path.join(targetDir, "caatinga.artifacts.json"))).resolves.toBeUndefined();
     await expect(access(path.join(targetDir, "package.json"))).resolves.toBeUndefined();
     await expect(access(path.join(targetDir, "circuits", "main.circom"))).resolves.toBeUndefined();
-    await expect(access(path.join(targetDir, "contracts", "verifier", "src", "lib.rs"))).resolves.toBeUndefined();
+    await expect(
+      access(path.join(targetDir, "contracts", "verifier", "src", "lib.rs"))
+    ).resolves.toBeUndefined();
 
     const config = await readFile(path.join(targetDir, "caatinga.config.ts"), "utf8");
     expect(config).toContain('project: "my-zk-app"');
     expect(config).not.toContain("frontend");
-    expect(config).toContain('wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"');
+    expect(config).toContain(
+      'wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"'
+    );
     expect(config).toContain('path: "./circuits"');
     expect(config).toContain('protocol: "groth16"');
     expect(config).toContain('curve: "bls12381"');
@@ -43,7 +47,9 @@ describe("createZkProject", () => {
     expect(circuit).toContain("template Main()");
     expect(circuit).not.toContain("Multiplier");
 
-    const input = JSON.parse(await readFile(path.join(targetDir, "circuits", "input.json"), "utf8"));
+    const input = JSON.parse(
+      await readFile(path.join(targetDir, "circuits", "input.json"), "utf8")
+    );
     expect(input).toEqual({ a: "1" });
 
     const artifacts = await readArtifacts(targetDir);
@@ -65,8 +71,6 @@ describe("createZkProject", () => {
     const targetDir = path.join(tmpDir, "my-zk-app");
     await createZkProject({ projectName: "my-zk-app", targetDir });
 
-    await expect(
-      createZkProject({ projectName: "my-zk-app", targetDir })
-    ).rejects.toThrow();
+    await expect(createZkProject({ projectName: "my-zk-app", targetDir })).rejects.toThrow();
   });
 });

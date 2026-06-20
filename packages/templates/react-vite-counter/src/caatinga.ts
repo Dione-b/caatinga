@@ -10,11 +10,11 @@ export const caatingaClient = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet: stellarWalletAdapter,
   contracts: {
-    counter: { binding: Counter }
-  }
+    counter: { binding: Counter },
+  },
 });

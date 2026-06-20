@@ -13,7 +13,7 @@ export function assertSorobanSymbol(value: string, paramName = "symbol"): void {
     [
       "Soroban Symbol values may only contain ASCII letters, digits, and underscores (max 32 chars).",
       `Received: ${JSON.stringify(value)}`,
-      "See docs/soroban-types.md for examples."
+      "See docs/soroban-types.md for examples.",
     ].join("\n")
   );
 }

@@ -37,7 +37,7 @@ export async function deployContractGraph(options: {
   const order = resolveDeployOrder({
     contracts: options.config.contracts,
     selectedContract: options.contractName,
-    includeDependencies: options.includeDependencies
+    includeDependencies: options.includeDependencies,
   });
   const deployedContracts: Array<{ name: string; contractId: string }> = [];
   const skippedContracts: SkippedContract[] = [];
@@ -53,20 +53,18 @@ export async function deployContractGraph(options: {
         dependencies: contractConfig.dependsOn,
         artifacts,
         network,
-        cwd
+        cwd,
       });
     }
 
     const resolvedDeployArgs = resolveDeployArgs({
       deployArgs: contractConfig.deployArgs,
       artifacts,
-      network: network.name
+      network: network.name,
     });
 
     if (existing?.contractId && !options.force) {
-      skippedContracts.push(
-        toSkippedContract(contractName, existing.contractId, network.name)
-      );
+      skippedContracts.push(toSkippedContract(contractName, existing.contractId, network.name));
       continue;
     }
 
@@ -79,20 +77,18 @@ export async function deployContractGraph(options: {
       force: options.force,
       checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
-      dependencies: contractConfig.dependsOn
+      dependencies: contractConfig.dependsOn,
     });
 
     if (result.staleWasmWarning) {
       staleWasmWarnings.push({
         contract: contractName,
-        message: result.staleWasmWarning
+        message: result.staleWasmWarning,
       });
     }
 
     if (result.skipped) {
-      skippedContracts.push(
-        toSkippedContract(contractName, result.contractId, network.name)
-      );
+      skippedContracts.push(toSkippedContract(contractName, result.contractId, network.name));
     } else {
       deployedContracts.push({ name: contractName, contractId: result.contractId });
     }
@@ -102,6 +98,6 @@ export async function deployContractGraph(options: {
     network,
     deployedContracts,
     skippedContracts,
-    staleWasmWarnings
+    staleWasmWarnings,
   };
 }

@@ -5,10 +5,10 @@ official `groth16_verifier` pattern.
 
 ## Curve choice
 
-| Choice | Why |
-| --- | --- |
+| Choice                  | Why                                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
 | **BLS12-381 + Groth16** | Matches Stellar Protocol 25+ host functions and `stellar/soroban-examples/groth16_verifier`. |
-| **Not BN254** | EVM-centric; Soroban does not expose BN254 pairing precompiles today. |
+| **Not BN254**           | EVM-centric; Soroban does not expose BN254 pairing precompiles today.                        |
 
 ## Requirements
 
@@ -45,18 +45,18 @@ caatinga zk invoke --source <identity>
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `caatinga zk init [project]` | Scaffold `zk-starter` (multiplier circuit + verifier). |
-| `caatinga zk init [project] --minimal` | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
-| `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`. |
-| `caatinga zk init [project] --force` | Overwrite existing scaffold files. |
-| `caatinga zk build [circuit]` | Compile Circom (`-p bls12381`) and run dev trusted setup. |
-| `caatinga zk build [circuit] --embed-vk` | Emit `contracts/verifier/src/vk.rs` with embedded BLS12-381 coordinates. |
-| `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` from `input.json`. |
-| `caatinga zk prove [circuit] --debug` | Emit intermediate `witness.wtns` for debugging. |
-| `caatinga zk invoke [circuit]` | Serialize snarkjs output and call `verify_proof` on-chain. |
-| `caatinga zk invoke [circuit] --embed-vk` | Use embedded VK entrypoint (WIP). |
+| Command                                        | Purpose                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------ |
+| `caatinga zk init [project]`                   | Scaffold `zk-starter` (multiplier circuit + verifier).                   |
+| `caatinga zk init [project] --minimal`         | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
+| `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`.             |
+| `caatinga zk init [project] --force`           | Overwrite existing scaffold files.                                       |
+| `caatinga zk build [circuit]`                  | Compile Circom (`-p bls12381`) and run dev trusted setup.                |
+| `caatinga zk build [circuit] --embed-vk`       | Emit `contracts/verifier/src/vk.rs` with embedded BLS12-381 coordinates. |
+| `caatinga zk prove [circuit]`                  | Generate `proof.json` and `public.json` from `input.json`.               |
+| `caatinga zk prove [circuit] --debug`          | Emit intermediate `witness.wtns` for debugging.                          |
+| `caatinga zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain.               |
+| `caatinga zk invoke [circuit] --embed-vk`      | Use embedded VK entrypoint (WIP).                                        |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
 
@@ -115,10 +115,10 @@ import { serializeProof, serializeVk, serializePublicSignals } from "@caatinga/z
 
 ```ts
 import {
-  buildCircuit,           // compile Circom circuit
-  proveCircuit,           // generate proof from input.json
-  invokeVerifier,         // call verify_proof on-chain
-  buildStellarVerifyProofArgs,  // build args for browser read/simulate
+  buildCircuit, // compile Circom circuit
+  proveCircuit, // generate proof from input.json
+  invokeVerifier, // call verify_proof on-chain
+  buildStellarVerifyProofArgs, // build args for browser read/simulate
   ptauSizeForConstraints, // determine powers-of-tau file size
 } from "@caatinga/zk";
 ```
@@ -127,46 +127,46 @@ import {
 
 ```ts
 import {
-  buildVerifyProofBindingArgs,  // build args for browser verify_proof read
-  concatG1Bytes,                // concatenate G1 point bytes
-  concatG2Bytes,                // concatenate G2 point bytes
+  buildVerifyProofBindingArgs, // build args for browser verify_proof read
+  concatG1Bytes, // concatenate G1 point bytes
+  concatG2Bytes, // concatenate G2 point bytes
 } from "@caatinga/zk/browser";
 ```
 
 ### Types
 
-| Type | Source | Purpose |
-| --- | --- | --- |
-| `SnarkjsProof` | `@caatinga/zk` | snarkjs JSON proof shape |
-| `SnarkjsVk` | `@caatinga/zk` | snarkjs JSON verification key shape |
-| `SerializedProof` | `@caatinga/zk` | Byte-serialized proof for Soroban |
-| `SerializedVk` | `@caatinga/zk` | Byte-serialized VK for Soroban |
-| `BuildCircuitOptions` | `@caatinga/zk` | Options for `buildCircuit()` |
-| `ProveCircuitOptions` | `@caatinga/zk` | Options for `proveCircuit()` |
-| `InvokeVerifierOptions` | `@caatinga/zk` | Options for `invokeVerifier()` |
-| `InvokeVerifierResult` | `@caatinga/zk` | Result of `invokeVerifier()` |
-| `SerializedG1` | `@caatinga/zk/browser` | Byte-serialized G1 point |
-| `SerializedG2` | `@caatinga/zk/browser` | Byte-serialized G2 point |
-| `VerifyProofBindingArgs` | `@caatinga/zk/browser` | Args for browser binding read |
-| `VerifyProofBindingBuffers` | `@caatinga/zk/browser` | Raw buffer form of binding args |
+| Type                        | Source                 | Purpose                             |
+| --------------------------- | ---------------------- | ----------------------------------- |
+| `SnarkjsProof`              | `@caatinga/zk`         | snarkjs JSON proof shape            |
+| `SnarkjsVk`                 | `@caatinga/zk`         | snarkjs JSON verification key shape |
+| `SerializedProof`           | `@caatinga/zk`         | Byte-serialized proof for Soroban   |
+| `SerializedVk`              | `@caatinga/zk`         | Byte-serialized VK for Soroban      |
+| `BuildCircuitOptions`       | `@caatinga/zk`         | Options for `buildCircuit()`        |
+| `ProveCircuitOptions`       | `@caatinga/zk`         | Options for `proveCircuit()`        |
+| `InvokeVerifierOptions`     | `@caatinga/zk`         | Options for `invokeVerifier()`      |
+| `InvokeVerifierResult`      | `@caatinga/zk`         | Result of `invokeVerifier()`        |
+| `SerializedG1`              | `@caatinga/zk/browser` | Byte-serialized G1 point            |
+| `SerializedG2`              | `@caatinga/zk/browser` | Byte-serialized G2 point            |
+| `VerifyProofBindingArgs`    | `@caatinga/zk/browser` | Args for browser binding read       |
+| `VerifyProofBindingBuffers` | `@caatinga/zk/browser` | Raw buffer form of binding args     |
 
 ### Error handling
 
 `ZkError` is thrown by ZK library functions with a `code` property:
 
-| Code | Meaning |
-| --- | --- |
-| `ZK_VK_REQUIRED` | Verification key is required but not provided |
-| `ZK_INVOKE_FAILED` | On-chain verification call failed |
-| `ZK_VERIFY_FAILED` | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
-| `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform |
+| Code                      | Meaning                                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| `ZK_VK_REQUIRED`          | Verification key is required but not provided                                             |
+| `ZK_INVOKE_FAILED`        | On-chain verification call failed                                                         |
+| `ZK_VERIFY_FAILED`        | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
+| `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform                                               |
 
 ## Dynamic VK vs embedded VK
 
-| Mode | When to use |
-| --- | --- |
-| **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes. |
-| **`--embed-vk`** | Static VK baked into the verifier contract (see WIP note below for end-to-end status). |
+| Mode                     | When to use                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes.                     |
+| **`--embed-vk`**         | Static VK baked into the verifier contract (see WIP note below for end-to-end status). |
 
 Embedded VK is opt-in and visible in your repo — never a hidden dependency.
 
@@ -207,7 +207,7 @@ export default defineConfig({
         path: "./circuits",
         protocol: "groth16",
         curve: "bls12381",
-        verifierContract: "verifier",  // optional: contract name for on-chain verification
+        verifierContract: "verifier", // optional: contract name for on-chain verification
       },
     },
   },

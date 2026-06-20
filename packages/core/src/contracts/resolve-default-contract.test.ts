@@ -10,13 +10,13 @@ const baseConfig: CaatingaConfig = {
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/bindings"
-  }
+    bindingsOutput: "./src/bindings",
+  },
 };
 
 describe("resolveDefaultContractName", () => {
@@ -28,9 +28,9 @@ describe("resolveDefaultContractName", () => {
           path: "./contracts/verifier",
           wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
           dependsOn: [],
-          deployArgs: {}
-        }
-      }
+          deployArgs: {},
+        },
+      },
     };
 
     expect(resolveDefaultContractName(config)).toBe("verifier");
@@ -44,15 +44,15 @@ describe("resolveDefaultContractName", () => {
           path: "./contracts/counter",
           wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
           dependsOn: [],
-          deployArgs: {}
+          deployArgs: {},
         },
         token: {
           path: "./contracts/token",
           wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
           dependsOn: [],
-          deployArgs: {}
-        }
-      }
+          deployArgs: {},
+        },
+      },
     };
 
     expect(() => resolveDefaultContractName(config)).toThrow(CaatingaError);

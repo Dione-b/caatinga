@@ -18,7 +18,7 @@ import {
   formatStaleWasmWarning,
   hashWasm,
   isWasmOlderThanSources,
-  resolveWasmArtifactPath
+  resolveWasmArtifactPath,
 } from "./wasm.js";
 
 export type DeployContractOptions = {
@@ -61,18 +61,18 @@ export async function deployContract(options: DeployContractOptions) {
 
   await checkBinary("stellar", "Install Stellar CLI before running caatinga deploy.");
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
-    sourcePath: contract.sourcePath
+    sourcePath: contract.sourcePath,
   });
   const contractWithWasm = {
     ...contract,
-    wasmPath
+    wasmPath,
   };
 
   let staleWasmWarning: string | undefined;
   if (options.checkStaleWasm !== false) {
     const stale = await isWasmOlderThanSources({
       wasmPath,
-      contractPath: contract.sourcePath
+      contractPath: contract.sourcePath,
     });
     if (stale) {
       staleWasmWarning = formatStaleWasmWarning(contract.name);
@@ -89,7 +89,7 @@ export async function deployContract(options: DeployContractOptions) {
       artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
       output: "",
       skipped: true as const,
-      staleWasmWarning
+      staleWasmWarning,
     };
   }
 
@@ -103,7 +103,7 @@ export async function deployContract(options: DeployContractOptions) {
     resolvedDeployArgs = resolveDeployArgs({
       deployArgs: rawDeployArgs,
       artifacts: artifactsBefore,
-      network: network.name
+      network: network.name,
     });
   } else {
     resolvedDeployArgs = {};
@@ -129,7 +129,7 @@ export async function deployContract(options: DeployContractOptions) {
     "--source-account",
     source,
     ...buildStellarNetworkArgs(network),
-    ...constructorArgs
+    ...constructorArgs,
   ];
 
   let output = "";
@@ -138,7 +138,7 @@ export async function deployContract(options: DeployContractOptions) {
   try {
     const result = await runCommand("stellar", stellarArgs, {
       cwd,
-      failureCode: CaatingaErrorCode.DEPLOY_FAILED
+      failureCode: CaatingaErrorCode.DEPLOY_FAILED,
     });
     output = result.all || `${result.stdout}\n${result.stderr}`;
     contractId = parseContractId(output);
@@ -151,7 +151,7 @@ export async function deployContract(options: DeployContractOptions) {
       output: `${error.message}\n${error.hint ?? ""}`,
       source,
       network: network.config,
-      cwd
+      cwd,
     });
 
     if (!recoveredContractId) {
@@ -162,8 +162,10 @@ export async function deployContract(options: DeployContractOptions) {
     output = [
       error.hint ?? "",
       "Caatinga recovered the contract ID from the on-chain deploy transaction.",
-      `Contract ID: ${contractId}`
-    ].filter(Boolean).join("\n");
+      `Contract ID: ${contractId}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
   }
   const wasmHash = await hashWasm(wasmPath);
   const dependencyGraph = buildDependencyGraph(options.config.contracts);
@@ -180,7 +182,7 @@ export async function deployContract(options: DeployContractOptions) {
       sourcePath: contract.config.path,
       wasmPath: contract.config.wasm,
       dependencies,
-      resolvedDeployArgs
+      resolvedDeployArgs,
     },
     { dependencyGraph }
   );
@@ -193,6 +195,6 @@ export async function deployContract(options: DeployContractOptions) {
     artifactsPath,
     output,
     skipped: false as const,
-    staleWasmWarning
+    staleWasmWarning,
   };
 }

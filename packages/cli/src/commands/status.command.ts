@@ -21,7 +21,7 @@ function toRow(entry: ContractStatusEntry): string[] {
     shortHash(entry.wasmHash),
     entry.deployed ? "✓" : "✗",
     entry.bindings.status,
-    entry.dependencies.length > 0 ? entry.dependencies.join(", ") : "—"
+    entry.dependencies.length > 0 ? entry.dependencies.join(", ") : "—",
   ];
 }
 
@@ -31,42 +31,44 @@ export function registerStatusCommand(program: Command): void {
     .description("Show deployed contracts and binding freshness per network")
     .option("-n, --network <network>", "Configured network name")
     .option("--json", "Print machine-readable JSON instead of the table")
-    .action((options: { network?: string; json?: boolean }) => runCliAction(async () => {
-      const config = await loadConfig();
-      const status = await collectProjectStatus({
-        config,
-        networkName: options.network
-      });
+    .action((options: { network?: string; json?: boolean }) =>
+      runCliAction(async () => {
+        const config = await loadConfig();
+        const status = await collectProjectStatus({
+          config,
+          networkName: options.network,
+        });
 
-      if (options.json) {
-        console.log(JSON.stringify(status, null, 2));
-        return;
-      }
-
-      logger.success(`Project: ${status.project}`);
-
-      for (const network of status.networks) {
-        logger.info("");
-        logger.info(`Network: ${network.network}`);
-
-        const lines = renderTable(
-          ["CONTRACT", "CONTRACT ID", "WASM HASH", "DEPLOYED", "BINDINGS", "DEPS"],
-          network.contracts.map(toRow)
-        );
-        for (const line of lines) {
-          logger.info(line);
+        if (options.json) {
+          console.log(JSON.stringify(status, null, 2));
+          return;
         }
 
-        const needsAttention = network.contracts.filter(
-          (entry) => entry.deployed && entry.bindings.status !== "fresh"
-        );
-        for (const entry of needsAttention) {
-          logger.warn(
-            `Bindings ${entry.bindings.status} for ${entry.name}` +
-              `${entry.bindings.reason ? ` (${entry.bindings.reason})` : ""}` +
-              ` — run: npx caatinga generate ${entry.name} --network ${network.network}`
+        logger.success(`Project: ${status.project}`);
+
+        for (const network of status.networks) {
+          logger.info("");
+          logger.info(`Network: ${network.network}`);
+
+          const lines = renderTable(
+            ["CONTRACT", "CONTRACT ID", "WASM HASH", "DEPLOYED", "BINDINGS", "DEPS"],
+            network.contracts.map(toRow)
           );
+          for (const line of lines) {
+            logger.info(line);
+          }
+
+          const needsAttention = network.contracts.filter(
+            (entry) => entry.deployed && entry.bindings.status !== "fresh"
+          );
+          for (const entry of needsAttention) {
+            logger.warn(
+              `Bindings ${entry.bindings.status} for ${entry.name}` +
+                `${entry.bindings.reason ? ` (${entry.bindings.reason})` : ""}` +
+                ` — run: npx caatinga generate ${entry.name} --network ${network.network}`
+            );
+          }
         }
-      }
-    }));
+      })
+    );
 }

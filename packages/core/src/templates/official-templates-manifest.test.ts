@@ -6,7 +6,7 @@ import { CAATINGA_CORE_VERSION } from "../version.js";
 import {
   TemplateManifestSchema,
   assertOfficialTemplateManifest,
-  defaultCompatibleCoreRange
+  defaultCompatibleCoreRange,
 } from "./template-manifest.schema.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,7 +30,9 @@ async function listOfficialTemplateNames(): Promise<string[]> {
 
 describe("official template manifests", () => {
   it("should_match_CAATINGA_CORE_VERSION_with_package_json", async () => {
-    const packageJson = JSON.parse(await readFile(corePackageJsonPath, "utf8")) as { version: string };
+    const packageJson = JSON.parse(await readFile(corePackageJsonPath, "utf8")) as {
+      version: string;
+    };
     expect(CAATINGA_CORE_VERSION).toBe(packageJson.version);
   });
 

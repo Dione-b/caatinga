@@ -15,18 +15,18 @@ const artifacts: CaatingaArtifacts = {
           sourcePath: "contracts/counter",
           wasmPath: "target/wasm32v1-none/release/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: {}
-    }
-  }
+      dependencyGraph: {},
+    },
+  },
 };
 
 function createClientConfig(overrides: Record<string, unknown> = {}) {
   const wallet = {
     getPublicKey: vi.fn(async () => "GPUBLIC"),
-    signTransaction: vi.fn(async () => "AAAA_SIGNED")
+    signTransaction: vi.fn(async () => "AAAA_SIGNED"),
   };
 
   class Client {
@@ -43,10 +43,10 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         }) {
           const signed = await input.signTransaction("AAAA_UNSIGNED", {
             networkPassphrase: "Test SDF Network ; September 2015",
-            address: "GPUBLIC"
+            address: "GPUBLIC",
           });
           return { txHash: `hash:${signed.signedTxXdr}`, result: 1 };
-        }
+        },
       };
     }
 
@@ -60,9 +60,9 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
             result: args?.fallback ?? 42,
             toXDR() {
               return "AAAA_GET_PREPARED";
-            }
+            },
           };
-        }
+        },
       };
     }
 
@@ -75,9 +75,9 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
           return {
             toXDR() {
               return "AAAA_NO_RESULT_PREPARED";
-            }
+            },
           };
-        }
+        },
       };
     }
 
@@ -88,7 +88,7 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         },
         async signAndSend() {
           return {};
-        }
+        },
       };
     }
 
@@ -99,7 +99,7 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         },
         prepare() {
           return Promise.reject(new Error("simulation failed"));
-        }
+        },
       };
     }
 
@@ -110,7 +110,7 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
         },
         async signAndSend() {
           throw new Error("rpc rejected");
-        }
+        },
       };
     }
   }
@@ -119,17 +119,17 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
     network: {
       name: "testnet",
       rpcUrl: "https://rpc.example",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
     artifacts,
     wallet,
     contracts: {
       counter: {
         binding: { Client },
-        ...(overrides.contractRegistration as object | undefined)
-      }
+        ...(overrides.contractRegistration as object | undefined),
+      },
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -140,13 +140,13 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
         getPublicKey: vi.fn(async () => {
           throw new Error("no wallet");
         }),
-        signTransaction: vi.fn(async () => "AAAA_SIGNED")
-      }
+        signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+      },
     });
     const client = createCaatingaClient(config);
 
     await expect(client.contract("counter").buildXdr("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.WALLET_NOT_CONNECTED
+      code: CaatingaErrorCode.WALLET_NOT_CONNECTED,
     });
   });
 
@@ -156,13 +156,13 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
         getPublicKey: vi.fn(async () => {
           throw new Error("no wallet");
         }),
-        signTransaction: vi.fn(async () => "AAAA_SIGNED")
-      }
+        signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+      },
     });
     const client = createCaatingaClient(config);
 
     await expect(client.contract("counter").invoke("increment")).rejects.toMatchObject({
-      code: CaatingaErrorCode.WALLET_NOT_CONNECTED
+      code: CaatingaErrorCode.WALLET_NOT_CONNECTED,
     });
   });
 
@@ -176,7 +176,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
       contract: "counter",
       method: "get",
       contractId: "CCOUNTER000000000000000000000000000000000000000000000000",
-      result: 42
+      result: 42,
     });
   });
 
@@ -189,18 +189,16 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
   it("should_forward_read_args_and_include_raw_when_debugRaw_is_enabled", async () => {
     const client = createCaatingaClient(createClientConfig());
 
-    const result = await client.contract("counter").simulate<number>(
-      "get",
-      { fallback: 7 },
-      { debugRaw: true }
-    );
+    const result = await client
+      .contract("counter")
+      .simulate<number>("get", { fallback: 7 }, { debugRaw: true });
 
     expect(result).toMatchObject({
       status: "simulated",
       result: 7,
       raw: {
-        result: 7
-      }
+        result: 7,
+      },
     });
   });
 
@@ -210,13 +208,13 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
         getPublicKey: vi.fn(async () => {
           throw new Error("no wallet");
         }),
-        signTransaction: vi.fn(async () => "AAAA_SIGNED")
-      }
+        signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+      },
     });
     const client = createCaatingaClient(config);
 
     await expect(client.contract("counter").simulate("get")).rejects.toMatchObject({
-      code: CaatingaErrorCode.WALLET_NOT_CONNECTED
+      code: CaatingaErrorCode.WALLET_NOT_CONNECTED,
     });
   });
 
@@ -225,13 +223,13 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
       artifacts: {
         project: "counter-app",
         version: 1,
-        networks: {}
-      }
+        networks: {},
+      },
     });
     const client = createCaatingaClient(config);
 
     await expect(client.contract("counter").simulate("get")).rejects.toMatchObject({
-      code: CaatingaErrorCode.CONTRACT_ARTIFACT_NOT_FOUND
+      code: CaatingaErrorCode.CONTRACT_ARTIFACT_NOT_FOUND,
     });
   });
 
@@ -239,7 +237,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const client = createCaatingaClient(createClientConfig());
 
     await expect(client.contract("counter").simulate("missing")).rejects.toMatchObject({
-      code: CaatingaErrorCode.BINDING_METHOD_NOT_FOUND
+      code: CaatingaErrorCode.BINDING_METHOD_NOT_FOUND,
     });
   });
 
@@ -248,7 +246,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").simulate("failingPrepare")).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_PREPARE_FAILED,
-      hint: expect.stringContaining("https://rpc.example")
+      hint: expect.stringContaining("https://rpc.example"),
     });
   });
 
@@ -257,7 +255,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").simulate("noResult")).rejects.toMatchObject({
       code: CaatingaErrorCode.READ_RESULT_MISSING,
-      hint: expect.stringContaining("counter.noResult")
+      hint: expect.stringContaining("counter.noResult"),
     });
   });
 
@@ -265,7 +263,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const client = createCaatingaClient(createClientConfig());
 
     await expect(client.contract("counter").invoke("badSubmit")).rejects.toMatchObject({
-      code: CaatingaErrorCode.XDR_RESULT_FAILED
+      code: CaatingaErrorCode.XDR_RESULT_FAILED,
     });
   });
 
@@ -274,7 +272,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").buildXdr("failingPrepare")).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_PREPARE_FAILED,
-      hint: expect.stringContaining("https://rpc.example")
+      hint: expect.stringContaining("https://rpc.example"),
     });
   });
 
@@ -283,7 +281,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
 
     await expect(client.contract("counter").invoke("failingSubmit")).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_SUBMIT_FAILED,
-      hint: expect.stringContaining("https://rpc.example")
+      hint: expect.stringContaining("https://rpc.example"),
     });
   });
 
@@ -291,17 +289,19 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const config = createClientConfig({
       wallet: {
         getPublicKey: vi.fn(async () => "GPUBLIC"),
-        signTransaction: vi.fn(async () => "")
-      }
+        signTransaction: vi.fn(async () => ""),
+      },
     });
 
-    await expect(createCaatingaClient(config).contract("counter").invoke("increment")).rejects.toMatchObject({
+    await expect(
+      createCaatingaClient(config).contract("counter").invoke("increment")
+    ).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_SIGN_FAILED,
-      hint: expect.stringContaining("empty")
+      hint: expect.stringContaining("empty"),
     });
     expect(config.wallet.signTransaction).toHaveBeenCalledWith({
       xdr: "AAAA_UNSIGNED",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     });
   });
 
@@ -309,33 +309,37 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const config = createClientConfig({
       wallet: {
         getPublicKey: vi.fn(async () => "GPUBLIC"),
-        signTransaction: vi.fn(async () => undefined as unknown as string)
-      }
+        signTransaction: vi.fn(async () => undefined as unknown as string),
+      },
     });
 
-    await expect(createCaatingaClient(config).contract("counter").invoke("increment")).rejects.toMatchObject({
+    await expect(
+      createCaatingaClient(config).contract("counter").invoke("increment")
+    ).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_SIGN_FAILED,
-      hint: expect.stringContaining("empty")
+      hint: expect.stringContaining("empty"),
     });
     expect(config.wallet.signTransaction).toHaveBeenCalledWith({
       xdr: "AAAA_UNSIGNED",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     });
   });
 
   it("should_submit_with_stellar_sdk_signAndSend_signTransaction_callback", async () => {
-    const signAndSend = vi.fn(async (input: {
-      signTransaction: (
-        xdr: string,
-        opts?: { networkPassphrase?: string; address?: string }
-      ) => Promise<{ signedTxXdr: string }>;
-    }) => {
-      const signed = await input.signTransaction("AAAA_PREPARED", {
-        networkPassphrase: "Test SDF Network ; September 2015",
-        address: "GPUBLIC"
-      });
-      return { txHash: `hash:${signed.signedTxXdr}`, result: 7 };
-    });
+    const signAndSend = vi.fn(
+      async (input: {
+        signTransaction: (
+          xdr: string,
+          opts?: { networkPassphrase?: string; address?: string }
+        ) => Promise<{ signedTxXdr: string }>;
+      }) => {
+        const signed = await input.signTransaction("AAAA_PREPARED", {
+          networkPassphrase: "Test SDF Network ; September 2015",
+          address: "GPUBLIC",
+        });
+        return { txHash: `hash:${signed.signedTxXdr}`, result: 7 };
+      }
+    );
 
     class Client {
       increment() {
@@ -343,7 +347,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
           toXDR() {
             return "AAAA_PREPARED";
           },
-          signAndSend
+          signAndSend,
         };
       }
     }
@@ -351,21 +355,23 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const config = createClientConfig({
       contracts: {
         counter: {
-          binding: { Client }
-        }
-      }
+          binding: { Client },
+        },
+      },
     });
 
     const result = await createCaatingaClient(config).contract("counter").invoke("increment", {
-      debugXdr: true
+      debugXdr: true,
     });
 
-    expect(signAndSend).toHaveBeenCalledWith(expect.objectContaining({
-      signTransaction: expect.any(Function)
-    }));
+    expect(signAndSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signTransaction: expect.any(Function),
+      })
+    );
     expect(config.wallet.signTransaction).toHaveBeenCalledWith({
       xdr: "AAAA_PREPARED",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     });
     expect(result).toMatchObject({
       status: "confirmed",
@@ -374,24 +380,26 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
       xdr: {
         unsigned: "AAAA_PREPARED",
         prepared: "AAAA_PREPARED",
-        signed: "AAAA_SIGNED"
-      }
+        signed: "AAAA_SIGNED",
+      },
     });
   });
 
   it("should_normalize_nested_stellar_sdk_send_transaction_response_hash", async () => {
-    const signAndSend = vi.fn(async (input: {
-      signTransaction: (
-        xdr: string,
-        opts?: { networkPassphrase?: string; address?: string }
-      ) => Promise<{ signedTxXdr: string }>;
-    }) => {
-      await input.signTransaction("AAAA_PREPARED", {
-        networkPassphrase: "Test SDF Network ; September 2015",
-        address: "GPUBLIC"
-      });
-      return { sendTransactionResponse: { hash: "hash:nested" }, result: 9 };
-    });
+    const signAndSend = vi.fn(
+      async (input: {
+        signTransaction: (
+          xdr: string,
+          opts?: { networkPassphrase?: string; address?: string }
+        ) => Promise<{ signedTxXdr: string }>;
+      }) => {
+        await input.signTransaction("AAAA_PREPARED", {
+          networkPassphrase: "Test SDF Network ; September 2015",
+          address: "GPUBLIC",
+        });
+        return { sendTransactionResponse: { hash: "hash:nested" }, result: 9 };
+      }
+    );
 
     class Client {
       increment() {
@@ -399,7 +407,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
           toXDR() {
             return "AAAA_PREPARED";
           },
-          signAndSend
+          signAndSend,
         };
       }
     }
@@ -407,9 +415,9 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const config = createClientConfig({
       contracts: {
         counter: {
-          binding: { Client }
-        }
-      }
+          binding: { Client },
+        },
+      },
     });
 
     const result = await createCaatingaClient(config).contract("counter").invoke("increment");
@@ -417,7 +425,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     expect(result).toMatchObject({
       status: "confirmed",
       transactionHash: "hash:nested",
-      result: 9
+      result: 9,
     });
   });
 
@@ -430,7 +438,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
           toXDR() {
             return "AAAA_PREPARED";
           },
-          send
+          send,
         };
       }
     }
@@ -438,9 +446,9 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const config = createClientConfig({
       contracts: {
         counter: {
-          binding: { Client }
-        }
-      }
+          binding: { Client },
+        },
+      },
     });
 
     const result = await createCaatingaClient(config).contract("counter").invoke("increment");
@@ -450,7 +458,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     expect(result).toMatchObject({
       status: "confirmed",
       transactionHash: "hash:send",
-      result: 3
+      result: 3,
     });
   });
 });

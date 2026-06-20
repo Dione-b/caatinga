@@ -9,11 +9,14 @@ export function renderTable(headers: string[], rows: string[][]): string[] {
   );
 
   const renderRow = (cells: string[]): string =>
-    cells.map((cell, column) => (cell ?? "").padEnd(widths[column])).join("  ").trimEnd();
+    cells
+      .map((cell, column) => (cell ?? "").padEnd(widths[column]))
+      .join("  ")
+      .trimEnd();
 
   return [
     renderRow(headers),
     widths.map((width) => "─".repeat(width)).join("  "),
-    ...rows.map((row) => renderRow(row))
+    ...rows.map((row) => renderRow(row)),
   ];
 }

@@ -11,12 +11,12 @@ import type {
   CaatingaInvokeResult,
   CaatingaReadOptions,
   CaatingaReadResult,
-  CaatingaXdrBuildResult
+  CaatingaXdrBuildResult,
 } from "../types.js";
 import {
   splitArgsAndOptions,
   splitInvokeArgsAndOptions,
-  splitReadArgsAndOptions
+  splitReadArgsAndOptions,
 } from "./invoke-args.js";
 import { prepareReadTransaction, readSimulationResult } from "./transaction-simulate.js";
 import { normalizeSubmitResult, submitTransaction } from "./transaction-submit.js";
@@ -46,7 +46,7 @@ export class CaatingaContractClient {
       contractId,
       transaction,
       rpcUrl: this.config.network.rpcUrl,
-      debug: debugRaw
+      debug: debugRaw,
     });
   }
 
@@ -63,20 +63,17 @@ export class CaatingaContractClient {
       contractId,
       transaction,
       rpcUrl: this.config.network.rpcUrl,
-      debug: debugRaw
+      debug: debugRaw,
     });
 
     let signedXdr: string | undefined;
     const signTransaction: StellarSdkSignTransaction = async (xdr) => {
       try {
-        signedXdr = await withWalletTimeout(
-          "signTransaction",
-          this.config.walletTimeout,
-          () =>
-            this.config.wallet.signTransaction({
-              xdr,
-              networkPassphrase: this.config.network.networkPassphrase
-            })
+        signedXdr = await withWalletTimeout("signTransaction", this.config.walletTimeout, () =>
+          this.config.wallet.signTransaction({
+            xdr,
+            networkPassphrase: this.config.network.networkPassphrase,
+          })
         );
       } catch (error) {
         if (error instanceof CaatingaError) {
@@ -136,11 +133,11 @@ export class CaatingaContractClient {
             xdr: {
               unsigned: xdr.unsignedXdr,
               prepared: xdr.preparedXdr,
-              ...(signedXdr ? { signed: signedXdr } : {})
-            }
+              ...(signedXdr ? { signed: signedXdr } : {}),
+            },
           }
         : {}),
-      ...(debugRaw ? { raw } : {})
+      ...(debugRaw ? { raw } : {}),
     };
   }
 
@@ -165,7 +162,7 @@ export class CaatingaContractClient {
       method,
       contractId,
       result,
-      ...(debugRaw ? { raw } : {})
+      ...(debugRaw ? { raw } : {}),
     };
   }
 
@@ -183,15 +180,13 @@ export class CaatingaContractClient {
       artifacts: this.config.artifacts,
       network: this.config.network.name,
       contract: this.contractName,
-      explicitContractId: this.registration.contractId
+      explicitContractId: this.registration.contractId,
     });
 
     let publicKey: string;
     try {
-      publicKey = await withWalletTimeout(
-        "getPublicKey",
-        this.config.walletTimeout,
-        () => this.config.wallet.getPublicKey()
+      publicKey = await withWalletTimeout("getPublicKey", this.config.walletTimeout, () =>
+        this.config.wallet.getPublicKey()
       );
     } catch (error) {
       if (error instanceof CaatingaError) {
@@ -209,7 +204,7 @@ export class CaatingaContractClient {
       contractId,
       publicKey,
       rpcUrl: this.config.network.rpcUrl,
-      networkPassphrase: this.config.network.networkPassphrase
+      networkPassphrase: this.config.network.networkPassphrase,
     });
     const transaction = await this.bindingAdapter.callMethod({ client, method, args });
 

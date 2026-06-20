@@ -1,4 +1,4 @@
-# __PROJECT_NAME__
+# **PROJECT_NAME**
 
 Experimental Caatinga multi-contract template with a real constructor dependency.
 

@@ -10,8 +10,7 @@ export function resolveContractId(input: {
     return input.explicitContractId;
   }
 
-  const contractId =
-    input.artifacts.networks[input.network]?.contracts[input.contract]?.contractId;
+  const contractId = input.artifacts.networks[input.network]?.contracts[input.contract]?.contractId;
 
   if (contractId) {
     return contractId;
@@ -39,7 +38,7 @@ function formatMissingContractArtifactHint(
       "caatinga.artifacts.json has no network scaffold.",
       `Run caatinga doctor --network ${network} to inspect deploy readiness, then run: ${deployCommand}.`,
       buildNote,
-      "Or pass contractId in the client registration."
+      "Or pass contractId in the client registration.",
     ].join(" ");
   }
 
@@ -48,13 +47,13 @@ function formatMissingContractArtifactHint(
       `No artifacts exist for network "${network}".`,
       `Run: ${deployCommand}.`,
       buildNote,
-      "Or pass contractId in the client registration."
+      "Or pass contractId in the client registration.",
     ].join(" ");
   }
 
   return [
     `Contract "${contract}" is not deployed on "${network}".`,
     `Run: ${deployCommand}.`,
-    "Or pass contractId in the client registration."
+    "Or pass contractId in the client registration.",
   ].join(" ");
 }

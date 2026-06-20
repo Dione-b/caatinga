@@ -5,8 +5,11 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: "@caatinga/zk", replacement: path.resolve(__dirname, "../zk/src/index.ts") },
-      { find: "@caatinga/core/runtime/requirements", replacement: path.resolve(__dirname, "../core/dist/runtime/requirements.js") },
-      { find: "@caatinga/core", replacement: path.resolve(__dirname, "../core/dist/index.js") }
-    ]
-  }
+      {
+        find: "@caatinga/core/runtime/requirements",
+        replacement: path.resolve(__dirname, "../core/dist/runtime/requirements.js"),
+      },
+      { find: "@caatinga/core", replacement: path.resolve(__dirname, "../core/dist/index.js") },
+    ],
+  },
 });

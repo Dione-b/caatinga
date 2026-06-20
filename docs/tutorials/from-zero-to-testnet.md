@@ -137,7 +137,11 @@ import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
-  network: { name: "testnet", rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" },
+  network: {
+    name: "testnet",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
   artifacts,
   wallet: createStellarWalletsKitAdapter(),
   contracts: { counter: { binding: Counter } },

@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@caatinga/zk": path.resolve(__dirname, "./src/index.ts")
-    }
-  }
+      "@caatinga/zk": path.resolve(__dirname, "./src/index.ts"),
+    },
+  },
 });

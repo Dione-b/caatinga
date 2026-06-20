@@ -15,5 +15,5 @@ export const logger = {
   },
   muted(message: string) {
     console.log(chalk.gray(message));
-  }
+  },
 };

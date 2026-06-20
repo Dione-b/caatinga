@@ -1,14 +1,11 @@
-const SAFE_OPTIONAL = [
-  "@safe-global/safe-apps-provider",
-  "@safe-global/safe-apps-sdk"
-];
+const SAFE_OPTIONAL = ["@safe-global/safe-apps-provider", "@safe-global/safe-apps-sdk"];
 
 // SWK ships Trezor/HOT as direct deps but defaultModules() does not register them.
 // Trezor pulls protobufjs (critical advisories); HOT pulls NEAR/elliptic — unused in Caatinga templates.
 const SWK_STRIPPED_DEPS = [
   "@trezor/connect-web",
   "@trezor/connect-plugin-stellar",
-  "@hot-wallet/sdk"
+  "@hot-wallet/sdk",
 ];
 
 /** @param {import('@pnpm/types').PackageManifest} pkg */
@@ -34,6 +31,6 @@ function readPackage(pkg) {
 
 module.exports = {
   hooks: {
-    readPackage
-  }
+    readPackage,
+  },
 };

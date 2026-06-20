@@ -12,7 +12,11 @@ function zkArtifactsPlugin(): Plugin {
 
   const serveArtifacts = (
     req: { url?: string },
-    res: { statusCode: number; setHeader(name: string, value: string): void; end(chunk?: string): void },
+    res: {
+      statusCode: number;
+      setHeader(name: string, value: string): void;
+      end(chunk?: string): void;
+    },
     next: () => void
   ) => {
     const urlPath = decodeURIComponent((req.url ?? "/").split("?")[0] ?? "/");
@@ -60,6 +64,6 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: walletStubViteAliases(stubsDir)
-  }
+    alias: walletStubViteAliases(stubsDir),
+  },
 });

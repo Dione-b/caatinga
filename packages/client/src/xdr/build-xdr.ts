@@ -46,7 +46,7 @@ export async function buildXdr(input: {
       contractId: input.contractId,
       unsignedXdr,
       preparedXdr,
-      ...(input.debug ? { raw: preparedTransaction } : {})
+      ...(input.debug ? { raw: preparedTransaction } : {}),
     };
   } catch (error) {
     if (error instanceof CaatingaError) {

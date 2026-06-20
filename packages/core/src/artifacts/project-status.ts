@@ -1,10 +1,7 @@
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { readArtifacts } from "./read-artifacts.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
-import {
-  evaluateBindingFreshness,
-  type BindingFreshness
-} from "../bindings/binding-freshness.js";
+import { evaluateBindingFreshness, type BindingFreshness } from "../bindings/binding-freshness.js";
 
 export type ContractStatusEntry = {
   name: string;
@@ -61,7 +58,7 @@ export async function collectProjectStatus(
         artifacts,
         networkName,
         contractName: name,
-        cwd
+        cwd,
       });
 
       contracts.push({
@@ -71,7 +68,7 @@ export async function collectProjectStatus(
         wasmHash: artifact?.wasmHash,
         deployedAt: artifact?.deployedAt,
         dependencies: artifact?.dependencies ?? options.config.contracts[name].dependsOn ?? [],
-        bindings
+        bindings,
       });
     }
 

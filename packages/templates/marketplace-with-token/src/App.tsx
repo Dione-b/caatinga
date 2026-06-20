@@ -2,7 +2,7 @@ const deploySteps = [
   "Build token and marketplace contracts",
   "Deploy token first so artifacts capture its contractId",
   "Deploy marketplace and inject tokenContractId via __constructor",
-  "Generate bindings for both contracts"
+  "Generate bindings for both contracts",
 ];
 
 export default function App() {

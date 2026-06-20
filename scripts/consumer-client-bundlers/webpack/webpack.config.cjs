@@ -7,12 +7,12 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),
-    clean: true
+    clean: true,
   },
   resolve: {
-    extensions: [".js", ".cjs", ".mjs"]
+    extensions: [".js", ".cjs", ".mjs"],
   },
   experiments: {
-    outputModule: true
-  }
+    outputModule: true,
+  },
 };

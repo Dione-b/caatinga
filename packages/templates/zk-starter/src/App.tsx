@@ -37,7 +37,9 @@ function AppBody() {
             </div>
             <span className="network-pill">testnet</span>
           </div>
-          <p>Connect a Stellar wallet to verify Groth16 proofs on the deployed verifier contract.</p>
+          <p>
+            Connect a Stellar wallet to verify Groth16 proofs on the deployed verifier contract.
+          </p>
         </section>
       )}
     </main>

@@ -74,43 +74,45 @@ export function registerDoctorCommand(program: Command): void {
     .description("Check local Caatinga, Stellar CLI, Rust, config, and source identity setup")
     .option("-n, --network <network>", "Configured network name to validate")
     .option("-s, --source <source>", "Stellar CLI identity alias to validate")
-    .action((options: DoctorOptions) => runCliAction(async () => {
-      logger.info("Caatinga Doctor");
-      logger.info("");
+    .action((options: DoctorOptions) =>
+      runCliAction(async () => {
+        logger.info("Caatinga Doctor");
+        logger.info("");
 
-      const diagnostics = await runAllDiagnostics(options);
+        const diagnostics = await runAllDiagnostics(options);
 
-      for (const diagnostic of diagnostics) {
-        printDiagnostic(diagnostic);
-      }
-
-      printFixes(diagnostics);
-
-      let ready = diagnostics.every((diagnostic) => diagnostic.ok);
-
-      let deployNetwork = options.network;
-      if (!deployNetwork && ready) {
-        const config = await loadConfig();
-        deployNetwork = config.defaultNetwork;
-      }
-
-      if (deployNetwork && ready) {
-        try {
-          await reportDeployCoverage(deployNetwork);
-        } catch (error) {
-          ready = false;
-          throw error;
+        for (const diagnostic of diagnostics) {
+          printDiagnostic(diagnostic);
         }
-        await reportBindingCoverage(deployNetwork);
-      }
 
-      logger.info("");
-      logger.info(`Status: ${ready ? "ready" : "blocked"}`);
+        printFixes(diagnostics);
 
-      if (!ready) {
-        process.exitCode = 1;
-      }
-    }));
+        let ready = diagnostics.every((diagnostic) => diagnostic.ok);
+
+        let deployNetwork = options.network;
+        if (!deployNetwork && ready) {
+          const config = await loadConfig();
+          deployNetwork = config.defaultNetwork;
+        }
+
+        if (deployNetwork && ready) {
+          try {
+            await reportDeployCoverage(deployNetwork);
+          } catch (error) {
+            ready = false;
+            throw error;
+          }
+          await reportBindingCoverage(deployNetwork);
+        }
+
+        logger.info("");
+        logger.info(`Status: ${ready ? "ready" : "blocked"}`);
+
+        if (!ready) {
+          process.exitCode = 1;
+        }
+      })
+    );
 }
 
 export { sourceDiagnostic } from "../diagnostics/source-diagnostic.js";

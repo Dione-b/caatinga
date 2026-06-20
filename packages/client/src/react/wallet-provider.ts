@@ -9,14 +9,14 @@ import {
   useRef,
   useSyncExternalStore,
   type ReactElement,
-  type ReactNode
+  type ReactNode,
 } from "react";
 import type { CaatingaWalletAdapter } from "../types.js";
 import {
   createWalletSession,
   type WalletSession,
   type WalletSessionOptions,
-  type WalletSessionState
+  type WalletSessionState,
 } from "../wallet/wallet-session.js";
 
 const WalletSessionContext = createContext<WalletSession | null>(null);
@@ -92,7 +92,7 @@ export function useWallet(): UseWalletResult {
       connecting: state.status === "connecting",
       connect: session.connect,
       disconnect: session.disconnect,
-      session
+      session,
     }),
     [session, state]
   );

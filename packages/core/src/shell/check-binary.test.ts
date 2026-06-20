@@ -4,7 +4,7 @@ import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("./run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { checkBinary } from "./check-binary.js";
@@ -14,7 +14,7 @@ describe("checkBinary", () => {
     runCommand.mockRejectedValueOnce(new Error("not found"));
 
     await expect(checkBinary("rustc", "hint")).rejects.toMatchObject({
-      code: CaatingaErrorCode.RUST_NOT_FOUND
+      code: CaatingaErrorCode.RUST_NOT_FOUND,
     });
 
     expect(runCommand).toHaveBeenCalledWith("rustc", ["--version"], {});

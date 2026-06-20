@@ -39,7 +39,7 @@ type CompatibilityStatus = "supported" | "untested" | "unsupported";
 type CompatibilityReport = {
   version: string;
   status: CompatibilityStatus;
-  minVersion: string;        // "23.0.0" — hard floor
+  minVersion: string; // "23.0.0" — hard floor
   lastTestedVersion: string; // "25.2.0" — advisory only
   warnings: CompatibilityWarning[];
 };

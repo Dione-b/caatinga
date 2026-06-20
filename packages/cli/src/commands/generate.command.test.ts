@@ -16,7 +16,7 @@ vi.mock("@caatinga/core", async () => {
     generateBindingsGraph: generateBindingsGraphMock,
     loadConfig: loadConfigMock,
     readArtifacts: readArtifactsMock,
-    evaluateBindingsFreshness: evaluateBindingsFreshnessMock
+    evaluateBindingsFreshness: evaluateBindingsFreshnessMock,
   };
 });
 
@@ -28,25 +28,25 @@ const config: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
+      deployArgs: {},
     },
     token: {
       path: "./contracts/token",
       wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 const counterResult = {
@@ -55,7 +55,7 @@ const counterResult = {
   outputDir: "/tmp/counter",
   importPath: "./src/contracts/generated/counter",
   legacyStubRemoved: true,
-  output: "generated"
+  output: "generated",
 };
 
 const tokenResult = {
@@ -64,7 +64,7 @@ const tokenResult = {
   outputDir: "/tmp/token",
   importPath: "./src/contracts/generated/token",
   legacyStubRemoved: false,
-  output: "generated"
+  output: "generated",
 };
 
 function createGenerateProgram(): Command {
@@ -85,7 +85,7 @@ describe("generate command", () => {
     evaluateBindingsFreshnessMock.mockResolvedValue([]);
     generateBindingsGraphMock.mockResolvedValue({
       network: { name: "testnet" },
-      results: [counterResult]
+      results: [counterResult],
     });
   });
 
@@ -98,13 +98,15 @@ describe("generate command", () => {
       expect(generateBindingsGraph).toHaveBeenCalledWith({
         config,
         contractName: "counter",
-        networkName: undefined
+        networkName: undefined,
       });
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Import path: ./src/contracts/generated/counter");
       expect(output).toContain("Removed legacy stub: ./src/contracts/generated/counter.ts");
-      expect(output).toContain("Next: import bindings from the import path above, then run npm run dev");
+      expect(output).toContain(
+        "Next: import bindings from the import path above, then run npm run dev"
+      );
     } finally {
       logSpy.mockRestore();
     }
@@ -113,7 +115,7 @@ describe("generate command", () => {
   it("generates all deployed contracts when no contract name is given", async () => {
     generateBindingsGraphMock.mockResolvedValue({
       network: { name: "testnet" },
-      results: [counterResult, tokenResult]
+      results: [counterResult, tokenResult],
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -123,7 +125,7 @@ describe("generate command", () => {
       expect(generateBindingsGraph).toHaveBeenCalledWith({
         config,
         contractName: undefined,
-        networkName: undefined
+        networkName: undefined,
       });
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
@@ -141,13 +143,13 @@ describe("generate command", () => {
         status: "stale",
         outputDir: "/tmp/counter",
         marker: null,
-        reason: "wasmHash changed since last generate"
+        reason: "wasmHash changed since last generate",
       },
-      { contractName: "token", status: "fresh", outputDir: "/tmp/token", marker: null }
+      { contractName: "token", status: "fresh", outputDir: "/tmp/token", marker: null },
     ]);
     generateBindingsGraphMock.mockResolvedValue({
       network: { name: "testnet" },
-      results: [counterResult, tokenResult]
+      results: [counterResult, tokenResult],
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -177,7 +179,7 @@ describe("generate command", () => {
   it("does not log legacy stub removal when stub was not present", async () => {
     generateBindingsGraphMock.mockResolvedValue({
       network: { name: "testnet" },
-      results: [tokenResult]
+      results: [tokenResult],
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 

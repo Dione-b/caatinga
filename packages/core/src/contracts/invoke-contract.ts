@@ -6,11 +6,7 @@ import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
-import {
-  buildReadCallHint,
-  isReadCallFailure,
-  parseInvokeTarget
-} from "./invoke-target.js";
+import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
 
 const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
@@ -47,26 +43,30 @@ export async function invokeContract(options: InvokeContractOptions) {
   let result: Awaited<ReturnType<typeof runCommand>>;
 
   try {
-    result = await runCommand("stellar", [
-      "contract",
-      "invoke",
-      "--id",
-      contractArtifact.contractId,
-      "--source-account",
-      source,
-      ...buildStellarNetworkArgs(network),
-      "--",
-      target.method,
-      ...(options.args ?? [])
-    ], {
-      cwd,
-      failureCode: CaatingaErrorCode.INVOKE_FAILED
-    });
+    result = await runCommand(
+      "stellar",
+      [
+        "contract",
+        "invoke",
+        "--id",
+        contractArtifact.contractId,
+        "--source-account",
+        source,
+        ...buildStellarNetworkArgs(network),
+        "--",
+        target.method,
+        ...(options.args ?? []),
+      ],
+      {
+        cwd,
+        failureCode: CaatingaErrorCode.INVOKE_FAILED,
+      }
+    );
   } catch (error) {
     if (
-      error instanceof CaatingaError
-      && error.code === CaatingaErrorCode.INVOKE_FAILED
-      && isReadCallFailure(error)
+      error instanceof CaatingaError &&
+      error.code === CaatingaErrorCode.INVOKE_FAILED &&
+      isReadCallFailure(error)
     ) {
       throw new CaatingaError(
         error.message,
@@ -77,9 +77,9 @@ export async function invokeContract(options: InvokeContractOptions) {
     }
 
     if (
-      error instanceof CaatingaError
-      && error.code === CaatingaErrorCode.INVOKE_FAILED
-      && INVOKE_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
+      error instanceof CaatingaError &&
+      error.code === CaatingaErrorCode.INVOKE_FAILED &&
+      INVOKE_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
     ) {
       throw new CaatingaError(
         error.message,
@@ -90,7 +90,7 @@ export async function invokeContract(options: InvokeContractOptions) {
           "  stellar --version",
           "Then retry with a funded identity, for example:",
           "  stellar keys generate alice --fund --network testnet",
-          "  npx caatinga invoke counter.increment --network testnet --source alice"
+          "  npx caatinga invoke counter.increment --network testnet --source alice",
         ].join("\n"),
         error
       );
@@ -102,6 +102,6 @@ export async function invokeContract(options: InvokeContractOptions) {
   return {
     target,
     network,
-    result: result.stdout || result.all
+    result: result.stdout || result.all,
   };
 }

@@ -48,11 +48,11 @@ pnpm --filter @caatinga/cli dev init my-dapp
 
 Caatinga supports three starting paths: **template** (full dApp), **minimal** (CLI + contract only), and **ZK** (Circom + Groth16 verifier). See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a comparison table and links to step-by-step guides:
 
-| Guide | Command |
-| --- | --- |
-| [Template project](./tutorials/template-project.md) | `npx caatinga init my-dapp` |
-| [Minimal project](./tutorials/minimal-project.md) | `npx caatinga init my-contract-app --minimal` |
-| [ZK project](./tutorials/zk-project.md) | `npx caatinga zk init my-zk-dapp` |
+| Guide                                               | Command                                       |
+| --------------------------------------------------- | --------------------------------------------- |
+| [Template project](./tutorials/template-project.md) | `npx caatinga init my-dapp`                   |
+| [Minimal project](./tutorials/minimal-project.md)   | `npx caatinga init my-contract-app --minimal` |
+| [ZK project](./tutorials/zk-project.md)             | `npx caatinga zk init my-zk-dapp`             |
 
 The default template flow (`react-vite-counter`) is summarized below. Minimal and ZK flows are documented in their dedicated guides.
 
@@ -106,7 +106,11 @@ import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
-  network: { name: "testnet", rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" },
+  network: {
+    name: "testnet",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
   artifacts,
   wallet: createStellarWalletsKitAdapter(),
   contracts: { counter: { binding: Counter } },

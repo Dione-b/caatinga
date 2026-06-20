@@ -8,15 +8,15 @@ const readArtifactsMock = vi.hoisted(() => vi.fn());
 const verifyDependencyContractsMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./deploy-contract.js", () => ({
-  deployContract: deployContractMock
+  deployContract: deployContractMock,
 }));
 
 vi.mock("../artifacts/read-artifacts.js", () => ({
-  readArtifacts: readArtifactsMock
+  readArtifacts: readArtifactsMock,
 }));
 
 vi.mock("./verify-dependency-contract.js", () => ({
-  verifyDependencyContracts: verifyDependencyContractsMock
+  verifyDependencyContracts: verifyDependencyContractsMock,
 }));
 
 const config: CaatingaConfig = {
@@ -27,27 +27,27 @@ const config: CaatingaConfig = {
       path: "./contracts/token",
       wasm: "./token.wasm",
       dependsOn: [],
-      deployArgs: {}
+      deployArgs: {},
     },
     marketplace: {
       path: "./contracts/marketplace",
       wasm: "./marketplace.wasm",
       dependsOn: ["token"],
       deployArgs: {
-        tokenContractId: "${contracts.token.contractId}"
-      }
-    }
+        tokenContractId: "${contracts.token.contractId}",
+      },
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 describe("deployContractGraph", () => {
@@ -66,35 +66,40 @@ describe("deployContractGraph", () => {
     }> = [];
     const store: {
       networks: {
-        testnet: { contracts: Record<string, { contractId: string }>; dependencyGraph: Record<string, string[]> };
+        testnet: {
+          contracts: Record<string, { contractId: string }>;
+          dependencyGraph: Record<string, string[]>;
+        };
       };
     } = {
       networks: {
-        testnet: { contracts: {}, dependencyGraph: {} }
-      }
+        testnet: { contracts: {}, dependencyGraph: {} },
+      },
     };
 
     readArtifactsMock.mockImplementation(async () => ({
       project: "marketplace-app",
       version: 1 as const,
-      networks: store.networks
+      networks: store.networks,
     }));
 
-    deployContractMock.mockImplementation(async (opts: {
-      contractName: string;
-      resolvedDeployArgs: Record<string, string | number | boolean>;
-      dependencies: string[];
-    }) => {
-      deployCalls.push({
-        contractName: opts.contractName,
-        resolvedDeployArgs: opts.resolvedDeployArgs,
-        dependencies: opts.dependencies
-      });
-      const id = opts.contractName === "token" ? "C".padEnd(56, "A") : "C".padEnd(56, "B");
-      store.networks.testnet.contracts[opts.contractName] = { contractId: id };
-      store.networks.testnet.dependencyGraph[opts.contractName] = opts.dependencies;
-      return { contractId: id, contract: { name: opts.contractName } };
-    });
+    deployContractMock.mockImplementation(
+      async (opts: {
+        contractName: string;
+        resolvedDeployArgs: Record<string, string | number | boolean>;
+        dependencies: string[];
+      }) => {
+        deployCalls.push({
+          contractName: opts.contractName,
+          resolvedDeployArgs: opts.resolvedDeployArgs,
+          dependencies: opts.dependencies,
+        });
+        const id = opts.contractName === "token" ? "C".padEnd(56, "A") : "C".padEnd(56, "B");
+        store.networks.testnet.contracts[opts.contractName] = { contractId: id };
+        store.networks.testnet.dependencyGraph[opts.contractName] = opts.dependencies;
+        return { contractId: id, contract: { name: opts.contractName } };
+      }
+    );
 
     const result = await deployContractGraph({
       config,
@@ -103,19 +108,25 @@ describe("deployContractGraph", () => {
       source: "alice",
       cwd: "/tmp/app",
       includeDependencies: true,
-      force: false
+      force: false,
     });
 
-    expect(result.deployedContracts.map((contract) => contract.name)).toEqual(["token", "marketplace"]);
+    expect(result.deployedContracts.map((contract) => contract.name)).toEqual([
+      "token",
+      "marketplace",
+    ]);
     expect(result.skippedContracts).toEqual([]);
     expect(deployCalls.map((call) => call.contractName)).toEqual(["token", "marketplace"]);
     expect(store.networks.testnet.dependencyGraph.marketplace).toEqual(["token"]);
-    expect(deployContractMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ contractName: "token" }));
+    expect(deployContractMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ contractName: "token" })
+    );
     expect(deployContractMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         contractName: "marketplace",
-        resolvedDeployArgs: { tokenContractId: "C".padEnd(56, "A") }
+        resolvedDeployArgs: { tokenContractId: "C".padEnd(56, "A") },
       })
     );
   });
@@ -124,7 +135,7 @@ describe("deployContractGraph", () => {
     readArtifactsMock.mockResolvedValue({
       project: "marketplace-app",
       version: 1,
-      networks: { testnet: { contracts: {}, dependencyGraph: {} } }
+      networks: { testnet: { contracts: {}, dependencyGraph: {} } },
     });
 
     await expect(
@@ -135,7 +146,7 @@ describe("deployContractGraph", () => {
         source: "alice",
         cwd: "/tmp/app",
         includeDependencies: false,
-        force: false
+        force: false,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND });
   });
@@ -143,18 +154,21 @@ describe("deployContractGraph", () => {
   it("deploys_all_contracts_in_topological_order_when_contractName_is_omitted", async () => {
     const store: {
       networks: {
-        testnet: { contracts: Record<string, { contractId: string }>; dependencyGraph: Record<string, string[]> };
+        testnet: {
+          contracts: Record<string, { contractId: string }>;
+          dependencyGraph: Record<string, string[]>;
+        };
       };
     } = {
       networks: {
-        testnet: { contracts: {}, dependencyGraph: {} }
-      }
+        testnet: { contracts: {}, dependencyGraph: {} },
+      },
     };
 
     readArtifactsMock.mockImplementation(async () => ({
       project: "marketplace-app",
       version: 1 as const,
-      networks: store.networks
+      networks: store.networks,
     }));
 
     deployContractMock.mockImplementation(async (opts: { contractName: string }) => {
@@ -169,7 +183,7 @@ describe("deployContractGraph", () => {
       source: "alice",
       cwd: "/tmp/app",
       includeDependencies: true,
-      force: false
+      force: false,
     });
 
     expect(result.deployedContracts.map((c) => c.name)).toEqual(["token", "marketplace"]);
@@ -185,24 +199,24 @@ describe("deployContractGraph", () => {
       networks: {
         testnet: {
           contracts: { token: { contractId: existingId } },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
 
     const result = await deployContractGraph({
       config: {
         ...config,
         contracts: {
-          token: config.contracts.token
-        }
+          token: config.contracts.token,
+        },
       },
       contractName: "token",
       networkName: "testnet",
       source: "alice",
       cwd: "/tmp/app",
       includeDependencies: true,
-      force: false
+      force: false,
     });
 
     expect(deployContractMock).not.toHaveBeenCalled();
@@ -211,8 +225,8 @@ describe("deployContractGraph", () => {
         name: "token",
         contractId: existingId,
         network: "testnet",
-        reason: "already-deployed"
-      })
+        reason: "already-deployed",
+      }),
     ]);
     expect(result.deployedContracts).toEqual([]);
   });
@@ -221,27 +235,31 @@ describe("deployContractGraph", () => {
     const existingToken = "C".padEnd(56, "X");
     const store: {
       networks: {
-        testnet: { contracts: Record<string, { contractId: string }>; dependencyGraph: Record<string, string[]> };
+        testnet: {
+          contracts: Record<string, { contractId: string }>;
+          dependencyGraph: Record<string, string[]>;
+        };
       };
     } = {
       networks: {
         testnet: {
           contracts: { token: { contractId: existingToken } },
-          dependencyGraph: { token: [] }
-        }
-      }
+          dependencyGraph: { token: [] },
+        },
+      },
     };
 
     readArtifactsMock.mockImplementation(async () => ({
       project: "marketplace-app",
       version: 1 as const,
-      networks: store.networks
+      networks: store.networks,
     }));
 
     deployContractMock.mockImplementation(async (opts: { contractName: string }) => {
       const id = "C".padEnd(56, "B");
       store.networks.testnet.contracts[opts.contractName] = { contractId: id };
-      store.networks.testnet.dependencyGraph[opts.contractName] = opts.contractName === "marketplace" ? ["token"] : [];
+      store.networks.testnet.dependencyGraph[opts.contractName] =
+        opts.contractName === "marketplace" ? ["token"] : [];
       return { contractId: id, contract: { name: opts.contractName }, skipped: false };
     });
 
@@ -251,21 +269,23 @@ describe("deployContractGraph", () => {
       source: "alice",
       cwd: "/tmp/app",
       includeDependencies: true,
-      force: false
+      force: false,
     });
 
     expect(deployContractMock).toHaveBeenCalledTimes(1);
-    expect(deployContractMock).toHaveBeenCalledWith(expect.objectContaining({ contractName: "marketplace" }));
+    expect(deployContractMock).toHaveBeenCalledWith(
+      expect.objectContaining({ contractName: "marketplace" })
+    );
     expect(result.skippedContracts).toEqual([
       expect.objectContaining({
         name: "token",
         contractId: existingToken,
         network: "testnet",
-        reason: "already-deployed"
-      })
+        reason: "already-deployed",
+      }),
     ]);
     expect(result.deployedContracts).toEqual([
-      { name: "marketplace", contractId: "C".padEnd(56, "B") }
+      { name: "marketplace", contractId: "C".padEnd(56, "B") },
     ]);
   });
 
@@ -274,24 +294,27 @@ describe("deployContractGraph", () => {
     const existingMarket = "C".padEnd(56, "Y");
     const store: {
       networks: {
-        testnet: { contracts: Record<string, { contractId: string }>; dependencyGraph: Record<string, string[]> };
+        testnet: {
+          contracts: Record<string, { contractId: string }>;
+          dependencyGraph: Record<string, string[]>;
+        };
       };
     } = {
       networks: {
         testnet: {
           contracts: {
             token: { contractId: existingToken },
-            marketplace: { contractId: existingMarket }
+            marketplace: { contractId: existingMarket },
           },
-          dependencyGraph: { token: [], marketplace: ["token"] }
-        }
-      }
+          dependencyGraph: { token: [], marketplace: ["token"] },
+        },
+      },
     };
 
     readArtifactsMock.mockImplementation(async () => ({
       project: "marketplace-app",
       version: 1 as const,
-      networks: store.networks
+      networks: store.networks,
     }));
 
     deployContractMock.mockImplementation(async (opts: { contractName: string }) => {
@@ -306,11 +329,14 @@ describe("deployContractGraph", () => {
       source: "alice",
       cwd: "/tmp/app",
       includeDependencies: true,
-      force: true
+      force: true,
     });
 
     expect(deployContractMock).toHaveBeenCalledTimes(2);
-    expect(deployContractMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ contractName: "token", force: true }));
+    expect(deployContractMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ contractName: "token", force: true })
+    );
     expect(deployContractMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ contractName: "marketplace", force: true })
@@ -327,14 +353,14 @@ describe("deployContractGraph", () => {
       networks: {
         testnet: {
           contracts: { token: { contractId: tokenId } },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
 
     deployContractMock.mockImplementation(async (opts: { contractName: string }) => ({
       contractId: opts.contractName === "token" ? tokenId : "C".padEnd(56, "B"),
-      contract: { name: opts.contractName }
+      contract: { name: opts.contractName },
     }));
 
     await deployContractGraph({
@@ -345,13 +371,13 @@ describe("deployContractGraph", () => {
       cwd: "/tmp/app",
       includeDependencies: true,
       force: false,
-      verifyDeps: true
+      verifyDeps: true,
     });
 
     expect(verifyDependencyContractsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         dependencies: ["token"],
-        network: expect.objectContaining({ name: "testnet" })
+        network: expect.objectContaining({ name: "testnet" }),
       })
     );
   });

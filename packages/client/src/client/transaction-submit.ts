@@ -9,11 +9,7 @@ function isMultiAuthRequired(error: unknown): boolean {
   return name === "NeedsMoreSignaturesError" || /requires signatures from/i.test(message);
 }
 
-function multiAuthError(
-  contractName: string,
-  method: string,
-  cause: unknown
-): CaatingaError {
+function multiAuthError(contractName: string, method: string, cause: unknown): CaatingaError {
   return new CaatingaError(
     `"${contractName}.${method}" requires additional non-invoker signatures (delegated AddressV2 credentials).`,
     CaatingaErrorCode.MULTI_AUTH_REQUIRED,
@@ -94,7 +90,11 @@ export async function submitTransaction(
   );
 }
 
-export function assertSubmitResultRecognized(raw: unknown, contractName: string, method: string): void {
+export function assertSubmitResultRecognized(
+  raw: unknown,
+  contractName: string,
+  method: string
+): void {
   if (raw === null || typeof raw !== "object") {
     return;
   }
@@ -143,6 +143,6 @@ export function normalizeSubmitResult<T>(raw: unknown): {
       candidate.transactionHash ??
       candidate.hash ??
       candidate.sendTransactionResponse?.hash,
-    result: candidate.result
+    result: candidate.result,
   };
 }

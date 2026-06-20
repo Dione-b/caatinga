@@ -43,12 +43,12 @@ examples/     # Sample consumer applications
 
 ## Running Checks
 
-| Command | What it does |
-|---|---|
-| `pnpm test` | Run all Vitest suites |
-| `pnpm typecheck` | Run `tsc --noEmit` across all packages |
-| `pnpm knip` | Detect unused files, exports, and dependencies |
-| `pnpm build` | Build all packages via Turborepo |
+| Command                  | What it does                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `pnpm test`              | Run all Vitest suites                                                         |
+| `pnpm typecheck`         | Run `tsc --noEmit` across all packages                                        |
+| `pnpm knip`              | Detect unused files, exports, and dependencies                                |
+| `pnpm build`             | Build all packages via Turborepo                                              |
 | `pnpm ci:publish-matrix` | Full CI gate: build → test → snapshot pack → dry-run publish → consumer tests |
 
 Always run `pnpm test` and `pnpm typecheck` before opening a PR. For changes that affect published packages, also run `pnpm ci:publish-matrix`.

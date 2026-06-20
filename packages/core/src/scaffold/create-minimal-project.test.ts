@@ -20,14 +20,16 @@ describe("createMinimalProject", () => {
 
     const result = await createMinimalProject({
       projectName: "my-app",
-      targetDir
+      targetDir,
     });
 
     expect(result.targetDir).toBe(targetDir);
     await expect(access(path.join(targetDir, "caatinga.config.ts"))).resolves.toBeUndefined();
     await expect(access(path.join(targetDir, "caatinga.artifacts.json"))).resolves.toBeUndefined();
     await expect(access(path.join(targetDir, "package.json"))).resolves.toBeUndefined();
-    await expect(access(path.join(targetDir, "contracts", "app", "src", "lib.rs"))).resolves.toBeUndefined();
+    await expect(
+      access(path.join(targetDir, "contracts", "app", "src", "lib.rs"))
+    ).resolves.toBeUndefined();
 
     const config = await readFile(path.join(targetDir, "caatinga.config.ts"), "utf8");
     expect(config).toContain('project: "my-app"');
@@ -46,7 +48,10 @@ describe("createMinimalProject", () => {
     expect(readme).toContain("caatinga read app.hello");
     expect(readme).not.toContain("caatinga invoke app.hello");
 
-    const contract = await readFile(path.join(targetDir, "contracts", "app", "src", "lib.rs"), "utf8");
+    const contract = await readFile(
+      path.join(targetDir, "contracts", "app", "src", "lib.rs"),
+      "utf8"
+    );
     expect(contract).toContain("pub fn hello");
     expect(contract).toContain("pub fn version");
 
@@ -60,8 +65,6 @@ describe("createMinimalProject", () => {
     const targetDir = path.join(tmpDir, "my-app");
     await createMinimalProject({ projectName: "my-app", targetDir });
 
-    await expect(
-      createMinimalProject({ projectName: "my-app", targetDir })
-    ).rejects.toThrow();
+    await expect(createMinimalProject({ projectName: "my-app", targetDir })).rejects.toThrow();
   });
 });

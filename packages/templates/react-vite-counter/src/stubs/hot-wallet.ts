@@ -10,5 +10,5 @@
 export const HOT = {
   request(): Promise<never> {
     return Promise.reject(new Error("HOT Wallet is not supported in this build."));
-  }
+  },
 };

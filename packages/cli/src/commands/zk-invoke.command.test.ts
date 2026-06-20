@@ -65,14 +65,7 @@ describe("zk invoke command", () => {
     program.exitOverride();
     registerZkInvokeCommand(program);
 
-    await program.parseAsync([
-      "node",
-      "caatinga",
-      "zk",
-      "invoke",
-      "--source",
-      "alice",
-    ]);
+    await program.parseAsync(["node", "caatinga", "zk", "invoke", "--source", "alice"]);
 
     expect(invokeVerifierMock).toHaveBeenCalledWith({
       verifierContract: "verifier",

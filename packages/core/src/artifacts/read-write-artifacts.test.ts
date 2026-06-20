@@ -41,20 +41,20 @@ describe("writeArtifacts and readArtifacts", () => {
       networks: {
         testnet: {
           contracts: {},
-          dependencyGraph: {}
+          dependencyGraph: {},
         },
         mainnet: {
           contracts: {},
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     });
   });
 
   it("should_throw_CAATINGA_ARTIFACT_NOT_FOUND_when_file_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
-      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND
+      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
     });
   });
 
@@ -62,7 +62,7 @@ describe("writeArtifacts and readArtifacts", () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
     await writeFile(path.join(tmpDir, "caatinga.artifacts.json"), "{", "utf8");
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
-      code: CaatingaErrorCode.ARTIFACT_INVALID
+      code: CaatingaErrorCode.ARTIFACT_INVALID,
     });
   });
 
@@ -79,7 +79,7 @@ describe("writeArtifacts and readArtifacts", () => {
               deployedAt: "2026-05-12T00:00:00.000Z",
               sourcePath: "./contracts/token",
               wasmPath: "./contracts/token.wasm",
-              dependencies: []
+              dependencies: [],
             },
             marketplace: {
               contractId: "C".padEnd(56, "B"),
@@ -89,16 +89,16 @@ describe("writeArtifacts and readArtifacts", () => {
               wasmPath: "./contracts/marketplace.wasm",
               dependencies: ["token"],
               resolvedDeployArgs: {
-                tokenContractId: "C".padEnd(56, "A")
-              }
-            }
+                tokenContractId: "C".padEnd(56, "A"),
+              },
+            },
           },
           dependencyGraph: {
             token: [],
-            marketplace: ["token"]
-          }
-        }
-      }
+            marketplace: ["token"],
+          },
+        },
+      },
     });
 
     expect(artifacts.networks.testnet.dependencyGraph?.marketplace).toEqual(["token"]);

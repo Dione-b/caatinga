@@ -6,18 +6,18 @@ export default defineConfig({
   contracts: {
     verifier: {
       path: "./contracts/verifier",
-      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"
-    }
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/bindings"
+    bindingsOutput: "./src/bindings",
   },
   zk: {
     circuits: {
@@ -25,8 +25,8 @@ export default defineConfig({
         path: "./circuits",
         protocol: "groth16",
         curve: "bls12381",
-        verifierContract: "verifier"
-      }
-    }
-  }
+        verifierContract: "verifier",
+      },
+    },
+  },
 });

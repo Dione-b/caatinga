@@ -6,12 +6,12 @@ export default defineConfig({
     alias: [
       {
         find: "@caatinga/core/browser",
-        replacement: path.resolve(__dirname, "../core/dist/browser.js")
+        replacement: path.resolve(__dirname, "../core/dist/browser.js"),
       },
       {
         find: "@caatinga/core",
-        replacement: path.resolve(__dirname, "../core/dist/index.js")
-      }
-    ]
-  }
+        replacement: path.resolve(__dirname, "../core/dist/index.js"),
+      },
+    ],
+  },
 });

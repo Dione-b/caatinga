@@ -12,12 +12,7 @@ function matchesWellKnownNetwork(name: string, config: NetworkConfig): boolean {
 }
 
 function buildRpcNetworkArgs(config: NetworkConfig): string[] {
-  return [
-    "--rpc-url",
-    config.rpcUrl,
-    "--network-passphrase",
-    config.networkPassphrase
-  ];
+  return ["--rpc-url", config.rpcUrl, "--network-passphrase", config.networkPassphrase];
 }
 
 export function buildStellarNetworkArgsFromConfig(config: NetworkConfig): string[] {

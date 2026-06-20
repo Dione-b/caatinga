@@ -18,12 +18,12 @@ describe("buildXdr", () => {
           },
           prepare() {
             return Promise.reject(new Error("simulation failed"));
-          }
-        }
+          },
+        },
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.XDR_PREPARE_FAILED,
-      hint: expect.stringContaining(rpcUrl)
+      hint: expect.stringContaining(rpcUrl),
     });
   });
 
@@ -42,8 +42,8 @@ describe("buildXdr", () => {
           },
           prepare() {
             return Promise.reject(original);
-          }
-        }
+          },
+        },
       })
     ).rejects.toBe(original);
   });

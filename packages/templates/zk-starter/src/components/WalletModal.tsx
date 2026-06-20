@@ -6,7 +6,7 @@ import {
   cancelWalletSelection,
   getWalletModalState,
   resolveWalletSelection,
-  subscribeWalletModal
+  subscribeWalletModal,
 } from "../wallet-modal-controller.js";
 
 const LEARN_MORE_URL = "https://developers.stellar.org/docs/build/apps/wallet/overview";
@@ -233,7 +233,6 @@ export function WalletModal() {
               ) : null}
             </>
           )}
-
         </div>
 
         <footer className="wallet-modal__footer">

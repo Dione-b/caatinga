@@ -7,7 +7,7 @@ describe("toSkippedContract", () => {
       name: "token",
       contractId: "C123",
       network: "testnet",
-      reason: "already-deployed"
+      reason: "already-deployed",
     });
   });
 });

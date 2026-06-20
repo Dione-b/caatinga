@@ -9,23 +9,23 @@ const evaluateDeployCoverageMock = vi.hoisted(() => vi.fn());
 const evaluateBindingCoverageMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../diagnostics/run-all.js", () => ({
-  runAllDiagnostics: runAllDiagnosticsMock
+  runAllDiagnostics: runAllDiagnosticsMock,
 }));
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
   return {
     ...actual,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
   };
 });
 
 vi.mock("./doctor-deploy-coverage.js", () => ({
-  evaluateDeployCoverage: evaluateDeployCoverageMock
+  evaluateDeployCoverage: evaluateDeployCoverageMock,
 }));
 
 vi.mock("./doctor-bindings.js", () => ({
-  evaluateBindingCoverage: evaluateBindingCoverageMock
+  evaluateBindingCoverage: evaluateBindingCoverageMock,
 }));
 
 const config: CaatingaConfig = {
@@ -36,15 +36,15 @@ const config: CaatingaConfig = {
       path: "./contracts/app",
       wasm: "./contracts/app/target/wasm32v1-none/release/app.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
-  }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
 };
 
 function createDoctorProgram(): Command {
@@ -64,7 +64,7 @@ describe("doctor command", () => {
 
     runAllDiagnosticsMock.mockResolvedValue([
       { ok: true, label: "Node.js" },
-      { ok: true, label: "Stellar CLI" }
+      { ok: true, label: "Stellar CLI" },
     ]);
     loadConfigMock.mockResolvedValue(config);
     evaluateBindingCoverageMock.mockResolvedValue({ lines: [], allFresh: true });
@@ -77,9 +77,9 @@ describe("doctor command", () => {
         {
           name: "app",
           ok: false,
-          fix: "Run: caatinga deploy app --network testnet --source <identity>"
-        }
-      ]
+          fix: "Run: caatinga deploy app --network testnet --source <identity>",
+        },
+      ],
     });
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor"]);
@@ -92,7 +92,7 @@ describe("doctor command", () => {
   it("should_use_explicit_network_flag_when_provided", async () => {
     evaluateDeployCoverageMock.mockResolvedValue({
       complete: true,
-      lines: [{ name: "app", ok: true, contractId: "C".padEnd(56, "A") }]
+      lines: [{ name: "app", ok: true, contractId: "C".padEnd(56, "A") }],
     });
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor", "--network", "testnet"]);
@@ -104,7 +104,7 @@ describe("doctor command", () => {
 
   it("should_not_run_deploy_coverage_when_diagnostics_fail", async () => {
     runAllDiagnosticsMock.mockResolvedValue([
-      { ok: false, label: "caatinga.config.ts not found", fix: "Run caatinga init." }
+      { ok: false, label: "caatinga.config.ts not found", fix: "Run caatinga init." },
     ]);
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor"]);

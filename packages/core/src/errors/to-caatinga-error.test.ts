@@ -10,7 +10,7 @@ describe("toCaatingaError", () => {
   it("should_map_ZkError_ZK_VERIFY_FAILED_to_ZK_VERIFICATION_FAILED", () => {
     const zkError = Object.assign(new Error("Verifier returned false."), {
       code: "ZK_VERIFY_FAILED",
-      hint: "Check your proof inputs."
+      hint: "Check your proof inputs.",
     });
     const result = toCaatingaError(zkError);
     expect(result.code).toBe(CaatingaErrorCode.ZK_VERIFICATION_FAILED);

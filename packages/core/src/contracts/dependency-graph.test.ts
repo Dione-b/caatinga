@@ -9,12 +9,12 @@ describe("buildDependencyGraph", () => {
         path: "./m",
         wasm: "./m.wasm",
         dependsOn: ["token"],
-        deployArgs: {}
-      }
+        deployArgs: {},
+      },
     };
     expect(buildDependencyGraph(contracts)).toEqual({
       token: [],
-      marketplace: ["token"]
+      marketplace: ["token"],
     });
   });
 });

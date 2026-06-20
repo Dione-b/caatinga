@@ -210,7 +210,6 @@
     `GenerateBindingsOptions`, and `RunAllDiagnosticsOptions`.
 
   ### Added
-
   - `evaluateStellarCliCompatibility({ version, features?, lastTestedVersion? })`
     returning a `CompatibilityReport` with `version`, `status` (`"supported" |
 "untested" | "unsupported"`), `minVersion`, `lastTestedVersion`, and
@@ -223,7 +222,6 @@
     `STELLAR_CLI_UNTESTED_VERSION`, `STELLAR_CLI_MISSING_FEATURE`).
 
   ### Documentation
-
   - [Stellar CLI version contract](../docs/stellar-cli-version-contract.md)
     rewritten around the hard floor + advisory last-tested model.
   - [CLI reference](../docs/cli.md), [From Zero to Testnet](../docs/tutorials/from-zero-to-testnet.md),

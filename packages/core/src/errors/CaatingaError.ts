@@ -24,9 +24,8 @@ export function toCaatingaError(error: unknown): CaatingaError {
   }
 
   if (error instanceof Error) {
-    const zkCode = "code" in error && typeof error.code === "string"
-      ? ZK_ERROR_CODE_MAP[error.code]
-      : undefined;
+    const zkCode =
+      "code" in error && typeof error.code === "string" ? ZK_ERROR_CODE_MAP[error.code] : undefined;
 
     if (zkCode) {
       return new CaatingaError(

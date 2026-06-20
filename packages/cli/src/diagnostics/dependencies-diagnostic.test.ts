@@ -28,7 +28,7 @@ describe("dependenciesDiagnostic", () => {
 
     expect(diagnostic).toMatchObject({
       ok: false,
-      label: "Project dependencies not installed"
+      label: "Project dependencies not installed",
     });
   });
 
@@ -37,13 +37,17 @@ describe("dependenciesDiagnostic", () => {
     await writeFile(path.join(tmpDir, "package.json"), "{}\n", "utf8");
     await writeFile(path.join(tmpDir, "caatinga.config.ts"), "export default {};\n", "utf8");
     await mkdir(path.join(tmpDir, "node_modules", "@caatinga", "core"), { recursive: true });
-    await writeFile(path.join(tmpDir, "node_modules", "@caatinga", "core", "package.json"), "{}\n", "utf8");
+    await writeFile(
+      path.join(tmpDir, "node_modules", "@caatinga", "core", "package.json"),
+      "{}\n",
+      "utf8"
+    );
 
     const diagnostic = await dependenciesDiagnostic(tmpDir);
 
     expect(diagnostic).toMatchObject({
       ok: true,
-      label: "Project dependencies installed"
+      label: "Project dependencies installed",
     });
   });
 });

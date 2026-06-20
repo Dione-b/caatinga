@@ -100,11 +100,11 @@ Use `read` for getters and pure queries. Use `invoke` for increments, transfers,
 Circom Groth16 workflow (`caatinga zk init`, `build`, `prove`, `invoke`). Full reference:
 [ZK module](./zk.md).
 
-| Command | Purpose |
-| --- | --- |
-| `caatinga zk build [circuit] [--embed-vk]` | Compile Circom and run dev trusted setup |
-| `caatinga zk prove [circuit]` | Generate `proof.json` and `public.json` |
-| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` |
+| Command                                            | Purpose                                  |
+| -------------------------------------------------- | ---------------------------------------- |
+| `caatinga zk build [circuit] [--embed-vk]`         | Compile Circom and run dev trusted setup |
+| `caatinga zk prove [circuit]`                      | Generate `proof.json` and `public.json`  |
+| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof`             |
 
 `--source` matches deploy/invoke (not `--source-account`). When verification returns `false`,
 the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`.

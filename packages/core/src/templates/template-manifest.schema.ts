@@ -10,20 +10,20 @@ export const TemplateManifestSchema = z.object({
   description: z.string().optional(),
   caatinga: z.object({
     compatibleCore: z.string().min(1),
-    templateVersion: z.number().int().positive()
+    templateVersion: z.number().int().positive(),
   }),
   frontend: z.object({
     framework: z.enum(["vite-react", "next", "astro"]),
-    packageManager: z.enum(["npm", "pnpm", "yarn", "bun"]).default("npm")
+    packageManager: z.enum(["npm", "pnpm", "yarn", "bun"]).default("npm"),
   }),
   contracts: z.object({
     path: z.string(),
-    default: z.string().optional()
+    default: z.string().optional(),
   }),
   files: z.object({
     config: z.string().default("caatinga.config.ts"),
-    artifacts: z.string().default("caatinga.artifacts.json")
-  })
+    artifacts: z.string().default("caatinga.artifacts.json"),
+  }),
 });
 
 export type TemplateManifest = z.infer<typeof TemplateManifestSchema>;
@@ -41,7 +41,10 @@ export function defaultCompatibleCoreRange(coreVersion = CAATINGA_CORE_VERSION):
   return `^${version}`;
 }
 
-export function isCoreVersionCompatible(range: string, coreVersion = CAATINGA_CORE_VERSION): boolean {
+export function isCoreVersionCompatible(
+  range: string,
+  coreVersion = CAATINGA_CORE_VERSION
+): boolean {
   return semver.satisfies(coreVersion, range);
 }
 
@@ -53,7 +56,7 @@ export function getTemplateCompatibilityIssue(
     return {
       kind: "template-version",
       expected: CURRENT_TEMPLATE_VERSION,
-      actual: manifest.caatinga.templateVersion
+      actual: manifest.caatinga.templateVersion,
     };
   }
 
@@ -61,7 +64,7 @@ export function getTemplateCompatibilityIssue(
     return {
       kind: "core-range",
       requiredRange: manifest.caatinga.compatibleCore,
-      runningVersion: coreVersion
+      runningVersion: coreVersion,
     };
   }
 

@@ -11,9 +11,7 @@ export type RunAllDiagnosticsOptions = {
   source?: string;
 };
 
-export async function runAllDiagnostics(
-  options: RunAllDiagnosticsOptions
-): Promise<Diagnostic[]> {
+export async function runAllDiagnostics(options: RunAllDiagnosticsOptions): Promise<Diagnostic[]> {
   return [
     nodeDiagnostic(),
     await stellarDiagnostic(),
@@ -23,6 +21,6 @@ export async function runAllDiagnostics(
     await configDiagnostic(),
     await artifactsDiagnostic(),
     await networkDiagnostic(options.network),
-    await sourceDiagnostic(options.source)
+    await sourceDiagnostic(options.source),
   ].filter((diagnostic): diagnostic is Diagnostic => diagnostic !== undefined);
 }

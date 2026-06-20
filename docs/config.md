@@ -11,19 +11,19 @@ export default defineConfig({
   contracts: {
     counter: {
       path: "./contracts/counter",
-      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"
-    }
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 });
 ```
 
@@ -33,52 +33,52 @@ export default defineConfig({
 
 Root config:
 
-| Field | Type | Required | Default | Notes |
-| --- | --- | --- | --- | --- |
-| `project` | string (min 1) | yes | — | |
-| `defaultNetwork` | string (min 1) | no | `"testnet"` | |
-| `contracts` | `Record<string, ContractConfig>` | yes | — | at least one entry |
-| `networks` | `Record<string, NetworkConfig>` | yes | — | at least one entry |
-| `frontend` | `FrontendConfig` | no | — | optional frontend configuration (see below) |
-| `zk` | `ZkConfig` | no | — | ZK circuit configuration (see below) |
+| Field            | Type                             | Required | Default     | Notes                                       |
+| ---------------- | -------------------------------- | -------- | ----------- | ------------------------------------------- |
+| `project`        | string (min 1)                   | yes      | —           |                                             |
+| `defaultNetwork` | string (min 1)                   | no       | `"testnet"` |                                             |
+| `contracts`      | `Record<string, ContractConfig>` | yes      | —           | at least one entry                          |
+| `networks`       | `Record<string, NetworkConfig>`  | yes      | —           | at least one entry                          |
+| `frontend`       | `FrontendConfig`                 | no       | —           | optional frontend configuration (see below) |
+| `zk`             | `ZkConfig`                       | no       | —           | ZK circuit configuration (see below)        |
 
 `ContractConfig` (each value in `contracts`):
 
-| Field | Type | Required | Default | Notes |
-| --- | --- | --- | --- | --- |
-| `path` | string (min 1) | yes | — | contract source directory |
-| `wasm` | string (min 1) | yes | — | compiled WASM path |
-| `dependsOn` | `string[]` | no | `[]` | contract names deployed first |
-| `deployArgs` | `Record<string, string \| number \| boolean>` | no | `{}` | constructor args; supports placeholders |
+| Field        | Type                                          | Required | Default | Notes                                   |
+| ------------ | --------------------------------------------- | -------- | ------- | --------------------------------------- |
+| `path`       | string (min 1)                                | yes      | —       | contract source directory               |
+| `wasm`       | string (min 1)                                | yes      | —       | compiled WASM path                      |
+| `dependsOn`  | `string[]`                                    | no       | `[]`    | contract names deployed first           |
+| `deployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | constructor args; supports placeholders |
 
 `FrontendConfig` (optional root `frontend` field):
 
-| Field | Type | Required | Default | Notes |
-| --- | --- | --- | --- | --- |
-| `framework` | `"vite-react" \| "next" \| "astro"` | no | `"vite-react"` | |
-| `bindingsOutput` | string (min 1) | yes | — | path for generated bindings |
+| Field            | Type                                | Required | Default        | Notes                       |
+| ---------------- | ----------------------------------- | -------- | -------------- | --------------------------- |
+| `framework`      | `"vite-react" \| "next" \| "astro"` | no       | `"vite-react"` |                             |
+| `bindingsOutput` | string (min 1)                      | yes      | —              | path for generated bindings |
 
 `NetworkConfig` (each value in `networks`):
 
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `rpcUrl` | string (valid URL) | yes | |
-| `networkPassphrase` | string (min 1) | yes | |
+| Field               | Type               | Required | Notes |
+| ------------------- | ------------------ | -------- | ----- |
+| `rpcUrl`            | string (valid URL) | yes      |       |
+| `networkPassphrase` | string (min 1)     | yes      |       |
 
 `ZkConfig` (optional root `zk` field):
 
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes | at least one circuit entry |
+| Field         | Type                              | Required | Notes                      |
+| ------------- | --------------------------------- | -------- | -------------------------- |
+| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes      | at least one circuit entry |
 
 `ZkCircuitConfig` (each value in `zk.circuits`):
 
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `path` | string (min 1) | yes | directory containing `.circom` files |
-| `protocol` | `"groth16"` | yes | only Groth16 supported today |
-| `curve` | `"bls12381"` | yes | only BLS12-381 supported today |
-| `verifierContract` | string | no | contract name for on-chain verification |
+| Field              | Type           | Required | Notes                                   |
+| ------------------ | -------------- | -------- | --------------------------------------- |
+| `path`             | string (min 1) | yes      | directory containing `.circom` files    |
+| `protocol`         | `"groth16"`    | yes      | only Groth16 supported today            |
+| `curve`            | `"bls12381"`   | yes      | only BLS12-381 supported today          |
+| `verifierContract` | string         | no       | contract name for on-chain verification |
 
 ## Artifacts
 
@@ -132,15 +132,15 @@ After a deploy, each contract is recorded under
 
 `ContractArtifact` fields:
 
-| Field | Type | Required | Default | Notes |
-| --- | --- | --- | --- | --- |
-| `contractId` | string (min 1) | yes | — | deployed on-chain ID |
-| `wasmHash` | string (min 1) | yes | — | hash of the deployed WASM |
-| `deployedAt` | ISO 8601 datetime string | yes | — | |
-| `sourcePath` | string (min 1) | yes | — | |
-| `wasmPath` | string (min 1) | yes | — | |
-| `dependencies` | `string[]` | no | `[]` | resolved dependency contract names |
-| `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no | `{}` | deploy args after placeholder resolution |
+| Field                | Type                                          | Required | Default | Notes                                    |
+| -------------------- | --------------------------------------------- | -------- | ------- | ---------------------------------------- |
+| `contractId`         | string (min 1)                                | yes      | —       | deployed on-chain ID                     |
+| `wasmHash`           | string (min 1)                                | yes      | —       | hash of the deployed WASM                |
+| `deployedAt`         | ISO 8601 datetime string                      | yes      | —       |                                          |
+| `sourcePath`         | string (min 1)                                | yes      | —       |                                          |
+| `wasmPath`           | string (min 1)                                | yes      | —       |                                          |
+| `dependencies`       | `string[]`                                    | no       | `[]`    | resolved dependency contract names       |
+| `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | deploy args after placeholder resolution |
 
 ### Multi-contract dependencies
 
@@ -185,9 +185,8 @@ contracts: {
      `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`.
 3. **CLI flag derivation** (`toSnakeCaseFlag` / `formatConstructorCliArgs`): resolved
    args are passed to `stellar contract deploy` after a `--` separator. Each key is
-   converted camelCase → snake_case (insert `_` before each uppercase letter, strip a
-   leading `_`, lowercase). For example `tokenContractId` becomes
-   `--token_contract_id`.
+   converted camelCase → snake*case (insert `*`before each uppercase letter, strip a
+leading`\_`, lowercase). For example `tokenContractId`becomes`--token_contract_id`.
 
 End-to-end: with `deployArgs: { tokenContractId: "${contracts.token.contractId}" }`,
 `token` deploys first, its `contractId` is recorded in `caatinga.artifacts.json`, and the

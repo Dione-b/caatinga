@@ -2,9 +2,7 @@ import chalk from "chalk";
 import { NODE_MIN_MAJOR } from "@caatinga/core/runtime/requirements";
 import { nodeDiagnostic } from "../diagnostics/node-diagnostic.js";
 
-type PreflightResult =
-  | { ok: true }
-  | { ok: false; failures: string[] };
+type PreflightResult = { ok: true } | { ok: false; failures: string[] };
 
 function formatNodePreflightFailure(): string {
   const version = process.versions.node;

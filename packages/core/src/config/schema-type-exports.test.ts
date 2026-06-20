@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const schemaFiles = [
   "src/artifacts/artifact.schema.ts",
   "src/config/config.schema.ts",
-  "src/templates/template-manifest.schema.ts"
+  "src/templates/template-manifest.schema.ts",
 ];
 
 describe("schema type exports", () => {

@@ -9,28 +9,27 @@ describe("resolveDeployOrder", () => {
       path: "./contracts/marketplace",
       wasm: "./marketplace.wasm",
       dependsOn: ["token"],
-      deployArgs: {}
+      deployArgs: {},
     },
     rewards: {
       path: "./contracts/rewards",
       wasm: "./rewards.wasm",
       dependsOn: ["marketplace"],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   };
 
   it("sorts two contracts in dependency order", () => {
-    expect(resolveDeployOrder({ contracts, selectedContract: "marketplace", includeDependencies: true })).toEqual([
-      "token",
-      "marketplace"
-    ]);
+    expect(
+      resolveDeployOrder({ contracts, selectedContract: "marketplace", includeDependencies: true })
+    ).toEqual(["token", "marketplace"]);
   });
 
   it("sorts three contracts in dependency order", () => {
     expect(resolveDeployOrder({ contracts, includeDependencies: true })).toEqual([
       "token",
       "marketplace",
-      "rewards"
+      "rewards",
     ]);
   });
 
@@ -42,12 +41,14 @@ describe("resolveDeployOrder", () => {
             path: "./contracts/marketplace",
             wasm: "./marketplace.wasm",
             dependsOn: ["token"],
-            deployArgs: {}
-          }
+            deployArgs: {},
+          },
         },
-        includeDependencies: true
+        includeDependencies: true,
       })
-    ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_NOT_FOUND }));
+    ).toThrowError(
+      expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_NOT_FOUND })
+    );
   });
 
   it("fails for dependency cycles", () => {
@@ -55,9 +56,9 @@ describe("resolveDeployOrder", () => {
       resolveDeployOrder({
         contracts: {
           a: { path: "./a", wasm: "./a.wasm", dependsOn: ["b"], deployArgs: {} },
-          b: { path: "./b", wasm: "./b.wasm", dependsOn: ["a"], deployArgs: {} }
+          b: { path: "./b", wasm: "./b.wasm", dependsOn: ["a"], deployArgs: {} },
         },
-        includeDependencies: true
+        includeDependencies: true,
       })
     ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_CYCLE }));
   });

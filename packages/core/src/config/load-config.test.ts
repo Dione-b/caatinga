@@ -17,7 +17,7 @@ describe("loadConfig", () => {
   it("should_throw_CAATINGA_CONFIG_NOT_FOUND_when_config_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
     await expect(loadConfig({ cwd: tmpDir })).rejects.toMatchObject({
-      code: CaatingaErrorCode.CONFIG_NOT_FOUND
+      code: CaatingaErrorCode.CONFIG_NOT_FOUND,
     });
   });
 
@@ -59,7 +59,7 @@ describe("loadConfig", () => {
     );
 
     await expect(loadConfig({ cwd: tmpDir })).rejects.toMatchObject({
-      code: CaatingaErrorCode.INVALID_CONFIG
+      code: CaatingaErrorCode.INVALID_CONFIG,
     });
   });
 
@@ -123,7 +123,7 @@ export default defineConfig({
     );
 
     await expect(loadConfig({ cwd: tmpDir })).rejects.toMatchObject({
-      code: CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED
+      code: CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED,
     });
   });
 });

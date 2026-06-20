@@ -14,12 +14,12 @@ vi.mock("@caatinga/core", async () => {
   return {
     ...actual,
     buildContract: buildContractMock,
-    loadConfig: loadConfigMock
+    loadConfig: loadConfigMock,
   };
 });
 
 vi.mock("./doctor-deploy-coverage.js", () => ({
-  evaluateDeployCoverage: evaluateDeployCoverageMock
+  evaluateDeployCoverage: evaluateDeployCoverageMock,
 }));
 
 const config: CaatingaConfig = {
@@ -30,19 +30,19 @@ const config: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 };
 
 function createBuildProgram(): Command {
@@ -62,8 +62,8 @@ describe("build command", () => {
     buildContractMock.mockResolvedValue({
       contract: {
         name: "counter",
-        config: config.contracts.counter
-      }
+        config: config.contracts.counter,
+      },
     });
     evaluateDeployCoverageMock.mockResolvedValue({
       complete: true,
@@ -71,9 +71,9 @@ describe("build command", () => {
         {
           name: "counter",
           ok: true,
-          contractId: "C".padEnd(56, "A")
-        }
-      ]
+          contractId: "C".padEnd(56, "A"),
+        },
+      ],
     });
   });
 
@@ -84,9 +84,9 @@ describe("build command", () => {
         {
           name: "counter",
           ok: false,
-          fix: "Run: caatinga deploy counter --network testnet --source <identity>"
-        }
-      ]
+          fix: "Run: caatinga deploy counter --network testnet --source <identity>",
+        },
+      ],
     });
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -96,11 +96,13 @@ describe("build command", () => {
 
       expect(buildContract).toHaveBeenCalledWith({
         config,
-        contractName: "counter"
+        contractName: "counter",
       });
       expect(evaluateDeployCoverage).toHaveBeenCalledWith({ networkName: "testnet" });
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(warnings).toContain("Next: caatinga deploy counter --network testnet --source <identity>");
+      expect(warnings).toContain(
+        "Next: caatinga deploy counter --network testnet --source <identity>"
+      );
       expect(warnings).toContain("build alone is not enough");
     } finally {
       warnSpy.mockRestore();
@@ -123,10 +125,12 @@ describe("build command", () => {
   });
 
   it("warns instead of failing when artifacts are missing after build", async () => {
-    evaluateDeployCoverageMock.mockRejectedValue(new CaatingaError(
-      "caatinga.artifacts.json was not found.",
-      CaatingaErrorCode.ARTIFACT_NOT_FOUND
-    ));
+    evaluateDeployCoverageMock.mockRejectedValue(
+      new CaatingaError(
+        "caatinga.artifacts.json was not found.",
+        CaatingaErrorCode.ARTIFACT_NOT_FOUND
+      )
+    );
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -134,7 +138,9 @@ describe("build command", () => {
       await createBuildProgram().parseAsync(["node", "caatinga", "build", "counter"]);
 
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(warnings).toContain("Next: caatinga deploy counter --network testnet --source <identity>");
+      expect(warnings).toContain(
+        "Next: caatinga deploy counter --network testnet --source <identity>"
+      );
       expect(warnings).toContain("build alone is not enough");
     } finally {
       warnSpy.mockRestore();
@@ -145,7 +151,7 @@ describe("build command", () => {
   it("does not warn about frontend for projects without a frontend config", async () => {
     const minimalConfig: CaatingaConfig = {
       ...config,
-      frontend: undefined
+      frontend: undefined,
     };
     loadConfigMock.mockResolvedValue(minimalConfig);
     evaluateDeployCoverageMock.mockResolvedValue({
@@ -154,9 +160,9 @@ describe("build command", () => {
         {
           name: "counter",
           ok: false,
-          fix: "Run: caatinga deploy counter --network testnet --source <identity>"
-        }
-      ]
+          fix: "Run: caatinga deploy counter --network testnet --source <identity>",
+        },
+      ],
     });
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -165,7 +171,9 @@ describe("build command", () => {
       await createBuildProgram().parseAsync(["node", "caatinga", "build", "counter"]);
 
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(warnings).toContain("Next: caatinga deploy counter --network testnet --source <identity>");
+      expect(warnings).toContain(
+        "Next: caatinga deploy counter --network testnet --source <identity>"
+      );
       expect(warnings).not.toContain("frontend needs contractId");
     } finally {
       warnSpy.mockRestore();
@@ -181,16 +189,16 @@ describe("build command", () => {
           path: "./contracts/verifier",
           wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
           dependsOn: [],
-          deployArgs: {}
-        }
-      }
+          deployArgs: {},
+        },
+      },
     };
     loadConfigMock.mockResolvedValue(verifierConfig);
     buildContractMock.mockResolvedValue({
       contract: {
         name: "verifier",
-        config: verifierConfig.contracts.verifier
-      }
+        config: verifierConfig.contracts.verifier,
+      },
     });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -199,7 +207,7 @@ describe("build command", () => {
 
       expect(buildContract).toHaveBeenCalledWith({
         config: verifierConfig,
-        contractName: "verifier"
+        contractName: "verifier",
       });
     } finally {
       logSpy.mockRestore();
@@ -215,23 +223,23 @@ describe("build command", () => {
           path: "./contracts/token",
           wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
           dependsOn: [],
-          deployArgs: {}
-        }
-      }
+          deployArgs: {},
+        },
+      },
     };
     loadConfigMock.mockResolvedValue(multiContractConfig);
     buildContractMock
       .mockResolvedValueOnce({
         contract: {
           name: "counter",
-          config: multiContractConfig.contracts.counter
-        }
+          config: multiContractConfig.contracts.counter,
+        },
       })
       .mockResolvedValueOnce({
         contract: {
           name: "token",
-          config: multiContractConfig.contracts.token
-        }
+          config: multiContractConfig.contracts.token,
+        },
       });
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -241,11 +249,11 @@ describe("build command", () => {
       expect(buildContract).toHaveBeenCalledTimes(2);
       expect(buildContract).toHaveBeenNthCalledWith(1, {
         config: multiContractConfig,
-        contractName: "counter"
+        contractName: "counter",
       });
       expect(buildContract).toHaveBeenNthCalledWith(2, {
         config: multiContractConfig,
-        contractName: "token"
+        contractName: "token",
       });
     } finally {
       logSpy.mockRestore();

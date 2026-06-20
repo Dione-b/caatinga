@@ -44,7 +44,7 @@ export async function generateBindingsGraph(options: {
         config: options.config,
         contractName,
         networkName: network.name,
-        cwd
+        cwd,
       })
     );
   }

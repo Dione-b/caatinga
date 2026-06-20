@@ -17,12 +17,12 @@ describe("updateArtifact", () => {
               sourcePath: "./contracts/counter",
               wasmPath: "./target/main.wasm",
               dependencies: [],
-              resolvedDeployArgs: {}
-            }
+              resolvedDeployArgs: {},
+            },
           },
-          dependencyGraph: {}
-        }
-      }
+          dependencyGraph: {},
+        },
+      },
     };
 
     const updated = updateArtifact(artifacts, "testnet", "counter", {
@@ -32,7 +32,7 @@ describe("updateArtifact", () => {
       sourcePath: "./contracts/counter",
       wasmPath: "./target/test.wasm",
       dependencies: [],
-      resolvedDeployArgs: {}
+      resolvedDeployArgs: {},
     });
 
     expect(updated.networks.mainnet.contracts.counter.contractId).toBe("CMAIN");

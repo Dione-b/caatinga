@@ -9,7 +9,7 @@ export function nodeDiagnostic(): Diagnostic {
     return {
       ok: false,
       label: `Node.js ${version} is below the required minimum ${NODE_MIN_MAJOR}.0.0`,
-      fix: `Install Node.js ${NODE_MIN_MAJOR} or newer.`
+      fix: `Install Node.js ${NODE_MIN_MAJOR} or newer.`,
     };
   }
 

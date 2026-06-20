@@ -14,7 +14,8 @@ export type Diagnostic = {
 
 export function printDiagnostic(diagnostic: Diagnostic): void {
   const warnings = diagnostic.warnings ?? [];
-  const suffix = warnings.length > 0 ? ` (${warnings.length} warning${warnings.length === 1 ? "" : "s"})` : "";
+  const suffix =
+    warnings.length > 0 ? ` (${warnings.length} warning${warnings.length === 1 ? "" : "s"})` : "";
 
   logger.info(`${diagnostic.ok ? "✓" : "✗"} ${diagnostic.label}${suffix}`);
 

@@ -106,17 +106,17 @@ Optional hosted services (dashboards, metadata indexes) may arrive later, but th
 
 ## ✨ Features
 
-|     | Feature | |
-| --- | --- | --- |
-| 🔨 | **Build** | Compile one or all configured contracts through Stellar CLI |
-| 🚀 | **Deploy** | Ship one contract or a full dependency graph — bindings regenerate automatically |
-| 🔗 | **Bind** | TypeScript bindings with freshness tracking (stale bindings get flagged, not shipped) |
-| 📊 | **Status** | `caatinga status`: deployed contracts + binding freshness per network, `--json` for scripts |
-| ⚡ | **Invoke** | Call contract methods straight from the CLI (state-changing or read-only) |
-| 🌐 | **Connect** | Multi-wallet adapters, persistent wallet sessions, and React hooks via `@caatinga/client` |
-| 🔐 | **ZK** | Circom Groth16 workflow (`zk init`, `zk build`, `zk prove`, `zk invoke`) via `@caatinga/zk` |
-| 🩺 | **Diagnose** | Catch setup problems early with `caatinga doctor` |
-| 🏗️ | **Starter Templates** | Begin from checked template manifests when you need a project skeleton |
+|     | Feature               |                                                                                             |
+| --- | --------------------- | ------------------------------------------------------------------------------------------- |
+| 🔨  | **Build**             | Compile one or all configured contracts through Stellar CLI                                 |
+| 🚀  | **Deploy**            | Ship one contract or a full dependency graph — bindings regenerate automatically            |
+| 🔗  | **Bind**              | TypeScript bindings with freshness tracking (stale bindings get flagged, not shipped)       |
+| 📊  | **Status**            | `caatinga status`: deployed contracts + binding freshness per network, `--json` for scripts |
+| ⚡  | **Invoke**            | Call contract methods straight from the CLI (state-changing or read-only)                   |
+| 🌐  | **Connect**           | Multi-wallet adapters, persistent wallet sessions, and React hooks via `@caatinga/client`   |
+| 🔐  | **ZK**                | Circom Groth16 workflow (`zk init`, `zk build`, `zk prove`, `zk invoke`) via `@caatinga/zk` |
+| 🩺  | **Diagnose**          | Catch setup problems early with `caatinga doctor`                                           |
+| 🏗️  | **Starter Templates** | Begin from checked template manifests when you need a project skeleton                      |
 
 <br />
 
@@ -124,19 +124,19 @@ Optional hosted services (dashboards, metadata indexes) may arrive later, but th
 
 The Stellar CLI is the foundation Caatinga builds on — you keep using it. Caatinga adds the workflow layer that connects build, deploy, bindings, artifacts, and wallets.
 
-| Capability | Stellar CLI | Caatinga |
-| --- | --- | --- |
-| Contract Build | ✅ | ✅ |
-| Contract Deploy | ✅ | ✅ |
-| Deployment Artifacts | ❌ | ✅ |
-| Typed Bindings Workflow | ⚠️ | ✅ |
-| Multi-Contract Deployments | ❌ | ✅ |
-| Binding Freshness Tracking | ❌ | ✅ |
-| Wallet Integration Layer | ❌ | ✅ |
-| React Hooks | ❌ | ✅ |
-| Multi-Wallet Support | ❌ | ✅ |
-| Project Diagnostics | ❌ | ✅ |
-| ZK Workflow | ❌ | ✅ |
+| Capability                 | Stellar CLI | Caatinga |
+| -------------------------- | ----------- | -------- |
+| Contract Build             | ✅          | ✅       |
+| Contract Deploy            | ✅          | ✅       |
+| Deployment Artifacts       | ❌          | ✅       |
+| Typed Bindings Workflow    | ⚠️          | ✅       |
+| Multi-Contract Deployments | ❌          | ✅       |
+| Binding Freshness Tracking | ❌          | ✅       |
+| Wallet Integration Layer   | ❌          | ✅       |
+| React Hooks                | ❌          | ✅       |
+| Multi-Wallet Support       | ❌          | ✅       |
+| Project Diagnostics        | ❌          | ✅       |
+| ZK Workflow                | ❌          | ✅       |
 
 <br />
 
@@ -181,7 +181,7 @@ This functionality ships through `@caatinga/zk`. See the [ZK docs](./docs/zk.md)
 ## 📋 Requirements
 
 - **Node.js** 22+
-- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on your `PATH` *(25.2.0 recommended; 22.x unsupported)*
+- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on your `PATH` _(25.2.0 recommended; 22.x unsupported)_
 - **Rust** 1.84.0+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)
 
@@ -256,28 +256,28 @@ help teams maintain consistency across development, staging, and production envi
 
 ## ⌨️ CLI Reference
 
-| Command | What it does |
-| --- | --- |
-| `caatinga init <dir>` | Create a project from a template |
-| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network & binding freshness |
-| `caatinga build [contract]` | Compile contract WASM *(default: `counter`)* |
-| `caatinga deploy [contract]` | Deploy, save `contractId` to artifacts, auto-generate bindings |
-| `caatinga generate [contract]` | (Re)generate TS bindings — recovery/CI path, deploy does it for you |
-| `caatinga status` | Show deployed contracts + binding freshness per network (`--json` for scripts) |
-| `caatinga invoke <contract.method>` | Call a state-changing contract method |
-| `caatinga read <contract.method>` | Simulate a read-only contract method (no signing) |
+| Command                             | What it does                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `caatinga init <dir>`               | Create a project from a template                                               |
+| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network & binding freshness  |
+| `caatinga build [contract]`         | Compile contract WASM _(default: `counter`)_                                   |
+| `caatinga deploy [contract]`        | Deploy, save `contractId` to artifacts, auto-generate bindings                 |
+| `caatinga generate [contract]`      | (Re)generate TS bindings — recovery/CI path, deploy does it for you            |
+| `caatinga status`                   | Show deployed contracts + binding freshness per network (`--json` for scripts) |
+| `caatinga invoke <contract.method>` | Call a state-changing contract method                                          |
+| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                              |
 
 **Common flags**
 
-| Flag | Description |
-| --- | --- |
-| `--source` | Local Stellar CLI identity that can sign (e.g. `alice`). Public `G...` addresses are **not** accepted for signing. |
-| `--network` | Network from `caatinga.config.ts` (e.g. `testnet`) |
-| `--force` | Redeploy even if artifacts already hold a contract ID |
-| `--no-generate` | Skip automatic bindings generation after deploy |
-| `--no-deps` | Deploy a single contract without its `dependsOn` graph |
-| `--verify-deps` | Confirm dependency contract IDs exist on-chain first |
-| `--no-stale-check` | Skip the WASM-older-than-sources warning |
+| Flag               | Description                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `--source`         | Local Stellar CLI identity that can sign (e.g. `alice`). Public `G...` addresses are **not** accepted for signing. |
+| `--network`        | Network from `caatinga.config.ts` (e.g. `testnet`)                                                                 |
+| `--force`          | Redeploy even if artifacts already hold a contract ID                                                              |
+| `--no-generate`    | Skip automatic bindings generation after deploy                                                                    |
+| `--no-deps`        | Deploy a single contract without its `dependsOn` graph                                                             |
+| `--verify-deps`    | Confirm dependency contract IDs exist on-chain first                                                               |
+| `--no-stale-check` | Skip the WASM-older-than-sources warning                                                                           |
 
 <br />
 
@@ -308,7 +308,7 @@ const client = createCaatingaClient({
   contracts: { counter: { binding: Counter } },
 });
 
-const before    = await client.contract("counter").read<number>("get");
+const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
 ```
 
@@ -349,15 +349,15 @@ Currently **alpha.** The roadmap prioritizes CLI stability, docs, error contract
 
 Full index: [docs/README.md →](./docs/README.md)
 
-| | |
-| --- | --- |
-| [Getting started](./docs/getting-started.md) | [Choosing a project scaffold](./docs/tutorials/project-scaffolds.md) |
-| [Template project](./docs/tutorials/template-project.md) | [Minimal project](./docs/tutorials/minimal-project.md) |
-| [ZK project](./docs/tutorials/zk-project.md) | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) |
-| [Cheatsheet](./docs/cheatsheet.md) | [CLI reference](./docs/cli.md) |
-| [Client](./docs/client.md) | [Wallets](./docs/wallets.md) |
-| [Config](./docs/config.md) | [Errors](./docs/errors.md) |
-| [Release process](./docs/release.md) | [Architecture](./docs/architecture.md) |
+|                                                          |                                                                      |
+| -------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Getting started](./docs/getting-started.md)             | [Choosing a project scaffold](./docs/tutorials/project-scaffolds.md) |
+| [Template project](./docs/tutorials/template-project.md) | [Minimal project](./docs/tutorials/minimal-project.md)               |
+| [ZK project](./docs/tutorials/zk-project.md)             | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md)     |
+| [Cheatsheet](./docs/cheatsheet.md)                       | [CLI reference](./docs/cli.md)                                       |
+| [Client](./docs/client.md)                               | [Wallets](./docs/wallets.md)                                         |
+| [Config](./docs/config.md)                               | [Errors](./docs/errors.md)                                           |
+| [Release process](./docs/release.md)                     | [Architecture](./docs/architecture.md)                               |
 
 <br />
 

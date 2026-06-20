@@ -12,10 +12,7 @@ Everything builds on one minimal interface:
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
 
-  signTransaction(input: {
-    xdr: string;
-    networkPassphrase: string;
-  }): Promise<string>;
+  signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
 }
 ```
 
@@ -37,10 +34,13 @@ npm install @caatinga/client @creit.tech/stellar-wallets-kit
 ```
 
 ```ts
-import { createStellarWalletsKitAdapter, WalletNetwork } from "@caatinga/client/stellar-wallets-kit";
+import {
+  createStellarWalletsKitAdapter,
+  WalletNetwork,
+} from "@caatinga/client/stellar-wallets-kit";
 
 export const stellarWalletAdapter = createStellarWalletsKitAdapter({
-  network: WalletNetwork.TESTNET
+  network: WalletNetwork.TESTNET,
 });
 ```
 
@@ -56,13 +56,13 @@ The adapter wraps SWK 2.x static methods and adds:
 
 Exported types from `@caatinga/client/stellar-wallets-kit`:
 
-| Type | Purpose |
-| --- | --- |
-| `StellarWalletsKitAdapter` | Return type of `createStellarWalletsKitAdapter` |
-| `StellarWalletsKitAdapterOptions` | Options for adapter creation (network, metadata) |
-| `StellarWalletsKitMetadata` | WalletConnect metadata shape |
-| `StellarWalletsKitOpenModalOptions` | Options for `openModal()` |
-| `WalletNetwork` | Enum of supported network passphrases |
+| Type                                | Purpose                                          |
+| ----------------------------------- | ------------------------------------------------ |
+| `StellarWalletsKitAdapter`          | Return type of `createStellarWalletsKitAdapter`  |
+| `StellarWalletsKitAdapterOptions`   | Options for adapter creation (network, metadata) |
+| `StellarWalletsKitMetadata`         | WalletConnect metadata shape                     |
+| `StellarWalletsKitOpenModalOptions` | Options for `openModal()`                        |
+| `WalletNetwork`                     | Enum of supported network passphrases            |
 
 ### Freighter (single wallet)
 
@@ -91,8 +91,8 @@ const unsubscribe = session.subscribe(() => {
   console.log(session.getState()); // { status, publicKey, error }
 });
 
-await session.connect();    // modal when available, else getPublicKey()
-await session.restore();    // silent reconnect from persisted state
+await session.connect(); // modal when available, else getPublicKey()
+await session.restore(); // silent reconnect from persisted state
 await session.disconnect(); // resets state and clears persistence
 ```
 
@@ -116,8 +116,8 @@ The session detects optional adapter methods and uses them when present:
 
 ```ts
 export interface CaatingaWalletCapabilities {
-  openModal?(): Promise<string>;     // connect() prefers the modal
-  disconnect?(): Promise<void>;      // disconnect() calls through
+  openModal?(): Promise<string>; // connect() prefers the modal
+  disconnect?(): Promise<void>; // disconnect() calls through
   setWallet?(walletId: string): void; // restore() re-selects the persisted wallet
   getWalletId?(): string | undefined; // persisted so restore can re-select
 }
@@ -183,7 +183,7 @@ export const myAdapter: CaatingaWalletAdapter = {
   },
   async signTransaction({ xdr, networkPassphrase }) {
     return myWallet.sign(xdr, networkPassphrase); // resolve signed XDR
-  }
+  },
 };
 ```
 
@@ -201,14 +201,18 @@ into your own app.
 `@caatinga/client/vite` exports reusable helpers so you do not copy 15+ lines of overrides by hand:
 
 ```ts
-import { walletStubViteAliases, walletStubOverrides, walletStubPnpmWorkspaceYaml } from "@caatinga/client/vite";
+import {
+  walletStubViteAliases,
+  walletStubOverrides,
+  walletStubPnpmWorkspaceYaml,
+} from "@caatinga/client/vite";
 import { fileURLToPath } from "node:url";
 
 const stubsDir = fileURLToPath(new URL("./src/stubs", import.meta.url));
 
 // vite.config.ts
 export default defineConfig({
-  resolve: { alias: walletStubViteAliases(stubsDir) }
+  resolve: { alias: walletStubViteAliases(stubsDir) },
 });
 
 // package.json → overrides (npm)

@@ -17,31 +17,31 @@ describe("resolveDeployArgs", () => {
             sourcePath: "./contracts/token",
             wasmPath: "./token.wasm",
             dependencies: [],
-            resolvedDeployArgs: {}
-          }
+            resolvedDeployArgs: {},
+          },
         },
         dependencyGraph: {
-          token: []
-        }
-      }
-    }
+          token: [],
+        },
+      },
+    },
   };
 
   it("resolves contractId placeholders from artifacts", () => {
     const marketplaceConfig = {
       deployArgs: {
-        tokenContractId: "${contracts.token.contractId}"
-      }
+        tokenContractId: "${contracts.token.contractId}",
+      },
     };
 
     const result = resolveDeployArgs({
       deployArgs: marketplaceConfig.deployArgs,
       artifacts,
-      network: "testnet"
+      network: "testnet",
     });
 
     expect(result).toEqual({
-      tokenContractId
+      tokenContractId,
     });
   });
 
@@ -50,9 +50,11 @@ describe("resolveDeployArgs", () => {
       resolveDeployArgs({
         deployArgs: { secret: "${env.SECRET}" },
         artifacts,
-        network: "testnet"
+        network: "testnet",
       })
-    ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID }));
+    ).toThrowError(
+      expect.objectContaining({ code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID })
+    );
   });
 
   it("fails when dependency artifact is missing", () => {
@@ -60,8 +62,10 @@ describe("resolveDeployArgs", () => {
       resolveDeployArgs({
         deployArgs: { tokenContractId: "${contracts.missing.contractId}" },
         artifacts,
-        network: "testnet"
+        network: "testnet",
       })
-    ).toThrowError(expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND }));
+    ).toThrowError(
+      expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND })
+    );
   });
 });

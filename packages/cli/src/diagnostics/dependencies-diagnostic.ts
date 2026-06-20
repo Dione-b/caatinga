@@ -32,7 +32,7 @@ export async function dependenciesDiagnostic(cwd = process.cwd()): Promise<Diagn
     return {
       ok: false,
       label: "Project dependencies not installed",
-      fix: "Run npm install (or pnpm install) in the project root."
+      fix: "Run npm install (or pnpm install) in the project root.",
     };
   }
 

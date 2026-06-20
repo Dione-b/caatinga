@@ -9,7 +9,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { deployContract } from "./deploy-contract.js";
@@ -24,16 +24,16 @@ const baseConfig: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./rel/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./out" }
+  frontend: { framework: "vite-react", bindingsOutput: "./out" },
 };
 
 const multiContractConfig: CaatingaConfig = {
@@ -43,17 +43,17 @@ const multiContractConfig: CaatingaConfig = {
       path: "./contracts/token",
       wasm: "./rel/token.wasm",
       dependsOn: [],
-      deployArgs: {}
+      deployArgs: {},
     },
     marketplace: {
       path: "./contracts/marketplace",
       wasm: "./rel/marketplace.wasm",
       dependsOn: ["token"],
       deployArgs: {
-        tokenContractId: "${contracts.token.contractId}"
-      }
-    }
-  }
+        tokenContractId: "${contracts.token.contractId}",
+      },
+    },
+  },
 };
 
 describe("deployContract", () => {
@@ -63,7 +63,11 @@ describe("deployContract", () => {
     runCommand.mockReset();
     runCommand.mockImplementation(async (command: string, args: string[]) => {
       if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
-        return { stdout: `deployed ${CONTRACT_ID}\n`, stderr: "", all: `deployed ${CONTRACT_ID}\n` };
+        return {
+          stdout: `deployed ${CONTRACT_ID}\n`,
+          stderr: "",
+          all: `deployed ${CONTRACT_ID}\n`,
+        };
       }
       return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
     });
@@ -89,7 +93,7 @@ describe("deployContract", () => {
       contractName: "counter",
       networkName: "testnet",
       source: "alice",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.contractId).toBe(CONTRACT_ID);
@@ -117,10 +121,10 @@ describe("deployContract", () => {
           sourcePath: "./contracts/token",
           wasmPath: "./rel/token.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: { token: [], marketplace: ["token"] }
+      dependencyGraph: { token: [], marketplace: ["token"] },
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -131,7 +135,7 @@ describe("deployContract", () => {
       source: "alice",
       cwd: tmpDir,
       resolvedDeployArgs: { tokenContractId: "CTOKENCONTRACTID" },
-      dependencies: ["token"]
+      dependencies: ["token"],
     });
 
     expect(runCommand).toHaveBeenCalledWith(
@@ -141,7 +145,7 @@ describe("deployContract", () => {
         "deploy",
         "--",
         "--token_contract_id",
-        "CTOKENCONTRACTID"
+        "CTOKENCONTRACTID",
       ]),
       expect.any(Object)
     );
@@ -152,7 +156,7 @@ describe("deployContract", () => {
       sourcePath: "./contracts/marketplace",
       wasmPath: "./rel/marketplace.wasm",
       dependencies: ["token"],
-      resolvedDeployArgs: { tokenContractId: "CTOKENCONTRACTID" }
+      resolvedDeployArgs: { tokenContractId: "CTOKENCONTRACTID" },
     });
     expect(saved.networks.testnet.contracts.marketplace.wasmHash).toMatch(/^[a-f0-9]{64}$/);
     expect(saved.networks.testnet.contracts.marketplace.deployedAt).toEqual(expect.any(String));
@@ -178,7 +182,7 @@ describe("deployContract", () => {
       contractName: "counter",
       networkName: "testnet",
       source: "alice",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.contractId).toBe(CONTRACT_ID);
@@ -192,7 +196,7 @@ describe("deployContract", () => {
           CaatingaErrorCode.DEPLOY_FAILED,
           [
             "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
-            "error: xdr processing error: xdr value invalid"
+            "error: xdr processing error: xdr value invalid",
           ].join("\n")
         );
       }
@@ -201,7 +205,7 @@ describe("deployContract", () => {
         return {
           stdout: `${CONTRACT_ID}\n`,
           stderr: "",
-          all: `${CONTRACT_ID}\n`
+          all: `${CONTRACT_ID}\n`,
         };
       }
 
@@ -217,11 +221,11 @@ describe("deployContract", () => {
               transaction_successful: true,
               type: "invoke_host_function",
               function: "HostFunctionTypeHostFunctionTypeCreateContract",
-              salt: "36760584017419743124423536061373365464991553746983011352231996661702535035363"
-            }
-          ]
-        }
-      })
+              salt: "36760584017419743124423536061373365464991553746983011352231996661702535035363",
+            },
+          ],
+        },
+      }),
     });
     vi.stubGlobal("fetch", fetchImpl);
 
@@ -236,7 +240,7 @@ describe("deployContract", () => {
       contractName: "counter",
       networkName: "testnet",
       source: "alice",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.contractId).toBe(CONTRACT_ID);
@@ -268,7 +272,7 @@ describe("deployContract", () => {
         contractName: "counter",
         networkName: "testnet",
         source: "alice",
-        cwd: tmpDir
+        cwd: tmpDir,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.DEPLOY_FAILED });
   });
@@ -289,10 +293,10 @@ describe("deployContract", () => {
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
-      dependencyGraph: { counter: [] }
+      dependencyGraph: { counter: [] },
     };
     await writeArtifacts(artifacts, tmpDir);
 
@@ -302,12 +306,15 @@ describe("deployContract", () => {
       networkName: "testnet",
       source: "alice",
       cwd: tmpDir,
-      force: false
+      force: false,
     });
 
     expect(result.skipped).toBe(true);
     expect(result.contractId).toBe(CONTRACT_ID);
-    expect(runCommand).not.toHaveBeenCalledWith("stellar", expect.arrayContaining(["contract", "deploy"]));
+    expect(runCommand).not.toHaveBeenCalledWith(
+      "stellar",
+      expect.arrayContaining(["contract", "deploy"])
+    );
   });
 
   it("should_return_stale_wasm_warning_when_sources_are_newer_than_wasm", async () => {
@@ -331,7 +338,7 @@ describe("deployContract", () => {
       contractName: "counter",
       networkName: "testnet",
       source: "alice",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.staleWasmWarning).toMatch(/may be stale/i);
@@ -365,7 +372,7 @@ describe("deployContract", () => {
       networkName: "testnet",
       source: "alice",
       cwd: tmpDir,
-      checkStaleWasm: false
+      checkStaleWasm: false,
     });
 
     expect(result.staleWasmWarning).toBeUndefined();
@@ -386,10 +393,10 @@ describe("deployContract", () => {
         networkName: "testnet",
         source: "alice",
         cwd: tmpDir,
-        resolvedDeployArgs: { initArg: "${contracts.x}" }
+        resolvedDeployArgs: { initArg: "${contracts.x}" },
       })
     ).rejects.toMatchObject({
-      code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_UNRESOLVED
+      code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_UNRESOLVED,
     });
   });
 });

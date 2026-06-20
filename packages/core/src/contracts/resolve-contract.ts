@@ -28,6 +28,6 @@ export function resolveContract(
     name: contractName,
     config: contract,
     sourcePath: path.resolve(cwd, contract.path),
-    wasmPath: path.resolve(cwd, contract.wasm)
+    wasmPath: path.resolve(cwd, contract.wasm),
   };
 }

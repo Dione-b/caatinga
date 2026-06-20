@@ -31,7 +31,7 @@ async function assertCanWriteZkScaffold(cwd: string, force: boolean): Promise<vo
 
   const conflicts = [
     path.join(cwd, "circuits", "main.circom"),
-    path.join(cwd, "contracts", "verifier")
+    path.join(cwd, "contracts", "verifier"),
   ];
   const existing = [];
   for (const conflict of conflicts) {
@@ -52,7 +52,7 @@ function mergeZkIntoConfigSource(source: string): string {
 
   if (!next.includes("verifier:")) {
     next = next.replace(
-      /contracts:\s*\{([\s\S]*?)\n  \},/,
+      /contracts:\s*\{([\s\S]*?)\n {2}\},/,
       `contracts: {$1
     verifier: {
       path: "./contracts/verifier",
@@ -112,7 +112,7 @@ export function registerZkInitCommand(program: Command): void {
             await createZkProject({
               projectName: path.basename(targetDir),
               targetDir,
-              force: options.force
+              force: options.force,
             });
           } else {
             const templateDir = await resolveTemplateDir(options.template);
@@ -143,7 +143,7 @@ export function registerZkInitCommand(program: Command): void {
             projectName: config.project,
             targetDir: cwd,
             force: true,
-            projectFiles: false
+            projectFiles: false,
           });
           await mergeZkIntoConfig(cwd);
           logger.success("Added minimal ZK circuit and verifier scaffold to the current project");

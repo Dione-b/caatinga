@@ -60,9 +60,13 @@ export async function ensureSnarkjs(): Promise<string> {
       JSON.stringify({ name: "caatinga-zk-snarkjs", private: true, version: "0.0.0" }, null, 2),
       "utf8"
     );
-    await runCommand("npm", ["install", "--no-save", "--legacy-peer-deps", `snarkjs@${SNARKJS_VERSION}`], {
-      cwd: installDir,
-    });
+    await runCommand(
+      "npm",
+      ["install", "--no-save", "--legacy-peer-deps", `snarkjs@${SNARKJS_VERSION}`],
+      {
+        cwd: installDir,
+      }
+    );
     return cliPath;
   }
 }
@@ -83,13 +87,7 @@ export async function ensurePtau(size: number): Promise<string> {
   const entropy = createHash("sha256").update(randomBytes(32)).digest("hex");
 
   await runCommand(snarkjs, ["powersoftau", "new", "bls12-381", String(size), pot0, "-v"]);
-  await runCommand(snarkjs, [
-    "powersoftau",
-    "contribute",
-    pot0,
-    pot1,
-    "-v",
-  ], {
+  await runCommand(snarkjs, ["powersoftau", "contribute", pot0, pot1, "-v"], {
     input: `caatinga-dev\n${entropy}\n`,
   });
   await runCommand(snarkjs, ["powersoftau", "prepare", "phase2", pot1, finalPath, "-v"]);

@@ -58,7 +58,7 @@ describe("zk-init command", () => {
     const config = await fs.readFile(path.join(targetDir, "caatinga.config.ts"), "utf-8");
     const circuit = await fs.readFile(path.join(targetDir, "circuits", "main.circom"), "utf-8");
     expect(config).not.toContain("frontend");
-    expect(config).toContain("verifierContract: \"verifier\"");
+    expect(config).toContain('verifierContract: "verifier"');
     expect(circuit).toContain("template Main()");
     expect(circuit).not.toContain("Multiplier");
   });
@@ -94,16 +94,15 @@ describe("zk-init command", () => {
 
     await program.parseAsync(["node", "caatinga", "zk", "init"]);
 
-    const circuit = await fs.readFile(
-      path.join(tmpDir, "circuits", "main.circom"),
-      "utf-8"
-    );
+    const circuit = await fs.readFile(path.join(tmpDir, "circuits", "main.circom"), "utf-8");
     expect(circuit).toContain("Multiplier");
   });
 
   it("merges zk config when scaffolding into the current project", async () => {
     const configPath = path.join(tmpDir, "caatinga.config.ts");
-    await fs.writeFile(configPath, `import { defineConfig } from "@caatinga/core";
+    await fs.writeFile(
+      configPath,
+      `import { defineConfig } from "@caatinga/core";
 
 export default defineConfig({
   project: "existing",
@@ -125,7 +124,9 @@ export default defineConfig({
     bindingsOutput: "./src/contracts/generated"
   }
 });
-`, "utf8");
+`,
+      "utf8"
+    );
     loadConfigMock.mockResolvedValue({
       project: "existing",
       defaultNetwork: "testnet",
@@ -159,7 +160,7 @@ export default defineConfig({
     const mergedConfig = await fs.readFile(configPath, "utf8");
     expect(mergedConfig).toContain("verifier");
     expect(mergedConfig).toContain("zk:");
-    expect(mergedConfig).toContain("verifierContract: \"verifier\"");
+    expect(mergedConfig).toContain('verifierContract: "verifier"');
   });
 
   it("fails before overwriting existing zk files unless --force is passed", async () => {
@@ -196,8 +197,8 @@ export default defineConfig({
     await program.parseAsync(["node", "caatinga", "zk", "init", "--minimal"]);
 
     expect(process.exitCode).toBe(1);
-    await expect(
-      fs.readFile(path.join(tmpDir, "circuits", "main.circom"), "utf8")
-    ).resolves.toBe("existing");
+    await expect(fs.readFile(path.join(tmpDir, "circuits", "main.circom"), "utf8")).resolves.toBe(
+      "existing"
+    );
   });
 });

@@ -96,20 +96,20 @@ const client = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet,
   contracts: {
     counter: {
-      binding: Counter
-    }
-  }
+      binding: Counter,
+    },
+  },
 });
 
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
-const after = increment.result ?? await client.contract("counter").read<number>("get");
+const after = increment.result ?? (await client.contract("counter").read<number>("get"));
 ```
 
 ## Wallet Adapter Contract
@@ -118,10 +118,7 @@ const after = increment.result ?? await client.contract("counter").read<number>(
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
 
-  signTransaction(input: {
-    xdr: string;
-    networkPassphrase: string;
-  }): Promise<string>;
+  signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
 }
 ```
 
@@ -135,8 +132,8 @@ Wrap any adapter with connection state, persistence, and silent restore:
 import { createWalletSession } from "@caatinga/client";
 
 const session = createWalletSession(wallet, { persist: true });
-await session.connect();   // modal when available, else getPublicKey()
-await session.restore();   // silent reconnect on page load — never throws
+await session.connect(); // modal when available, else getPublicKey()
+await session.restore(); // silent reconnect on page load — never throws
 session.subscribe(() => console.log(session.getState()));
 ```
 

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildToolchainPrepend,
   isCargoBinMissingFromPath,
-  resolveSubprocessEnv
+  resolveSubprocessEnv,
 } from "./resolve-subprocess-env.js";
 
 describe("resolveSubprocessEnv", () => {
@@ -13,7 +13,7 @@ describe("resolveSubprocessEnv", () => {
     const cargoBin = path.join(home, ".cargo", "bin");
     const env = resolveSubprocessEnv({
       HOME: home,
-      PATH: "/usr/bin"
+      PATH: "/usr/bin",
     });
 
     expect(env.PATH?.startsWith(cargoBin)).toBe(true);
@@ -24,7 +24,7 @@ describe("resolveSubprocessEnv", () => {
     const home = os.homedir();
     const missing = isCargoBinMissingFromPath({
       HOME: home,
-      PATH: "/usr/bin"
+      PATH: "/usr/bin",
     });
 
     expect(typeof missing).toBe("boolean");
@@ -44,11 +44,7 @@ describe("buildToolchainPrepend", () => {
       return binDir === cargoBin || binDir === localBin;
     };
 
-    const prepend = buildToolchainPrepend(
-      [localBin, "/usr/bin"],
-      [cargoBin],
-      executableExists
-    );
+    const prepend = buildToolchainPrepend([localBin, "/usr/bin"], [cargoBin], executableExists);
 
     expect(prepend[0]).toBe(localBin);
     expect(prepend[1]).toBe(cargoBin);

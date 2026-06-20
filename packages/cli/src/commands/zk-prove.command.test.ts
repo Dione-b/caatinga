@@ -78,7 +78,7 @@ describe("zk prove command", () => {
       await program.parseAsync(["node", "caatinga", "zk", "prove"]);
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(output).toContain("Generated proof for circuit \"main\"");
+      expect(output).toContain('Generated proof for circuit "main"');
       expect(output).toContain(".artifacts/zk/main/proof.json");
     } finally {
       logSpy.mockRestore();

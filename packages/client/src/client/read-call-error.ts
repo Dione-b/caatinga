@@ -7,7 +7,7 @@ export function enrichReadCallInvokeError(
   method: string
 ): CaatingaError | null {
   const message = error instanceof Error ? error.message : String(error);
-  const hint = error instanceof CaatingaError ? error.hint ?? "" : "";
+  const hint = error instanceof CaatingaError ? (error.hint ?? "") : "";
   const haystack = `${message}\n${hint}`;
 
   if (!READ_CALL_FAILURE_REGEX.test(haystack)) {
@@ -22,7 +22,7 @@ export function enrichReadCallInvokeError(
       "Use read() or simulate() instead of invoke():",
       `  client.contract("${contractName}").read("${method}")`,
       `  client.contract("${contractName}").simulate("${method}")`,
-      "Pass method args as the second argument to read() when the contract method takes parameters."
+      "Pass method args as the second argument to read() when the contract method takes parameters.",
     ].join("\n"),
     error
   );

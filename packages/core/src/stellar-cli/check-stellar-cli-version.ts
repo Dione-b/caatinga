@@ -3,7 +3,7 @@ import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarCliCompatibility,
   type CompatibilityReport,
-  type CompatibilityWarning
+  type CompatibilityWarning,
 } from "./compat.js";
 import { parseStellarCliVersion } from "./version.js";
 
@@ -20,7 +20,7 @@ export async function checkStellarCliVersion(
 
   try {
     const result = await runCommand("stellar", ["--version"], {
-      skipStellarVersionCheck: true
+      skipStellarVersionCheck: true,
     });
     rawOutput = result.all || result.stdout || result.stderr;
   } catch (error) {
@@ -39,7 +39,7 @@ export async function checkStellarCliVersion(
   const report = evaluateStellarCliCompatibility({
     version: parseStellarCliVersion(rawOutput),
     features: input.features,
-    lastTestedVersion: input.lastTestedVersion
+    lastTestedVersion: input.lastTestedVersion,
   });
 
   for (const warning of report.warnings) {
@@ -56,7 +56,7 @@ export async function checkStellarCliVersion(
 function defaultEmitWarning(warning: CompatibilityWarning): void {
   const lines = [
     `Warning: ${warning.message}`,
-    warning.remediation ? `  ${warning.remediation}` : undefined
+    warning.remediation ? `  ${warning.remediation}` : undefined,
   ].filter((line): line is string => Boolean(line));
 
   process.stderr.write(`${lines.join("\n")}\n`);

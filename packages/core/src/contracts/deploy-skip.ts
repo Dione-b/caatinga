@@ -14,6 +14,6 @@ export function toSkippedContract(
     name,
     contractId,
     network,
-    reason: "already-deployed"
+    reason: "already-deployed",
   };
 }

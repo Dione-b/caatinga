@@ -2,5 +2,5 @@ export {
   walletStubOverrides,
   walletStubViteAliases,
   walletStubPnpmWorkspaceYaml,
-  type WalletStubPaths
+  type WalletStubPaths,
 } from "./vite/wallet-stubs.js";

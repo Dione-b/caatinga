@@ -1,5 +1,11 @@
 import { access } from "node:fs/promises";
-import { CaatingaError, CaatingaErrorCode, loadConfig, readArtifacts, resolveNetwork } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  loadConfig,
+  readArtifacts,
+  resolveNetwork,
+} from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 
 export async function configDiagnostic(): Promise<Diagnostic> {
@@ -12,7 +18,7 @@ export async function configDiagnostic(): Promise<Diagnostic> {
         return {
           ok: false,
           label: "Project dependencies not installed",
-          fix: error.hint ?? "Run npm install (or pnpm install) in the project root."
+          fix: error.hint ?? "Run npm install (or pnpm install) in the project root.",
         };
       }
 
@@ -20,7 +26,7 @@ export async function configDiagnostic(): Promise<Diagnostic> {
         return {
           ok: false,
           label: "caatinga.config.ts not found",
-          fix: error.hint ?? "Run this command from a Caatinga project root."
+          fix: error.hint ?? "Run this command from a Caatinga project root.",
         };
       }
 
@@ -28,21 +34,21 @@ export async function configDiagnostic(): Promise<Diagnostic> {
         return {
           ok: false,
           label: "caatinga.config.ts is invalid",
-          fix: error.hint ?? "Fix schema errors in caatinga.config.ts."
+          fix: error.hint ?? "Fix schema errors in caatinga.config.ts.",
         };
       }
 
       return {
         ok: false,
         label: "caatinga.config.ts not ready",
-        fix: error.hint ?? "Run this command from a Caatinga project root."
+        fix: error.hint ?? "Run this command from a Caatinga project root.",
       };
     }
 
     return {
       ok: false,
       label: "caatinga.config.ts not ready",
-      fix: "Run this command from a Caatinga project root."
+      fix: "Run this command from a Caatinga project root.",
     };
   }
 }
@@ -56,12 +62,14 @@ export async function artifactsDiagnostic(): Promise<Diagnostic> {
     return {
       ok: false,
       label: "caatinga.artifacts.json not found or invalid",
-      fix: "Run caatinga init, or restore a valid caatinga.artifacts.json file."
+      fix: "Run caatinga init, or restore a valid caatinga.artifacts.json file.",
     };
   }
 }
 
-export async function networkDiagnostic(networkName: string | undefined): Promise<Diagnostic | undefined> {
+export async function networkDiagnostic(
+  networkName: string | undefined
+): Promise<Diagnostic | undefined> {
   if (!networkName) return undefined;
 
   try {
@@ -73,7 +81,7 @@ export async function networkDiagnostic(networkName: string | undefined): Promis
     return {
       ok: false,
       label: `network ${networkName} not found`,
-      fix: hint ?? `Add "${networkName}" to caatinga.config.ts networks.`
+      fix: hint ?? `Add "${networkName}" to caatinga.config.ts networks.`,
     };
   }
 }

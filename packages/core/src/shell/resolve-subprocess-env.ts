@@ -24,7 +24,7 @@ function hasExecutable(binDir: string, name: string): boolean {
 function toolchainBinDirs(home: string, env: NodeJS.ProcessEnv): string[] {
   const candidates = [
     path.join(home, ".cargo", "bin"),
-    env.CARGO_HOME ? path.join(env.CARGO_HOME, "bin") : undefined
+    env.CARGO_HOME ? path.join(env.CARGO_HOME, "bin") : undefined,
   ];
 
   return candidates.filter((entry): entry is string => Boolean(entry && existsSync(entry)));

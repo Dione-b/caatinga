@@ -6,19 +6,17 @@ import type { CaatingaWalletAdapter } from "../types.js";
 import {
   createWalletSession,
   WALLET_SESSION_STORAGE_KEY,
-  type WalletSessionStorage
+  type WalletSessionStorage,
 } from "../wallet/wallet-session.js";
 import { useWallet, useWalletSession, WalletProvider } from "./wallet-provider.js";
 
 const PUBLIC_KEY = "GPUBLIC";
 
-function createAdapter(
-  overrides: Partial<CaatingaWalletAdapter> = {}
-): CaatingaWalletAdapter {
+function createAdapter(overrides: Partial<CaatingaWalletAdapter> = {}): CaatingaWalletAdapter {
   return {
     getPublicKey: vi.fn().mockResolvedValue(PUBLIC_KEY),
     signTransaction: vi.fn().mockResolvedValue("AAAA_SIGNED"),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -32,13 +30,12 @@ function createMemoryStorage(): WalletSessionStorage & { data: Map<string, strin
     },
     removeItem: (key) => {
       data.delete(key);
-    }
+    },
   };
 }
 
 function providerWrapper(props: Parameters<typeof WalletProvider>[0]) {
-  return ({ children }: { children?: ReactNode }) =>
-    createElement(WalletProvider, props, children);
+  return ({ children }: { children?: ReactNode }) => createElement(WalletProvider, props, children);
 }
 
 describe("WalletProvider / useWallet", () => {
@@ -56,7 +53,7 @@ describe("WalletProvider / useWallet", () => {
   it("exposes session state and connects through the hook", async () => {
     const adapter = createAdapter();
     const { result } = renderHook(() => useWallet(), {
-      wrapper: providerWrapper({ adapter })
+      wrapper: providerWrapper({ adapter }),
     });
 
     expect(result.current.status).toBe("disconnected");
@@ -75,10 +72,10 @@ describe("WalletProvider / useWallet", () => {
   it("surfaces connect rejections as state without unmount", async () => {
     const rejection = new Error("User dismissed");
     const adapter = createAdapter({
-      getPublicKey: vi.fn().mockRejectedValue(rejection)
+      getPublicKey: vi.fn().mockRejectedValue(rejection),
     });
     const { result } = renderHook(() => useWallet(), {
-      wrapper: providerWrapper({ adapter })
+      wrapper: providerWrapper({ adapter }),
     });
 
     await act(async () => {
@@ -95,7 +92,7 @@ describe("WalletProvider / useWallet", () => {
     const adapter = createAdapter();
 
     const { result } = renderHook(() => useWallet(), {
-      wrapper: providerWrapper({ adapter, options: { persist: true, storage } })
+      wrapper: providerWrapper({ adapter, options: { persist: true, storage } }),
     });
 
     await act(async () => {});
@@ -114,8 +111,8 @@ describe("WalletProvider / useWallet", () => {
       wrapper: providerWrapper({
         adapter,
         autoConnect: false,
-        options: { persist: true, storage }
-      })
+        options: { persist: true, storage },
+      }),
     });
 
     await act(async () => {});
@@ -130,8 +127,8 @@ describe("WalletProvider / useWallet", () => {
     const { result } = renderHook(() => useWalletSession(), {
       wrapper: providerWrapper({
         adapter: createAdapter(),
-        session: externalSession
-      })
+        session: externalSession,
+      }),
     });
 
     expect(result.current).toBe(externalSession);

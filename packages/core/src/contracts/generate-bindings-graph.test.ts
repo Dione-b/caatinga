@@ -9,7 +9,7 @@ import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand
+  runCommand,
 }));
 
 import { generateBindingsGraph } from "./generate-bindings-graph.js";
@@ -21,16 +21,21 @@ const baseConfig: CaatingaConfig = {
   project: "app",
   defaultNetwork: "testnet",
   contracts: {
-    counter: { path: "./contracts/counter", wasm: "./rel/counter.wasm", dependsOn: [], deployArgs: {} },
-    token: { path: "./contracts/token", wasm: "./rel/token.wasm", dependsOn: [], deployArgs: {} }
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./rel/counter.wasm",
+      dependsOn: [],
+      deployArgs: {},
+    },
+    token: { path: "./contracts/token", wasm: "./rel/token.wasm", dependsOn: [], deployArgs: {} },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" }
+  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" },
 };
 
 function deployedArtifact(contractId: string) {
@@ -41,7 +46,7 @@ function deployedArtifact(contractId: string) {
     sourcePath: "./contracts/x",
     wasmPath: "./rel/x.wasm",
     dependencies: [],
-    resolvedDeployArgs: {}
+    resolvedDeployArgs: {},
   };
 }
 
@@ -51,7 +56,7 @@ async function writeDeployed(tmpDir: string, contracts: Record<string, string>):
     contracts: Object.fromEntries(
       Object.entries(contracts).map(([name, id]) => [name, deployedArtifact(id)])
     ),
-    dependencyGraph: {}
+    dependencyGraph: {},
   };
   await writeArtifacts(artifacts, tmpDir);
 }
@@ -61,7 +66,11 @@ describe("generateBindingsGraph", () => {
 
   beforeEach(() => {
     runCommand.mockReset();
-    runCommand.mockImplementation(async () => ({ stdout: "generated", stderr: "", all: "generated" }));
+    runCommand.mockImplementation(async () => ({
+      stdout: "generated",
+      stderr: "",
+      all: "generated",
+    }));
   });
 
   afterEach(async () => {
@@ -77,7 +86,7 @@ describe("generateBindingsGraph", () => {
     const result = await generateBindingsGraph({
       config: baseConfig,
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.network.name).toBe("testnet");
@@ -93,7 +102,7 @@ describe("generateBindingsGraph", () => {
       config: baseConfig,
       contractName: "counter",
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.results.map((entry) => entry.contractName)).toEqual(["counter"]);
@@ -107,7 +116,7 @@ describe("generateBindingsGraph", () => {
       config: baseConfig,
       contractNames: ["token"],
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.results.map((entry) => entry.contractName)).toEqual(["token"]);
@@ -122,7 +131,7 @@ describe("generateBindingsGraph", () => {
       contractName: "counter",
       contractNames: ["token"],
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(result.results.map((entry) => entry.contractName)).toEqual(["counter"]);

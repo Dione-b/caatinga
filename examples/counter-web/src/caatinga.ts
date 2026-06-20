@@ -16,27 +16,27 @@ const artifacts: CaatingaArtifacts = {
           sourcePath: "contracts/counter",
           wasmPath: "target/wasm32v1-none/release/counter.wasm",
           dependencies: [],
-          resolvedDeployArgs: {}
-        }
+          resolvedDeployArgs: {},
+        },
       },
       dependencyGraph: {
-        counter: []
-      }
-    }
-  }
+        counter: [],
+      },
+    },
+  },
 };
 
 export const caatinga = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet: stellarWalletAdapter,
   contracts: {
     counter: {
-      binding: Counter
-    }
-  }
+      binding: Counter,
+    },
+  },
 });

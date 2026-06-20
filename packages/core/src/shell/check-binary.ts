@@ -17,11 +17,12 @@ export async function checkBinary(
       throw error;
     }
 
-    const code = binary === "stellar"
-      ? CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
-      : binary === "rustc"
-        ? CaatingaErrorCode.RUST_NOT_FOUND
-        : CaatingaErrorCode.COMMAND_FAILED;
+    const code =
+      binary === "stellar"
+        ? CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
+        : binary === "rustc"
+          ? CaatingaErrorCode.RUST_NOT_FOUND
+          : CaatingaErrorCode.COMMAND_FAILED;
     throw new CaatingaError(`${binary} was not found.`, code, hint, error);
   }
 }

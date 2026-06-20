@@ -76,12 +76,7 @@ function validateMarkdownLineLength(file, content) {
     if (line.length <= MAX_PROSE_LINE_LENGTH) continue;
     if (isLongLineExempt(line)) continue;
 
-    fail(
-      file,
-      `line ${index + 1} exceeds ${MAX_PROSE_LINE_LENGTH} characters (${
-        line.length
-      })`
-    );
+    fail(file, `line ${index + 1} exceeds ${MAX_PROSE_LINE_LENGTH} characters (${line.length})`);
   }
 }
 
@@ -113,10 +108,7 @@ function validateTables(file, content) {
 
     const previous = lines[index - 1].trim();
     if (!previous.includes("|")) {
-      fail(
-        file,
-        `table separator on line ${index + 1} does not follow a table header`
-      );
+      fail(file, `table separator on line ${index + 1} does not follow a table header`);
     }
   }
 }
@@ -128,10 +120,7 @@ function validateInternalLinks(file, content) {
     const target = match[1].split("#")[0];
     if (!target) continue;
 
-    const absoluteTarget = path.resolve(
-      path.dirname(path.join(ROOT, file)),
-      target
-    );
+    const absoluteTarget = path.resolve(path.dirname(path.join(ROOT, file)), target);
     if (!existsSync(absoluteTarget)) {
       fail(file, `internal link target does not exist: ${match[1]}`);
     }
@@ -149,10 +138,7 @@ const unsafeSourcePatterns = [
 function validateSourceAccountWording(file, content) {
   for (const pattern of unsafeSourcePatterns) {
     if (pattern.test(content)) {
-      fail(
-        file,
-        "suggests public G... addresses or account ids are accepted for --source"
-      );
+      fail(file, "suggests public G... addresses or account ids are accepted for --source");
     }
   }
 }
@@ -161,10 +147,7 @@ function validatePackageJson(file, content) {
   const trimmed = content.trim();
 
   if (!trimmed.includes("\n")) {
-    fail(
-      file,
-      "appears minified; expected multi-line JSON with 2-space indentation"
-    );
+    fail(file, "appears minified; expected multi-line JSON with 2-space indentation");
   }
 
   try {
@@ -177,16 +160,10 @@ function validatePackageJson(file, content) {
 
 function validateDocsCheckScript(file, content) {
   const nonEmptyLines = countNonEmptyLines(content);
-  const longestLine = Math.max(
-    ...content.split(/\r?\n/).map((line) => line.length),
-    0
-  );
+  const longestLine = Math.max(...content.split(/\r?\n/).map((line) => line.length), 0);
 
   if (nonEmptyLines < MIN_DOCS_CHECK_LINES) {
-    fail(
-      file,
-      `appears compressed; expected at least ${MIN_DOCS_CHECK_LINES} non-empty lines`
-    );
+    fail(file, `appears compressed; expected at least ${MIN_DOCS_CHECK_LINES} non-empty lines`);
   }
 
   if (longestLine > 500) {
@@ -250,10 +227,7 @@ for (const entry of readdirSync(workflowDir)) {
   validateWorkflowYaml(file, read(file));
 }
 
-validateDocsCheckScript(
-  "scripts/docs-check.mjs",
-  read("scripts/docs-check.mjs")
-);
+validateDocsCheckScript("scripts/docs-check.mjs", read("scripts/docs-check.mjs"));
 
 if (failures.length > 0) {
   console.error("Documentation check failed:");

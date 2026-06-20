@@ -38,7 +38,7 @@ function buildTemplateCandidates(templateName: string): string[] {
   return [
     envTemplatesDir ? path.join(envTemplatesDir, templateName) : undefined,
     path.resolve(process.cwd(), "packages", "templates", templateName),
-    ...candidatePathsFromModule(templateName)
+    ...candidatePathsFromModule(templateName),
   ].filter((candidate): candidate is string => Boolean(candidate));
 }
 

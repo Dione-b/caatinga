@@ -62,20 +62,20 @@ const client = createCaatingaClient({
   network: {
     name: "testnet",
     rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015"
+    networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
   wallet,
   contracts: {
     counter: {
-      binding: Counter
-    }
-  }
+      binding: Counter,
+    },
+  },
 });
 
 const before = await client.contract("counter").read<number>("get");
 const increment = await client.contract("counter").invoke<number>("increment");
-const after = increment.result ?? await client.contract("counter").read<number>("get");
+const after = increment.result ?? (await client.contract("counter").read<number>("get"));
 ```
 
 Minimal successful result:
@@ -106,9 +106,9 @@ const client = createCaatingaClient({
   contracts: {
     counter: {
       binding: Counter,
-      contractId: "C..."
-    }
-  }
+      contractId: "C...",
+    },
+  },
 });
 ```
 
@@ -119,17 +119,17 @@ Arguments are forwarded as one object to the generated binding method:
 ```ts
 await client.contract("token").invoke("transfer", {
   to: receiverAddress,
-  amount: 100n
+  amount: 100n,
 });
 ```
 
 ## Read and Simulate
 
-| API | When to use |
-| --- | --- |
-| `read()` | Read-only methods; returns the parsed value directly |
+| API          | When to use                                                           |
+| ------------ | --------------------------------------------------------------------- |
+| `read()`     | Read-only methods; returns the parsed value directly                  |
 | `simulate()` | Read-only methods when you need `status`, `contractId`, or `debugRaw` |
-| `invoke()` | State-changing methods that must be signed and submitted |
+| `invoke()`   | State-changing methods that must be signed and submitted              |
 
 Use `read()` for read-only contract methods when the UI only needs the returned value:
 
@@ -141,7 +141,7 @@ Use `simulate()` when the UI or diagnostics need metadata:
 
 ```ts
 const result = await client.contract("counter").simulate<number>("get", {
-  debugRaw: true
+  debugRaw: true,
 });
 
 console.log(result.status);
@@ -167,7 +167,9 @@ import artifactsJson from "../caatinga.artifacts.json";
 import * as Counter from "./contracts/generated/counter";
 import { stellarWalletAdapter } from "./wallet.js";
 
-export const caatingaClient = createCaatingaClient({ /* ... */ });
+export const caatingaClient = createCaatingaClient({
+  /* ... */
+});
 ```
 
 ```ts
@@ -183,7 +185,7 @@ XDR is omitted by default and only returned when `debugXdr` is enabled.
 
 ```ts
 const result = await client.contract("counter").invoke("increment", {
-  debugXdr: true
+  debugXdr: true,
 });
 
 console.log(result.xdr?.unsigned);
@@ -196,7 +198,7 @@ Raw binding or submit output is omitted unless `debugRaw` is enabled:
 ```ts
 const result = await client.contract("counter").invoke("increment", {
   debugXdr: true,
-  debugRaw: true
+  debugRaw: true,
 });
 
 console.log(result.raw);
@@ -219,10 +221,7 @@ console.log(tx.preparedXdr);
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
 
-  signTransaction(input: {
-    xdr: string;
-    networkPassphrase: string;
-  }): Promise<string>;
+  signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
 }
 ```
 
@@ -264,8 +263,8 @@ import { createWalletSession } from "@caatinga/client";
 
 const session = createWalletSession(wallet, { persist: true });
 session.subscribe(() => render(session.getState()));
-await session.connect();   // modal when the adapter has one, else getPublicKey()
-await session.restore();   // silent reconnect on page load — never throws
+await session.connect(); // modal when the adapter has one, else getPublicKey()
+await session.restore(); // silent reconnect on page load — never throws
 ```
 
 ## React hooks

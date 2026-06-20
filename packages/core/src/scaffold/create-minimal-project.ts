@@ -17,7 +17,7 @@ const moduleDir =
 function scaffoldRoot(): string {
   const candidates = [
     path.resolve(moduleDir, "../../scaffolds"),
-    path.resolve(moduleDir, "../scaffolds")
+    path.resolve(moduleDir, "../scaffolds"),
   ];
   const found = candidates.find((candidate) => existsSync(candidate));
   return found ?? candidates[0];
@@ -46,23 +46,29 @@ export default defineConfig({
 }
 
 function packageJsonSource(projectName: string): string {
-  return `${JSON.stringify({
-    name: projectName,
-    version: "0.1.0",
-    private: true,
-    type: "module",
-    scripts: {
-      build: "caatinga build app",
-      deploy: "caatinga deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
-      doctor: "caatinga doctor --network testnet",
-      "read:hello": "caatinga read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
-      "read:version": "caatinga read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}"
+  return `${JSON.stringify(
+    {
+      name: projectName,
+      version: "0.1.0",
+      private: true,
+      type: "module",
+      scripts: {
+        build: "caatinga build app",
+        deploy: "caatinga deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "caatinga doctor --network testnet",
+        "read:hello":
+          "caatinga read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        "read:version":
+          "caatinga read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}",
+      },
+      devDependencies: {
+        "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
+        "@caatinga/core": `^${CAATINGA_CORE_VERSION}`,
+      },
     },
-    devDependencies: {
-      "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
-      "@caatinga/core": `^${CAATINGA_CORE_VERSION}`
-    }
-  }, null, 2)}\n`;
+    null,
+    2
+  )}\n`;
 }
 
 function readmeSource(projectName: string): string {
@@ -100,20 +106,39 @@ export async function createMinimalProject(options: CreateMinimalProjectOptions)
 
   await mkdir(targetDir, { recursive: true });
   await Promise.all([
-    writeFile(path.join(targetDir, "caatinga.config.ts"), configSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" }),
-    writeFile(path.join(targetDir, "package.json"), packageJsonSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" }),
-    writeFile(path.join(targetDir, ".gitignore"), "node_modules\n.artifacts\ntarget\n", { encoding: "utf8", flag: force ? "w" : "wx" }),
-    writeFile(path.join(targetDir, "README.md"), readmeSource(options.projectName), { encoding: "utf8", flag: force ? "w" : "wx" })
+    writeFile(path.join(targetDir, "caatinga.config.ts"), configSource(options.projectName), {
+      encoding: "utf8",
+      flag: force ? "w" : "wx",
+    }),
+    writeFile(path.join(targetDir, "package.json"), packageJsonSource(options.projectName), {
+      encoding: "utf8",
+      flag: force ? "w" : "wx",
+    }),
+    writeFile(path.join(targetDir, ".gitignore"), "node_modules\n.artifacts\ntarget\n", {
+      encoding: "utf8",
+      flag: force ? "w" : "wx",
+    }),
+    writeFile(path.join(targetDir, "README.md"), readmeSource(options.projectName), {
+      encoding: "utf8",
+      flag: force ? "w" : "wx",
+    }),
   ]);
 
   await mkdir(path.join(targetDir, "contracts"), { recursive: true });
-  await cp(path.join(scaffoldRoot(), "soroban-contract-stub"), path.join(targetDir, "contracts", "app"), {
-    recursive: true,
-    force,
-    errorOnExist: !force
-  });
+  await cp(
+    path.join(scaffoldRoot(), "soroban-contract-stub"),
+    path.join(targetDir, "contracts", "app"),
+    {
+      recursive: true,
+      force,
+      errorOnExist: !force,
+    }
+  );
 
-  await writeArtifacts(createInitialArtifacts(options.projectName, { networks: ["testnet"] }), targetDir);
+  await writeArtifacts(
+    createInitialArtifacts(options.projectName, { networks: ["testnet"] }),
+    targetDir
+  );
 
   return { targetDir };
 }

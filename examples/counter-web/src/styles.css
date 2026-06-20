@@ -41,7 +41,8 @@ button:disabled {
 }
 
 .hero {
-  background: radial-gradient(circle at top right, #cfe87b, transparent 35%),
+  background:
+    radial-gradient(circle at top right, #cfe87b, transparent 35%),
     linear-gradient(135deg, #f9ffe8, #dfeec3);
   padding: 3rem;
 }

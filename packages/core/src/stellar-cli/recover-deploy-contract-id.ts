@@ -9,7 +9,7 @@ const DEPLOY_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
 const HORIZON_URL_BY_PASSPHRASE: Record<string, string> = {
   "Test SDF Network ; September 2015": "https://horizon-testnet.stellar.org",
-  "Public Global Stellar Network ; September 2015": "https://horizon.stellar.org"
+  "Public Global Stellar Network ; September 2015": "https://horizon.stellar.org",
 };
 
 type HorizonOperation = {
@@ -56,12 +56,13 @@ export async function fetchCreateContractSalt(
     return null;
   }
 
-  const body = await response.json() as HorizonOperationsResponse;
-  const operation = body._embedded?.records?.find((record) =>
-    record.transaction_successful === true
-    && record.type === "invoke_host_function"
-    && record.function === "HostFunctionTypeHostFunctionTypeCreateContract"
-    && typeof record.salt === "string"
+  const body = (await response.json()) as HorizonOperationsResponse;
+  const operation = body._embedded?.records?.find(
+    (record) =>
+      record.transaction_successful === true &&
+      record.type === "invoke_host_function" &&
+      record.function === "HostFunctionTypeHostFunctionTypeCreateContract" &&
+      typeof record.salt === "string"
   );
 
   return operation?.salt ?? null;
@@ -74,19 +75,23 @@ export async function resolveContractIdFromDeploySalt(options: {
   cwd?: string;
 }): Promise<string> {
   const saltHex = decimalSaltToHex(options.salt);
-  const result = await runCommand("stellar", [
-    "contract",
-    "id",
-    "wasm",
-    "--salt",
-    saltHex,
-    "--source-account",
-    options.source,
-    ...buildStellarNetworkArgsFromConfig(options.network)
-  ], {
-    cwd: options.cwd,
-    skipStellarVersionCheck: true
-  });
+  const result = await runCommand(
+    "stellar",
+    [
+      "contract",
+      "id",
+      "wasm",
+      "--salt",
+      saltHex,
+      "--source-account",
+      options.source,
+      ...buildStellarNetworkArgsFromConfig(options.network),
+    ],
+    {
+      cwd: options.cwd,
+      skipStellarVersionCheck: true,
+    }
+  );
 
   return parseContractId(result.all || `${result.stdout}\n${result.stderr}`);
 }
@@ -117,6 +122,6 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
     salt,
     source: options.source,
     network: options.network,
-    cwd: options.cwd
+    cwd: options.cwd,
   });
 }

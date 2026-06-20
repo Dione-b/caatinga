@@ -20,7 +20,9 @@ export type SnarkjsVk = {
   IC?: Array<[string, string, string]>;
 };
 
-function g2FromSnarkjsExport(rows: [[string, string], [string, string], ...string[][]]): SerializedG2 {
+function g2FromSnarkjsExport(
+  rows: [[string, string], [string, string], ...string[][]]
+): SerializedG2 {
   return g2FromSnarkjs([rows[0]!, rows[1]!]);
 }
 

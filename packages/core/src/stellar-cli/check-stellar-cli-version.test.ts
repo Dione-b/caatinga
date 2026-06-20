@@ -4,7 +4,7 @@ import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 const runCommandMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../shell/run-command.js", () => ({
-  runCommand: runCommandMock
+  runCommand: runCommandMock,
 }));
 
 import { checkStellarCliVersion } from "./check-stellar-cli-version.js";
@@ -19,7 +19,7 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 25.2.0",
       stderr: "",
-      all: "stellar 25.2.0"
+      all: "stellar 25.2.0",
     });
 
     const report = await checkStellarCliVersion();
@@ -28,7 +28,7 @@ describe("checkStellarCliVersion", () => {
     expect(report.version).toBe("25.2.0");
     expect(report.warnings).toEqual([]);
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
-      skipStellarVersionCheck: true
+      skipStellarVersionCheck: true,
     });
   });
 
@@ -36,7 +36,7 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 99.0.0",
       stderr: "",
-      all: "stellar 99.0.0"
+      all: "stellar 99.0.0",
     });
 
     const onWarning = vi.fn();
@@ -53,7 +53,7 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 26.0.0",
       stderr: "",
-      all: "stellar 26.0.0"
+      all: "stellar 26.0.0",
     });
 
     const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
@@ -73,12 +73,12 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 22.0.1",
       stderr: "",
-      all: "stellar 22.0.1"
+      all: "stellar 22.0.1",
     });
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
       code: CaatingaErrorCode.UNSUPPORTED_CLI_VERSION,
-      message: expect.stringContaining("below the supported minimum 23.0.0")
+      message: expect.stringContaining("below the supported minimum 23.0.0"),
     });
   });
 
@@ -86,7 +86,7 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
-      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND
+      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
     });
   });
 
@@ -94,17 +94,17 @@ describe("checkStellarCliVersion", () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar dev build",
       stderr: "",
-      all: "stellar dev build"
+      all: "stellar dev build",
     });
 
     expect(() => parseStellarCliVersion("stellar dev build")).toThrowError(
       expect.objectContaining({
-        code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED
+        code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED,
       })
     );
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
-      code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED
+      code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED,
     });
   });
 });

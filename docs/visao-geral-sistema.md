@@ -16,11 +16,11 @@ init → build → deploy → generate (bindings) → invoke → client (browser
 
 Princípio central: **orquestra o workflow, não esconde o mental model do Stellar.** Conceitos como `contractId`, RPC URL, network passphrase, identidade de assinatura, XDR, fees e simulação permanecem visíveis ao usuário. Caatinga compõe, valida e organiza — não reimplementa o SDK Stellar nem a CLI.
 
-| Caatinga é | Caatinga não é |
-|------------|----------------|
-| Convenção + orquestração + artifacts + integração de client | Um segundo SDK Soroban/Stellar |
-| CLI fina sobre `@caatinga/core` | Lugar para guardar chaves privadas ou assinar silenciosamente |
-| Scaffolding por templates | Registry hospedado obrigatório para o fluxo core |
+| Caatinga é                                                  | Caatinga não é                                                |
+| ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Convenção + orquestração + artifacts + integração de client | Um segundo SDK Soroban/Stellar                                |
+| CLI fina sobre `@caatinga/core`                             | Lugar para guardar chaves privadas ou assinar silenciosamente |
+| Scaffolding por templates                                   | Registry hospedado obrigatório para o fluxo core              |
 
 ---
 
@@ -49,13 +49,13 @@ packages/templates ────> consumido por `caatinga init`
 
 ### Pacotes
 
-| Pacote | Responsabilidade |
-|--------|------------------|
-| `@caatinga/cli` | Parsing de argumentos, UX de terminal, diagnósticos `doctor`, delegação ao core. Sem orquestração de subprocess fora das APIs do core. |
-| `@caatinga/core` | Carrega `caatinga.config.ts`, valida schemas, resolve redes/contratos, lê/escreve `caatinga.artifacts.json`, roda a CLI Stellar via camada única de shell. |
-| `@caatinga/client` | Client de browser/Node sobre bindings gerados, artifacts e wallet adapters. `invoke()`, `buildXdr()`, debug XDR explícito. Subpaths: `./react` (WalletProvider/useWallet), `./vite` (helpers de bundler), `./freighter`, `./stellar-wallets-kit`. |
-| `@caatinga/zk` | Serialização de provas ZK, workflow Circom Groth16, args de binding para verificação on-chain. Subpath `./browser` para helpers de binding no browser. |
-| `packages/templates` | Templates oficiais consumidos por `caatinga init`, validados via `caatinga.template.json` antes de copiar. |
+| Pacote               | Responsabilidade                                                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@caatinga/cli`      | Parsing de argumentos, UX de terminal, diagnósticos `doctor`, delegação ao core. Sem orquestração de subprocess fora das APIs do core.                                                                                                            |
+| `@caatinga/core`     | Carrega `caatinga.config.ts`, valida schemas, resolve redes/contratos, lê/escreve `caatinga.artifacts.json`, roda a CLI Stellar via camada única de shell.                                                                                        |
+| `@caatinga/client`   | Client de browser/Node sobre bindings gerados, artifacts e wallet adapters. `invoke()`, `buildXdr()`, debug XDR explícito. Subpaths: `./react` (WalletProvider/useWallet), `./vite` (helpers de bundler), `./freighter`, `./stellar-wallets-kit`. |
+| `@caatinga/zk`       | Serialização de provas ZK, workflow Circom Groth16, args de binding para verificação on-chain. Subpath `./browser` para helpers de binding no browser.                                                                                            |
+| `packages/templates` | Templates oficiais consumidos por `caatinga init`, validados via `caatinga.template.json` antes de copiar.                                                                                                                                        |
 
 ### Fonte de verdade (MVP)
 
@@ -72,17 +72,17 @@ Estado local do projeto é autoritativo. Sem cache central nem registry remoto c
 
 Cada subdiretório de `packages/core/src/` é uma camada com responsabilidade isolada.
 
-| Camada | Arquivos-chave | Função |
-|--------|----------------|--------|
-| **shell** | `run-command.ts`, `check-binary.ts` | Camada única de subprocess. Todo `execa` concentrado aqui. Verifica presença de binários no PATH. |
-| **stellar-cli** | `compat.ts`, `check-stellar-cli-version.ts`, `version.ts`, `parse-contract-id.ts`, `recover-deploy-contract-id.ts`, `build-stellar-network-args.ts` | Adaptador sobre a CLI Stellar. Absorve mudanças em flags, stdout, caminhos e workflow de XDR. |
-| **contracts** | `build-contract.ts`, `deploy-contract.ts`, `generate-bindings.ts`, `invoke-contract.ts`, `resolve-contract.ts`, `resolve-deploy-args.ts`, `source-account.ts`, `validate-source-shape.ts`, `wasm.ts` | Orquestração das operações de contrato (build, deploy, bindings, invoke). |
-| **networks** | `resolve-network.ts`, `networks.ts` | Resolve a rede declarada em `caatinga.config.ts`. |
-| **artifacts** | `read-artifacts.ts`, `write-artifacts.ts`, `update-artifact.ts`, `artifact.schema.ts` | Lê/escreve/atualiza `caatinga.artifacts.json`. Persiste `contractId` por rede. |
-| **config** | — | Carrega e valida `caatinga.config.ts`. |
-| **templates** | — | Valida manifest `caatinga.template.json` (semver core ↔ template). |
-| **errors** | — | Códigos `CAATINGA_*` centralizados (`CaatingaErrorCode`). |
-| **runtime / release / ci** | — | Utilidades de runtime, fluxo de release, checagens de CI. |
+| Camada                     | Arquivos-chave                                                                                                                                                                                       | Função                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **shell**                  | `run-command.ts`, `check-binary.ts`                                                                                                                                                                  | Camada única de subprocess. Todo `execa` concentrado aqui. Verifica presença de binários no PATH. |
+| **stellar-cli**            | `compat.ts`, `check-stellar-cli-version.ts`, `version.ts`, `parse-contract-id.ts`, `recover-deploy-contract-id.ts`, `build-stellar-network-args.ts`                                                  | Adaptador sobre a CLI Stellar. Absorve mudanças em flags, stdout, caminhos e workflow de XDR.     |
+| **contracts**              | `build-contract.ts`, `deploy-contract.ts`, `generate-bindings.ts`, `invoke-contract.ts`, `resolve-contract.ts`, `resolve-deploy-args.ts`, `source-account.ts`, `validate-source-shape.ts`, `wasm.ts` | Orquestração das operações de contrato (build, deploy, bindings, invoke).                         |
+| **networks**               | `resolve-network.ts`, `networks.ts`                                                                                                                                                                  | Resolve a rede declarada em `caatinga.config.ts`.                                                 |
+| **artifacts**              | `read-artifacts.ts`, `write-artifacts.ts`, `update-artifact.ts`, `artifact.schema.ts`                                                                                                                | Lê/escreve/atualiza `caatinga.artifacts.json`. Persiste `contractId` por rede.                    |
+| **config**                 | —                                                                                                                                                                                                    | Carrega e valida `caatinga.config.ts`.                                                            |
+| **templates**              | —                                                                                                                                                                                                    | Valida manifest `caatinga.template.json` (semver core ↔ template).                                |
+| **errors**                 | —                                                                                                                                                                                                    | Códigos `CAATINGA_*` centralizados (`CaatingaErrorCode`).                                         |
+| **runtime / release / ci** | —                                                                                                                                                                                                    | Utilidades de runtime, fluxo de release, checagens de CI.                                         |
 
 ### O que pode e o que não pode abstrair
 
@@ -98,12 +98,12 @@ Cada subdiretório de `packages/core/src/` é uma camada com responsabilidade is
 
 ### Operações delegadas à CLI
 
-| Operação Caatinga | Comando Stellar subjacente |
-|-------------------|----------------------------|
-| `build` | `stellar contract build` |
-| `deploy` | `stellar contract deploy` |
-| `generate` | `npx @stellar/stellar-sdk generate` |
-| `invoke` | `stellar contract invoke` |
+| Operação Caatinga | Comando Stellar subjacente          |
+| ----------------- | ----------------------------------- |
+| `build`           | `stellar contract build`            |
+| `deploy`          | `stellar contract deploy`           |
+| `generate`        | `npx @stellar/stellar-sdk generate` |
+| `invoke`          | `stellar contract invoke`           |
 
 ### Resiliência a drift de output
 
@@ -140,9 +140,9 @@ Acontece em `@caatinga/client`. O client **não detém chaves privadas nem seria
 
 ### Adapters embarcados
 
-| Adapter | Arquivo | Uso |
-|---------|---------|-----|
-| Freighter | `adapters/freighter.ts` | Wallet única. |
+| Adapter                   | Arquivo                           | Uso                                                                        |
+| ------------------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| Freighter                 | `adapters/freighter.ts`           | Wallet única.                                                              |
 | Stellar Wallets Kit (SWK) | `adapters/stellar-wallets-kit.ts` | Múltiplos provedores de wallet a partir de uma única camada de integração. |
 
 `wallet/with-wallet-timeout.ts` aplica timeout às operações de assinatura.
@@ -198,17 +198,17 @@ const next = await client.contract("counter").invoke<number>("increment");
 
 ## 6. Interface CLI
 
-| Comando | Função |
-|---------|--------|
-| `caatinga init <dir>` | Cria projeto a partir de template (valida manifest). |
-| `caatinga doctor [--network] [--source]` | Checa Node, Stellar CLI, Rust, config, artifacts, rede e identidade de source. Exibe warnings. |
-| `caatinga build [contract]` | Compila WASM do contrato (default: `counter`). |
-| `caatinga deploy [contract] --source <id> --network <net>` | Faz deploy, grava `contractId` nos artifacts e gera bindings automaticamente (`--no-generate` para pular). |
-| `caatinga generate [contract] --network <net>` | (Re)gera bindings TypeScript; sem nome, regenera todos os contratos implantados. |
-| `caatinga status [--network <net>] [--json]` | Tabela por rede: contratos implantados, hashes e frescor dos bindings. |
-| `caatinga invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato que altera estado. |
-| `caatinga read <contract.method> [--network <net>]` | Simula método read-only (sem assinatura). |
-| `caatinga dev` | Proxy opinativo sobre Vite + validação (MVP). |
+| Comando                                                           | Função                                                                                                     |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `caatinga init <dir>`                                             | Cria projeto a partir de template (valida manifest).                                                       |
+| `caatinga doctor [--network] [--source]`                          | Checa Node, Stellar CLI, Rust, config, artifacts, rede e identidade de source. Exibe warnings.             |
+| `caatinga build [contract]`                                       | Compila WASM do contrato (default: `counter`).                                                             |
+| `caatinga deploy [contract] --source <id> --network <net>`        | Faz deploy, grava `contractId` nos artifacts e gera bindings automaticamente (`--no-generate` para pular). |
+| `caatinga generate [contract] --network <net>`                    | (Re)gera bindings TypeScript; sem nome, regenera todos os contratos implantados.                           |
+| `caatinga status [--network <net>] [--json]`                      | Tabela por rede: contratos implantados, hashes e frescor dos bindings.                                     |
+| `caatinga invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato que altera estado.                                                               |
+| `caatinga read <contract.method> [--network <net>]`               | Simula método read-only (sem assinatura).                                                                  |
+| `caatinga dev`                                                    | Proxy opinativo sobre Vite + validação (MVP).                                                              |
 
 **Flags comuns:**
 
@@ -222,12 +222,12 @@ const next = await client.contract("counter").invoke<number>("increment");
 
 Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
-| Contrato | Descrição |
-|----------|-----------|
-| `caatinga.config.ts` | Contratos, caminhos WASM, redes. |
-| `caatinga.artifacts.json` | `contractId` por rede: `networks[net].contracts[name].contractId`. |
-| Códigos `CAATINGA_*` | API estável para automação parsear (a prosa não é contrato). |
-| `caatinga.template.json` | Manifest (name, version, `compatibleCore`, paths) validado no `init`. |
+| Contrato                    | Descrição                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `caatinga.config.ts`        | Contratos, caminhos WASM, redes.                                                |
+| `caatinga.artifacts.json`   | `contractId` por rede: `networks[net].contracts[name].contractId`.              |
+| Códigos `CAATINGA_*`        | API estável para automação parsear (a prosa não é contrato).                    |
+| `caatinga.template.json`    | Manifest (name, version, `compatibleCore`, paths) validado no `init`.           |
 | Paths de export dos pacotes | Subpaths como `@caatinga/core/browser`, `@caatinga/client/stellar-wallets-kit`. |
 
 ---

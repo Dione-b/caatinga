@@ -25,11 +25,11 @@ Required secrets: `CAATINGA_CI_IDENTITY_ALIAS`, `CAATINGA_CI_STELLAR_CONFIG_B64`
 
 ### Smoke script exit codes
 
-| Exit code | Meaning | Workflow behavior |
-| --- | --- | --- |
-| `0` | Success | Pass. |
-| `1` | Hard failure (Caatinga, parser, or Stellar CLI version error) | No workflow retry. |
-| `2` | Classified transient testnet failure | The workflow runs at most one retry. |
+| Exit code | Meaning                                                       | Workflow behavior                    |
+| --------- | ------------------------------------------------------------- | ------------------------------------ |
+| `0`       | Success                                                       | Pass.                                |
+| `1`       | Hard failure (Caatinga, parser, or Stellar CLI version error) | No workflow retry.                   |
+| `2`       | Classified transient testnet failure                          | The workflow runs at most one retry. |
 
 CI uploads the following artifacts: `smoke-ci-out/*-smoke.log`, `*-caatinga-version.txt`, `*-stellar-version.txt`, and each generated app directory’s `caatinga.artifacts.json`. The live smoke proves both official templates — `react-vite-counter` and `marketplace-with-token` — including on-chain verification that `marketplace.token_contract_id` matches the deployed token contract ID.
 

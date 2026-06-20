@@ -14,20 +14,30 @@ const baseConfig: CaatingaConfig = {
   project: "app",
   defaultNetwork: "testnet",
   contracts: {
-    counter: { path: "./contracts/counter", wasm: "./rel/counter.wasm", dependsOn: [], deployArgs: {} },
-    token: { path: "./contracts/token", wasm: "./rel/token.wasm", dependsOn: ["counter"], deployArgs: {} }
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./rel/counter.wasm",
+      dependsOn: [],
+      deployArgs: {},
+    },
+    token: {
+      path: "./contracts/token",
+      wasm: "./rel/token.wasm",
+      dependsOn: ["counter"],
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
     mainnet: {
       rpcUrl: "https://soroban.stellar.org",
-      networkPassphrase: "Public Global Stellar Network ; September 2015"
-    }
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" }
+  frontend: { framework: "vite-react", bindingsOutput: "./src/gen" },
 };
 
 async function writeDeployedCounter(tmpDir: string): Promise<void> {
@@ -41,10 +51,10 @@ async function writeDeployedCounter(tmpDir: string): Promise<void> {
         sourcePath: "./contracts/counter",
         wasmPath: "./rel/counter.wasm",
         dependencies: [],
-        resolvedDeployArgs: {}
-      }
+        resolvedDeployArgs: {},
+      },
     },
-    dependencyGraph: {}
+    dependencyGraph: {},
   };
   await writeArtifacts(artifacts, tmpDir);
 }
@@ -65,7 +75,7 @@ describe("collectProjectStatus", () => {
     const status = await collectProjectStatus({
       config: baseConfig,
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     expect(status.project).toBe("app");
@@ -77,14 +87,14 @@ describe("collectProjectStatus", () => {
     expect(counter).toMatchObject({
       deployed: true,
       contractId: CONTRACT_ID,
-      wasmHash: "abc"
+      wasmHash: "abc",
     });
 
     const token = testnet.contracts.find((entry) => entry.name === "token");
     expect(token).toMatchObject({
       deployed: false,
       dependencies: ["counter"],
-      bindings: { status: "missing" }
+      bindings: { status: "missing" },
     });
   });
 
@@ -100,13 +110,13 @@ describe("collectProjectStatus", () => {
       contractId: CONTRACT_ID,
       wasmHash: "abc",
       network: "testnet",
-      generatedAt: "2026-06-11T12:00:00.000Z"
+      generatedAt: "2026-06-11T12:00:00.000Z",
     });
 
     const status = await collectProjectStatus({
       config: baseConfig,
       networkName: "testnet",
-      cwd: tmpDir
+      cwd: tmpDir,
     });
 
     const counter = status.networks[0].contracts.find((entry) => entry.name === "counter");

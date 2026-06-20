@@ -7,7 +7,7 @@ import {
   CURRENT_RUST_WASM_TARGET,
   LEGACY_RUST_WASM_TARGET,
   resolveWasmArtifactPath,
-  toCurrentWasmTargetPath
+  toCurrentWasmTargetPath,
 } from "./wasm.js";
 
 describe("wasm target paths", () => {
@@ -67,7 +67,7 @@ describe("wasm target paths", () => {
     );
 
     await expect(resolveWasmArtifactPath(legacyPath)).rejects.toMatchObject({
-      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND
+      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
     });
   });
 
@@ -116,7 +116,7 @@ describe("wasm target paths", () => {
     try {
       await expect(resolveWasmArtifactPath(configuredPath)).rejects.toMatchObject({
         code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        hint: expect.stringContaining("CARGO_TARGET_DIR")
+        hint: expect.stringContaining("CARGO_TARGET_DIR"),
       });
     } finally {
       if (previous === undefined) {

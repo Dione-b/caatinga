@@ -1,7 +1,9 @@
 import { runCommand, validateSourceShape } from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 
-export async function sourceDiagnostic(source: string | undefined): Promise<Diagnostic | undefined> {
+export async function sourceDiagnostic(
+  source: string | undefined
+): Promise<Diagnostic | undefined> {
   if (!source) return undefined;
 
   const unsafeSource = validateSourceShape(source);
@@ -9,7 +11,7 @@ export async function sourceDiagnostic(source: string | undefined): Promise<Diag
     return {
       ok: false,
       label: `source identity ${source} rejected (${unsafeSource.code})`,
-      fix: unsafeSource.hint
+      fix: unsafeSource.hint,
     };
   }
 
@@ -20,7 +22,7 @@ export async function sourceDiagnostic(source: string | undefined): Promise<Diag
     return {
       ok: false,
       label: `source identity ${source} not found`,
-      fix: `Create and fund it: stellar keys generate ${source} --fund --network testnet`
+      fix: `Create and fund it: stellar keys generate ${source} --fund --network testnet`,
     };
   }
 }

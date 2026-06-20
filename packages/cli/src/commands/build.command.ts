@@ -4,7 +4,7 @@ import {
   CaatingaError,
   CaatingaErrorCode,
   loadConfig,
-  type CaatingaConfig
+  type CaatingaConfig,
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -15,25 +15,25 @@ export function registerBuildCommand(program: Command): void {
     .command("build")
     .description("Build one or all configured Soroban contracts")
     .argument("[contract]", "Contract name (builds all if omitted)")
-    .action((contractName: string | undefined) => runCliAction(async () => {
-      const config = await loadConfig();
+    .action((contractName: string | undefined) =>
+      runCliAction(async () => {
+        const config = await loadConfig();
 
-      const contractNames = contractName
-        ? [contractName]
-        : Object.keys(config.contracts);
+        const contractNames = contractName ? [contractName] : Object.keys(config.contracts);
 
-      for (const name of contractNames) {
-        const result = await buildContract({
-          config,
-          contractName: name
-        });
+        for (const name of contractNames) {
+          const result = await buildContract({
+            config,
+            contractName: name,
+          });
 
-        logger.success(`Contract built: ${result.contract.name}`);
-        logger.info(`  WASM: ${result.contract.config.wasm}`);
-      }
+          logger.success(`Contract built: ${result.contract.name}`);
+          logger.info(`  WASM: ${result.contract.config.wasm}`);
+        }
 
-      await warnIfDefaultNetworkNeedsDeploy(config);
-    }));
+        await warnIfDefaultNetworkNeedsDeploy(config);
+      })
+    );
 }
 
 async function warnIfDefaultNetworkNeedsDeploy(config: CaatingaConfig): Promise<void> {
@@ -68,6 +68,8 @@ async function warnIfDefaultNetworkNeedsDeploy(config: CaatingaConfig): Promise<
     logger.warn(`Next: ${command}`);
   }
   if (config.frontend) {
-    logger.warn("The frontend needs contractId in caatinga.artifacts.json; build alone is not enough.");
+    logger.warn(
+      "The frontend needs contractId in caatinga.artifacts.json; build alone is not enough."
+    );
   }
 }

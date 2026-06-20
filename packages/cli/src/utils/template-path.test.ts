@@ -7,7 +7,7 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs/promises")>();
   return {
     ...actual,
-    access: accessMock
+    access: accessMock,
   };
 });
 
@@ -39,7 +39,7 @@ describe("resolveTemplateDir", () => {
 
   it("throws TEMPLATE_NOT_FOUND when no template candidate is accessible", async () => {
     await expect(resolveTemplateDir("__caatinga_nonexistent_template__")).rejects.toMatchObject({
-      code: CaatingaErrorCode.TEMPLATE_NOT_FOUND
+      code: CaatingaErrorCode.TEMPLATE_NOT_FOUND,
     });
   });
 
@@ -49,11 +49,13 @@ describe("resolveTemplateDir", () => {
 
     try {
       await expect(resolveTemplateDir("__caatinga_nonexistent_template__")).rejects.toMatchObject({
-        code: CaatingaErrorCode.TEMPLATE_NOT_FOUND
+        code: CaatingaErrorCode.TEMPLATE_NOT_FOUND,
       });
 
       const output = stderrSpy.mock.calls.map((call) => call[0]).join("");
-      expect(output).toContain("caatinga: template resolution candidates for \"__caatinga_nonexistent_template__\"");
+      expect(output).toContain(
+        'caatinga: template resolution candidates for "__caatinga_nonexistent_template__"'
+      );
       expect(output).toContain("env=");
       expect(output).toContain("cwd=");
     } finally {
@@ -64,7 +66,7 @@ describe("resolveTemplateDir", () => {
   it("mentions the pnpm build prerequisite in the error hint", async () => {
     await expect(resolveTemplateDir("__caatinga_nonexistent_template__")).rejects.toMatchObject({
       code: CaatingaErrorCode.TEMPLATE_NOT_FOUND,
-      hint: expect.stringContaining("pnpm build")
+      hint: expect.stringContaining("pnpm build"),
     });
   });
 });

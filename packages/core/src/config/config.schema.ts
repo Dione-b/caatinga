@@ -6,12 +6,12 @@ export const ContractConfigSchema = z.object({
   path: z.string().min(1),
   wasm: z.string().min(1),
   dependsOn: z.array(z.string().min(1)).default([]),
-  deployArgs: z.record(z.string().min(1), DeployArgValueSchema).default({})
+  deployArgs: z.record(z.string().min(1), DeployArgValueSchema).default({}),
 });
 
 export const NetworkConfigSchema = z.object({
   rpcUrl: z.string().url(),
-  networkPassphrase: z.string().min(1)
+  networkPassphrase: z.string().min(1),
 });
 
 const ZkCircuitSchema = z.object({
@@ -21,25 +21,33 @@ const ZkCircuitSchema = z.object({
   verifierContract: z.string().optional(),
 });
 
-const ZkConfigSchema = z.object({
-  circuits: z.record(z.string().min(1), ZkCircuitSchema),
-}).optional();
+const ZkConfigSchema = z
+  .object({
+    circuits: z.record(z.string().min(1), ZkCircuitSchema),
+  })
+  .optional();
 
 export const CaatingaConfigSchema = z.object({
   project: z.string().min(1),
   defaultNetwork: z.string().min(1).default("testnet"),
-  contracts: z.record(z.string().min(1), ContractConfigSchema).refine(
-    (contracts) => Object.keys(contracts).length > 0,
-    "At least one contract must be configured."
-  ),
-  networks: z.record(z.string().min(1), NetworkConfigSchema).refine(
-    (networks) => Object.keys(networks).length > 0,
-    "At least one network must be configured."
-  ),
-  frontend: z.object({
-    framework: z.enum(["vite-react", "next", "astro"]).default("vite-react"),
-    bindingsOutput: z.string().min(1)
-  }).optional(),
+  contracts: z
+    .record(z.string().min(1), ContractConfigSchema)
+    .refine(
+      (contracts) => Object.keys(contracts).length > 0,
+      "At least one contract must be configured."
+    ),
+  networks: z
+    .record(z.string().min(1), NetworkConfigSchema)
+    .refine(
+      (networks) => Object.keys(networks).length > 0,
+      "At least one network must be configured."
+    ),
+  frontend: z
+    .object({
+      framework: z.enum(["vite-react", "next", "astro"]).default("vite-react"),
+      bindingsOutput: z.string().min(1),
+    })
+    .optional(),
   zk: ZkConfigSchema,
 });
 

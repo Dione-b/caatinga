@@ -15,10 +15,7 @@ export interface CaatingaNetwork {
  */
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
-  signTransaction(input: {
-    xdr: string;
-    networkPassphrase: string;
-  }): Promise<string>;
+  signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
 }
 
 export interface CaatingaContractRegistration {

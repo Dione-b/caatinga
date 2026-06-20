@@ -16,6 +16,6 @@ export function createCaatingaClient(config: CaatingaClientConfig) {
       }
 
       return new CaatingaContractClient(config, contractName, registration);
-    }
+    },
   };
 }

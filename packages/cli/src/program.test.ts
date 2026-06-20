@@ -23,7 +23,17 @@ describe("createProgram", () => {
     const commandNames = createProgram().commands.map((command) => command.name());
 
     expect(commandNames).toEqual(
-      expect.arrayContaining(["init", "dev", "doctor", "build", "deploy", "generate", "invoke", "read", "status"])
+      expect.arrayContaining([
+        "init",
+        "dev",
+        "doctor",
+        "build",
+        "deploy",
+        "generate",
+        "invoke",
+        "read",
+        "status",
+      ])
     );
   });
 
@@ -40,9 +50,7 @@ describe("createProgram", () => {
     process.env.CAATINGA_TEMPLATES_DIR = path.resolve(__dirname, "../../templates");
     const targetDir = path.join(tmpDir, "absolute-path-app");
 
-    await createProgram()
-      .exitOverride()
-      .parseAsync(["node", "caatinga", "init", targetDir]);
+    await createProgram().exitOverride().parseAsync(["node", "caatinga", "init", targetDir]);
 
     const packageJson = JSON.parse(
       await readFile(path.join(targetDir, "package.json"), "utf8")
@@ -73,7 +81,7 @@ describe("createProgram", () => {
           "init",
           path.join(tmpDir, "market-app"),
           "--template",
-          "marketplace-with-token"
+          "marketplace-with-token",
         ]);
       expect(logSpy).toHaveBeenCalledWith("  npx caatinga build    marketplace");
     } finally {

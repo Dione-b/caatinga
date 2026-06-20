@@ -48,7 +48,7 @@ export const CaatingaErrorCode = {
   TEMPLATE_INCOMPATIBLE: "CAATINGA_TEMPLATE_INCOMPATIBLE",
   ZK_VERIFICATION_FAILED: "CAATINGA_ZK_VERIFICATION_FAILED",
   DOCTOR_PARTIAL_DEPLOY: "CAATINGA_DOCTOR_PARTIAL_DEPLOY",
-  MULTI_AUTH_REQUIRED: "CAATINGA_MULTI_AUTH_REQUIRED"
+  MULTI_AUTH_REQUIRED: "CAATINGA_MULTI_AUTH_REQUIRED",
 } as const;
 
-export type CaatingaErrorCodeValue = typeof CaatingaErrorCode[keyof typeof CaatingaErrorCode];
+export type CaatingaErrorCodeValue = (typeof CaatingaErrorCode)[keyof typeof CaatingaErrorCode];

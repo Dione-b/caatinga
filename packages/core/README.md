@@ -53,19 +53,19 @@ export default defineConfig({
   contracts: {
     counter: {
       path: "./contracts/counter",
-      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"
-    }
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./contracts/generated"
-  }
+    bindingsOutput: "./contracts/generated",
+  },
 });
 ```
 
@@ -73,11 +73,11 @@ Multi-contract projects may declare `dependsOn` and `${contracts.<name>.contract
 
 ## Consumer guidance
 
-| Goal | Package |
-| --- | --- |
-| End-user CLI workflow | `@caatinga/cli` |
-| Browser / Node client over generated bindings | `@caatinga/client` |
-| `caatinga.config.ts` in a Caatinga project | `defineConfig` from `@caatinga/core` |
+| Goal                                                                     | Package                                             |
+| ------------------------------------------------------------------------ | --------------------------------------------------- |
+| End-user CLI workflow                                                    | `@caatinga/cli`                                     |
+| Browser / Node client over generated bindings                            | `@caatinga/client`                                  |
+| `caatinga.config.ts` in a Caatinga project                               | `defineConfig` from `@caatinga/core`                |
 | Custom tooling on deploy graphs, artifacts, or Stellar CLI orchestration | `@caatinga/core` (advanced; track releases closely) |
 
 ## Error codes

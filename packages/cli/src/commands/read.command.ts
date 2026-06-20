@@ -13,28 +13,35 @@ export function registerReadCommand(program: Command): void {
     .option("-s, --source <source>", "Optional Stellar CLI identity alias for simulation context")
     .allowUnknownOption(true)
     .allowExcessArguments(true)
-    .action((target: string, args: string[], options: {
-      network?: string;
-      source?: string;
-    }) => runCliAction(async () => {
-      const config = await loadConfig();
-      const result = await readContract({
-        config,
-        target,
-        args,
-        networkName: options.network,
-        source: options.source
-      });
+    .action(
+      (
+        target: string,
+        args: string[],
+        options: {
+          network?: string;
+          source?: string;
+        }
+      ) =>
+        runCliAction(async () => {
+          const config = await loadConfig();
+          const result = await readContract({
+            config,
+            target,
+            args,
+            networkName: options.network,
+            source: options.source,
+          });
 
-      logger.success("Read complete");
-      logger.info("");
-      logger.info(`Network: ${result.network.name}`);
-      logger.info(`Contract: ${result.target.contractName}`);
-      logger.info(`Method: ${result.target.method}`);
+          logger.success("Read complete");
+          logger.info("");
+          logger.info(`Network: ${result.network.name}`);
+          logger.info(`Contract: ${result.target.contractName}`);
+          logger.info(`Method: ${result.target.method}`);
 
-      if (result.result) {
-        logger.info("");
-        logger.info(result.result);
-      }
-    }));
+          if (result.result) {
+            logger.info("");
+            logger.info(result.result);
+          }
+        })
+    );
 }

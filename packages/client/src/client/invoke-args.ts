@@ -6,7 +6,7 @@ export function splitArgsAndOptions(
 ) {
   return {
     args: argsOrOptions,
-    debugRaw: maybeOptions?.debugRaw ?? false
+    debugRaw: maybeOptions?.debugRaw ?? false,
   };
 }
 
@@ -24,14 +24,14 @@ export function splitInvokeArgsAndOptions(
     return {
       args: undefined,
       debugXdr: options.debugXdr ?? false,
-      debugRaw: options.debugRaw ?? false
+      debugRaw: options.debugRaw ?? false,
     };
   }
 
   return {
     args: argsOrOptions as Record<string, unknown> | undefined,
     debugXdr: maybeOptions?.debugXdr ?? false,
-    debugRaw: maybeOptions?.debugRaw ?? false
+    debugRaw: maybeOptions?.debugRaw ?? false,
   };
 }
 
@@ -40,20 +40,18 @@ export function splitReadArgsAndOptions(
   maybeOptions?: CaatingaReadOptions
 ) {
   const looksLikeOptions =
-    argsOrOptions !== undefined &&
-    "debugRaw" in argsOrOptions &&
-    maybeOptions === undefined;
+    argsOrOptions !== undefined && "debugRaw" in argsOrOptions && maybeOptions === undefined;
 
   if (looksLikeOptions) {
     const options = argsOrOptions as CaatingaReadOptions;
     return {
       args: undefined,
-      debugRaw: options.debugRaw ?? false
+      debugRaw: options.debugRaw ?? false,
     };
   }
 
   return {
     args: argsOrOptions as Record<string, unknown> | undefined,
-    debugRaw: maybeOptions?.debugRaw ?? false
+    debugRaw: maybeOptions?.debugRaw ?? false,
   };
 }

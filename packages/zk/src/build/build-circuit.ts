@@ -75,10 +75,7 @@ export function generateVkRust(_vkPath: string, rawJson: string): string {
   ].join("\n");
 }
 
-async function writeEmbeddedVk(
-  vkPath: string,
-  verifierSrcDir: string,
-): Promise<void> {
+async function writeEmbeddedVk(vkPath: string, verifierSrcDir: string): Promise<void> {
   const rawJson = await readFile(vkPath, "utf8");
   const rustSource = generateVkRust(vkPath, rawJson);
   await writeFile(path.join(verifierSrcDir, "vk.rs"), rustSource, "utf8");

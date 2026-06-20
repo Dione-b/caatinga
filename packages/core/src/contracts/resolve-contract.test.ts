@@ -12,16 +12,16 @@ const baseConfig: CaatingaConfig = {
       path: "./contracts/counter",
       wasm: "./target/counter.wasm",
       dependsOn: [],
-      deployArgs: {}
-    }
+      deployArgs: {},
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
-  frontend: { framework: "vite-react", bindingsOutput: "./out" }
+  frontend: { framework: "vite-react", bindingsOutput: "./out" },
 };
 
 describe("resolveContract", () => {

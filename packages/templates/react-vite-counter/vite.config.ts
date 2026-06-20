@@ -8,6 +8,6 @@ const stubsDir = fileURLToPath(new URL("./src/stubs", import.meta.url));
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: walletStubViteAliases(stubsDir)
-  }
+    alias: walletStubViteAliases(stubsDir),
+  },
 });
