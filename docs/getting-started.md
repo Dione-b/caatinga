@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
 
-During alpha, install published packages from npm. Use **`next`** for the current line (**`2.4.5`**); **`latest`** remains **`2.2.1`** until promoted. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+Install published packages from npm. The current line is **`3.1.2`** on **`latest`**. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -22,15 +22,15 @@ stellar --version
 ## Install from npm
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
-Confirm the resolved versions (`next` is currently **`2.4.5`**; `latest` is **`2.2.1`**):
+Confirm the resolved versions (`latest` is currently **`3.1.2`**):
 
 ```bash
-npm view @caatinga/cli@next version
-npm view @caatinga/core@next version
-npm view @caatinga/client@next version
+npm view @caatinga/cli version
+npm view @caatinga/core version
+npm view @caatinga/client version
 npm view @caatinga/zk version
 ```
 

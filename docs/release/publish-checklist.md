@@ -37,8 +37,22 @@ pnpm ci:publish-matrix
 ## Before `latest`
 
 - complete every `next` check above
+- verify release owner approval for the `latest` promotion
+
+Promote an already-published version (no republish) by moving the `latest` dist-tag:
+
+```bash
+VERSION=3.1.2
+OTP=<code-from-authenticator>
+for pkg in cli core client zk; do
+  npm dist-tag add "@caatinga/$pkg@$VERSION" latest --otp="$OTP"
+done
+npm view @caatinga/cli dist-tags
+```
+
+Optional v1 gate (when targeting stable `1.0.0`):
+
 - verify all five v1 specs are implemented and accepted
 - verify three consecutive scheduled `Testnet Smoke` runs succeeded
 - verify no unretried smoke failure occurred in the previous 7 days
 - verify the release evidence section in `docs/release/v1.0.0.md` is complete
-- verify release owner approval for the `latest` promotion

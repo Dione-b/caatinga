@@ -234,8 +234,8 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Release atual no npm **`next`**: **`2.4.5`** (`latest` permanece **`2.2.1`**). Destaques: `init --minimal`, `caatinga read`, guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`caatinga build` sem argumento), erro `CAATINGA_ZK_VERIFICATION_FAILED`.
-- **Distribuição:** dist-tag `next` em todos os pacotes publicados durante o alpha.
+- **Status:** alpha. Release atual no npm **`latest`**: **`3.1.2`**. Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `caatinga read`, guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`, progresso de install no CLI), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`caatinga build` sem argumento), overrides de dependências nos templates.
+- **Distribuição:** dist-tag `latest` em todos os pacotes publicados; `next` segue candidatos pré-release.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.
 

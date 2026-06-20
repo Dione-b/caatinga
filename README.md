@@ -30,7 +30,7 @@ Caatinga wires build, deploy, artifacts, typed bindings, and wallet adapters int
 > **Caatinga is a workflow layer for Soroban development.** It connects contracts, deployments, bindings, artifacts, and wallets into a single developer experience.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`next`** release: **`2.4.5`** (`latest` remains **`2.4.1`** until promoted). Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`latest`** release: **`3.1.2`**. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -207,19 +207,19 @@ See the [version contract](./docs/stellar-cli-version-contract.md).
 ## 🚀 Quick Start
 
 ```bash
-npx caatinga@next init my-dapp
+npx caatinga init my-dapp
 cd my-dapp
 npm install                # or: pnpm install — template ships overrides for a clean wallet SDK tree
 
-npx caatinga@next build  counter
-npx caatinga@next deploy counter --network testnet --source alice
-npx caatinga@next status --network testnet
+npx caatinga build  counter
+npx caatinga deploy counter --network testnet --source alice
+npx caatinga status --network testnet
 npm run dev
 ```
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 The current release ships on the **`next`** dist-tag (`2.4.5`); `latest` lags behind at `2.4.1` until promoted. Use `npx caatinga@next` (or pin an exact version like `npx caatinga@2.4.5`) to get the newest release.
+> 💡 The current release is **`3.1.2`** on npm **`latest`**. Use `npx caatinga` (or pin `npx caatinga@3.1.2`) for reproducible installs.
 
 📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 

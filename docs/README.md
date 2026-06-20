@@ -42,7 +42,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Quick orientation
 
-- **Current release:** `next` **`2.4.5`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`); `latest` **`2.2.1`**.
+- **Current release:** `latest` **`3.1.2`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`).
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in
