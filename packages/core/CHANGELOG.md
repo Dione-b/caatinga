@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.1.1
+
+### Patch Changes
+
+- 54a0e4f: Patch generated Soroban bindings for Vite: normalize binding `package.json` to `./src/index.ts` and add a root `index.ts` re-export after `caatinga generate`. Harden `zk-starter` with `caatinga:zk:setup`, clearer ZK artifact docs, and CI vite build checks.
+
 ## 3.0.2
 
 ### Patch Changes
