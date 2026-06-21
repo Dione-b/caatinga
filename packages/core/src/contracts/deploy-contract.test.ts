@@ -248,6 +248,81 @@ describe("deployContract", () => {
     vi.unstubAllGlobals();
   });
 
+  it("should_retry_transient_deploy_failures_until_success", async () => {
+    let deployAttempts = 0;
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        deployAttempts += 1;
+        if (deployAttempts === 1) {
+          throw new CaatingaError(
+            "Command failed: stellar contract deploy",
+            CaatingaErrorCode.DEPLOY_FAILED,
+            "transaction submission timeout"
+          );
+        }
+        return {
+          stdout: `deployed ${CONTRACT_ID}\n`,
+          stderr: "",
+          all: `deployed ${CONTRACT_ID}\n`,
+        };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-retry-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const deployPromise = deployContract({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+      deployRetryDelaysMs: [0],
+    });
+
+    const result = await deployPromise;
+
+    expect(result.contractId).toBe(CONTRACT_ID);
+    expect(deployAttempts).toBe(2);
+  });
+
+  it("should_not_retry_non_transient_deploy_failures", async () => {
+    let deployAttempts = 0;
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        deployAttempts += 1;
+        throw new CaatingaError(
+          "Command failed: stellar contract deploy",
+          CaatingaErrorCode.DEPLOY_FAILED,
+          "simulation failed: contract trap"
+        );
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-no-retry-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    await expect(
+      deployContract({
+        config: baseConfig,
+        contractName: "counter",
+        networkName: "testnet",
+        source: "alice",
+        cwd: tmpDir,
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.DEPLOY_FAILED });
+
+    expect(deployAttempts).toBe(1);
+  });
+
   it("should_map_stellar_deploy_command_failures_to_DEPLOY_FAILED", async () => {
     runCommand.mockImplementation(async (command: string, args: string[]) => {
       if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {

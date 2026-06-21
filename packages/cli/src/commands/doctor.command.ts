@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { CaatingaError, CaatingaErrorCode, loadConfig } from "@caatinga/core";
+import { loadConfig } from "@caatinga/core";
 import { runAllDiagnostics } from "../diagnostics/run-all.js";
 import { printDiagnostic, printFixes } from "../diagnostics/types.js";
 import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
@@ -22,7 +22,8 @@ function printDeployCoverageLine(line: DeployCoverageLine): void {
   if (line.fix) logger.info(`  ${line.fix}`);
 }
 
-export async function reportDeployCoverage(networkName: string): Promise<boolean> {
+/** Advisory only: missing deploy coverage never flips doctor to blocked. */
+export async function reportDeployCoverage(networkName: string): Promise<void> {
   const coverage = await evaluateDeployCoverage({ networkName });
 
   logger.info("");
@@ -33,14 +34,11 @@ export async function reportDeployCoverage(networkName: string): Promise<boolean
 
   if (!coverage.complete) {
     const missing = coverage.lines.filter((line) => !line.ok).map((line) => line.name);
-    throw new CaatingaError(
-      `Not all configured contracts are deployed on ${networkName}.`,
-      CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY,
-      `Deploy missing contracts: ${missing.join(", ")}. See the commands above.`
+    logger.info("");
+    logger.info(
+      `Advisory: not all configured contracts are deployed on ${networkName} (${missing.join(", ")}).`
     );
   }
-
-  return true;
 }
 
 function printBindingCoverageLine(line: BindingCoverageLine): void {
@@ -96,12 +94,7 @@ export function registerDoctorCommand(program: Command): void {
         }
 
         if (deployNetwork && ready) {
-          try {
-            await reportDeployCoverage(deployNetwork);
-          } catch (error) {
-            ready = false;
-            throw error;
-          }
+          await reportDeployCoverage(deployNetwork);
           await reportBindingCoverage(deployNetwork);
         }
 

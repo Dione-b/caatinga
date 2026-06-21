@@ -10,6 +10,7 @@ import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { parseContractId } from "../stellar-cli/parse-contract-id.js";
 import { tryRecoverContractIdFromDeployFailure } from "../stellar-cli/recover-deploy-contract-id.js";
+import { isTransientDeployFailure } from "./is-transient-deploy-failure.js";
 import { buildDependencyGraph } from "./dependency-graph.js";
 import { resolveDeployArgs, type DeployArgValue } from "./resolve-deploy-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
@@ -31,7 +32,22 @@ export type DeployContractOptions = {
   checkStaleWasm?: boolean;
   resolvedDeployArgs?: Record<string, DeployArgValue>;
   dependencies?: string[];
+  onTransientDeployRetry?: (info: {
+    attempt: number;
+    maxAttempts: number;
+    delayMs: number;
+  }) => void;
+  /** Override retry backoff delays (primarily for tests). */
+  deployRetryDelaysMs?: readonly number[];
 };
+
+const DEFAULT_DEPLOY_RETRY_DELAYS_MS = [2000, 5000] as const;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function toSnakeCaseFlag(key: string): string {
   return key
@@ -132,41 +148,72 @@ export async function deployContract(options: DeployContractOptions) {
     ...constructorArgs,
   ];
 
-  let output = "";
-  let contractId: string;
+  let deployOutcome: { output: string; contractId: string } | undefined;
+  const retryDelaysMs = options.deployRetryDelaysMs ?? DEFAULT_DEPLOY_RETRY_DELAYS_MS;
+  const maxDeployAttempts = retryDelaysMs.length + 1;
 
-  try {
-    const result = await runCommand("stellar", stellarArgs, {
-      cwd,
-      failureCode: CaatingaErrorCode.DEPLOY_FAILED,
-    });
-    output = result.all || `${result.stdout}\n${result.stderr}`;
-    contractId = parseContractId(output);
-  } catch (error) {
-    if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.DEPLOY_FAILED) {
-      throw error;
+  for (let attempt = 0; attempt < maxDeployAttempts; attempt++) {
+    try {
+      const result = await runCommand("stellar", stellarArgs, {
+        cwd,
+        failureCode: CaatingaErrorCode.DEPLOY_FAILED,
+      });
+      const output = result.all || `${result.stdout}\n${result.stderr}`;
+      deployOutcome = {
+        output,
+        contractId: parseContractId(output),
+      };
+      break;
+    } catch (error) {
+      if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.DEPLOY_FAILED) {
+        throw error;
+      }
+
+      const recoveredContractId = await tryRecoverContractIdFromDeployFailure({
+        output: `${error.message}\n${error.hint ?? ""}`,
+        source,
+        network: network.config,
+        cwd,
+      });
+
+      if (recoveredContractId) {
+        deployOutcome = {
+          output: [
+            error.hint ?? "",
+            "Caatinga recovered the contract ID from the on-chain deploy transaction.",
+            `Contract ID: ${recoveredContractId}`,
+          ]
+            .filter(Boolean)
+            .join("\n"),
+          contractId: recoveredContractId,
+        };
+        break;
+      }
+
+      const isLastAttempt = attempt === maxDeployAttempts - 1;
+      if (!isTransientDeployFailure(error) || isLastAttempt) {
+        throw error;
+      }
+
+      const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
+      options.onTransientDeployRetry?.({
+        attempt: attempt + 1,
+        maxAttempts: maxDeployAttempts,
+        delayMs,
+      });
+      await sleep(delayMs);
     }
-
-    const recoveredContractId = await tryRecoverContractIdFromDeployFailure({
-      output: `${error.message}\n${error.hint ?? ""}`,
-      source,
-      network: network.config,
-      cwd,
-    });
-
-    if (!recoveredContractId) {
-      throw error;
-    }
-
-    contractId = recoveredContractId;
-    output = [
-      error.hint ?? "",
-      "Caatinga recovered the contract ID from the on-chain deploy transaction.",
-      `Contract ID: ${contractId}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
   }
+
+  if (!deployOutcome) {
+    throw new CaatingaError(
+      "Deploy failed without a contract ID.",
+      CaatingaErrorCode.DEPLOY_FAILED,
+      "Re-run the deploy command with the underlying Stellar CLI for full diagnostics."
+    );
+  }
+
+  const { output, contractId } = deployOutcome;
   const wasmHash = await hashWasm(wasmPath);
   const dependencyGraph = buildDependencyGraph(options.config.contracts);
   const dependencies = options.dependencies ?? contract.config.dependsOn;

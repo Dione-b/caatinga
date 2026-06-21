@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client` (single-invoker wallet signing until v1.0).
 
-Install published packages from npm. The current line is **`3.2.0`** on **`latest`**. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+Install published packages from npm. The current line is **`3.2.0`** on **`next`**; **`latest`** is **`3.1.2`** until maintainers promote the release. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -25,16 +25,17 @@ stellar --version
 npm install -g @caatinga/cli
 ```
 
-Confirm the resolved versions (`latest` is currently **`3.2.0`**):
+Confirm the resolved dist-tags and versions:
 
 ```bash
+npm view @caatinga/cli dist-tags
 npm view @caatinga/cli version
 npm view @caatinga/core version
 npm view @caatinga/client version
 npm view @caatinga/zk version
 ```
 
-Without a global CLI install, use `npx caatinga@latest` in the commands below.
+For the current **`3.2.0`** line, install globally with `npm install -g @caatinga/cli@next` (or `@3.2.0`). Without a global CLI install, use `npx caatinga@3.2.0` or `npx caatinga@next` in the commands below.
 
 ## From the repository
 
@@ -58,7 +59,7 @@ The default template flow (`react-vite-counter`) is summarized below. Minimal an
 
 ## Generated app flow
 
-After `caatinga init` (global CLI) or `npx caatinga@latest init`:
+After `caatinga init` (global CLI on `@next` or `@3.2.0`) or `npx caatinga@3.2.0 init`:
 
 ```bash
 cd my-dapp

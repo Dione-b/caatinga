@@ -69,6 +69,10 @@ describe("CaatingaErrorCode", () => {
     }
   });
 
+  it("should_keep_DOCTOR_PARTIAL_DEPLOY_as_a_public_compatibility_code", () => {
+    expect(CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY).toBe("CAATINGA_DOCTOR_PARTIAL_DEPLOY");
+  });
+
   it("should_not_construct_public_errors_with_inline_unprefixed_codes", async () => {
     const violations: string[] = [];
 

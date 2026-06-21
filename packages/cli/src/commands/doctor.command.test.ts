@@ -70,7 +70,7 @@ describe("doctor command", () => {
     evaluateBindingCoverageMock.mockResolvedValue({ lines: [], allFresh: true });
   });
 
-  it("should_exit_with_code_1_when_default_network_has_partial_deploy_without_explicit_network_flag", async () => {
+  it("should_remain_ready_when_default_network_has_partial_deploy_without_explicit_network_flag", async () => {
     evaluateDeployCoverageMock.mockResolvedValue({
       complete: false,
       lines: [
@@ -86,7 +86,7 @@ describe("doctor command", () => {
 
     expect(loadConfigMock).toHaveBeenCalled();
     expect(evaluateDeployCoverageMock).toHaveBeenCalledWith({ networkName: "testnet" });
-    expect(process.exitCode).toBe(1);
+    expect(process.exitCode).toBeUndefined();
   });
 
   it("should_use_explicit_network_flag_when_provided", async () => {

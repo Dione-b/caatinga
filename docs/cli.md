@@ -42,8 +42,8 @@ Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`),
 
 With `--network`, doctor also compares every contract in `caatinga.config.ts` against
 `caatinga.artifacts.json` for that network. Each contract prints `✓` with its contract ID when
-deployed, or `✗` with a suggested `caatinga deploy` command when missing. If any contract is
-missing, doctor exits with code `1` and `CAATINGA_DOCTOR_PARTIAL_DEPLOY`.
+deployed, or `✗` with a suggested `caatinga deploy` command when missing. Missing deploy coverage
+is advisory only — it never flips doctor to `blocked` or changes the exit code.
 
 When the deploy coverage check passes, doctor also prints a `Bindings (<network>)` section with
 the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`, `missing`, or
@@ -53,7 +53,9 @@ is advisory only — it never flips doctor to `blocked`.
 ## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--allow-dev-ceremony]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
-CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first
+CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient testnet failures
+(for example transaction submission timeouts) are retried automatically with backoff before the
+command exits with `CAATINGA_DEPLOY_FAILED`. Dependencies deploy first
 when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
 contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
 Pass `--verify-deps` to confirm each dependency's contract ID exists on-chain (via

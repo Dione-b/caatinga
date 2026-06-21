@@ -77,6 +77,11 @@ export function registerDeployCommand(program: Command): void {
             force: options.force === true,
             checkStaleWasm: options.staleCheck !== false,
             verifyDeps: options.verifyDeps === true,
+            onTransientDeployRetry: ({ attempt, maxAttempts, delayMs }) => {
+              logger.warn(
+                `Deploy hit a transient testnet error (attempt ${attempt}/${maxAttempts}). Retrying in ${Math.round(delayMs / 1000)}s...`
+              );
+            },
           });
 
           for (const warning of result.staleWasmWarnings) {

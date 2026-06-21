@@ -1,7 +1,7 @@
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { resolveNetwork, type ResolvedNetwork } from "../networks/resolve-network.js";
-import { deployContract } from "./deploy-contract.js";
+import { deployContract, type DeployContractOptions } from "./deploy-contract.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveDeployOrder } from "./resolve-deploy-order.js";
 import { toSkippedContract, type SkippedContract } from "./deploy-skip.js";
@@ -31,6 +31,7 @@ export async function deployContractGraph(options: {
   force: boolean;
   checkStaleWasm?: boolean;
   verifyDeps?: boolean;
+  onTransientDeployRetry?: DeployContractOptions["onTransientDeployRetry"];
 }): Promise<DeployContractGraphResult> {
   const cwd = options.cwd ?? process.cwd();
   const network = resolveNetwork(options.config, options.networkName);
@@ -78,6 +79,7 @@ export async function deployContractGraph(options: {
       checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
       dependencies: contractConfig.dependsOn,
+      onTransientDeployRetry: options.onTransientDeployRetry,
     });
 
     if (result.staleWasmWarning) {

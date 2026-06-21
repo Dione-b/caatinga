@@ -2,7 +2,7 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm **`latest`** (currently **`3.2.0`**).
+Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. The current line is **`3.2.0`** on **`next`** (`latest` is **`3.1.2`** until promoted).
 
 ## Prerequisites
 
@@ -16,13 +16,16 @@ stellar --version
 rustc --version
 ```
 
-Confirm the published versions (`latest` is currently **`3.2.0`**):
+Confirm the published dist-tags and versions:
 
 ```bash
+npm view @caatinga/cli dist-tags
 npm view @caatinga/cli version
 npm view @caatinga/core version
 npm view @caatinga/client version
 ```
+
+For the current line, prefer `npm install -g @caatinga/cli@next` or `@3.2.0`.
 
 Create and fund a local Stellar CLI identity:
 
@@ -42,7 +45,7 @@ npm install
 
 `pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
 
-Without a global CLI install, run `npx caatinga@latest init my-dapp` instead of `caatinga init`.
+Without a global CLI install, run `npx caatinga@3.2.0 init my-dapp` (or `npx caatinga@next init my-dapp`) instead of `caatinga init`.
 
 The default template creates:
 
@@ -178,7 +181,7 @@ default template, see [Wallets](../wallets.md).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
   If you have `CARGO_TARGET_DIR` set, Stellar CLI writes the Wasm under that directory instead of `contracts/<name>/target`. Caatinga `2.4.1+` resolves the Wasm from `CARGO_TARGET_DIR` automatically, but if it still fails, unset `CARGO_TARGET_DIR` or update the `wasm` path in `caatinga.config.ts`.
-- `CAATINGA_DOCTOR_PARTIAL_DEPLOY`: one or more configured contracts lack a `contractId` on the selected network. Run the `caatinga deploy` commands printed by `caatinga doctor --network <name>`.
+- Partial deploy coverage: `caatinga doctor` prints missing `contractId`s as an advisory section (exit code stays `0` when the toolchain is ready). Run the `caatinga deploy` commands it suggests before invoke/read on testnet.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
 - `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0 or newer (25.2.0 recommended). Versions newer than the last-tested 25.2.0 run with a non-fatal stderr advisory; no override flag is required.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.

@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CaatingaConfig } from "@caatinga/core";
-import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import { evaluateDeployCoverage } from "./doctor-deploy-coverage.js";
 import { reportDeployCoverage } from "./doctor.command.js";
 
@@ -131,7 +130,7 @@ describe("reportDeployCoverage", () => {
     });
   });
 
-  it("should_throw_DOCTOR_PARTIAL_DEPLOY_when_coverage_is_incomplete", async () => {
+  it("should_print_advisory_when_coverage_is_incomplete_without_throwing", async () => {
     readArtifactsMock.mockResolvedValue({
       project: "marketplace-app",
       version: 1,
@@ -145,9 +144,6 @@ describe("reportDeployCoverage", () => {
       },
     });
 
-    await expect(reportDeployCoverage("testnet")).rejects.toMatchObject({
-      code: CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY,
-    });
-    await expect(reportDeployCoverage("testnet")).rejects.toBeInstanceOf(CaatingaError);
+    await expect(reportDeployCoverage("testnet")).resolves.toBeUndefined();
   });
 });

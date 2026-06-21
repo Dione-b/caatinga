@@ -33,7 +33,7 @@ Caatinga does not reimplement Soroban. It composes the official stack and keeps 
 > **One-line promise:** a reproducible workflow to create, compile, deploy, generate bindings, invoke, and wire browser clients for Soroban contracts — without hiding how Stellar works.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`latest`** release: **`3.2.0`**. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. On npm, **`latest`** is **`3.1.2`** and the current **`3.2.0`** line is on **`next`**. Pin an exact version (`npx caatinga@3.2.0`) or use `@next` for the current line; check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -273,7 +273,7 @@ npm run dev
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 The current release is **`3.2.0`** on npm **`latest`**. Use `npx caatinga` (or pin `npx caatinga@3.2.0`) for reproducible installs.
+> 💡 The current line is **`3.2.0`** on npm **`next`** (`latest` is **`3.1.2`** until promoted). Use `npx caatinga@3.2.0` or `npx caatinga@next` for reproducible installs of the current line.
 
 📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
