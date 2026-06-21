@@ -33,7 +33,7 @@ Caatinga does not reimplement Soroban. It composes the official stack and keeps 
 > **One-line promise:** a reproducible workflow to create, compile, deploy, generate bindings, invoke, and wire browser clients for Soroban contracts — without hiding how Stellar works.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. On npm, **`latest`** is **`3.1.2`** and the current **`3.2.0`** line is on **`next`**. Pin an exact version (`npx caatinga@3.2.0`) or use `@next` for the current line; check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. npm **`latest`** is **`3.1.2`**; **`3.2.0`** is on **`next`**. Pin `npx caatinga@3.2.0` or `@next`; check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 

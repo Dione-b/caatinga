@@ -85,7 +85,7 @@ export function registerDoctorCommand(program: Command): void {
 
         printFixes(diagnostics);
 
-        let ready = diagnostics.every((diagnostic) => diagnostic.ok);
+        const ready = diagnostics.every((diagnostic) => diagnostic.ok);
 
         let deployNetwork = options.network;
         if (!deployNetwork && ready) {
