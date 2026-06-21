@@ -16,6 +16,15 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 - Wallet adapter documentation beyond Freighter (shipped in `docs/wallets.md`).
 - Multi-contract deploy with dependencies via `dependsOn` and deploy-arg placeholders (shipped, ADR 0005).
 
+## Production Readiness (in progress)
+
+- Artifact history and `caatinga migrate artifacts` (schema v2).
+- `caatinga estimate deploy` — pre-deploy cost advisory.
+- `caatinga inspect` — on-chain vs local artifact comparison.
+- `caatinga rollback` — logical artifact restore.
+- [Signing strategy](docs/signing-strategy.md) and [production readiness checklist](docs/production-readiness.md).
+- Stellar CLI and SDK version matrices with CI validation.
+
 ## Beta
 
 - Generate XDR transaction flows for advanced wallet/debug use cases.

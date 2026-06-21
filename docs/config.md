@@ -82,19 +82,24 @@ Root config:
 
 ## Artifacts
 
-Artifacts are network-scoped in schema `version: 1` so `counter` can have different contract IDs
-on testnet and mainnet. Environments are intentionally not modeled yet; a future artifact schema
-can distinguish `dev -> testnet`, `staging -> testnet`, and `production -> mainnet`.
+Artifacts are network-scoped so `counter` can have different contract IDs on testnet and mainnet.
+Schema **v2** is current; v1 files are still readable. Run `caatinga migrate artifacts` to bump the
+file version without redeploying.
 
-Top-level shape: `project` (string), `version` (literal `1`), and `networks`
-(`Record<network, { contracts, dependencyGraph }>`). `dependencyGraph` is
-`Record<contractName, string[]>`. Before any deploy, `contracts` and
-`dependencyGraph` are empty:
+**Multi-frontend:** one `caatinga.artifacts.json` per Caatinga project root. Multiple apps (web,
+admin, mobile wrapper) should import the same artifacts file and generated bindings — do not fork
+artifacts per frontend.
+
+**Multi-environment** (staging vs production on the same network) is **not** supported yet. Use git
+branches, separate Caatinga projects, or wait for a future `environments` dimension in v1.0+.
+
+Top-level shape: `project` (string), `version` (`1` or `2`), and `networks`
+(`Record<network, { contracts, dependencyGraph }>`). New projects initialize with `version: 2`.
 
 ```json
 {
   "project": "my-dapp",
-  "version": 1,
+  "version": 2,
   "networks": {
     "testnet": {
       "contracts": {},
@@ -110,7 +115,7 @@ After a deploy, each contract is recorded under
 ```json
 {
   "project": "my-dapp",
-  "version": 1,
+  "version": 2,
   "networks": {
     "testnet": {
       "contracts": {

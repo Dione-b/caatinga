@@ -2,18 +2,18 @@
 
 <img src="https://img.shields.io/badge/-CAATINGA-2D7D46?style=for-the-badge&labelColor=1a1a1a" alt="Caatinga" />
 
-### The Hardhat of Soroban
+### Git-versioned Soroban deploy artifacts + multi-contract orchestration
 
-**A TypeScript-native maestro that unifies Stellar's official tools into one predictable workflow.**
+**From `init` to wallet-ready browser client in one afternoon — without a hosted registry or hidden Stellar primitives.**
 
-npm-first · git-driven · orchestrates `@stellar/stellar-sdk` · ZK dev workflow
+git-driven · multi-contract · npm-first · TypeScript-native
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
 [![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli&logo=npm)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#)
 
-[Quick Start](#-quick-start) · [Why Caatinga](#-the-problem) · [Docs](#-docs) · [CLI](#-cli-reference)
+[Quick Start](#-quick-start) · [When it pays off](#-when-caatinga-pays-off) · [Docs](#-docs) · [CLI](#-cli-reference)
 
 </div>
 
@@ -24,16 +24,15 @@ npm install -g @caatinga/cli
 caatinga init my-dapp
 ```
 
-The Stellar ecosystem ships powerful official pieces — Stellar CLI, `@stellar/stellar-sdk`, generated bindings — but TypeScript teams still had to wire them together by hand.
+TypeScript teams building on Soroban still wire Stellar CLI, bindings, and wallet integration by hand — and lose track of contract IDs across networks and teammates.
 
-Caatinga is the **workflow layer** that keeps a predictable path from contract to **single-invoker wallet-ready** client: **init → build → deploy → generate → invoke → browser** — even when upstream tooling changes flags, stdout, or paths.
+Caatinga keeps **deploy artifacts in git** (`caatinga.artifacts.json`), orchestrates **multi-contract deploy graphs**, and ships a **wallet-ready client** — without a mandatory registry or hidden Stellar primitives.
 
-Caatinga does not reimplement Soroban. It composes the official stack and keeps the mental model visible: `contractId`, RPC URLs, network passphrases, signing identities, and XDR stay explicit (no magic).
-
-> **One-line promise:** a reproducible workflow to create, compile, deploy, generate bindings, invoke, and wire browser clients for Soroban contracts — without hiding how Stellar works.
+> **One-line promise:** version-controlled deployment artifacts + reproducible contract-to-browser workflow for teams that want sovereignty over their Soroban stack.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. npm **`latest`** is **`3.1.2`**; **`3.2.0`** is on **`next`**. Pin `npx caatinga@3.2.0` or `@next`; check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software (pre-1.0 development line).** The `3.x` npm major does **not** imply API stability — formats may change before `v1.0.0`.
+> npm **`latest`** is **`3.1.2`**; **`3.3.0`** is on **`next`**. Pin `npx caatinga@3.3.0` or `@next`; see the [CHANGELOG](./packages/cli/CHANGELOG.md).
 
 <br />
 
@@ -76,23 +75,6 @@ That matters for teams that want **full sovereignty** and **clean CI/CD**: deplo
 Optional hosted services (dashboards, metadata indexes) may arrive later, but they will remain **optional** and never a hard dependency of `@caatinga/core` or `@caatinga/cli`. See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md) for the full rationale.
 
 > Want a Rust-centric workflow with an on-chain registry and a bundled full-stack frontend? Another tool may suit you better. Caatinga is for builders who want a **lightweight, transparent, TypeScript-native** path from contract to single-invoker wallet-ready client.
-
-<br />
-
-## 🔐 Built-in ZK workflow
-
-Zero-knowledge proofs on Soroban are still hard to bootstrap. **`@caatinga/zk`** bundles Circom, Groth16 (BLS12-381, Protocol 25+), and a Soroban verifier contract in one CLI workflow.
-
-**`caatinga zk build` runs a single-party development ceremony** suitable for testnet/dev only. Production requires an external MPC ceremony; mainnet deploy/invoke with dev artifacts is blocked by default (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`). `--embed-vk` is experimental and not end-to-end yet.
-
-```bash
-caatinga zk init      # scaffold a verifier contract + circuit
-caatinga zk build     # compile Circom, run dev trusted setup
-caatinga zk prove     # generate proof.json + public.json
-caatinga zk invoke --source alice    # serialize the proof and call verify_proof on-chain
-```
-
-See the [ZK docs](./docs/zk.md) and the [zk-starter template](./docs/tutorials/zk-project.md) for a working multiplier + verifier walkthrough.
 
 <br />
 
@@ -163,17 +145,24 @@ Caatinga tracks that gap:
 
 <br />
 
+## 🎯 When Caatinga pays off
+
+- **2+ contracts** with deploy dependencies (`dependsOn`, topological deploy order)
+- **Multiple networks** (testnet, futurenet) tracked in git — not in a spreadsheet
+- **Small TypeScript team** shipping a browser dApp without hand-parsing CLI stdout
+- **CI/CD** that needs stable `CAATINGA_*` error codes and artifact-driven automation
+
 ## ⚖️ Without Caatinga
 
-Build contract → Deploy contract → Track contract ID → Generate bindings → Update frontend → Configure wallet integration → **Repeat for every environment.**
+Build contract → Deploy contract → Track contract ID manually → Generate bindings → Update frontend imports → Configure wallet integration → **Repeat for every environment and every teammate.**
 
 ## ✅ With Caatinga
 
 ```bash
-caatinga deploy counter --network testnet
+caatinga deploy counter --network testnet --source alice
 ```
 
-Caatinga updates artifacts, regenerates bindings, validates deployment state, and keeps frontend integrations synchronized.
+Artifacts update in git, bindings regenerate, deployment state validates, and frontend integrations stay synchronized.
 
 <br />
 
@@ -273,7 +262,7 @@ npm run dev
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 The current line is **`3.2.0`** on npm **`next`** (`latest` is **`3.1.2`** until promoted). Use `npx caatinga@3.2.0` or `npx caatinga@next` for reproducible installs of the current line.
+> 💡 The current line is **`3.3.0`** on npm **`next`** (`latest` is **`3.1.2`** until promoted). Use `npx caatinga@3.3.0` or `npx caatinga@next` for reproducible installs of the current line.
 
 📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
@@ -294,28 +283,51 @@ my-dapp/
 
 ## ⌨️ CLI Reference
 
-| Command                             | What it does                                                                   |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| `caatinga init <dir>`               | Create a project from a template                                               |
-| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network & binding freshness  |
-| `caatinga build [contract]`         | Compile contract WASM _(default: `counter`)_                                   |
-| `caatinga deploy [contract]`        | Deploy, save `contractId` to artifacts, auto-generate bindings                 |
-| `caatinga generate [contract]`      | (Re)generate TS bindings — recovery/CI path, deploy does it for you            |
-| `caatinga status`                   | Show deployed contracts + binding freshness per network (`--json` for scripts) |
-| `caatinga invoke <contract.method>` | Call a state-changing contract method                                          |
-| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                              |
+| Command                               | What it does                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `caatinga init <dir>`                 | Create a project from a template                                               |
+| `caatinga doctor`                     | Check Node, Stellar CLI, Rust, config, artifacts, network & binding freshness  |
+| `caatinga build [contract]`           | Compile contract WASM _(default: `counter`)_                                   |
+| `caatinga deploy [contract]`          | Deploy, save `contractId` to artifacts, auto-generate bindings                 |
+| `caatinga generate [contract]`        | (Re)generate TS bindings — recovery/CI path, deploy does it for you            |
+| `caatinga status`                     | Show deployed contracts + binding freshness per network (`--json` for scripts) |
+| `caatinga invoke <contract.method>`   | Call a state-changing contract method                                          |
+| `caatinga read <contract.method>`     | Simulate a read-only contract method (no signing)                              |
+| `caatinga estimate deploy <contract>` | Estimate deploy fees (advisory)                                                |
+| `caatinga inspect <contract>`         | Compare artifact state vs on-chain reachability and local WASM                 |
+| `caatinga migrate artifacts`          | Upgrade `caatinga.artifacts.json` to schema v2                                 |
+| `caatinga rollback <contract>`        | Restore a prior contract ID in artifacts (logical rollback)                    |
 
 **Common flags**
 
-| Flag               | Description                                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `--source`         | Local Stellar CLI identity that can sign (e.g. `alice`). Public `G...` addresses are **not** accepted for signing. |
-| `--network`        | Network from `caatinga.config.ts` (e.g. `testnet`)                                                                 |
-| `--force`          | Redeploy even if artifacts already hold a contract ID                                                              |
-| `--no-generate`    | Skip automatic bindings generation after deploy                                                                    |
-| `--no-deps`        | Deploy a single contract without its `dependsOn` graph                                                             |
-| `--verify-deps`    | Confirm dependency contract IDs exist on-chain first                                                               |
-| `--no-stale-check` | Skip the WASM-older-than-sources warning                                                                           |
+| Flag               | Description                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `--source`         | Local Stellar CLI identity that can sign (e.g. `alice`). Public `G...` addresses are **not** accepted for signing.          |
+| `--network`        | Network from `caatinga.config.ts` (e.g. `testnet`)                                                                          |
+| `--force`          | Redeploy even if artifacts already hold a contract ID                                                                       |
+| `--no-generate`    | Skip automatic bindings generation after deploy                                                                             |
+| `--no-deps`        | Deploy a single contract without its `dependsOn` graph                                                                      |
+| `--verify-deps`    | Confirm dependency contract IDs exist on-chain first                                                                        |
+| `--no-stale-check` | Skip the WASM-older-than-sources warning                                                                                    |
+| `--upgrade`        | Semantic alias for `--force` — redeploy with upgrade history (see [contract upgrade](./docs/tutorials/contract-upgrade.md)) |
+| `--dry-run`        | Estimate deploy cost without submitting (alias for `caatinga estimate deploy`)                                              |
+
+<br />
+
+## 🔐 Advanced: ZK workflow
+
+Zero-knowledge proofs on Soroban are a **niche** workflow — not required for most dApps. **`@caatinga/zk`** bundles Circom, Groth16 (BLS12-381, Protocol 25+), and a Soroban verifier contract in one CLI workflow.
+
+**`caatinga zk build` runs a single-party development ceremony** suitable for testnet/dev only. Production requires an external MPC ceremony; mainnet deploy/invoke with dev artifacts is blocked by default (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`). `--embed-vk` is experimental and not end-to-end yet.
+
+```bash
+caatinga zk init      # scaffold a verifier contract + circuit
+caatinga zk build     # compile Circom, run dev trusted setup
+caatinga zk prove     # generate proof.json + public.json
+caatinga zk invoke --source alice    # serialize the proof and call verify_proof on-chain
+```
+
+See the [ZK docs](./docs/zk.md) and the [zk-starter template](./docs/tutorials/zk-project.md) for a working multiplier + verifier walkthrough.
 
 <br />
 
@@ -337,15 +349,17 @@ Currently **alpha.** The roadmap prioritizes CLI stability, docs, error contract
 
 Full index: [docs/README.md →](./docs/README.md)
 
-|                                                          |                                                                      |
-| -------------------------------------------------------- | -------------------------------------------------------------------- |
-| [Getting started](./docs/getting-started.md)             | [Choosing a project scaffold](./docs/tutorials/project-scaffolds.md) |
-| [Template project](./docs/tutorials/template-project.md) | [Minimal project](./docs/tutorials/minimal-project.md)               |
-| [ZK project](./docs/tutorials/zk-project.md)             | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md)     |
-| [Cheatsheet](./docs/cheatsheet.md)                       | [CLI reference](./docs/cli.md)                                       |
-| [Client](./docs/client.md)                               | [Wallets](./docs/wallets.md)                                         |
-| [Config](./docs/config.md)                               | [Errors](./docs/errors.md)                                           |
-| [Release process](./docs/release.md)                     | [Architecture](./docs/architecture.md)                               |
+|                                                               |                                                                      |
+| ------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Getting started](./docs/getting-started.md)                  | [Choosing a project scaffold](./docs/tutorials/project-scaffolds.md) |
+| [Template project](./docs/tutorials/template-project.md)      | [Minimal project](./docs/tutorials/minimal-project.md)               |
+| [ZK project](./docs/tutorials/zk-project.md)                  | [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md)     |
+| [Cheatsheet](./docs/cheatsheet.md)                            | [CLI reference](./docs/cli.md)                                       |
+| [Client](./docs/client.md)                                    | [Wallets](./docs/wallets.md)                                         |
+| [Config](./docs/config.md)                                    | [Errors](./docs/errors.md)                                           |
+| [Release process](./docs/release.md)                          | [Architecture](./docs/architecture.md)                               |
+| [Signing strategy](./docs/signing-strategy.md)                | [Production readiness](./docs/production-readiness.md)               |
+| [Case study: counter-web](./docs/case-studies/counter-web.md) | [Contract upgrade](./docs/tutorials/contract-upgrade.md)             |
 
 <br />
 

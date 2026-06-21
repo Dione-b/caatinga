@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import {
   deployContractGraph,
+  estimateDeployCost,
   generateBindingsGraph,
   toCaatingaError,
   CaatingaError,
@@ -26,6 +27,8 @@ export function registerDeployCommand(program: Command): void {
       "Stellar CLI identity alias that can sign (for example alice)"
     )
     .option("--force", "Redeploy contracts even if artifacts already contain contract IDs")
+    .option("--upgrade", "Redeploy with upgrade history (alias for --force with upgrade reason)")
+    .option("--dry-run", "Estimate deploy cost without submitting (runs caatinga estimate deploy)")
     .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
@@ -41,6 +44,8 @@ export function registerDeployCommand(program: Command): void {
           network?: string;
           source: string;
           force?: boolean;
+          upgrade?: boolean;
+          dryRun?: boolean;
           deps?: boolean;
           staleCheck?: boolean;
           verifyDeps?: boolean;
@@ -59,6 +64,30 @@ export function registerDeployCommand(program: Command): void {
 
           const config = await loadConfig();
           const { name: networkName } = resolveNetwork(config, options.network);
+
+          if (options.dryRun) {
+            const target = contractName ?? Object.keys(config.contracts)[0];
+            if (!target) {
+              throw new CaatingaError(
+                "No contract configured for deploy estimate.",
+                CaatingaErrorCode.INVALID_CONFIG,
+                "Add a contract to caatinga.config.ts or pass a contract name."
+              );
+            }
+
+            const estimate = await estimateDeployCost({
+              config,
+              contractName: target,
+              networkName: options.network,
+              source: options.source,
+            });
+
+            logger.info(`Deploy estimate: ${estimate.contractName} (${estimate.network})`);
+            logger.info(`Total (estimate): ${estimate.totalFeeStroops} stroops`);
+            logger.warn(estimate.advisory);
+            return;
+          }
+
           const contractNames = resolveContractNamesForDeploy(config, contractName);
 
           await assertZkVerifierDeployAllowed({
@@ -68,13 +97,16 @@ export function registerDeployCommand(program: Command): void {
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 
+          const force = options.force === true || options.upgrade === true;
+
           const result = await deployContractGraph({
             config,
             contractName,
             networkName: options.network,
             source: options.source,
             includeDependencies: options.deps !== false,
-            force: options.force === true,
+            force,
+            upgrade: options.upgrade === true,
             checkStaleWasm: options.staleCheck !== false,
             verifyDeps: options.verifyDeps === true,
             onTransientDeployRetry: ({ attempt, maxAttempts, delayMs }) => {

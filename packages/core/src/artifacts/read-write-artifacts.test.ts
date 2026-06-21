@@ -25,11 +25,11 @@ describe("writeArtifacts and readArtifacts", () => {
     const loaded = await readArtifacts(tmpDir);
 
     expect(loaded.project).toBe("app");
-    expect(loaded.version).toBe(1);
+    expect(loaded.version).toBe(2);
     expect(loaded.networks.testnet?.contracts).toEqual({});
 
     const raw = await readFile(path.join(tmpDir, "caatinga.artifacts.json"), "utf8");
-    expect(JSON.parse(raw).version).toBe(1);
+    expect(JSON.parse(raw).version).toBe(2);
   });
 
   it("should_create_initial_artifacts_with_network_scaffold", () => {
@@ -37,7 +37,7 @@ describe("writeArtifacts and readArtifacts", () => {
 
     expect(initial).toEqual({
       project: "app",
-      version: 1,
+      version: 2,
       networks: {
         testnet: {
           contracts: {},

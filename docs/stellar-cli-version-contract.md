@@ -29,6 +29,22 @@ Warning: Stellar CLI 26.0.0 is newer than the last-tested 25.2.0; proceeding wit
   Pin Stellar CLI to the last-tested version, or update Caatinga after re-running the parser fixtures.
 ```
 
+The optional `features` argument lists **missing** capabilities. At runtime, `checkStellarCliVersion()` probes the installed binary for `contract-build`, `contract-deploy`, and `contract-invoke-sign` subcommands and appends any missing ids before evaluating compatibility.
+
+## Version matrix
+
+| Version | Status              | Build    | Deploy   | Invoke         | Bindings    | Fixture coverage      |
+| ------- | ------------------- | -------- | -------- | -------------- | ----------- | --------------------- |
+| 22.x    | **blocked**         | —        | parses\* | broken signing | —           | `v22.0.0/`            |
+| 23.0.0  | supported (floor)   | ✓        | ✓        | ✓              | SDK (`npx`) | min-version gate only |
+| 24.0.0  | supported           | ✓        | ✓        | ✓              | SDK         | `v24.0.0/`            |
+| 25.2.0  | **last-tested**     | ✓        | ✓        | ✓              | SDK         | `v25.2.0/` + CI pin   |
+| 26.0.0+ | untested (advisory) | fixtures | fixtures | fixtures       | SDK         | `v26.0.0/`            |
+
+\*22.x deploy stdout still parses, but invoke signing fails — Caatinga hard-fails below 23.0.0 before any command runs.
+
+Bindings generation uses `npx @stellar/stellar-sdk generate` — see [Stellar SDK version contract](./stellar-sdk-version-contract.md).
+
 ## Compatibility Mechanism
 
 `@caatinga/core` exports `evaluateStellarCliCompatibility({ version, features?, lastTestedVersion? })`, which returns a structured `CompatibilityReport`:
@@ -49,7 +65,7 @@ type CompatibilityReport = {
 - `status === "untested"` => emit warnings; do not throw.
 - `status === "supported"` => proceed silently.
 
-The optional `features` argument is a forward-compatible hook for future capability checks. When a feature is missing, the report is downgraded to `"untested"` and a `STELLAR_CLI_MISSING_FEATURE` warning is appended. No live probe is performed yet; the hook is wired through the API and tests only.
+The optional `features` argument is a forward-compatible hook for capability checks. When a feature is missing, the report is downgraded to `"untested"` and a `STELLAR_CLI_MISSING_FEATURE` warning is appended. Live probes run in `checkStellarCliVersion()` unless `probeFeatures: false`.
 
 ## Recommended Install
 
@@ -68,6 +84,7 @@ stellar --version
 
 ## CI Rule
 
-CI installs Stellar CLI via `stellar/stellar-cli@v25.2.0` in `.github/workflows/ci.yml` (adjust
-the tag when raising `STELLAR_CLI_LAST_TESTED_VERSION`). Parser fixture tests run on every push
-and pull request.
+CI installs Stellar CLI via `stellar/stellar-cli@v25.2.0` in `.github/workflows/ci.yml` for the main test job (adjust
+the tag when raising `STELLAR_CLI_LAST_TESTED_VERSION`).
+
+A separate **`stellar-cli-matrix`** job installs `23.0.0`, `24.0.0`, and `25.2.0` and runs live capability probes plus parser fixture matrix tests (`stellar-cli-fixture-matrix.test.ts`). Parser fixture tests also run on every push in the main `ci` job.

@@ -5,12 +5,15 @@ import {
   type CompatibilityReport,
   type CompatibilityWarning,
 } from "./compat.js";
+import { probeMissingStellarCliFeatures } from "./probe-stellar-cli-features.js";
 import { parseStellarCliVersion } from "./version.js";
 
 export type CheckStellarCliVersionOptions = {
   features?: readonly string[];
   lastTestedVersion?: string;
   onWarning?: (warning: CompatibilityWarning) => void;
+  /** When false, skip live capability probes (used in unit tests). Default true. */
+  probeFeatures?: boolean;
 };
 
 export async function checkStellarCliVersion(
@@ -36,9 +39,14 @@ export async function checkStellarCliVersion(
     throw error;
   }
 
+  const version = parseStellarCliVersion(rawOutput);
+  const probedMissing =
+    input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version);
+  const missingFeatures = [...(input.features ?? []), ...probedMissing];
+
   const report = evaluateStellarCliCompatibility({
-    version: parseStellarCliVersion(rawOutput),
-    features: input.features,
+    version,
+    features: missingFeatures.length > 0 ? missingFeatures : undefined,
     lastTestedVersion: input.lastTestedVersion,
   });
 

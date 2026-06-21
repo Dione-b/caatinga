@@ -4,7 +4,7 @@ This document is the **canonical product and architecture stance** for Caatinga.
 
 ## One-sentence promise
 
-**Caatinga keeps a predictable, reproducible workflow to create, compile, deploy, generate bindings, invoke, and wire browser clients for Soroban contracts—even when Stellar tooling changes operational details.**
+**Git-versioned Soroban deploy artifacts + multi-contract orchestration for TypeScript teams that want sovereignty — from scaffold to wallet-ready browser client without a hosted registry.**
 
 That does not mean hiding Stellar reality. Users keep a **stable Caatinga surface** (`caatinga build`, `caatinga deploy`, `caatinga generate`, `caatinga invoke`, `@caatinga/client`). Changes in flags, stdout, paths, transaction/XDR workflow, and subprocess composition are absorbed behind small adapters, not scattered across user scripts.
 
@@ -32,7 +32,19 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 | Browser integration | `@caatinga/client` with pluggable wallet adapters   | Generated TS clients + Vite/React template                   |
 | Error surface       | Stable `CAATINGA_*` codes for automation            | Stellar CLI / plugin errors                                  |
 
-**What Caatinga should do unusually well:** standardize Stellar/Soroban steps, persist **per-network** deployment facts, generate frontend integration from deployed contracts, avoid manual `contractId` wiring in the app, make XDR visible when debugging, support **multi-contract** reproducible deploys later, and lower friction for JS/TS teams.
+**What Caatinga should do unusually well:** (1) persist **git-versioned per-network** deployment artifacts, (2) orchestrate **multi-contract** deploy graphs with `dependsOn`, (3) ship **wallet-ready browser client** integration, (4) track **binding freshness**, and (5) lower friction for JS/TS teams — CLI orchestration is infrastructure supporting those outcomes, not the headline value.
+
+## Competitive moat
+
+| Moat                            | Why it matters                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------ |
+| Portable artifacts file         | Exit Caatinga without losing deploy history — `caatinga.artifacts.json` stays in your repo |
+| `CAATINGA_*` error API          | Stable automation surface for CI/CD                                                        |
+| Parser fixtures + adapters      | Absorb Stellar CLI stdout drift without user script churn                                  |
+| npm-first, no on-chain registry | Sovereignty for teams that reject mandatory registry workflows                             |
+| Multi-contract DAG deploy       | Topological deploy + `${contracts.*.contractId}` placeholders                              |
+
+**Honest risk:** SDF may integrate overlapping workflow pieces into Stellar CLI or Scaffold Stellar. Caatinga competes on **TypeScript DX + git artifacts + multi-contract orchestration**, not on reimplementing Soroban or replacing the official SDK.
 
 ## Validation roadmap (flows)
 

@@ -37,12 +37,16 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | [Release process](./release.md)                                   | Changesets, dist-tags, release gate        |
 | [v1 viability index](./release/v1-viability-index.md)             | Stable-release blocking specs              |
 | [Stellar CLI version contract](./stellar-cli-version-contract.md) | Supported Stellar CLI range and advisories |
+| [Stellar SDK version contract](./stellar-sdk-version-contract.md) | Supported `@stellar/stellar-sdk` range     |
+| [Signing strategy](./signing-strategy.md)                         | CLI and browser signing models             |
+| [Production readiness](./production-readiness.md)                 | Pre-mainnet checklist                      |
+| [Case studies](./case-studies/counter-web.md)                     | Reference implementations                  |
 | [Packages](./packages.md)                                         | What each npm package contains             |
 | [ADRs](./adr/)                                                    | Architecture decision records              |
 
 ## Quick orientation
 
-- **Current release:** **`3.2.0`** on npm **`next`**; **`latest`** is **`3.1.2`** until promoted (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`). Confirm with `npm view @caatinga/cli dist-tags`.
+- **Current release:** **`3.3.0`** on npm **`next`**; **`latest`** is **`3.1.2`** until promoted (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`). Confirm with `npm view @caatinga/cli dist-tags`.
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in

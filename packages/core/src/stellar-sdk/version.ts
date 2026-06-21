@@ -1,0 +1,2 @@
+export const STELLAR_SDK_MIN_VERSION = "16.0.1";
+export const STELLAR_SDK_LAST_TESTED_VERSION = "16.0.1";

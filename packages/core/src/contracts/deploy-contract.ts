@@ -29,6 +29,7 @@ export type DeployContractOptions = {
   source?: string;
   cwd?: string;
   force?: boolean;
+  upgrade?: boolean;
   checkStaleWasm?: boolean;
   resolvedDeployArgs?: Record<string, DeployArgValue>;
   dependencies?: string[];
@@ -217,6 +218,12 @@ export async function deployContract(options: DeployContractOptions) {
   const wasmHash = await hashWasm(wasmPath);
   const dependencyGraph = buildDependencyGraph(options.config.contracts);
   const dependencies = options.dependencies ?? contract.config.dependsOn;
+  const supersedeReason =
+    existing?.contractId && options.force
+      ? options.upgrade
+        ? ("upgrade" as const)
+        : ("force-redeploy" as const)
+      : undefined;
 
   const nextArtifacts = updateArtifact(
     artifactsBefore,
@@ -231,7 +238,7 @@ export async function deployContract(options: DeployContractOptions) {
       dependencies,
       resolvedDeployArgs,
     },
-    { dependencyGraph }
+    { dependencyGraph, supersedeReason }
   );
   const artifactsPath = await writeArtifacts(nextArtifacts, cwd);
 

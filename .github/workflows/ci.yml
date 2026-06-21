@@ -44,3 +44,38 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  stellar-cli-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stellar-version: ["23.0.0", "24.0.0", "25.2.0"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Stellar CLI ${{ matrix.stellar-version }}
+        uses: stellar/stellar-cli@${{ matrix.stellar-version }}
+
+      - name: Verify Stellar CLI version
+        run: stellar --version
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Fixture matrix tests
+        run: pnpm --filter @caatinga/core test -- stellar-cli-fixture-matrix
+
+      - name: Live capability probe
+        run: pnpm --filter @caatinga/core test -- probe-stellar-cli-features

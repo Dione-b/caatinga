@@ -29,6 +29,7 @@ export async function deployContractGraph(options: {
   cwd?: string;
   includeDependencies: boolean;
   force: boolean;
+  upgrade?: boolean;
   checkStaleWasm?: boolean;
   verifyDeps?: boolean;
   onTransientDeployRetry?: DeployContractOptions["onTransientDeployRetry"];
@@ -76,6 +77,7 @@ export async function deployContractGraph(options: {
       source: options.source,
       cwd,
       force: options.force,
+      upgrade: options.upgrade,
       checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
       dependencies: contractConfig.dependsOn,

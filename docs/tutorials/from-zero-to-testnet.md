@@ -2,7 +2,7 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. The current line is **`3.2.0`** on **`next`** (`latest` is **`3.1.2`** until promoted).
+Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. The current line is **`3.3.0`** on **`next`** (`latest` is **`3.1.2`** until promoted).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ npm view @caatinga/core version
 npm view @caatinga/client version
 ```
 
-For the current line, prefer `npm install -g @caatinga/cli@next` or `@3.2.0`.
+For the current line, prefer `npm install -g @caatinga/cli@next` or `@3.3.0`.
 
 Create and fund a local Stellar CLI identity:
 
@@ -45,7 +45,7 @@ npm install
 
 `pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
 
-Without a global CLI install, run `npx caatinga@3.2.0 init my-dapp` (or `npx caatinga@next init my-dapp`) instead of `caatinga init`.
+Without a global CLI install, run `npx caatinga@3.3.0 init my-dapp` (or `npx caatinga@next init my-dapp`) instead of `caatinga init`.
 
 The default template creates:
 

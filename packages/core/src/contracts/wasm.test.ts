@@ -55,20 +55,31 @@ describe("wasm target paths", () => {
   });
 
   it("should_throw_CAATINGA_ARTIFACT_NOT_FOUND_when_neither_legacy_nor_current_path_exists", async () => {
-    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-"));
-    const legacyPath = path.join(
-      tmpDir,
-      "contracts",
-      "counter",
-      "target",
-      LEGACY_RUST_WASM_TARGET,
-      "release",
-      "counter.wasm"
-    );
+    const previousCargoTargetDir = process.env.CARGO_TARGET_DIR;
+    delete process.env.CARGO_TARGET_DIR;
 
-    await expect(resolveWasmArtifactPath(legacyPath)).rejects.toMatchObject({
-      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-    });
+    try {
+      tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-"));
+      const legacyPath = path.join(
+        tmpDir,
+        "contracts",
+        "counter",
+        "target",
+        LEGACY_RUST_WASM_TARGET,
+        "release",
+        "counter.wasm"
+      );
+
+      await expect(resolveWasmArtifactPath(legacyPath)).rejects.toMatchObject({
+        code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
+      });
+    } finally {
+      if (previousCargoTargetDir === undefined) {
+        delete process.env.CARGO_TARGET_DIR;
+      } else {
+        process.env.CARGO_TARGET_DIR = previousCargoTargetDir;
+      }
+    }
   });
 
   it("should_resolve_wasm_under_CARGO_TARGET_DIR_when_configured_path_missing", async () => {

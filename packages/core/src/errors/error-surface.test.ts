@@ -58,6 +58,22 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/stellar-cli/check-stellar-cli-version.test.ts",
     trigger: "checkStellarCliVersion(",
   },
+  [CaatingaErrorCode.STELLAR_SDK_VERSION_PARSE_FAILED]: {
+    file: "packages/core/src/stellar-sdk/compat.test.ts",
+    trigger: "evaluateStellarSdkCompatibility(",
+  },
+  [CaatingaErrorCode.UNSUPPORTED_SDK_VERSION]: {
+    file: "packages/core/src/stellar-sdk/compat.test.ts",
+    trigger: "evaluateStellarSdkCompatibility(",
+  },
+  [CaatingaErrorCode.ROLLBACK_TARGET_NOT_FOUND]: {
+    file: "packages/core/src/artifacts/update-artifact.test.ts",
+    trigger: "restoreArtifactFromHistory(",
+  },
+  [CaatingaErrorCode.ESTIMATE_FAILED]: {
+    file: "packages/core/src/contracts/estimate-deploy-cost.test.ts",
+    trigger: "estimateDeployCost(",
+  },
   [CaatingaErrorCode.RUST_NOT_FOUND]: {
     file: "packages/core/src/shell/check-binary.test.ts",
     trigger: "checkBinary(",

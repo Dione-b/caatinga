@@ -22,7 +22,11 @@ export {
   createInitialArtifacts,
   type CreateInitialArtifactsOptions,
 } from "./artifacts/write-artifacts.js";
-export { updateArtifact } from "./artifacts/update-artifact.js";
+export { updateArtifact, restoreArtifactFromHistory } from "./artifacts/update-artifact.js";
+export { migrateArtifactsToV2 } from "./artifacts/migrate-artifacts.js";
+export { migrateArtifactsFile } from "./artifacts/migrate-artifacts-file.js";
+export { rollbackContractArtifact } from "./artifacts/rollback-artifact.js";
+export { CURRENT_ARTIFACTS_SCHEMA_VERSION } from "./artifacts/artifact.schema.js";
 export {
   collectProjectStatus,
   type CollectProjectStatusOptions,
@@ -69,6 +73,22 @@ export {
   type EvaluateStellarCliCompatibilityInput,
 } from "./stellar-cli/compat.js";
 
+export {
+  checkStellarSdkVersion,
+  type CheckStellarSdkVersionOptions,
+} from "./stellar-sdk/check-stellar-sdk-version.js";
+export {
+  STELLAR_SDK_LAST_TESTED_VERSION,
+  STELLAR_SDK_MIN_VERSION,
+  evaluateStellarSdkCompatibility,
+  parseStellarSdkVersion,
+  type EvaluateStellarSdkCompatibilityInput,
+  type SdkCompatibilityReport,
+  type SdkCompatibilityStatus,
+  type SdkCompatibilityWarning,
+  type SdkCompatibilityWarningCode,
+} from "./stellar-sdk/compat.js";
+
 export { validateSourceShape } from "./contracts/validate-source-shape.js";
 export { resolveContract, type ResolvedContract } from "./contracts/resolve-contract.js";
 export { resolveDefaultContractName } from "./contracts/resolve-default-contract.js";
@@ -100,6 +120,16 @@ export {
   READ_CALL_FAILURE_REGEX,
   type ReadContractOptions,
 } from "./contracts/read-contract.js";
+export {
+  estimateDeployCost,
+  type DeployCostEstimate,
+  type EstimateDeployCostOptions,
+} from "./contracts/estimate-deploy-cost.js";
+export {
+  inspectContract,
+  type ContractInspectResult,
+  type InspectContractOptions,
+} from "./contracts/inspect-contract.js";
 export {
   createProjectFromTemplate,
   type CreateProjectFromTemplateOptions,

@@ -26,7 +26,13 @@ Any exception must be called out in release notes and package changelogs.
 - `alpha`
 - `beta`
 - `latest` — currently `3.1.2` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
-- `next` — currently `3.2.0` (pre-release candidates until promoted to `latest`)
+- `next` — currently `3.3.0` (pre-release candidates until promoted to `latest`)
+
+## Pre-1.0 semver note
+
+The published **`3.x` line is a pre-1.0 development line**. The major version number reflects npm
+publish history, **not** API stability. Treat releases as alpha until `v1.0.0` readiness gates pass
+(see [`release/v1.0.0.md`](./release/v1.0.0.md)). Pin exact versions in production CI until then.
 
 ## Release Gate
 

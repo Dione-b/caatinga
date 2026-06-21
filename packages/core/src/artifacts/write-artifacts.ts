@@ -32,7 +32,7 @@ export function createInitialArtifacts(
 
   return {
     project,
-    version: 1,
+    version: 2,
     networks,
   };
 }

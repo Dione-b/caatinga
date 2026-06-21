@@ -12,6 +12,10 @@ import { registerZkInvokeCommand } from "./commands/zk-invoke.command.js";
 import { registerInvokeCommand } from "./commands/invoke.command.js";
 import { registerReadCommand } from "./commands/read.command.js";
 import { registerStatusCommand } from "./commands/status.command.js";
+import { registerMigrateCommand } from "./commands/migrate.command.js";
+import { registerRollbackCommand } from "./commands/rollback.command.js";
+import { registerEstimateCommand } from "./commands/estimate.command.js";
+import { registerInspectCommand } from "./commands/inspect.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
 export function createProgram(): Command {
@@ -35,6 +39,10 @@ export function createProgram(): Command {
   registerInvokeCommand(program);
   registerReadCommand(program);
   registerStatusCommand(program);
+  registerMigrateCommand(program);
+  registerRollbackCommand(program);
+  registerEstimateCommand(program);
+  registerInspectCommand(program);
 
   return program;
 }

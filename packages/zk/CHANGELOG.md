@@ -1,5 +1,46 @@
 ## Breaking changes policy
 
+## 3.3.0
+
+### Minor Changes
+
+- feat: production readiness, artifact history, and compatibility hardening
+
+  **Positioning & docs**
+
+  - Reposition README and architecture around git-driven artifacts, multi-contract deploy, and sovereignty (ZK moved to Advanced section).
+  - Add signing strategy, production readiness checklist, contract upgrade tutorial, internal counter-web case study, and outreach template.
+
+  **CLI**
+
+  - Add `caatinga migrate artifacts` (schema v1 → v2).
+  - Add `caatinga rollback <contract> --to <contractId>` (logical artifact restore; on-chain state unchanged).
+  - Add `caatinga estimate deploy` and `deploy --dry-run` (advisory fee estimate via Stellar CLI build-only + simulate).
+  - Add `caatinga inspect <contract>` (artifact vs on-chain reachability vs local WASM hash).
+  - Add `deploy --upgrade` (semantic alias for `--force` with upgrade history reason).
+  - Enrich `caatinga doctor` with `@stellar/stellar-sdk` compatibility, signing guidance, and production checklist link.
+
+  **Core**
+
+  - Artifact schema **v2** with deploy history on `--force` / `--upgrade`; new projects initialize at v2.
+  - Stellar CLI live capability probes (`contract-build`, `contract-deploy`, `contract-invoke-sign`) in version gate.
+  - `@stellar/stellar-sdk` version contract (`evaluateStellarSdkCompatibility`, check before `generate`).
+  - New public error codes: `CAATINGA_UNSUPPORTED_SDK_VERSION`, `CAATINGA_STELLAR_SDK_VERSION_PARSE_FAILED`, `CAATINGA_ROLLBACK_TARGET_NOT_FOUND`, `CAATINGA_ESTIMATE_FAILED`.
+
+  **CI**
+
+  - Add `stellar-cli-matrix` job (fixtures + live probes for Stellar CLI 23.0.0, 24.0.0, 25.2.0).
+
+  **Notes**
+
+  - v1 `caatinga.artifacts.json` files remain readable; run `caatinga migrate artifacts` to bump the file version without redeploying.
+  - Cost estimates are advisory only; mainnet signing, KMS, and multisig remain out of alpha scope (see `docs/signing-strategy.md`).
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.3.0
+
 ## 3.2.0
 
 ### Minor Changes

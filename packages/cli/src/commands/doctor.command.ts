@@ -85,6 +85,14 @@ export function registerDoctorCommand(program: Command): void {
 
         printFixes(diagnostics);
 
+        const sourceFailed = diagnostics.some(
+          (diagnostic) => !diagnostic.ok && diagnostic.label.includes("source identity")
+        );
+        if (sourceFailed) {
+          logger.info("");
+          logger.info("Signing: see docs/signing-strategy.md for --source and wallet models.");
+        }
+
         const ready = diagnostics.every((diagnostic) => diagnostic.ok);
 
         let deployNetwork = options.network;
@@ -100,6 +108,7 @@ export function registerDoctorCommand(program: Command): void {
 
         logger.info("");
         logger.info(`Status: ${ready ? "ready" : "blocked"}`);
+        logger.info("Production checklist: docs/production-readiness.md");
 
         if (!ready) {
           process.exitCode = 1;

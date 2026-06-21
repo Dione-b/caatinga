@@ -7,6 +7,7 @@ import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
 import { runCommand } from "../shell/run-command.js";
+import { checkStellarSdkVersion } from "../stellar-sdk/check-stellar-sdk-version.js";
 import { buildGenerateNetworkArgs } from "./build-generate-network-args.js";
 
 export type GenerateBindingsOptions = {
@@ -61,6 +62,8 @@ export async function generateBindings(options: GenerateBindingsOptions) {
 
   const outputDir = path.resolve(cwd, options.config.frontend.bindingsOutput, options.contractName);
   await mkdir(outputDir, { recursive: true });
+
+  await checkStellarSdkVersion({ cwd });
 
   const result = await runCommand(
     "npx",

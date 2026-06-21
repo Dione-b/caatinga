@@ -12,6 +12,16 @@ vi.mock("../shell/run-command.js", () => ({
   runCommand,
 }));
 
+vi.mock("../stellar-sdk/check-stellar-sdk-version.js", () => ({
+  checkStellarSdkVersion: vi.fn(async () => ({
+    version: "16.0.1",
+    status: "supported",
+    minVersion: "16.0.1",
+    lastTestedVersion: "16.0.1",
+    warnings: [],
+  })),
+}));
+
 import { generateBindingsGraph } from "./generate-bindings-graph.js";
 
 const CONTRACT_ID = `C${"2".repeat(55)}`;

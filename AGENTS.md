@@ -16,9 +16,9 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 
 - **`latest`**: **`3.1.2`** (last promoted stable on npm)
-- **`next`**: **`3.2.0`** (current repo line; pre-release candidates until promoted to `latest`)
+- **`next`**: **`3.3.0`** (current repo line; pre-release candidates until promoted to `latest`)
 
-Repository packages are version **`3.2.0`**. After publish, promote `next` → `latest` per [docs/release/publish-checklist.md](docs/release/publish-checklist.md).
+Repository packages are version **`3.3.0`**. After publish, promote `next` → `latest` per [docs/release/publish-checklist.md](docs/release/publish-checklist.md).
 
 Highlights from the `3.0.0` line:
 
