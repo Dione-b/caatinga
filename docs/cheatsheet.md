@@ -89,6 +89,8 @@ Setup broken? `npx caatinga doctor --network testnet --source alice` tells you w
 
 ## ZK loop
 
+> **Dev/testnet only:** `caatinga zk build` runs a single-party development ceremony. Mainnet deploy/invoke with those artifacts is blocked unless you pass `--allow-dev-ceremony` (not for production).
+
 ```bash
 caatinga zk init my-zk-dapp && cd my-zk-dapp && npm install
 npx caatinga build verifier

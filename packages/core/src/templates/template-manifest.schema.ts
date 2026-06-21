@@ -13,7 +13,7 @@ export const TemplateManifestSchema = z.object({
     templateVersion: z.number().int().positive(),
   }),
   frontend: z.object({
-    framework: z.enum(["vite-react", "next", "astro"]),
+    framework: z.literal("vite-react"),
     packageManager: z.enum(["npm", "pnpm", "yarn", "bun"]).default("npm"),
   }),
   contracts: z.object({

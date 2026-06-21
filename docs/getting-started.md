@@ -1,8 +1,8 @@
 # Getting Started
 
-Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client`.
+Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client` (single-invoker wallet signing until v1.0).
 
-Install published packages from npm. The current line is **`3.1.2`** on **`latest`**. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
+Install published packages from npm. The current line is **`3.2.0`** on **`latest`**. Pin an exact version in apps when you need reproducibility; see [Release process](./release.md).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ stellar --version
 npm install -g @caatinga/cli
 ```
 
-Confirm the resolved versions (`latest` is currently **`3.1.2`**):
+Confirm the resolved versions (`latest` is currently **`3.2.0`**):
 
 ```bash
 npm view @caatinga/cli version
@@ -91,6 +91,8 @@ Template projects support `pnpm install` as well as npm — see [Templates — p
 
 ## Browser client flow
 
+> **Single-invoker only until v1.0:** `@caatinga/client` wallet `invoke` supports one signing invoker. Multi-signer / `signAuthEntry` flows are application code today (`CAATINGA_MULTI_AUTH_REQUIRED`). See [Client — Single-invoker scope](./client.md#single-invoker-scope-until-v10).
+
 After `deploy` (which generates the bindings), install the client packages (match the CLI version when possible):
 
 ```bash
@@ -131,4 +133,4 @@ pnpm build
 pnpm test
 ```
 
-See [`client.md`](./client.md) for the client contract and debug behavior.
+See [`client.md`](./client.md) for the client contract and debug behavior. For CLI capability limits, see [Supported today vs not yet](./cli.md#supported-today-vs-not-yet).

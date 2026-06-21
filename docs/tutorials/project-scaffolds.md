@@ -20,9 +20,9 @@ Aliases:
 
 ## Decision guide
 
-**Choose a template** when you want a working browser dApp out of the box — wallet modal, placeholder bindings, Vite dev server, and wallet SDK stubs already configured. Start with `react-vite-counter`; use `marketplace-with-token` only when you need a multi-contract dependency graph.
+**Choose a template** when you want a working Vite + React browser dApp with a single-invoker wallet path — wallet modal, placeholder bindings, Vite dev server, and wallet SDK stubs already configured. Official Caatinga templates are **Vite + React only** (`vite-react`). Start with `react-vite-counter`; use `marketplace-with-token` only when you need a multi-contract dependency graph.
 
-**Choose minimal** when you want a Soroban contract and CLI workflow without committing to React, Next.js, Svelte, or another frontend. You deploy and read from the terminal first, then wire `@caatinga/client` when you are ready.
+**Choose minimal** when you want a Soroban contract and CLI workflow without committing to a frontend stack. You deploy and read from the terminal first, then wire `@caatinga/client` when you are ready (any UI framework).
 
 **Choose ZK** when you need Groth16 proofs verified on Soroban (BLS12-381). Use the `zk-starter` template for an end-to-end multiplier demo with UI, or `zk init --minimal` for circuits + verifier only.
 

@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 3.2.0
+
+### Minor Changes
+
+- Add `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` and map `ZK_DEV_CEREMONY_BLOCKED` from `@caatinga/zk`.
+- Restrict `frontend.framework` schema to `vite-react` only (remove unused `next`/`astro` enum values).
+
 ## 3.1.2
 
 ### Patch Changes

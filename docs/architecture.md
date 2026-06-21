@@ -162,7 +162,7 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 
 ## `caatinga dev`
 
-**MVP direction:** opinionated proxy around **Vite + Caatinga validation** (not a plugin marketplace). Future adapters (`vite`, `next`, `astro`, custom) are conceivable only after the core workflow and multi-contract story prove value.
+**MVP direction:** opinionated proxy around **Vite + Caatinga validation** (not a plugin marketplace). Official templates are Vite + React only (`vite-react`). Future adapters (`next`, `astro`, custom) are conceivable only after the core workflow and multi-contract story prove value. See [CLI — Supported today vs not yet](./cli.md#supported-today-vs-not-yet).
 
 ## Extensibility
 

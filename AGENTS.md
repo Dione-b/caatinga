@@ -15,8 +15,8 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 Published on npm:
 
-- **`latest`**: **`3.1.2`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
-- **`next`**: **`3.1.2`** (tracks pre-release candidates until the next publish)
+- **`latest`**: **`3.2.0`** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`)
+- **`next`**: **`3.2.0`** (tracks pre-release candidates until the next publish)
 
 Highlights from the `3.0.0` line:
 

@@ -6,7 +6,7 @@
 
 **A TypeScript-native maestro that unifies Stellar's official tools into one predictable workflow.**
 
-npm-first · git-driven · orchestrates `@stellar/stellar-sdk` · ZK-ready
+npm-first · git-driven · orchestrates `@stellar/stellar-sdk` · ZK dev workflow
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
 [![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli&logo=npm)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
@@ -24,14 +24,16 @@ npm install -g @caatinga/cli
 caatinga init my-dapp
 ```
 
-The Stellar ecosystem ships powerful official pieces — Stellar CLI, `@stellar/stellar-sdk`, generated bindings — but TypeScript teams still had to wire them together by hand. Caatinga is the **workflow layer** that keeps a predictable path from contract to wallet-ready client: **init → build → deploy → generate → invoke → browser** — even when upstream tooling changes flags, stdout, or paths.
+The Stellar ecosystem ships powerful official pieces — Stellar CLI, `@stellar/stellar-sdk`, generated bindings — but TypeScript teams still had to wire them together by hand.
+
+Caatinga is the **workflow layer** that keeps a predictable path from contract to **single-invoker wallet-ready** client: **init → build → deploy → generate → invoke → browser** — even when upstream tooling changes flags, stdout, or paths.
 
 Caatinga does not reimplement Soroban. It composes the official stack and keeps the mental model visible: `contractId`, RPC URLs, network passphrases, signing identities, and XDR stay explicit (no magic).
 
 > **One-line promise:** a reproducible workflow to create, compile, deploy, generate bindings, invoke, and wire browser clients for Soroban contracts — without hiding how Stellar works.
 
 > [!WARNING]
-> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`latest`** release: **`3.1.2`**. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
+> **Alpha software.** APIs and config formats may change before `v1.0.0`. Current npm **`latest`** release: **`3.2.0`**. Pin an exact version in apps and check the [CHANGELOG](./packages/cli/CHANGELOG.md) before upgrading.
 
 <br />
 
@@ -73,13 +75,15 @@ That matters for teams that want **full sovereignty** and **clean CI/CD**: deplo
 
 Optional hosted services (dashboards, metadata indexes) may arrive later, but they will remain **optional** and never a hard dependency of `@caatinga/core` or `@caatinga/cli`. See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md) for the full rationale.
 
-> Want a Rust-centric workflow with an on-chain registry and a bundled full-stack frontend? Another tool may suit you better. Caatinga is for builders who want a **lightweight, transparent, TypeScript-native** path from contract to wallet-ready client.
+> Want a Rust-centric workflow with an on-chain registry and a bundled full-stack frontend? Another tool may suit you better. Caatinga is for builders who want a **lightweight, transparent, TypeScript-native** path from contract to single-invoker wallet-ready client.
 
 <br />
 
 ## 🔐 Built-in ZK workflow
 
-Zero-knowledge proofs on Soroban are still hard to bootstrap. **`@caatinga/zk`** is Caatinga's deepest differentiator for advanced teams — Circom, Groth16 (BLS12-381, Protocol 25+), and a Soroban verifier contract in one CLI workflow, without maintaining a separate toolchain.
+Zero-knowledge proofs on Soroban are still hard to bootstrap. **`@caatinga/zk`** bundles Circom, Groth16 (BLS12-381, Protocol 25+), and a Soroban verifier contract in one CLI workflow.
+
+**`caatinga zk build` runs a single-party development ceremony** suitable for testnet/dev only. Production requires an external MPC ceremony; mainnet deploy/invoke with dev artifacts is blocked by default (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`). `--embed-vk` is experimental and not end-to-end yet.
 
 ```bash
 caatinga zk init      # scaffold a verifier contract + circuit
@@ -96,9 +100,11 @@ See the [ZK docs](./docs/zk.md) and the [zk-starter template](./docs/tutorials/z
 
 `@stellar/stellar-sdk` v16 brought Protocol 27 helpers for delegated authentication — but wiring **simulation, log extraction, and wallet signing** into a coherent browser flow still generates boilerplate.
 
-`@caatinga/client` closes that gap: generated bindings + `caatinga.artifacts.json` + network config + a pluggable wallet adapter, with `read`, `simulate`, `invoke`, and `buildXdr` out of the box. React apps get `WalletProvider` / `useWallet`; Vite apps get bundler workarounds for Stellar Wallets Kit.
+`@caatinga/client` closes that gap: generated bindings + `caatinga.artifacts.json` + network config + a pluggable wallet adapter, with `read`, `simulate`, `invoke`, and `buildXdr` for **single-invoker** flows.
 
-Multi-signer flows that require non-invoker `signAuthEntry` credentials still need application code today — Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED` when that happens.
+React apps get `WalletProvider` / `useWallet`; Vite apps get bundler workarounds for Stellar Wallets Kit.
+
+**Browser wallet support is single-invoker only until v1.0.** Contracts requiring delegated AddressV2 / non-invoker `signAuthEntry` credentials will fail with `CAATINGA_MULTI_AUTH_REQUIRED`; orchestration is application code today.
 
 ```bash
 npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
@@ -267,7 +273,7 @@ npm run dev
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 The current release is **`3.1.2`** on npm **`latest`**. Use `npx caatinga` (or pin `npx caatinga@3.1.2`) for reproducible installs.
+> 💡 The current release is **`3.2.0`** on npm **`latest`**. Use `npx caatinga` (or pin `npx caatinga@3.2.0`) for reproducible installs.
 
 📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 

@@ -2,6 +2,19 @@
 
 The CLI is intentionally thin. It delegates config, artifacts, command execution, and parser behavior to `@caatinga/core`.
 
+## Supported today vs not yet
+
+| Capability                        | Status                                                       |
+| --------------------------------- | ------------------------------------------------------------ |
+| Official frontend templates       | Vite + React only (`vite-react`)                             |
+| `caatinga zk build`               | Single-party **dev** ceremony; blocked on mainnet by default |
+| `caatinga zk invoke --embed-vk`   | **Not supported** (experimental / end-to-end incomplete)     |
+| Browser `invoke` via wallet       | **Single-invoker only** until v1.0                           |
+| Multi-signer / `signAuthEntry`    | Application code; `CAATINGA_MULTI_AUTH_REQUIRED`             |
+| Production ZK (MPC powers-of-tau) | Out of scope; no Caatinga command for MPC ceremony           |
+
+See [Client](./client.md#single-invoker-scope-until-v10) and [ZK module](./zk.md#production-guardrails) for details.
+
 ## `caatinga init <projectName>`
 
 Creates a project from a bundled template and writes `caatinga.artifacts.json`.
@@ -37,7 +50,7 @@ the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`,
 `unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
 is advisory only — it never flips doctor to `blocked`.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate]`
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--allow-dev-ceremony]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Dependencies deploy first
@@ -103,14 +116,19 @@ Use `read` for getters and pure queries. Use `invoke` for increments, transfers,
 Circom Groth16 workflow (`caatinga zk init`, `build`, `prove`, `invoke`). Full reference:
 [ZK module](./zk.md).
 
-| Command                                            | Purpose                                  |
-| -------------------------------------------------- | ---------------------------------------- |
-| `caatinga zk build [circuit] [--embed-vk]`         | Compile Circom and run dev trusted setup |
-| `caatinga zk prove [circuit]`                      | Generate `proof.json` and `public.json`  |
-| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof`             |
+| Command                                            | Purpose                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------ |
+| `caatinga zk build [circuit] [--embed-vk]`         | Compile Circom and run **dev** trusted setup (`--embed-vk` experimental) |
+| `caatinga zk prove [circuit]`                      | Generate `proof.json` and `public.json`                                  |
+| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK)                                |
+| `caatinga zk invoke [circuit] --network <name>`    | Target a configured network (not only `defaultNetwork`)                  |
 
-`--source` matches deploy/invoke (not `--source-account`). When verification returns `false`,
-the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`.
+Shared ZK flags:
+
+- `--allow-dev-ceremony` — bypass mainnet guardrails for dev-ceremony artifacts (not for production)
+- `--embed-vk` on `zk build` — experimental; writes `vk.rs` only. **`zk invoke --embed-vk` is blocked** until the embedded-VK contract path is complete.
+
+When verification returns `false`, the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`. Mainnet deploy/invoke with dev ceremony artifacts exits with `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` unless `--allow-dev-ceremony` is set.
 
 ## Stellar CLI compatibility
 

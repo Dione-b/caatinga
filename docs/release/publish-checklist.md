@@ -42,7 +42,7 @@ pnpm ci:publish-matrix
 Promote an already-published version (no republish) by moving the `latest` dist-tag:
 
 ```bash
-VERSION=3.1.2
+VERSION=3.2.0
 OTP=<code-from-authenticator>
 for pkg in cli core client zk; do
   npm dist-tag add "@caatinga/$pkg@$VERSION" latest --otp="$OTP"

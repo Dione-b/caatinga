@@ -138,6 +138,28 @@ describe("CaatingaConfigSchema", () => {
     expect(result.zk?.circuits.main.curve).toBe("bls12381");
   });
 
+  it("rejects unsupported frontend frameworks", () => {
+    expect(() =>
+      CaatingaConfigSchema.parse({
+        ...minimalValid,
+        frontend: {
+          framework: "next",
+          bindingsOutput: "./src/contracts/generated",
+        },
+      })
+    ).toThrow();
+
+    expect(() =>
+      CaatingaConfigSchema.parse({
+        ...minimalValid,
+        frontend: {
+          framework: "astro",
+          bindingsOutput: "./src/contracts/generated",
+        },
+      })
+    ).toThrow();
+  });
+
   it("rejects unsupported zk curves", () => {
     expect(() =>
       CaatingaConfigSchema.parse({

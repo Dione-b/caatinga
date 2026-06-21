@@ -25,6 +25,8 @@ configured in `caatinga.config.ts` under `contracts.verifier.wasm`.
 
 ## Frontend (hybrid flow)
 
+> **Single-invoker only until v1.0** for wallet `invoke` via `@caatinga/client`.
+
 The template ships a Vite + React dApp modeled after `react-vite-counter`:
 
 - edit private inputs (`a`, `b`) in the browser
@@ -65,3 +67,7 @@ Hybrid flow after changing inputs in the browser:
 
 The default `caatinga zk build` flow runs a **local, single-party** trusted setup suitable
 for development only. Do not use those keys in production — run a proper MPC ceremony instead.
+
+**Mainnet guardrail:** Caatinga blocks `zk build` when `defaultNetwork` is `mainnet`, and blocks
+mainnet deploy/invoke of verifiers backed by dev-ceremony artifacts (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)
+unless you pass `--allow-dev-ceremony` for conscious testing. See [ZK production guardrails](https://github.com/Dione-b/caatinga/blob/main/docs/zk.md#production-guardrails).

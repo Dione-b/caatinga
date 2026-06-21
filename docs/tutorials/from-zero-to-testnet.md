@@ -2,7 +2,7 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm **`latest`** (currently **`3.1.2`**).
+Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm **`latest`** (currently **`3.2.0`**).
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ stellar --version
 rustc --version
 ```
 
-Confirm the published versions (`latest` is currently **`3.1.2`**):
+Confirm the published versions (`latest` is currently **`3.2.0`**):
 
 ```bash
 npm view @caatinga/cli version
@@ -128,7 +128,7 @@ After deploy (which generated the bindings), install the browser packages from `
 npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```
 
-Browser code can compose artifacts, generated bindings, network config, and a wallet adapter:
+Browser code can compose artifacts, generated bindings, network config, and a wallet adapter (**single-invoker only until v1.0** — see [Client scope](../client.md#single-invoker-scope-until-v10)):
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";

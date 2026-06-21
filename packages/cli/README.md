@@ -127,7 +127,9 @@ Full table: [docs/errors.md](https://github.com/Dione-b/caatinga/blob/main/docs/
 
 ## Browser and client apps
 
-For wallet-backed invocation in the browser, use [`@caatinga/client`](https://www.npmjs.com/package/@caatinga/client) with generated bindings and `caatinga.artifacts.json`.
+For single-invoker wallet-backed invocation in the browser, use [`@caatinga/client`](https://www.npmjs.com/package/@caatinga/client) with generated bindings and `caatinga.artifacts.json`. Multi-signer / `signAuthEntry` orchestration is not supported until v1.0 — see [Client docs](https://github.com/Dione-b/caatinga/blob/main/docs/client.md#single-invoker-scope-until-v10).
+
+ZK workflows use dev-ceremony guardrails on mainnet — see [ZK module](https://github.com/Dione-b/caatinga/blob/main/docs/zk.md#production-guardrails).
 
 ## Relationship to `@caatinga/core`
 

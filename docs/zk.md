@@ -52,11 +52,11 @@ caatinga zk invoke --source <identity>
 | `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`.             |
 | `caatinga zk init [project] --force`           | Overwrite existing scaffold files.                                       |
 | `caatinga zk build [circuit]`                  | Compile Circom (`-p bls12381`) and run dev trusted setup.                |
-| `caatinga zk build [circuit] --embed-vk`       | Emit `contracts/verifier/src/vk.rs` with embedded BLS12-381 coordinates. |
+| `caatinga zk build [circuit] --embed-vk`       | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).  |
 | `caatinga zk prove [circuit]`                  | Generate `proof.json` and `public.json` from `input.json`.               |
 | `caatinga zk prove [circuit] --debug`          | Emit intermediate `witness.wtns` for debugging.                          |
-| `caatinga zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain.               |
-| `caatinga zk invoke [circuit] --embed-vk`      | Use embedded VK entrypoint (WIP).                                        |
+| `caatinga zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK).  |
+| `caatinga zk invoke [circuit] --embed-vk`      | **Blocked** — experimental; use dynamic VK flow today.                   |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
 
@@ -160,26 +160,42 @@ import {
 | `ZK_VK_REQUIRED`          | Verification key is required but not provided                                             |
 | `ZK_INVOKE_FAILED`        | On-chain verification call failed                                                         |
 | `ZK_VERIFY_FAILED`        | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
+| `ZK_DEV_CEREMONY_BLOCKED` | Mainnet blocked for dev-ceremony artifacts (maps to `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)   |
 | `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform                                               |
 
 ## Dynamic VK vs embedded VK
 
-| Mode                     | When to use                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes.                     |
-| **`--embed-vk`**         | Static VK baked into the verifier contract (see WIP note below for end-to-end status). |
+| Mode                     | When to use                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes.                               |
+| **`--embed-vk`**         | **Experimental** — writes `vk.rs` only; `zk invoke --embed-vk` is blocked until E2E is complete. |
 
 Embedded VK is opt-in and visible in your repo — never a hidden dependency.
 
-### WIP: end-to-end `--embed-vk`
+### Experimental: `--embed-vk` (not end-to-end)
 
 `caatinga zk build --embed-vk` writes `contracts/verifier/src/vk.rs` with real BLS12-381
 coordinates from `verification_key.json`. Re-run the same command after circuit changes to
 regenerate the file.
 
-The default `zk-starter` verifier scaffold still expects a dynamic VK argument. Wiring an
-embedded-VK entrypoint in the contract and `caatinga zk invoke --embed-vk` is not complete yet.
+The default `zk-starter` verifier scaffold still expects a dynamic VK argument. **`caatinga zk invoke --embed-vk` is blocked** until an embedded-VK entrypoint exists in the contract.
 Use the default dynamic VK flow for end-to-end verification today.
+
+## Production guardrails
+
+`caatinga zk build` always records a dev ceremony manifest (`.artifacts/zk/<circuit>/ceremony.json`).
+Caatinga **blocks mainnet** operations that would use those artifacts:
+
+| Command                      | Guardrail                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `caatinga zk build`          | Fails when `defaultNetwork` is `mainnet` (ceremony is always dev single-party) |
+| `caatinga deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits       |
+| `caatinga zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                           |
+
+Pass `--allow-dev-ceremony` only for conscious testing — not for production deployments.
+The CLI surfaces `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` when a guardrail trips.
+
+Production ZK still requires an **external MPC powers-of-tau ceremony** and audited circuit artifacts; Caatinga does not run MPC today.
 
 ## Trusted setup warning
 

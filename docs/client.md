@@ -11,6 +11,12 @@ It does not replace Stellar CLI, Stellar SDK, Soroban SDK, generated bindings, o
 
 ## Scope
 
+### Single-invoker scope (until v1.0)
+
+**Browser wallet support is single-invoker only until v1.0.** `@caatinga/client` `invoke()` signs with one connected wallet as the transaction invoker.
+
+Contracts requiring delegated AddressV2 / non-invoker `signAuthEntry` credentials will fail with `CAATINGA_MULTI_AUTH_REQUIRED`; orchestration is application code today.
+
 Included in alpha:
 
 - artifact-based `contractId` lookup
@@ -306,7 +312,7 @@ If `@stellar/stellar-sdk generate` changes this generated shape, the compatibili
 The return is a `SentTransaction<T>`. Caatinga normalizes `sendTransactionResponse.hash` → `transactionHash` and reads the `result` getter → `result` on invoke responses.
 
 Multi-auth: when a simulated transaction has unsigned non-invoker Soroban auth entries (delegated address credentials / "AddressV2"), signing raises `NeedsMoreSignaturesError`.
-Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED`. Full `signAuthEntry` orchestration is not yet provided by the browser wallet adapter — handle multi-signer flows in application code.
+Caatinga surfaces `CAATINGA_MULTI_AUTH_REQUIRED`. Full `signAuthEntry` orchestration is **not supported until v1.0** — handle multi-signer flows in application code.
 
 ## Failure behavior
 

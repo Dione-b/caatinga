@@ -5,6 +5,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { ensureCircom, ensurePtau, ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
 import type { ZkInstallProgress } from "../install/install-progress.js";
 import { ptauSizeForConstraints } from "./detect-ptau-size.js";
+import { writeDevCeremonyManifest } from "../ceremony/dev-ceremony.js";
 import { serializeVk, type SnarkjsVk } from "../serialization/serialize-vk.js";
 import { concatG1Bytes, concatG2Bytes } from "../serialization/curve-bytes.js";
 
@@ -127,4 +128,6 @@ export async function buildCircuit(options: BuildCircuitOptions): Promise<void> 
     const verifierSrcDir = path.resolve("contracts", "verifier", "src");
     await writeEmbeddedVk(vkPath, verifierSrcDir);
   }
+
+  await writeDevCeremonyManifest(outDir);
 }

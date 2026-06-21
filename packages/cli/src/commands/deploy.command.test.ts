@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdir, rm } from "node:fs/promises";
 import { Command } from "commander";
 import type { CaatingaConfig } from "@caatinga/core";
 import { CaatingaError, CaatingaErrorCode, generateBindingsGraph } from "@caatinga/core";
+import { writeDevCeremonyManifest } from "@caatinga/zk";
 import { registerDeployCommand } from "./deploy.command.js";
 
 const deployContractGraphMock = vi.hoisted(() => vi.fn());
@@ -197,6 +199,68 @@ describe("deploy command", () => {
     } finally {
       logSpy.mockRestore();
       warnSpy.mockRestore();
+    }
+  });
+
+  it("blocks mainnet deploy of zk verifier with dev-ceremony artifacts", async () => {
+    const zkConfig: CaatingaConfig = {
+      project: "zk-app",
+      defaultNetwork: "testnet",
+      contracts: {
+        verifier: {
+          path: "./contracts/verifier",
+          wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+          dependsOn: [],
+          deployArgs: {},
+        },
+      },
+      networks: {
+        testnet: {
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
+        mainnet: {
+          rpcUrl: "https://mainnet.sorobanrpc.com",
+          networkPassphrase: "Public Global Stellar Network ; September 2015",
+        },
+      },
+      zk: {
+        circuits: {
+          main: {
+            path: "./circuits",
+            protocol: "groth16",
+            curve: "bls12381",
+            verifierContract: "verifier",
+          },
+        },
+      },
+    };
+
+    loadConfigMock.mockResolvedValue(zkConfig);
+    await mkdir(".artifacts/zk/main", { recursive: true });
+    await writeDevCeremonyManifest(".artifacts/zk/main");
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await createDeployProgram().parseAsync([
+        "node",
+        "caatinga",
+        "deploy",
+        "verifier",
+        "--network",
+        "mainnet",
+        "--source",
+        "alice",
+      ]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("CAATINGA_ZK_DEV_CEREMONY_BLOCKED");
+      expect(deployContractGraphMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+      await rm(".artifacts/zk", { recursive: true, force: true });
     }
   });
 });

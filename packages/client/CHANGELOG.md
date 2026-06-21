@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 3.2.0
+
+### Minor Changes
+
+- Document single-invoker browser wallet scope until v1.0 (`CAATINGA_MULTI_AUTH_REQUIRED` remains detection-only).
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.2.0
+
 ## 3.1.2
 
 ### Patch Changes

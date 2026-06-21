@@ -6,9 +6,14 @@ import {
   CaatingaError,
   CaatingaErrorCode,
   loadConfig,
+  resolveNetwork,
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import {
+  assertZkVerifierDeployAllowed,
+  resolveContractNamesForDeploy,
+} from "../utils/zk-guardrails.js";
 
 export function registerDeployCommand(program: Command): void {
   program
@@ -25,6 +30,10 @@ export function registerDeployCommand(program: Command): void {
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
     .option("--no-generate", "Skip TypeScript bindings generation after deploy")
+    .option(
+      "--allow-dev-ceremony",
+      "Allow deploying ZK verifier contracts with dev-ceremony artifacts on mainnet (not for production)"
+    )
     .action(
       (
         contractName: string | undefined,
@@ -36,6 +45,7 @@ export function registerDeployCommand(program: Command): void {
           staleCheck?: boolean;
           verifyDeps?: boolean;
           generate?: boolean;
+          allowDevCeremony?: boolean;
         }
       ) =>
         runCliAction(async () => {
@@ -48,6 +58,16 @@ export function registerDeployCommand(program: Command): void {
           }
 
           const config = await loadConfig();
+          const { name: networkName } = resolveNetwork(config, options.network);
+          const contractNames = resolveContractNamesForDeploy(config, contractName);
+
+          await assertZkVerifierDeployAllowed({
+            config,
+            contractNames,
+            networkName,
+            allowDevCeremony: Boolean(options.allowDevCeremony),
+          });
+
           const result = await deployContractGraph({
             config,
             contractName,

@@ -43,7 +43,9 @@ npx caatinga zk init
 
 Without `--minimal`, Caatinga copies circuit and verifier files from `zk-starter` and merges `verifier` + `zk` blocks into your config. With `--minimal`, it scaffolds a minimal identity circuit and verifier instead.
 
-## Full workflow
+## Dev/testnet workflow
+
+> `caatinga zk build` runs a **single-party development ceremony**. Use **testnet** for this walkthrough; mainnet deploy/invoke with dev artifacts is blocked by default.
 
 ```bash
 npx caatinga zk init my-zk-dapp
@@ -60,7 +62,7 @@ npx caatinga zk invoke --source alice
 Step by step:
 
 1. **`build verifier`** — compile the Soroban Groth16 verifier WASM
-2. **`zk build main`** — compile Circom (`-p bls12381`) and run dev trusted setup; artifacts land in `.artifacts/zk/main/`
+2. **`zk build main`** — compile Circom (`-p bls12381`) and run **dev** trusted setup (not for production); artifacts land in `.artifacts/zk/main/`
 3. **`deploy verifier`** — record verifier `contractId` in `caatinga.artifacts.json`
 4. **`zk prove main`** — generate `proof.json` and `public.json` from `circuits/input.json`
 5. **`zk invoke`** — serialize proof data and call `verify_proof` on-chain

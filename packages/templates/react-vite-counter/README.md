@@ -37,6 +37,8 @@ With pnpm, use `pnpm run caatinga:build` (and the same pattern for deploy/genera
 
 ## Client Smoke Path
 
+> **Single-invoker only until v1.0** — `@caatinga/client` wallet `invoke` does not orchestrate `signAuthEntry` for delegated credentials (`CAATINGA_MULTI_AUTH_REQUIRED`).
+
 After `caatinga generate`, wire generated bindings to the client:
 
 ```ts

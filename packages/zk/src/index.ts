@@ -14,5 +14,14 @@ export {
   type InvokeVerifierResult,
 } from "./invoke/invoke-verifier.js";
 export { ptauSizeForConstraints } from "./build/detect-ptau-size.js";
+export {
+  assertDevCeremonyAllowed,
+  isProductionNetwork,
+  readDevCeremonyManifest,
+  writeDevCeremonyManifest,
+  zkArtifactsDir,
+  type AssertDevCeremonyAllowedOptions,
+  type DevCeremonyManifest,
+} from "./ceremony/dev-ceremony.js";
 export type { ZkInstallProgress } from "./install/install-progress.js";
 export { ZkError } from "./errors/ZkError.js";

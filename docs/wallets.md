@@ -29,6 +29,8 @@ Rules every adapter must follow:
 
 ### Stellar Wallets Kit (multi-wallet)
 
+“Multi-wallet” here means **choosing among wallet providers** (Freighter, xBull, etc.) via Stellar Wallets Kit — not Soroban multi-invoker / `signAuthEntry` orchestration. Browser `invoke` is **single-invoker only until v1.0** ([Client scope](./client.md#single-invoker-scope-until-v10)).
+
 ```bash
 npm install @caatinga/client @creit.tech/stellar-wallets-kit
 ```

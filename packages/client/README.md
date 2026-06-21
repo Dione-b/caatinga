@@ -178,10 +178,12 @@ Common codes include:
 - `CAATINGA_XDR_RESULT_FAILED`
 - `CAATINGA_READ_RESULT_MISSING`
 - `CAATINGA_PLACEHOLDER_BINDING`
+- `CAATINGA_MULTI_AUTH_REQUIRED` (multi-signer / `signAuthEntry` not supported until v1.0)
 
 ## Limitations
 
 - this package does not replace Stellar CLI, Stellar SDK, Soroban SDK, or generated bindings
 - manual SCVal serialization and manual XDR parsing are out of scope
-- multisig orchestration, backend signing, and non-documented wallet integrations are not part of the supported contract
+- **browser wallet support is single-invoker only until v1.0** — multisig / `signAuthEntry` orchestration is application code (`CAATINGA_MULTI_AUTH_REQUIRED`)
+- backend signing and non-documented wallet integrations are not part of the supported contract
 - private module paths and undocumented helpers are less stable than the exports listed above

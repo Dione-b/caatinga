@@ -16,6 +16,7 @@ export class CaatingaError extends Error {
 
 const ZK_ERROR_CODE_MAP: Record<string, CaatingaErrorCodeValue> = {
   ZK_VERIFY_FAILED: CaatingaErrorCode.ZK_VERIFICATION_FAILED,
+  ZK_DEV_CEREMONY_BLOCKED: CaatingaErrorCode.ZK_DEV_CEREMONY_BLOCKED,
 };
 
 export function toCaatingaError(error: unknown): CaatingaError {

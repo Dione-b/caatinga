@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 3.2.0
+
+### Minor Changes
+
+- Add dev-ceremony manifest (`ceremony.json`) on `buildCircuit`, `assertDevCeremonyAllowed`, and `isProductionNetwork` exports for CLI guardrails.
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.2.0
+
 ## 3.1.2
 
 ### Patch Changes

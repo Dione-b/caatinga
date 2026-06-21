@@ -53,10 +53,10 @@ Root config:
 
 `FrontendConfig` (optional root `frontend` field):
 
-| Field            | Type                                | Required | Default        | Notes                       |
-| ---------------- | ----------------------------------- | -------- | -------------- | --------------------------- |
-| `framework`      | `"vite-react" \| "next" \| "astro"` | no       | `"vite-react"` |                             |
-| `bindingsOutput` | string (min 1)                      | yes      | —              | path for generated bindings |
+| Field            | Type           | Required | Default        | Notes                                                                      |
+| ---------------- | -------------- | -------- | -------------- | -------------------------------------------------------------------------- |
+| `framework`      | `"vite-react"` | no       | `"vite-react"` | Official templates are Vite + React only; no Next.js or Astro adapter yet. |
+| `bindingsOutput` | string (min 1) | yes      | —              | path for generated bindings                                                |
 
 `NetworkConfig` (each value in `networks`):
 

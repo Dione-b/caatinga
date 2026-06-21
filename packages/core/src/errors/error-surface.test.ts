@@ -218,6 +218,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/errors/to-caatinga-error.test.ts",
     trigger: "toCaatingaError(",
   },
+  [CaatingaErrorCode.ZK_DEV_CEREMONY_BLOCKED]: {
+    file: "packages/core/src/errors/to-caatinga-error.test.ts",
+    trigger: "toCaatingaError(",
+  },
   [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
     file: "packages/cli/src/commands/doctor-deploy-coverage.test.ts",
     trigger: "reportDeployCoverage(",

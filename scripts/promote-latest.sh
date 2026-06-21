@@ -5,7 +5,7 @@
 #   bash scripts/promote-latest.sh <version> --otp <code>
 #
 # Example:
-#   bash scripts/promote-latest.sh 3.1.2 --otp 123456
+#   bash scripts/promote-latest.sh 3.2.0 --otp 123456
 set -euo pipefail
 
 VERSION="${1:?Usage: promote-latest.sh <version> --otp <code>}"

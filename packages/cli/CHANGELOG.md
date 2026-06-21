@@ -1,5 +1,20 @@
 ## Breaking changes policy
 
+## 3.2.0
+
+### Minor Changes
+
+- Add ZK production guardrails: write dev-ceremony manifest on `caatinga zk build`, block mainnet `zk build`/`deploy verifier`/`zk invoke` when dev artifacts are present unless `--allow-dev-ceremony`; new public error `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`.
+- Mark `caatinga zk build --embed-vk` as experimental; block `caatinga zk invoke --embed-vk` until embedded-VK end-to-end is complete.
+- Add `caatinga zk invoke --network` and document honest CLI/client capability limits (single-invoker wallet until v1.0, Vite+React templates only).
+- Restrict `frontend.framework` in `caatinga.config.ts` to `vite-react` only.
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.2.0
+  - @caatinga/zk@3.2.0
+
 ## 3.1.2
 
 ### Patch Changes

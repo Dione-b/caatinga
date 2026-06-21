@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
+import { CaatingaErrorCode } from "@caatinga/core";
 import { registerZkInvokeCommand } from "./zk-invoke.command.js";
 
 const invokeVerifierMock = vi.hoisted(() => vi.fn());
+const assertDevCeremonyAllowedMock = vi.hoisted(() => vi.fn());
 const mockConfig = vi.hoisted(() => ({
   project: "zk-app",
   defaultNetwork: "testnet",
@@ -18,6 +20,10 @@ const mockConfig = vi.hoisted(() => ({
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
       networkPassphrase: "Test SDF Network ; September 2015",
+    },
+    mainnet: {
+      rpcUrl: "https://mainnet.sorobanrpc.com",
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
     },
   },
   frontend: {
@@ -38,6 +44,8 @@ const mockConfig = vi.hoisted(() => ({
 
 vi.mock("@caatinga/zk", () => ({
   invokeVerifier: invokeVerifierMock,
+  assertDevCeremonyAllowed: assertDevCeremonyAllowedMock,
+  zkArtifactsDir: (name: string) => `.artifacts/zk/${name}`,
 }));
 
 vi.mock("@caatinga/core", async () => {
@@ -51,6 +59,8 @@ vi.mock("@caatinga/core", async () => {
 describe("zk invoke command", () => {
   beforeEach(() => {
     invokeVerifierMock.mockReset();
+    assertDevCeremonyAllowedMock.mockReset();
+    assertDevCeremonyAllowedMock.mockResolvedValue(undefined);
     invokeVerifierMock.mockResolvedValue({
       network: "testnet",
       verifierContract: "verifier",
@@ -67,6 +77,13 @@ describe("zk invoke command", () => {
 
     await program.parseAsync(["node", "caatinga", "zk", "invoke", "--source", "alice"]);
 
+    expect(assertDevCeremonyAllowedMock).toHaveBeenCalledWith({
+      networkName: "testnet",
+      artifactsDir: ".artifacts/zk/main",
+      allowDevCeremony: false,
+      operation: "caatinga zk invoke main",
+    });
+
     expect(invokeVerifierMock).toHaveBeenCalledWith({
       verifierContract: "verifier",
       network: "testnet",
@@ -77,5 +94,58 @@ describe("zk invoke command", () => {
       embedVk: false,
       config: mockConfig,
     });
+  });
+
+  it("passes --network to invokeVerifier", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerZkInvokeCommand(program);
+
+    await program.parseAsync([
+      "node",
+      "caatinga",
+      "zk",
+      "invoke",
+      "--source",
+      "alice",
+      "--network",
+      "mainnet",
+      "--allow-dev-ceremony",
+    ]);
+
+    expect(assertDevCeremonyAllowedMock).toHaveBeenCalledWith(
+      expect.objectContaining({ networkName: "mainnet", allowDevCeremony: true })
+    );
+    expect(invokeVerifierMock).toHaveBeenCalledWith(
+      expect.objectContaining({ network: "mainnet" })
+    );
+  });
+
+  it("rejects --embed-vk", async () => {
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkInvokeCommand(program);
+
+      await program.parseAsync([
+        "node",
+        "caatinga",
+        "zk",
+        "invoke",
+        "--source",
+        "alice",
+        "--embed-vk",
+      ]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain(CaatingaErrorCode.INVALID_CONFIG);
+      expect(invokeVerifierMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });

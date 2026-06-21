@@ -30,11 +30,12 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 - Stable package exports.
 - Documented migration and breaking-change policy.
 - Release automation that creates a GitHub Release for every public tag.
+- **Candidate:** multisig / `signAuthEntry` orchestration in `@caatinga/client` (see [Client scope](docs/client.md#single-invoker-scope-until-v10)).
 
 ## Explicit Non-Goals for Alpha
 
 - Mainnet by default.
 - Backend signing.
-- Multisig orchestration.
+- Multisig orchestration (browser `signAuthEntry` — single-invoker only until v1.0; see [docs/client.md](docs/client.md#single-invoker-scope-until-v10)).
 - Full indexer abstraction.
 - Framework-owned web runtime.

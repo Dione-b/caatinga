@@ -7,6 +7,15 @@ describe("toCaatingaError", () => {
     expect(toCaatingaError(new Error("boom")).code).toBe(CaatingaErrorCode.UNEXPECTED_ERROR);
   });
 
+  it("should_map_ZkError_ZK_DEV_CEREMONY_BLOCKED", () => {
+    const zkError = Object.assign(new Error("blocked on mainnet"), {
+      code: "ZK_DEV_CEREMONY_BLOCKED",
+      hint: "Use testnet.",
+    });
+    const result = toCaatingaError(zkError);
+    expect(result.code).toBe(CaatingaErrorCode.ZK_DEV_CEREMONY_BLOCKED);
+  });
+
   it("should_map_ZkError_ZK_VERIFY_FAILED_to_ZK_VERIFICATION_FAILED", () => {
     const zkError = Object.assign(new Error("Verifier returned false."), {
       code: "ZK_VERIFY_FAILED",
