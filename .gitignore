@@ -17,6 +17,10 @@ smoke-ci-out/
 smoke-app/
 smoke-app-retry/
 
+# Local tooling (Claude Code / Cursor command + skill installs)
+.claude/
+.cursor/
+
 # Cargo / Soroban contract build outputs
 target/
 **/target/
