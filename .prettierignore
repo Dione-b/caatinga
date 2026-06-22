@@ -10,3 +10,5 @@ packages/cli/templates/
 **/bindings/**
 pnpm-lock.yaml
 *.log
+.claude/
+.cursor/

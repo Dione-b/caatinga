@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
@@ -118,15 +118,29 @@ async function replaceTemplateVariables(dir: string, projectName: string): Promi
 
   await Promise.all(
     entries.map(async (entry) => {
+      // Skip the same directories the copy step excludes. When merging into an
+      // existing project the walk root is the project itself, so descending into
+      // node_modules/target/.git could follow an unrelated (possibly broken)
+      // symlink and crash the command with ENOENT.
+      if (TEMPLATE_COPY_EXCLUDED_DIRS.has(entry)) {
+        return;
+      }
+
       const entryPath = path.join(dir, entry);
-      const entryStat = await stat(entryPath);
+      // Use lstat so symlinks are never dereferenced: a dangling link must not
+      // be followed (that is what throws ENOENT) and is not a substitution target.
+      const entryStat = await lstat(entryPath);
+
+      if (entryStat.isSymbolicLink()) {
+        return;
+      }
 
       if (entryStat.isDirectory()) {
         await replaceTemplateVariables(entryPath, projectName);
         return;
       }
 
-      if (!isTextTemplateFile(entryPath)) {
+      if (!entryStat.isFile() || !isTextTemplateFile(entryPath)) {
         return;
       }
 
