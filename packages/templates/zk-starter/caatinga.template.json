@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Editable ZK scaffold with a multiplier circuit and BLS12-381 Groth16 verifier.",
   "caatinga": {
-    "compatibleCore": "^3.3.0",
+    "compatibleCore": "^3.3.1",
     "templateVersion": 1
   },
   "frontend": {

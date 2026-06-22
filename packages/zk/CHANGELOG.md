@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 3.3.1
+
+### Patch Changes
+
+- Updated dependencies [b7372f9]
+  - @caatinga/core@3.3.1
+
 ## 3.3.0
 
 ### Minor Changes
