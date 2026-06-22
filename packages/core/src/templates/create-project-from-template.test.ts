@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -256,6 +256,53 @@ describe("createProjectFromTemplate", () => {
       code: CaatingaErrorCode.INVALID_TEMPLATE_MANIFEST,
       message: "Template manifest is invalid.",
     });
+  });
+
+  it("merges into an existing project with a dangling node_modules symlink without ENOENT", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
+    const templateDir = path.join(tmpDir, "template");
+    const targetDir = path.join(tmpDir, "existing-project");
+
+    await mkdir(path.join(templateDir, "circuits"), { recursive: true });
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "zk-starter",
+        version: "0.1.0",
+        caatinga: { compatibleCore: "^3.0.0", templateVersion: 1 },
+        frontend: { framework: "vite-react", packageManager: "npm" },
+        contracts: { path: "contracts" },
+        files: { config: "caatinga.config.ts", artifacts: "caatinga.artifacts.json" },
+      }),
+      "utf8"
+    );
+    await writeFile(
+      path.join(templateDir, "circuits", "config.toml"),
+      'name = "__PROJECT_NAME__"\n',
+      "utf8"
+    );
+
+    // Pre-populate the target as an existing project whose node_modules holds a
+    // broken symlink, reproducing the `caatinga zk init --force` crash.
+    await mkdir(path.join(targetDir, "node_modules", "@hot-wallet"), { recursive: true });
+    await symlink(
+      path.join(tmpDir, "does-not-exist"),
+      path.join(targetDir, "node_modules", "@hot-wallet", "sdk")
+    );
+
+    await expect(
+      createProjectFromTemplate({
+        projectName: "my-dapp",
+        targetDir,
+        templateDir,
+        filter: (relativePath) =>
+          relativePath === "circuits" || relativePath.startsWith("circuits/"),
+      })
+    ).resolves.toBeDefined();
+
+    const configToml = await readFile(path.join(targetDir, "circuits", "config.toml"), "utf8");
+    expect(configToml).toContain('name = "my-dapp"');
+    expect(configToml).not.toContain("__PROJECT_NAME__");
   });
 
   it("ships marketplace-with-token as a multi-contract dependency template", async () => {

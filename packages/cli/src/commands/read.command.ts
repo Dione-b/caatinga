@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { loadConfig, readContract } from "@caatinga/core";
+import { describeCliSource, loadConfig, readContract } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -10,7 +10,10 @@ export function registerReadCommand(program: Command): void {
     .argument("<target>", "Read target in contract.method format")
     .argument("[args...]", "Arguments forwarded to Stellar CLI after the method name")
     .option("-n, --network <network>", "Configured network name")
-    .option("-s, --source <source>", "Optional Stellar CLI identity alias for simulation context")
+    .option(
+      "-s, --source <source>",
+      "Stellar CLI identity alias for simulation context (defaults to CAATINGA_SOURCE, otherwise alice)"
+    )
     .allowUnknownOption(true)
     .allowExcessArguments(true)
     .action(
@@ -24,6 +27,16 @@ export function registerReadCommand(program: Command): void {
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
+
+          const resolvedSource = describeCliSource(options.source);
+          if (resolvedSource.origin !== "explicit") {
+            const originLabel =
+              resolvedSource.origin === "env" ? "from CAATINGA_SOURCE" : "built-in default";
+            logger.info(
+              `Using source identity "${resolvedSource.source}" (${originLabel}). Pass --source to override.`
+            );
+          }
+
           const result = await readContract({
             config,
             target,

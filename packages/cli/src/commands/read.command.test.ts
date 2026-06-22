@@ -81,4 +81,66 @@ describe("read command", () => {
       logSpy.mockRestore();
     }
   });
+
+  it("discloses the built-in default identity when --source is omitted", async () => {
+    const previous = process.env.CAATINGA_SOURCE;
+    delete process.env.CAATINGA_SOURCE;
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createReadProgram().parseAsync(["node", "caatinga", "read", "app.version"]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain('Using source identity "alice"');
+      expect(output).toContain("built-in default");
+    } finally {
+      logSpy.mockRestore();
+      if (previous === undefined) {
+        delete process.env.CAATINGA_SOURCE;
+      } else {
+        process.env.CAATINGA_SOURCE = previous;
+      }
+    }
+  });
+
+  it("discloses CAATINGA_SOURCE when --source is omitted", async () => {
+    const previous = process.env.CAATINGA_SOURCE;
+    process.env.CAATINGA_SOURCE = "bob";
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createReadProgram().parseAsync(["node", "caatinga", "read", "app.version"]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain('Using source identity "bob"');
+      expect(output).toContain("from CAATINGA_SOURCE");
+    } finally {
+      logSpy.mockRestore();
+      if (previous === undefined) {
+        delete process.env.CAATINGA_SOURCE;
+      } else {
+        process.env.CAATINGA_SOURCE = previous;
+      }
+    }
+  });
+
+  it("stays silent about fallbacks when --source is explicit", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createReadProgram().parseAsync([
+        "node",
+        "caatinga",
+        "read",
+        "app.version",
+        "--source",
+        "carol",
+      ]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).not.toContain("Using source identity");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });

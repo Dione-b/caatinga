@@ -90,6 +90,12 @@ export {
 } from "./stellar-sdk/compat.js";
 
 export { validateSourceShape } from "./contracts/validate-source-shape.js";
+export {
+  describeCliSource,
+  DEFAULT_CLI_SOURCE,
+  type CliSourceOrigin,
+  type ResolvedCliSource,
+} from "./contracts/source-account.js";
 export { resolveContract, type ResolvedContract } from "./contracts/resolve-contract.js";
 export { resolveDefaultContractName } from "./contracts/resolve-default-contract.js";
 export { buildContract, type BuildContractOptions } from "./contracts/build-contract.js";
