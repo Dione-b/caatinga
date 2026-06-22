@@ -8,18 +8,16 @@ import {
 } from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 
-export async function configDiagnostic(): Promise<Diagnostic> {
+export async function configDiagnostic(): Promise<Diagnostic | undefined> {
   try {
     await loadConfig();
     return { ok: true, label: "caatinga.config.ts found" };
   } catch (error) {
     if (error instanceof CaatingaError) {
       if (error.code === CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED) {
-        return {
-          ok: false,
-          label: "Project dependencies not installed",
-          fix: error.hint ?? "Run npm install (or pnpm install) in the project root.",
-        };
+        // The dependencies diagnostic already owns this line; reporting it here
+        // too duplicates "Project dependencies not installed" in doctor output.
+        return undefined;
       }
 
       if (error.code === CaatingaErrorCode.CONFIG_NOT_FOUND) {
@@ -77,6 +75,17 @@ export async function networkDiagnostic(
     const network = resolveNetwork(config, networkName);
     return { ok: true, label: `network ${network.name} found` };
   } catch (error) {
+    if (
+      error instanceof CaatingaError &&
+      (error.code === CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED ||
+        error.code === CaatingaErrorCode.CONFIG_NOT_FOUND)
+    ) {
+      // The config cannot be loaded for a reason unrelated to the network, so we
+      // cannot tell whether the network exists. Skip rather than falsely report
+      // it missing; the dependencies/config diagnostics carry the real signal.
+      return undefined;
+    }
+
     const hint = error instanceof CaatingaError ? error.hint : undefined;
     return {
       ok: false,
