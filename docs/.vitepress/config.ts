@@ -1,6 +1,8 @@
 import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   base: "/caatinga/",
   title: "Caatinga",
   description: "Soroban deploy artifacts + TypeScript-native CLI",
@@ -12,6 +14,7 @@ export default defineConfig({
     nav: [
       { text: "Guide", link: "/getting-started" },
       { text: "Reference", link: "/cli" },
+      { text: "AI agents", link: "/tutorials/integration-guide" },
       {
         text: "GitHub",
         link: "https://github.com/Dione-b/caatinga",
@@ -39,6 +42,15 @@ export default defineConfig({
             link: "/tutorials/from-zero-to-testnet",
           },
           { text: "Cheatsheet", link: "/cheatsheet" },
+        ],
+      },
+      {
+        text: "stellar-build",
+        items: [
+          {
+            text: "Integration guide",
+            link: "/tutorials/integration-guide",
+          },
         ],
       },
       {
@@ -83,4 +95,5 @@ export default defineConfig({
       provider: "local",
     },
   },
-});
+  }),
+);

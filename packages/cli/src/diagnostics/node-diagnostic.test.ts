@@ -11,6 +11,6 @@ describe("nodeDiagnostic", () => {
   });
 
   it("should_use_NODE_MIN_MAJOR_from_requirements", () => {
-    expect(NODE_MIN_MAJOR).toBe(20);
+    expect(NODE_MIN_MAJOR).toBe(22);
   });
 });

@@ -16,6 +16,7 @@ import { registerMigrateCommand } from "./commands/migrate.command.js";
 import { registerRollbackCommand } from "./commands/rollback.command.js";
 import { registerEstimateCommand } from "./commands/estimate.command.js";
 import { registerInspectCommand } from "./commands/inspect.command.js";
+import { registerSetupCommand } from "./commands/setup.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
 export function createProgram(): Command {
@@ -43,6 +44,7 @@ export function createProgram(): Command {
   registerRollbackCommand(program);
   registerEstimateCommand(program);
   registerInspectCommand(program);
+  registerSetupCommand(program);
 
   return program;
 }
