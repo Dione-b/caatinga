@@ -2,6 +2,16 @@
 
 The whole Caatinga loop on one page. Every command runs inside a generated project.
 
+## One-step environment setup
+
+```bash
+caatinga setup                         # install missing prerequisites (Rust, wasm target, Stellar CLI), fund `alice` on testnet
+caatinga setup --source bob            # use a different identity alias
+caatinga setup --skip-rust --skip-stellar  # only create the local identity
+```
+
+Run on a fresh machine before `init`. Idempotent — already-installed, compatible tools are skipped.
+
 ## Scaffold commands
 
 ```bash
@@ -41,6 +51,7 @@ npx caatinga generate --network testnet           # regenerate everything deploy
 
 | Command                             | What it does                                                        |
 | ----------------------------------- | ------------------------------------------------------------------- |
+| `caatinga setup`                    | Install missing prerequisites (Rust, wasm target, Stellar CLI) + identity |
 | `caatinga init <dir>`               | Scaffold a project from a template                                  |
 | `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity |
 | `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts  |

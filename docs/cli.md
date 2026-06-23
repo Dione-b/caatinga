@@ -15,6 +15,43 @@ The CLI is intentionally thin. It delegates config, artifacts, command execution
 
 See [Client](./client.md#single-invoker-scope-until-v10) and [ZK module](./zk.md#production-guardrails) for details.
 
+## `caatinga setup [--source alice] [--network testnet] [--skip-rust] [--skip-stellar] [--skip-identity]`
+
+One-step bootstrap of every prerequisite for Stellar/Soroban development. Run it **before**
+`caatinga init` on a fresh machine — it detects what is missing and installs only that. Each of the
+five steps is idempotent: anything already present and compatible is reported and skipped.
+
+| Step | What it does |
+| ---- | ------------ |
+| 1. Node.js | Verifies Node meets the minimum (22+). Cannot auto-install Node — aborts with upgrade guidance if too old. |
+| 2. Rust toolchain | Installs Rust via `rustup` (`curl \| sh`) when missing, or updates it via `rustup update` when below the minimum. |
+| 3. WebAssembly target | Adds the `wasm32v1-none` target required to build Soroban contracts. |
+| 4. Stellar CLI | Validates the installed CLI against the supported minimum; installs the last-tested version (`cargo install --locked stellar-cli --version <pinned>`) when missing or too old. |
+| 5. Local identity | Generates the `--source` identity; funds it via friendbot on fundable networks (`testnet`, `futurenet`, `local`, `standalone`). |
+
+```bash
+caatinga setup                               # alice on testnet, install everything missing
+caatinga setup --source bob --network testnet
+caatinga setup --skip-rust --skip-stellar    # only create the local identity
+```
+
+Notes:
+
+- The Stellar CLI is **version-pinned** to the last-tested release so `caatinga doctor` never reports
+  an untested version after setup. An already-installed CLI below the supported minimum is reinstalled
+  at the pinned version.
+- On **Windows**, Rust cannot be auto-installed (the `rustup` flow is Unix-only) — setup prints manual
+  `winget`/`rustup-init.exe` instructions instead of failing cryptically.
+- On a **non-`testnet`/non-fundable network** (for example `mainnet`), the identity is created but **not**
+  funded — fund it manually before deploying.
+- When tools are freshly installed, restart your terminal or run `source "$HOME/.cargo/env"` so `cargo`
+  and `stellar` resolve in the current shell.
+- If the Stellar CLI build from source fails (it needs a C toolchain and headers), setup prints the
+  per-platform build dependencies and a faster `cargo binstall`/prebuilt-binary alternative.
+
+`caatinga doctor` is the read-only counterpart: setup *installs* prerequisites, doctor *checks* them
+(plus project config, artifacts, and deploy/binding coverage).
+
 ## `caatinga init <projectName>`
 
 Creates a project from a bundled template and writes `caatinga.artifacts.json`.

@@ -13,6 +13,15 @@ Install published packages from npm. Pin `@next` or an exact version in apps whe
 - A local Stellar CLI identity for CLI deploy/invoke, for example `alice`
 - Optional: Freighter or another wallet adapter for browser-side `@caatinga/client` calls
 
+On a fresh machine, install everything above (except Node.js) in one step with `caatinga setup` — it
+detects what's missing and installs only that, then creates a funded local identity:
+
+```bash
+npx caatinga@next setup                 # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
+```
+
+See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) for flags and behavior. To verify an existing environment instead, run the dependency checks manually:
+
 ```bash
 rustc --version
 rustup target add wasm32v1-none

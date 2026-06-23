@@ -15,10 +15,16 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 
-- **`latest`**: **`3.1.2`** (last promoted stable on npm)
-- **`next`**: **`3.3.0`** (current repo line; pre-release candidates until promoted to `latest`)
+- **`latest`**: **`3.3.1`** (current stable on npm)
+- **`next`**: **`3.3.0`** (previous pre-release candidate, superseded by `3.3.1`)
 
-Repository packages are version **`3.3.0`**. After publish, promote `next` → `latest` per [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
+Repository packages are version **`3.3.1`**. After publish, promote `next` → `latest` per [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
+
+Highlights from the `3.3.x` line:
+
+- `3.3.1`: fix four CLI bugs across `zk init`, `read`, and `doctor`; advisory doctor
+  deploy check; transient deploy retry; honest guardrails; VitePress docs site.
+- `3.3.0`: production readiness remediation — pre-publish gate, lint/docs checks.
 
 Highlights from the `3.0.0` line:
 
