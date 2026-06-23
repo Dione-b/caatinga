@@ -59,7 +59,7 @@ The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> i
 ### `init`
 
 - `-t, --template <name>` selects a bundled template (default: `react-vite-counter`)
-- Official templates: `react-vite-counter` (single counter dApp), `marketplace-with-token` (experimental multi-contract layout with `dependsOn` and deploy-arg placeholders)
+- Official templates: `react-vite-counter` (single counter dApp); ZK projects use `caatinga zk init` with `zk-starter`
 - `init` validates `caatinga.template.json` before copying files
 
 ### `build`

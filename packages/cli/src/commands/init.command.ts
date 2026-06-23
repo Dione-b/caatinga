@@ -16,7 +16,11 @@ export function registerInitCommand(program: Command): void {
     .command("init")
     .description("Create a new Caatinga dApp from a template or minimal scaffold")
     .argument("<projectName>", "Project directory to create")
-    .option("-t, --template <template>", "Template name", "react-vite-counter")
+    .option(
+      "-t, --template <template>",
+      "Template name (react-vite-counter; ZK projects use caatinga zk init with zk-starter)",
+      "react-vite-counter"
+    )
     .option("--minimal", "Scaffold a minimal CLI + Soroban contract project (no frontend template)")
     .option("--empty", "Alias for --minimal")
     .action((projectName: string, options: InitOptions) =>

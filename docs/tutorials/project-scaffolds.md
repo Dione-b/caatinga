@@ -20,7 +20,7 @@ Aliases:
 
 ## Decision guide
 
-**Choose a template** when you want a working Vite + React browser dApp with a single-invoker wallet path — wallet modal, placeholder bindings, Vite dev server, and wallet SDK stubs already configured. Official Caatinga templates are **Vite + React only** (`vite-react`). Start with `react-vite-counter`; use `marketplace-with-token` only when you need a multi-contract dependency graph.
+**Choose a template** when you want a working Vite + React browser dApp with a single-invoker wallet path — wallet modal, placeholder bindings, Vite dev server, and wallet SDK stubs already configured. Official Caatinga templates are **Vite + React only** (`vite-react`). Start with `react-vite-counter`.
 
 **Choose minimal** when you want a Soroban contract and CLI workflow without committing to a frontend stack. You deploy and read from the terminal first, then wire `@caatinga/client` when you are ready (any UI framework).
 
@@ -28,11 +28,10 @@ Aliases:
 
 ## Official templates
 
-| Template                       | Command                                               | Status                                         |
-| ------------------------------ | ----------------------------------------------------- | ---------------------------------------------- |
-| `react-vite-counter` (default) | `npx caatinga init my-dapp`                           | Stable — recommended for first walkthrough     |
-| `marketplace-with-token`       | `npx caatinga init my-dapp -t marketplace-with-token` | Experimental — multi-contract `dependsOn` demo |
-| `zk-starter`                   | `npx caatinga zk init my-zk-dapp`                     | Stable ZK example with Vite + React shell      |
+| Template                       | Command                           | Status                                     |
+| ------------------------------ | --------------------------------- | ------------------------------------------ |
+| `react-vite-counter` (default) | `npx caatinga init my-dapp`       | Stable — recommended for first walkthrough |
+| `zk-starter`                   | `npx caatinga zk init my-zk-dapp` | Stable ZK example with Vite + React shell  |
 
 See [Templates](../templates.md) for manifest details and package-manager notes.
 

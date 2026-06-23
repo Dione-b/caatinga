@@ -269,7 +269,7 @@ Pin at the **top level** of npm overrides (and in `pnpm-workspace.yaml`):
 Use `walletStubOverrides()` from `@caatinga/client/vite` so the pin stays aligned with official
 templates. **Do not remove** without running `npm audit` on a scaffolded project and updating
 [`scripts/consumer-isolation-test.sh`](../scripts/consumer-isolation-test.sh). Details:
-[Templates — Install override contract](./templates.md#install-time-dependency-overrides-maintainer-contract).
+[Templates — Install override contract](./internal/template-overrides.md).
 
 ### Safe / uuid overrides
 

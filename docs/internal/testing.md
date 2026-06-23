@@ -31,7 +31,7 @@ Required secrets: `CAATINGA_CI_IDENTITY_ALIAS`, `CAATINGA_CI_STELLAR_CONFIG_B64`
 | `1`       | Hard failure (Caatinga, parser, or Stellar CLI version error) | No workflow retry.                   |
 | `2`       | Classified transient testnet failure                          | The workflow runs at most one retry. |
 
-CI uploads the following artifacts: `smoke-ci-out/*-smoke.log`, `*-caatinga-version.txt`, `*-stellar-version.txt`, and each generated app directory’s `caatinga.artifacts.json`. The live smoke proves both official templates — `react-vite-counter` and `marketplace-with-token` — including on-chain verification that `marketplace.token_contract_id` matches the deployed token contract ID.
+CI uploads the following artifacts: `smoke-ci-out/*-smoke.log`, `*-caatinga-version.txt`, `*-stellar-version.txt`, and each generated app directory’s `caatinga.artifacts.json`. The live smoke proves the `react-vite-counter` template end-to-end on testnet, including build, deploy, binding generation, Vite build, and invoke.
 
 ### Smoke secrets handling
 
@@ -55,7 +55,7 @@ base64 -w0 stellar-ci-config.tgz
 
 Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
 
-Before tagging `v1.0.0`, verify three consecutive successful scheduled runs (see [v1.0.0 observability plan](./v1.0.0.md#observability-plan)).
+Before tagging `v1.0.0`, verify three consecutive successful scheduled runs (see [v1.0.0 observability plan](./release/v1.0.0.md#observability-plan)).
 
 Stellar CLI fixtures live under:
 
@@ -67,7 +67,7 @@ Use versioned directories such as `v26.0.0` when the output came from a known CL
 
 New Stellar CLI version fixtures should include the CLI semver in the filename, for example `version.v22.0.1.fixture.txt`. Existing legacy `version.txt` fixtures remain valid until touched by parser fixture work. Other command-output fixtures may continue using existing names inside versioned directories.
 
-See [Stellar CLI Version Contract](./stellar-cli-version-contract.md) for the supported version range and upgrade process.
+See [Stellar CLI Version Contract](../stellar-cli-version-contract.md) for the supported version range and upgrade process.
 
 When adding parser behavior:
 

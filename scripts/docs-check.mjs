@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const criticalMarkdownFiles = {
   "README.md": { minNonEmptyLines: 80 },
   "ROADMAP.md": { minNonEmptyLines: 20 },
-  "docs/release.md": { minNonEmptyLines: 25 },
+  "docs/internal/release.md": { minNonEmptyLines: 25 },
   "docs/getting-started.md": { minNonEmptyLines: 30 },
   "docs/tutorials/from-zero-to-testnet.md": { minNonEmptyLines: 40 },
   "examples/counter-web/README.md": { minNonEmptyLines: 25 },

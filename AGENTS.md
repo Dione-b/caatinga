@@ -18,7 +18,7 @@ Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 - **`latest`**: **`3.1.2`** (last promoted stable on npm)
 - **`next`**: **`3.3.0`** (current repo line; pre-release candidates until promoted to `latest`)
 
-Repository packages are version **`3.3.0`**. After publish, promote `next` → `latest` per [docs/release/publish-checklist.md](docs/release/publish-checklist.md).
+Repository packages are version **`3.3.0`**. After publish, promote `next` → `latest` per [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
 
 Highlights from the `3.0.0` line:
 
@@ -105,7 +105,7 @@ Trezor/`protobufjs` noise. Canonical definitions live in
 `packages/client/src/vite/wallet-stubs.ts`; keep templates in sync. CI runs
 `npm audit --audit-level=high` in `scripts/consumer-isolation-test.sh`. Full maintainer
 contract:
-[docs/templates.md — Install override contract](docs/templates.md#install-time-dependency-overrides-maintainer-contract).
+[docs/templates.md — Install override contract](docs/internal/template-overrides.md).
 
 ## Security & Configuration Tips
 

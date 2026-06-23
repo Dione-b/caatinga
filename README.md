@@ -32,7 +32,7 @@ Caatinga keeps **deploy artifacts in git** (`caatinga.artifacts.json`), orchestr
 
 > [!WARNING]
 > **Alpha software (pre-1.0 development line).** The `3.x` npm major does **not** imply API stability — formats may change before `v1.0.0`.
-> npm **`latest`** is **`3.1.2`**; **`3.3.0`** is on **`next`**. Pin `npx caatinga@3.3.0` or `@next`; see the [CHANGELOG](./packages/cli/CHANGELOG.md).
+> Install with `npx caatinga@next` or pin an exact version; see the [CHANGELOG](./packages/cli/CHANGELOG.md).
 
 <br />
 
@@ -262,7 +262,7 @@ npm run dev
 
 That's it. `deploy` writes the contract ID to `caatinga.artifacts.json` **and generates TypeScript bindings automatically** (pass `--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh. Setup misbehaving? Run `npx caatinga doctor --network testnet --source alice`.
 
-> 💡 The current line is **`3.3.0`** on npm **`next`** (`latest` is **`3.1.2`** until promoted). Use `npx caatinga@3.3.0` or `npx caatinga@next` for reproducible installs of the current line.
+> 💡 Use `npx caatinga@next` or pin an exact version for reproducible installs.
 
 📖 **Choose your scaffold:** [Project scaffolds →](./docs/tutorials/project-scaffolds.md) · **Full walkthrough:** [From Zero to Testnet →](./docs/tutorials/from-zero-to-testnet.md) · **One-pager:** [Cheatsheet →](./docs/cheatsheet.md)
 
@@ -347,7 +347,7 @@ Currently **alpha.** The roadmap prioritizes CLI stability, docs, error contract
 
 ## 📚 Docs
 
-Full index: [docs/README.md →](./docs/README.md)
+**Docs site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/) · Repository index: [docs/README.md →](./docs/README.md)
 
 |                                                               |                                                                      |
 | ------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -357,7 +357,7 @@ Full index: [docs/README.md →](./docs/README.md)
 | [Cheatsheet](./docs/cheatsheet.md)                            | [CLI reference](./docs/cli.md)                                       |
 | [Client](./docs/client.md)                                    | [Wallets](./docs/wallets.md)                                         |
 | [Config](./docs/config.md)                                    | [Errors](./docs/errors.md)                                           |
-| [Release process](./docs/release.md)                          | [Architecture](./docs/architecture.md)                               |
+| [Release process](./docs/internal/release.md)                | [Architecture](./docs/architecture.md)                               |
 | [Signing strategy](./docs/signing-strategy.md)                | [Production readiness](./docs/production-readiness.md)               |
 | [Case study: counter-web](./docs/case-studies/counter-web.md) | [Contract upgrade](./docs/tutorials/contract-upgrade.md)             |
 
@@ -365,7 +365,7 @@ Full index: [docs/README.md →](./docs/README.md)
 
 ## 🤝 Contributing
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md), [Architecture](./docs/architecture.md), and [Testing](./docs/testing.md) before opening a PR. New public behavior should ship with tests and error-path coverage.
+Read [CONTRIBUTING.md](./CONTRIBUTING.md), [Architecture](./docs/architecture.md), and [Testing](./docs/internal/testing.md) before opening a PR. New public behavior should ship with tests and error-path coverage.
 
 ```bash
 git clone https://github.com/Dione-b/caatinga.git && cd caatinga

@@ -79,11 +79,11 @@ describe("createProgram", () => {
           "node",
           "caatinga",
           "init",
-          path.join(tmpDir, "market-app"),
+          path.join(tmpDir, "my-dapp"),
           "--template",
-          "marketplace-with-token",
+          "react-vite-counter",
         ]);
-      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build    marketplace");
+      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build    counter");
     } finally {
       logSpy.mockRestore();
     }

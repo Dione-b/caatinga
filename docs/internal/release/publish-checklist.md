@@ -55,4 +55,4 @@ Optional v1 gate (when targeting stable `1.0.0`):
 - verify all five v1 specs are implemented and accepted
 - verify three consecutive scheduled `Testnet Smoke` runs succeeded
 - verify no unretried smoke failure occurred in the previous 7 days
-- verify the release evidence section in `docs/release/v1.0.0.md` is complete
+- verify the release evidence section in `docs/internal/release/v1.0.0.md` is complete

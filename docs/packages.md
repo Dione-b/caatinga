@@ -10,10 +10,8 @@
 Install for end users:
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 ```
-
-`latest` currently resolves to **`3.1.2`** on npm. The current **`3.3.0`** line is on **`next`** — use `@next` or `@3.3.0` when installing. Confirm with `npm view @caatinga/cli dist-tags`.
 
 Monorepo development:
 

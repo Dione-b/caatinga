@@ -2,30 +2,19 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. The current line is **`3.3.0`** on **`next`** (`latest` is **`3.1.2`** until promoted).
+Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. Pin `@next` or an exact version for reproducible installs.
 
 ## Prerequisites
 
 Install Node.js 22+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 cargo install --locked stellar-cli --version 25.2.0
 rustup target add wasm32v1-none
 stellar --version
 rustc --version
 ```
-
-Confirm the published dist-tags and versions:
-
-```bash
-npm view @caatinga/cli dist-tags
-npm view @caatinga/cli version
-npm view @caatinga/core version
-npm view @caatinga/client version
-```
-
-For the current line, prefer `npm install -g @caatinga/cli@next` or `@3.3.0`.
 
 Create and fund a local Stellar CLI identity:
 
@@ -45,7 +34,7 @@ npm install
 
 `pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
 
-Without a global CLI install, run `npx caatinga@3.3.0 init my-dapp` (or `npx caatinga@next init my-dapp`) instead of `caatinga init`.
+Without a global CLI install, run `npx caatinga@next init my-dapp` instead of `caatinga init`.
 
 The default template creates:
 
@@ -125,7 +114,7 @@ npx caatinga deploy counter --network testnet --source alice --force
 
 ## Use the Contract in a Client
 
-After deploy (which generated the bindings), install the browser packages from `next`:
+After deploy (which generated the bindings), install the browser packages:
 
 ```bash
 npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
@@ -172,12 +161,12 @@ default template, see [Wallets](../wallets.md).
   ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)), **not** Trezor.
   Official templates pin `"ws": "^8.21.0"` in npm/pnpm overrides. Regenerate from a current
   template or copy the override block from
-  [Templates — Install override contract](../templates.md#install-time-dependency-overrides-maintainer-contract).
+  [Templates — Install override contract](../internal/template-overrides.md).
   Verify with `npm install && npm audit`.
 - `npm audit` reports **critical** `protobufjs` findings: Trezor Connect was not stubbed.
   Official templates replace `@trezor/connect-web` with local stubs under `src/stubs/` — Caatinga
   does not support hardware wallets yet. See the same
-  [override contract](../templates.md#install-time-dependency-overrides-maintainer-contract).
+  [override contract](../internal/template-overrides.md).
 - `CAATINGA_ARTIFACT_NOT_FOUND` on deploy: WASM was not built yet. Run `npx caatinga build <contract>` before `deploy`.
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
   If you have `CARGO_TARGET_DIR` set, Stellar CLI writes the Wasm under that directory instead of `contracts/<name>/target`. Caatinga `2.4.1+` resolves the Wasm from `CARGO_TARGET_DIR` automatically, but if it still fails, unset `CARGO_TARGET_DIR` or update the `wasm` path in `caatinga.config.ts`.

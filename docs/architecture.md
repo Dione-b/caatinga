@@ -1,6 +1,6 @@
 # Architecture
 
-This document is the **canonical product and architecture stance** for Caatinga. It complements package-level code and the CLI reference in `docs/cli.md`. Detailed rationale for selected decisions lives in [Architecture Decision Records](./adr/) under `docs/adr/`.
+This document is the **canonical product and architecture stance** for Caatinga. It complements package-level code and the CLI reference in `docs/cli.md`. Detailed rationale for selected decisions lives in [Architecture Decision Records](./adr/index.md) under `docs/adr/`.
 
 ## One-sentence promise
 
@@ -49,7 +49,7 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 ## Validation roadmap (flows)
 
 1. **Alpha flow (current):** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
-2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then marketplace that depends on token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
+2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then a dependent contract such as vault that injects the token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
 3. **Next:** upgrade / redeploy with **artifacts history** and clear migration story.
 
 ### Alpha flow diagram
@@ -174,7 +174,7 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 
 ## `caatinga dev`
 
-**MVP direction:** opinionated proxy around **Vite + Caatinga validation** (not a plugin marketplace). Official templates are Vite + React only (`vite-react`). Future adapters (`next`, `astro`, custom) are conceivable only after the core workflow and multi-contract story prove value. See [CLI — Supported today vs not yet](./cli.md#supported-today-vs-not-yet).
+**MVP direction:** opinionated proxy around **Vite + Caatinga validation** (not a plugin or template store). Official templates are Vite + React only (`vite-react`). Future adapters (`next`, `astro`, custom) are conceivable only after the core workflow and multi-contract story prove value. See [CLI — Supported today vs not yet](./cli.md#supported-today-vs-not-yet).
 
 ## Extensibility
 
@@ -263,4 +263,4 @@ Semver applies to monorepo packages **and** to serialized formats (`caatinga.art
 - [`config.md`](./config.md)
 - [`templates.md`](./templates.md)
 - [`errors.md`](./errors.md)
-- [`testing.md`](./testing.md)
+- [`testing.md`](./internal/testing.md)

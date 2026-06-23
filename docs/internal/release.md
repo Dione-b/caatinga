@@ -68,5 +68,5 @@ Each published package maintains its own Changesets-generated changelog under
 and `packages/zk/CHANGELOG.md`.
 Those files include a **Breaking changes policy** header that links to the v1 public API contract
 in [`release/v1.0.0.md`](./release/v1.0.0.md) and the `CAATINGA_*` error reference in
-[`errors.md`](./errors.md). There is no root `CHANGELOG.md`; use the package changelog for the
+[`errors.md`](../errors.md). There is no root `CHANGELOG.md`; use the package changelog for the
 package you depend on.

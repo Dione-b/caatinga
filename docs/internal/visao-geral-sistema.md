@@ -154,7 +154,7 @@ de conexão (`disconnected`/`connecting`/`connected`), persistência em `localSt
 silenciosa (`restore()`) sobre qualquer adapter. O subpath `@caatinga/client/react` expõe
 `WalletProvider` + `useWallet` para apps React (peer opcional `react >= 18`) — o template
 `react-vite-counter` usa esse provider em vez de um contexto manual. Guia completo:
-[Wallets](./wallets.md).
+[Wallets](../wallets.md).
 
 ### Fluxo do client
 

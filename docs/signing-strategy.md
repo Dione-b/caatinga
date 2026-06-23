@@ -36,7 +36,7 @@ Caatinga does not manage CI secrets. Recommended pattern:
 3. Pass `--source ci-deployer` (or your alias) to `caatinga deploy` / `invoke`.
 4. Commit updated `caatinga.artifacts.json` from the pipeline or store as a build artifact.
 
-See [Testing — CI without local secrets](./testing.md).
+See [Testing — CI without local secrets](./internal/testing.md).
 
 ## Testnet vs mainnet
 
@@ -55,14 +55,8 @@ See [Testing — CI without local secrets](./testing.md).
 | Hardware wallets (Ledger/Trezor)     | Not supported  | SWK stubs only; no native Ledger integration                                 |
 | KMS / cloud signing (AWS KMS, GCP)   | Non-goal alpha | Use Stellar CLI or custom signing outside Caatinga                           |
 | Backend / server-side signing        | Non-goal alpha | Application responsibility                                                   |
-| Multisig / `signAuthEntry` in client | v1.0 candidate | See [ROADMAP](../ROADMAP.md)                                                 |
+| Multisig / `signAuthEntry` in client | v1.0 candidate |                                                                              |
 | Caatinga-managed key storage         | Never          | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
-
-## v1.0 roadmap (signing)
-
-- Documented multisig / `signAuthEntry` orchestration in `@caatinga/client` (candidate).
-- Clear extension points for custom signers without bypassing generated bindings.
-- Production readiness checklist integration in `caatinga doctor`.
 
 ## Related docs
 

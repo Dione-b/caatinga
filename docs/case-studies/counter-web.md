@@ -1,6 +1,6 @@
 # Case Study: counter-web (internal reference)
 
-> **Status:** Internal reference case study — not a third-party production testimonial. Replace with an external quote when available. See [outreach template](../outreach-template.md).
+> **Status:** Internal reference case study — not a third-party production testimonial. Replace with an external quote when available. See [outreach template](../internal/outreach-template.md).
 
 ## Project summary
 
@@ -66,7 +66,7 @@ Future case studies should capture:
 
 ## External validation
 
-No external team has confirmed production mainnet usage yet. If you ship with Caatinga, we'd like to hear from you — see [outreach template](../outreach-template.md).
+No external team has confirmed production mainnet usage yet. If you ship with Caatinga, we'd like to hear from you — see [outreach template](../internal/outreach-template.md).
 
 ## Related docs
 

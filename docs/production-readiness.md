@@ -64,7 +64,7 @@ One `caatinga.artifacts.json` per Caatinga project root. Multiple frontends (web
 
 ## semver note
 
-The `3.x` npm line is a **pre-1.0 development line**. Do not assume semver stability until `v1.0.0` gates are met — see [Release process](./release.md) and [v1.0.0 readiness](./release/v1.0.0.md).
+Caatinga is pre-1.0. APIs may change between minor versions. Pin exact versions in production CI.
 
 ## Related docs
 

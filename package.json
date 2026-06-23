@@ -17,6 +17,9 @@
     "install:global": "pnpm build && NPM_CONFIG_PREFIX=\"$(dirname \"$(dirname \"$(command -v node)\")\")\" npm install -g ./packages/cli",
     "test": "turbo test",
     "docs:check": "node scripts/docs-check.mjs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "typecheck": "turbo typecheck",
     "knip": "knip --no-config-hints",
     "check:versions": "bash scripts/check-version-alignment.sh",
@@ -43,6 +46,7 @@
     "turbo": "^2.3.3",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.0.0",
+    "vitepress": "^1.6.3",
     "yaml": "^2.7.0"
   },
   "dependencies": {

@@ -41,7 +41,7 @@ Thanks,
 
 1. Create `docs/case-studies/<project-slug>.md` using the counter-web template.
 2. Add a quote block to README under a **Built with Caatinga** section (only with explicit permission).
-3. Update [production-readiness.md](./production-readiness.md) with any new operational lessons.
+3. Update [production-readiness.md](../production-readiness.md) with any new operational lessons.
 
 ## What not to promise
 

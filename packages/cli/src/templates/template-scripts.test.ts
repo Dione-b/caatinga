@@ -14,10 +14,6 @@ const TEMPLATES: { name: string; contracts: string[] }[] = [
     name: "zk-starter",
     contracts: ["verifier"],
   },
-  {
-    name: "marketplace-with-token",
-    contracts: ["token", "marketplace"],
-  },
 ];
 
 describe("template npm scripts", () => {

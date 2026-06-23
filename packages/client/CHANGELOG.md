@@ -361,7 +361,7 @@
   - @caatinga/core@0.2.2
 
 Public API contract and `CAATINGA_*` error code stability are documented in
-[`docs/release/v1.0.0.md`](../../docs/release/v1.0.0.md) and [`docs/errors.md`](../../docs/errors.md).
+[`docs/internal/release/v1.0.0.md`](../../docs/internal/release/v1.0.0.md) and [`docs/errors.md`](../../docs/errors.md).
 Consult those documents when upgrading across minor versions during the `0.x` phase.
 
 # @caatinga/client

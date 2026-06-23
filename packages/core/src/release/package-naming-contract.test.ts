@@ -20,7 +20,7 @@ describe("package naming contract", () => {
   });
 
   it("should_not_list_live_testnet_ci_as_alpha_non_goal", async () => {
-    const alpha = await readFile(path.join(root, "docs/release/v0.1.0-alpha.md"), "utf8");
+    const alpha = await readFile(path.join(root, "docs/internal/release/v0.1.0-alpha.md"), "utf8");
     expect(alpha).not.toMatch(/- live testnet CI/);
     expect(alpha).toMatch(/testnet-smoke/);
   });

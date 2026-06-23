@@ -157,9 +157,9 @@ contracts: {
     path: "./contracts/token",
     wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm"
   },
-  marketplace: {
-    path: "./contracts/marketplace",
-    wasm: "./contracts/marketplace/target/wasm32v1-none/release/marketplace.wasm",
+  vault: {
+    path: "./contracts/vault",
+    wasm: "./contracts/vault/target/wasm32v1-none/release/vault.wasm",
     dependsOn: ["token"],
     deployArgs: {
       tokenContractId: "${contracts.token.contractId}"
@@ -195,4 +195,4 @@ leading`\_`, lowercase). For example `tokenContractId`becomes`--token_contract_i
 
 End-to-end: with `deployArgs: { tokenContractId: "${contracts.token.contractId}" }`,
 `token` deploys first, its `contractId` is recorded in `caatinga.artifacts.json`, and the
-`marketplace` deploy appends `-- --token_contract_id C<token-id>`.
+`vault` deploy appends `-- --token_contract_id C<token-id>`.

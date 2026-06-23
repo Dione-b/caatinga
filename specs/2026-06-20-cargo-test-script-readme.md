@@ -16,19 +16,17 @@ as versões de dependências dos templates com a versão atual do monorepo (`^3.
 
 ## Alterações por área
 
-### 1. Templates oficiais (3 templates)
+### 1. Templates oficiais (2 templates)
 
-| Template                 | Arquivos alterados                                    |
-| ------------------------ | ----------------------------------------------------- |
-| `react-vite-counter`     | `package.json`, `caatinga.template.json`, `README.md` |
-| `marketplace-with-token` | `package.json`, `caatinga.template.json`, `README.md` |
-| `zk-starter`             | `package.json`, `caatinga.template.json`, `README.md` |
+| Template             | Arquivos alterados                                    |
+| -------------------- | ----------------------------------------------------- |
+| `react-vite-counter` | `package.json`, `caatinga.template.json`, `README.md` |
+| `zk-starter`         | `package.json`, `caatinga.template.json`, `README.md` |
 
 **Em todos os templates:**
 
 - **Novo script `test`** no `package.json`:
   - `react-vite-counter`: `cargo test --manifest-path contracts/counter/Cargo.toml`
-  - `marketplace-with-token`: `cargo test --manifest-path contracts/token/Cargo.toml && cargo test --manifest-path contracts/marketplace/Cargo.toml`
   - `zk-starter`: `cargo test --manifest-path contracts/verifier/Cargo.toml`
 
 - **Versões bumpadas:**
@@ -89,7 +87,7 @@ o script `test` e documentação de teste no README.
 
 ---
 
-## Arquivos alterados (14)
+## Arquivos alterados (11)
 
 ```
 packages/cli/src/templates/template-scripts.test.ts          (novo)
@@ -97,9 +95,6 @@ packages/core/src/scaffold/create-minimal-project.test.ts    (+1)
 packages/core/src/scaffold/create-minimal-project.ts         (+12)
 packages/core/src/scaffold/create-zk-project.test.ts         (+3)
 packages/core/src/scaffold/create-zk-project.ts              (+12)
-packages/templates/marketplace-with-token/README.md          (+3)
-packages/templates/marketplace-with-token/caatinga.template.json (+1)
-packages/templates/marketplace-with-token/package.json       (+4/-3)
 packages/templates/react-vite-counter/README.md              (+2)
 packages/templates/react-vite-counter/caatinga.template.json (+1)
 packages/templates/react-vite-counter/package.json           (+4/-3)

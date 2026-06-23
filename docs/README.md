@@ -1,5 +1,7 @@
 # Caatinga Docs
 
+**Published site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/) — onboarding guides and reference with search.
+
 Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Start here
@@ -32,21 +34,17 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | Doc                                                               | What you get                               |
 | ----------------------------------------------------------------- | ------------------------------------------ |
 | [Architecture](./architecture.md)                                 | Package layout, layering rules, data flow  |
-| [Visão geral do sistema (PT)](./visao-geral-sistema.md)           | Architecture overview in Portuguese        |
-| [Testing](./testing.md)                                           | Test layers and how to run them            |
-| [Release process](./release.md)                                   | Changesets, dist-tags, release gate        |
-| [v1 viability index](./release/v1-viability-index.md)             | Stable-release blocking specs              |
 | [Stellar CLI version contract](./stellar-cli-version-contract.md) | Supported Stellar CLI range and advisories |
 | [Stellar SDK version contract](./stellar-sdk-version-contract.md) | Supported `@stellar/stellar-sdk` range     |
 | [Signing strategy](./signing-strategy.md)                         | CLI and browser signing models             |
 | [Production readiness](./production-readiness.md)                 | Pre-mainnet checklist                      |
-| [Case studies](./case-studies/counter-web.md)                     | Reference implementations                  |
 | [Packages](./packages.md)                                         | What each npm package contains             |
-| [ADRs](./adr/)                                                    | Architecture decision records              |
+| [ADRs](./adr/index.md)                                            | Architecture decision records              |
+
+For maintainers: release process, publish checklists, testing policy, and internal specs live in [`docs/internal/`](./internal/) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 ## Quick orientation
 
-- **Current release:** **`3.3.0`** on npm **`next`**; **`latest`** is **`3.1.2`** until promoted (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`). Confirm with `npm view @caatinga/cli dist-tags`.
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
   `caatinga.artifacts.json` and auto-generates TypeScript bindings.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in

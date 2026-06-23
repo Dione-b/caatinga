@@ -19,6 +19,11 @@ See [Client](./client.md#single-invoker-scope-until-v10) and [ZK module](./zk.md
 
 Creates a project from a bundled template and writes `caatinga.artifacts.json`.
 
+`-t, --template <name>` selects the template (default: `react-vite-counter`). Official browser templates:
+
+- `react-vite-counter` — single Soroban counter dApp (default)
+- `zk-starter` — ZK dApp with Circom/Groth16 verifier (use `caatinga zk init <projectName>`)
+
 `init` validates `caatinga.template.json` before copying files and prints the selected template name and version.
 
 For a step-by-step guide, see [Template project](./tutorials/template-project.md). To compare template, minimal, and ZK scaffolds, see [Choosing a project scaffold](./tutorials/project-scaffolds.md).

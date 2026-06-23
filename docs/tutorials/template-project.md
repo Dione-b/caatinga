@@ -23,12 +23,12 @@ npm install
 Pick a different bundled template:
 
 ```bash
-npx caatinga init my-dapp -t marketplace-with-token
+npx caatinga zk init my-zk-dapp
 ```
 
 `pnpm install` also works. The `react-vite-counter` template ships `pnpm-workspace.yaml` for pnpm 10.26+/11.x — see [Templates — pnpm](../templates.md#pnpm-1026--11x).
 
-Without a global CLI install, use `npx caatinga@3.3.0 init my-dapp` (or `npx caatinga@next init my-dapp`).
+Without a global CLI install, use `npx caatinga@next init my-dapp`.
 
 ## What gets generated
 
@@ -42,7 +42,7 @@ Without a global CLI install, use `npx caatinga@3.3.0 init my-dapp` (or `npx caa
 | `src/stubs/`                      | Wallet SDK stubs (Trezor, HOT, Safe) for clean browser bundles |
 | `vite.config.ts`, `tsconfig.json` | Frontend toolchain                                             |
 
-The default contract is `counter` in `react-vite-counter`. `marketplace-with-token` ships `token` and `marketplace` with a `dependsOn` graph.
+The default contract is `counter` in `react-vite-counter`.
 
 ## Standard workflow
 
@@ -84,7 +84,7 @@ The frontend reads `contractId` from `caatinga.artifacts.json`. Deploy before `n
 
 **`npm install` warnings or audit findings from wallet SDK transitives:**
 
-The template ships npm `overrides` and optional `pnpm-workspace.yaml` blocks (**required**, not optional). The most common report is ~14 **high** findings from `ws` via Reown/viem — fixed by `"ws": "^8.21.0"`. Trezor/HOT are stubbed because Caatinga does not support hardware wallets yet. See [Templates — Install override contract](../templates.md#install-time-dependency-overrides-maintainer-contract) and [Wallets](../wallets.md#stellar-wallets-kit-bundler-workarounds).
+The template ships npm `overrides` and optional `pnpm-workspace.yaml` blocks (**required**, not optional). The most common report is ~14 **high** findings from `ws` via Reown/viem — fixed by `"ws": "^8.21.0"`. Trezor/HOT are stubbed because Caatinga does not support hardware wallets yet. See [Templates — Install override contract](../internal/template-overrides.md) and [Wallets](../wallets.md#stellar-wallets-kit-bundler-workarounds).
 
 ## Next steps
 

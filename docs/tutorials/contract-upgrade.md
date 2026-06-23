@@ -86,6 +86,6 @@ Each redeploy creates a new on-chain contract. Old instances are **orphaned** â€
 
 ## Related docs
 
-- [Production readiness](./production-readiness.md)
+- [Production readiness](../production-readiness.md)
 - [Config â€” artifacts](../config.md)
 - [CLI reference](../cli.md)
