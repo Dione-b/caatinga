@@ -4,21 +4,12 @@ import type { CaatingaConfig } from "@caatinga/core";
 import { registerDoctorCommand } from "./doctor.command.js";
 
 const runAllDiagnosticsMock = vi.hoisted(() => vi.fn());
-const loadConfigMock = vi.hoisted(() => vi.fn());
 const evaluateDeployCoverageMock = vi.hoisted(() => vi.fn());
 const evaluateBindingCoverageMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../diagnostics/run-all.js", () => ({
   runAllDiagnostics: runAllDiagnosticsMock,
 }));
-
-vi.mock("@caatinga/core", async () => {
-  const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
-  return {
-    ...actual,
-    loadConfig: loadConfigMock,
-  };
-});
 
 vi.mock("./doctor-deploy-coverage.js", () => ({
   evaluateDeployCoverage: evaluateDeployCoverageMock,
@@ -57,16 +48,17 @@ function createDoctorProgram(): Command {
 describe("doctor command", () => {
   beforeEach(() => {
     runAllDiagnosticsMock.mockReset();
-    loadConfigMock.mockReset();
     evaluateDeployCoverageMock.mockReset();
     evaluateBindingCoverageMock.mockReset();
     process.exitCode = undefined;
 
-    runAllDiagnosticsMock.mockResolvedValue([
-      { ok: true, label: "Node.js" },
-      { ok: true, label: "Stellar CLI" },
-    ]);
-    loadConfigMock.mockResolvedValue(config);
+    runAllDiagnosticsMock.mockResolvedValue({
+      diagnostics: [
+        { ok: true, label: "Node.js" },
+        { ok: true, label: "Stellar CLI" },
+      ],
+      config,
+    });
     evaluateBindingCoverageMock.mockResolvedValue({ lines: [], allFresh: true });
   });
 
@@ -84,7 +76,7 @@ describe("doctor command", () => {
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor"]);
 
-    expect(loadConfigMock).toHaveBeenCalled();
+    expect(runAllDiagnosticsMock).toHaveBeenCalledWith({ network: undefined, source: undefined });
     expect(evaluateDeployCoverageMock).toHaveBeenCalledWith({ networkName: "testnet" });
     expect(process.exitCode).toBeUndefined();
   });
@@ -97,15 +89,18 @@ describe("doctor command", () => {
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor", "--network", "testnet"]);
 
-    expect(loadConfigMock).not.toHaveBeenCalled();
+    expect(runAllDiagnosticsMock).toHaveBeenCalledWith({ network: "testnet", source: undefined });
     expect(evaluateDeployCoverageMock).toHaveBeenCalledWith({ networkName: "testnet" });
     expect(process.exitCode).toBeUndefined();
   });
 
   it("should_not_run_deploy_coverage_when_diagnostics_fail", async () => {
-    runAllDiagnosticsMock.mockResolvedValue([
-      { ok: false, label: "caatinga.config.ts not found", fix: "Run caatinga init." },
-    ]);
+    runAllDiagnosticsMock.mockResolvedValue({
+      diagnostics: [
+        { ok: false, label: "caatinga.config.ts not found", fix: "Run caatinga init." },
+      ],
+      config: undefined,
+    });
 
     await createDoctorProgram().parseAsync(["node", "caatinga", "doctor"]);
 

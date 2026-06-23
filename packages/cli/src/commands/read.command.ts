@@ -14,8 +14,6 @@ export function registerReadCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias for simulation context (defaults to CAATINGA_SOURCE, otherwise alice)"
     )
-    .allowUnknownOption(true)
-    .allowExcessArguments(true)
     .action(
       (
         target: string,

@@ -1,5 +1,4 @@
 import { Command } from "commander";
-import { loadConfig } from "@caatinga/core";
 import { runAllDiagnostics } from "../diagnostics/run-all.js";
 import { printDiagnostic, printFixes } from "../diagnostics/types.js";
 import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
@@ -77,7 +76,7 @@ export function registerDoctorCommand(program: Command): void {
         logger.info("Caatinga Doctor");
         logger.info("");
 
-        const diagnostics = await runAllDiagnostics(options);
+        const { diagnostics, config } = await runAllDiagnostics(options);
 
         for (const diagnostic of diagnostics) {
           printDiagnostic(diagnostic);
@@ -96,8 +95,7 @@ export function registerDoctorCommand(program: Command): void {
         const ready = diagnostics.every((diagnostic) => diagnostic.ok);
 
         let deployNetwork = options.network;
-        if (!deployNetwork && ready) {
-          const config = await loadConfig();
+        if (!deployNetwork && ready && config) {
           deployNetwork = config.defaultNetwork;
         }
 

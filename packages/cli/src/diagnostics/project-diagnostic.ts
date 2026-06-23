@@ -68,7 +68,9 @@ export async function artifactsDiagnostic(): Promise<Diagnostic> {
 export async function networkDiagnostic(
   networkName: string | undefined
 ): Promise<Diagnostic | undefined> {
-  if (!networkName) return undefined;
+  if (!networkName) {
+    return { ok: true, label: "network (skipped — no --network provided)" };
+  }
 
   try {
     const config = await loadConfig();

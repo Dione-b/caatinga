@@ -15,6 +15,9 @@ import {
 const runCommandMock = vi.hoisted(() => vi.fn());
 const execaMock = vi.hoisted(() => vi.fn());
 const checkStellarCliVersionMock = vi.hoisted(() => vi.fn());
+const httpsGetMock = vi.hoisted(() => vi.fn());
+const fsWriteFileMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const fsUnlinkMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
@@ -28,6 +31,16 @@ vi.mock("@caatinga/core", async () => {
 });
 
 vi.mock("execa", () => ({ execa: execaMock }));
+
+vi.mock("node:https", () => ({
+  default: { get: httpsGetMock },
+  get: httpsGetMock,
+}));
+
+vi.mock("node:fs/promises", () => ({
+  writeFile: fsWriteFileMock,
+  unlink: fsUnlinkMock,
+}));
 
 // Stub requirements constants to stable values for test isolation
 vi.mock("@caatinga/core/runtime/requirements", () => ({
@@ -49,6 +62,34 @@ function resetMocks(): void {
   runCommandMock.mockReset();
   execaMock.mockReset();
   checkStellarCliVersionMock.mockReset();
+  httpsGetMock.mockReset();
+}
+
+type MockHttpResponse = {
+  statusCode: number;
+  headers: Record<string, string>;
+  on: (evt: string, handler: (chunk?: Buffer) => void) => MockHttpResponse;
+};
+
+type MockHttpRequest = { on: (evt: string, handler: () => void) => void };
+
+function mockHttpsGetWithScript(script: string): void {
+  httpsGetMock.mockImplementation(
+    (_url: unknown, cb: (res: MockHttpResponse) => void): MockHttpRequest => {
+      const data = Buffer.from(script);
+      const fakeRes: MockHttpResponse = {
+        statusCode: 200,
+        headers: {},
+        on: (evt: string, handler: (chunk?: Buffer) => void) => {
+          if (evt === "data") Promise.resolve().then(() => handler(data));
+          else if (evt === "end") Promise.resolve().then(() => handler());
+          return fakeRes;
+        },
+      };
+      cb(fakeRes);
+      return { on: () => {} };
+    }
+  );
 }
 
 // ─── checkNodeStep ────────────────────────────────────────────────────────────
@@ -96,6 +137,7 @@ describe("installRustStep", () => {
     expect(execaMock).toHaveBeenCalledWith("rustup", ["update", "stable"], {
       stdio: "inherit",
       env: {},
+      cancelSignal: expect.any(AbortSignal),
     });
   });
 
@@ -118,16 +160,39 @@ describe("installRustStep", () => {
       .mockRejectedValueOnce(new Error("rustc not found"))
       .mockResolvedValueOnce({ stdout: "rustc 1.87.0 (abc 2024-01-01)", stderr: "", all: "" });
 
-    execaMock.mockResolvedValueOnce({});
+    // Provide a test script and set its expected hash via env var
+    const testScript = "#!/bin/sh\necho installing rustup";
+    const crypto = await import("node:crypto");
+    const testHash = crypto.createHash("sha256").update(testScript).digest("hex");
+    process.env.CAATINGA_RUSTUP_INIT_SHA256 = testHash;
+
+    mockHttpsGetWithScript(testScript);
+
+    // Mock writeFile/unlink to prevent actual file system writes
+    fsWriteFileMock.mockResolvedValue(undefined);
+    fsUnlinkMock.mockResolvedValue(undefined);
 
     const result = await installRustStep();
+
+    delete process.env.CAATINGA_RUSTUP_INIT_SHA256;
+    vi.restoreAllMocks();
 
     expect(result.ok).toBe(true);
     expect(result.installed).toBe(true);
     expect(result.label).toContain("installed");
-    expect(execaMock).toHaveBeenCalledWith("sh", ["-c", expect.stringContaining("rustup.rs")], {
-      stdio: "inherit",
-    });
+  });
+
+  it("should_reject_rustup_when_checksum_mismatch", async () => {
+    runCommandMock.mockRejectedValueOnce(new Error("rustc not found"));
+
+    const testScript = "#!/bin/sh\necho wrong script";
+    mockHttpsGetWithScript(testScript);
+
+    const result = await installRustStep();
+
+    expect(result.ok).toBe(false);
+    expect(result.label).toContain("checksum mismatch");
+    expect(execaMock).not.toHaveBeenCalled();
   });
 
   it("should_return_error_when_rustc_not_on_path_after_install", async () => {
@@ -135,9 +200,22 @@ describe("installRustStep", () => {
       .mockRejectedValueOnce(new Error("rustc not found"))
       .mockRejectedValueOnce(new Error("rustc still not found"));
 
+    const testScript = "#!/bin/sh\necho installing rustup";
+    const crypto = await import("node:crypto");
+    const testHash = crypto.createHash("sha256").update(testScript).digest("hex");
+    process.env.CAATINGA_RUSTUP_INIT_SHA256 = testHash;
+
+    mockHttpsGetWithScript(testScript);
+
     execaMock.mockResolvedValueOnce({});
 
+    fsWriteFileMock.mockResolvedValue(undefined);
+    fsUnlinkMock.mockResolvedValue(undefined);
+
     const result = await installRustStep();
+
+    delete process.env.CAATINGA_RUSTUP_INIT_SHA256;
+    vi.restoreAllMocks();
 
     expect(result.ok).toBe(false);
     expect(result.label).toContain("not on PATH");
@@ -178,6 +256,7 @@ describe("installWasmTargetStep", () => {
     expect(execaMock).toHaveBeenCalledWith("rustup", ["target", "add", "wasm32v1-none"], {
       stdio: "inherit",
       env: {},
+      cancelSignal: expect.any(AbortSignal),
     });
   });
 
@@ -221,7 +300,7 @@ describe("installStellarCliStep", () => {
     expect(execaMock).toHaveBeenCalledWith(
       "cargo",
       ["install", "--locked", "stellar-cli", "--version", "25.2.0"],
-      { stdio: "inherit", env: {} }
+      { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
 
@@ -246,7 +325,7 @@ describe("installStellarCliStep", () => {
     expect(execaMock).toHaveBeenCalledWith(
       "cargo",
       ["install", "--locked", "stellar-cli", "--version", "25.2.0"],
-      { stdio: "inherit", env: {} }
+      { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
 
@@ -289,7 +368,7 @@ describe("createIdentityStep", () => {
     expect(execaMock).toHaveBeenCalledWith(
       "stellar",
       ["keys", "generate", "alice", "--fund", "--network", "testnet"],
-      { stdio: "inherit", env: {} }
+      { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
 
@@ -305,7 +384,7 @@ describe("createIdentityStep", () => {
     expect(execaMock).toHaveBeenCalledWith(
       "stellar",
       ["keys", "generate", "alice", "--network", "mainnet"],
-      { stdio: "inherit", env: {} }
+      { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
 
@@ -381,7 +460,19 @@ describe("runSetup", () => {
       // identity already exists
       .mockResolvedValueOnce({ stdout: "GABC...", stderr: "", all: "" });
     checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
-    execaMock.mockResolvedValueOnce({}); // rustup install
+
+    // Mock https.get for rustup download
+    const testScript = "#!/bin/sh\necho installing rustup";
+    const crypto = await import("node:crypto");
+    const testHash = crypto.createHash("sha256").update(testScript).digest("hex");
+    process.env.CAATINGA_RUSTUP_INIT_SHA256 = testHash;
+
+    mockHttpsGetWithScript(testScript);
+
+    execaMock.mockResolvedValueOnce({}); // rustup install execa call
+
+    fsWriteFileMock.mockResolvedValue(undefined);
+    fsUnlinkMock.mockResolvedValue(undefined);
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {
@@ -391,6 +482,8 @@ describe("runSetup", () => {
       expect(output).toContain(".cargo/env");
     } finally {
       logSpy.mockRestore();
+      delete process.env.CAATINGA_RUSTUP_INIT_SHA256;
+      vi.restoreAllMocks();
     }
   });
 
@@ -410,6 +503,33 @@ describe("runSetup", () => {
     try {
       await runSetup({ source: "alice", network: "testnet" });
       expect(process.exitCode).toBe(1);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("should_call_onProgress_callback_for_each_step", async () => {
+    runCommandMock
+      .mockResolvedValueOnce({ stdout: "rustc 1.87.0", stderr: "", all: "" })
+      .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+
+    const events: { step: number; title: string; status: string }[] = [];
+    const onProgress = (event: { step: number; total: number; title: string; status: string }) => {
+      events.push({ step: event.step, title: event.title, status: event.status });
+    };
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    try {
+      await runSetup(
+        { source: "alice", network: "testnet", skipStellar: true, skipIdentity: true },
+        onProgress
+      );
+      expect(events[0]).toMatchObject({ step: 1, title: "Node.js", status: "start" });
+      expect(events[1]).toMatchObject({ step: 1, title: "Node.js", status: "complete" });
+      const stepNumbers = events.map((e) => e.step);
+      expect(stepNumbers).not.toContain(4);
+      expect(stepNumbers).not.toContain(5);
     } finally {
       logSpy.mockRestore();
     }

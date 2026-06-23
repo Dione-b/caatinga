@@ -2,6 +2,7 @@ import { access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
+import { logger } from "./logger.js";
 
 export async function resolveTemplateDir(templateName: string): Promise<string> {
   const candidates = buildTemplateCandidates(templateName);
@@ -9,11 +10,11 @@ export async function resolveTemplateDir(templateName: string): Promise<string> 
   if (process.env.CAATINGA_DEBUG_TEMPLATE_RESOLUTION === "1") {
     const envValue = process.env.CAATINGA_TEMPLATES_DIR ?? "<unset>";
     const cwd = process.cwd();
-    process.stderr.write(
-      `caatinga: template resolution candidates for "${templateName}": env=${envValue} cwd=${cwd}\n`
+    logger.muted(
+      `template resolution candidates for "${templateName}": env=${envValue} cwd=${cwd}`
     );
     for (const candidate of candidates) {
-      process.stderr.write(`caatinga: candidate ${candidate}\n`);
+      logger.muted(`candidate ${candidate}`);
     }
   }
 
@@ -48,7 +49,7 @@ function candidatePathsFromModule(templateName: string): string[] {
   const candidates: string[] = [];
   let dir = start;
 
-  for (let depth = 0; depth < 8; depth += 1) {
+  for (let depth = 0; depth < 5; depth += 1) {
     candidates.push(path.join(dir, "packages", "templates", templateName));
     candidates.push(path.join(dir, "templates", templateName));
     candidates.push(path.join(dir, "node_modules", "@caatinga", "templates", templateName));
