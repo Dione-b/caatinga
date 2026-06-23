@@ -30,6 +30,10 @@ features:
   - title: ZK workflow
     details: Circom + Groth16 verifier on Soroban (niche). Use zk-starter for an end-to-end demo with UI.
     link: /tutorials/zk-project
+  - title: AI agents (stellar-build)
+    details: Drive the Caatinga lifecycle from Claude Code or Codex with the stellar-build agents. Optional — see the Integration guide.
+    link: /tutorials/integration-guide
+    linkText: Integration guide
 ---
 
 ## Quick start
