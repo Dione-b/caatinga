@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.4.0
+
+### Patch Changes
+
+- @caatinga/core@3.4.0
+
 ## 3.3.1
 
 ### Patch Changes

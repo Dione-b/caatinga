@@ -1,6 +1,6 @@
 # @caatinga/cli
 
-Developer toolkit for Stellar / Soroban dApps — `init`, `build`, `deploy`, `generate`, `status`, and `invoke`.
+Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `generate`, `status`, and `invoke`.
 
 ## Install
 
@@ -12,6 +12,8 @@ caatinga --help
 Inside a generated project, prefer `npx caatinga` so the project-local workflow stays explicit.
 
 ## Requirements
+
+Run `caatinga setup` on a fresh machine to install everything below automatically, or follow the manual steps:
 
 - Node.js `>=22`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (22.x breaks `caatinga invoke` signing)
@@ -45,6 +47,7 @@ npx caatinga invoke counter.increment --network testnet --source alice
 
 | Command                                                       | What it does                                                                               |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `caatinga setup [--source alice] [--network testnet]`         | Install Node/Rust/Stellar CLI prerequisites and create a funded local identity             |
 | `caatinga init <projectName>`                                 | Create a project from a bundled template and write `caatinga.artifacts.json`               |
 | `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
 | `caatinga build [contract]`                                   | Compile contract WASM through Stellar CLI (default contract: `counter`)                    |
@@ -55,6 +58,13 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | `caatinga read <contract.method>`                             | Simulate a read-only contract method (no signing or submission)                            |
 
 The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> invoke`.
+
+### `setup`
+
+- One-step bootstrap for a fresh machine: checks Node, installs/updates Rust via `rustup`, adds the `wasm32v1-none` target, installs the version-pinned Stellar CLI, and creates a funded local identity
+- Each step is idempotent — anything already present and compatible is reported and skipped
+- `--skip-rust`, `--skip-stellar`, `--skip-identity` skip individual steps
+- Run it before `caatinga init` on a fresh machine; `caatinga doctor` is the read-only counterpart that checks the same prerequisites afterward
 
 ### `init`
 
