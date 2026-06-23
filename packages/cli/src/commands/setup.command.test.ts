@@ -125,11 +125,9 @@ describe("installRustStep", () => {
     expect(result.ok).toBe(true);
     expect(result.installed).toBe(true);
     expect(result.label).toContain("installed");
-    expect(execaMock).toHaveBeenCalledWith(
-      "sh",
-      ["-c", expect.stringContaining("rustup.rs")],
-      { stdio: "inherit" }
-    );
+    expect(execaMock).toHaveBeenCalledWith("sh", ["-c", expect.stringContaining("rustup.rs")], {
+      stdio: "inherit",
+    });
   });
 
   it("should_return_error_when_rustc_not_on_path_after_install", async () => {
@@ -228,8 +226,7 @@ describe("installStellarCliStep", () => {
   });
 
   it("should_install_pinned_version_when_existing_cli_is_below_minimum", async () => {
-    const { CaatingaError, CaatingaErrorCode } =
-      await import("@caatinga/core");
+    const { CaatingaError, CaatingaErrorCode } = await import("@caatinga/core");
     checkStellarCliVersionMock
       .mockRejectedValueOnce(
         new CaatingaError(
