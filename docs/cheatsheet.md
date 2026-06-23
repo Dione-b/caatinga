@@ -49,17 +49,17 @@ npx caatinga generate --network testnet           # regenerate everything deploy
 
 ## Commands
 
-| Command                             | What it does                                                        |
-| ----------------------------------- | ------------------------------------------------------------------- |
+| Command                             | What it does                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------- |
 | `caatinga setup`                    | Install missing prerequisites (Rust, wasm target, Stellar CLI) + identity |
-| `caatinga init <dir>`               | Scaffold a project from a template                                  |
-| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity |
-| `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts  |
-| `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings      |
-| `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs         |
-| `caatinga status`                   | Table of deployed contracts + binding freshness per network         |
-| `caatinga invoke <contract.method>` | Call a contract method from the CLI                                 |
-| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                   |
+| `caatinga init <dir>`               | Scaffold a project from a template                                        |
+| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity       |
+| `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts        |
+| `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings            |
+| `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs               |
+| `caatinga status`                   | Table of deployed contracts + binding freshness per network               |
+| `caatinga invoke <contract.method>` | Call a contract method from the CLI                                       |
+| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                         |
 
 ## Flags
 

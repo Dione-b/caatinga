@@ -357,7 +357,7 @@ Currently **alpha.** The roadmap prioritizes CLI stability, docs, error contract
 | [Cheatsheet](./docs/cheatsheet.md)                            | [CLI reference](./docs/cli.md)                                       |
 | [Client](./docs/client.md)                                    | [Wallets](./docs/wallets.md)                                         |
 | [Config](./docs/config.md)                                    | [Errors](./docs/errors.md)                                           |
-| [Release process](./docs/internal/release.md)                | [Architecture](./docs/architecture.md)                               |
+| [Release process](./docs/internal/release.md)                 | [Architecture](./docs/architecture.md)                               |
 | [Signing strategy](./docs/signing-strategy.md)                | [Production readiness](./docs/production-readiness.md)               |
 | [Case study: counter-web](./docs/case-studies/counter-web.md) | [Contract upgrade](./docs/tutorials/contract-upgrade.md)             |
 

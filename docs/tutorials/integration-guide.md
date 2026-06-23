@@ -7,7 +7,7 @@ two tools work in complementary layers:
   multi-contract deploy via `dependsOn`, TypeScript binding generation, and the deployed
   state recorded in `caatinga.artifacts.json`.
 - **Cognitive layer — stellar-build.** A set of AI personas and skills that attach to Claude
-  Code or the Codex CLI. The agents *drive* Caatinga commands — they plan, prompt, and
+  Code or the Codex CLI. The agents _drive_ Caatinga commands — they plan, prompt, and
   refine; they do not replace the CLI or talk to the network directly.
 
 stellar-build is a separate, third-party project. This page documents how to wire it to a
@@ -69,13 +69,13 @@ This is optional guidance, not a required edit. Adjust it to fit how your team w
 Each stellar-build persona maps naturally onto a phase of the Caatinga lifecycle. Use the
 prompt phrasing as a starting point; every command is documented in the [CLI reference](../cli.md).
 
-| Persona | Skill | Caatinga commands | Example prompt |
-| --- | --- | --- | --- |
-| Tyler — architect | `tyler-architect` | `caatinga zk init`, `caatinga build` | "Tyler, design the contract structure and validate the dependencies." |
-| Elliot — developer | `elliot-dev` | `caatinga build`, `caatinga invoke` | "Elliot, implement the increment logic and run the invoke." |
-| Nicole — product | `nicole-pm` | `caatinga deploy --network testnet` | "Nicole, validate the business rules and publish to testnet." |
-| Justin — analyst | `justin-analyst` | `caatinga doctor`, `caatinga status` | "Justin, check the toolchain state and the binding freshness." |
-| Bri — tech writer | `bri-tech-writer` | `caatinga inspect` | "Bri, inspect on-chain reachability and document the methods." |
+| Persona            | Skill             | Caatinga commands                    | Example prompt                                                        |
+| ------------------ | ----------------- | ------------------------------------ | --------------------------------------------------------------------- |
+| Tyler — architect  | `tyler-architect` | `caatinga zk init`, `caatinga build` | "Tyler, design the contract structure and validate the dependencies." |
+| Elliot — developer | `elliot-dev`      | `caatinga build`, `caatinga invoke`  | "Elliot, implement the increment logic and run the invoke."           |
+| Nicole — product   | `nicole-pm`       | `caatinga deploy --network testnet`  | "Nicole, validate the business rules and publish to testnet."         |
+| Justin — analyst   | `justin-analyst`  | `caatinga doctor`, `caatinga status` | "Justin, check the toolchain state and the binding freshness."        |
+| Bri — tech writer  | `bri-tech-writer` | `caatinga inspect`                   | "Bri, inspect on-chain reachability and document the methods."        |
 
 ## Edge cases
 
