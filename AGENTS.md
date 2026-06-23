@@ -18,7 +18,14 @@ Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 - **`latest`**: **`3.3.1`** (current stable on npm)
 - **`next`**: **`3.3.0`** (previous pre-release candidate, superseded by `3.3.1`)
 
-Repository packages are version **`3.3.1`**. After publish, promote `next` → `latest` per [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
+Repository packages are version **`3.4.0`**, pending publish to `next`. After publish, promote
+`next` → `latest` per [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
+
+Highlights from the `3.4.x` line:
+
+- `3.4.0`: add `caatinga setup`, a one-step bootstrap (Node check, Rust/`rustup`,
+  `wasm32v1-none` target, version-pinned Stellar CLI, funded local identity) for fresh
+  machines.
 
 Highlights from the `3.3.x` line:
 
