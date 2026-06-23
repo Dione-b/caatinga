@@ -16,13 +16,14 @@ export function runPreflight(): PreflightResult {
   return { ok: false, failures: [formatNodePreflightFailure()] };
 }
 
-export function assertPreflight(): void {
+export function assertPreflight(): boolean {
   const result = runPreflight();
-  if (result.ok) return;
+  if (result.ok) return true;
 
   console.error(chalk.red.bold("\n✖ Caatinga preflight check failed\n"));
   for (const failure of result.failures) {
     console.error(chalk.red(`  • ${failure}\n`));
   }
-  process.exit(1);
+  process.exitCode = 1;
+  return false;
 }

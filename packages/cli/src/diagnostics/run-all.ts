@@ -1,3 +1,5 @@
+import type { CaatingaConfig } from "@caatinga/core";
+import { loadConfig } from "@caatinga/core";
 import type { Diagnostic } from "./types.js";
 import { dependenciesDiagnostic } from "./dependencies-diagnostic.js";
 import { artifactsDiagnostic, configDiagnostic, networkDiagnostic } from "./project-diagnostic.js";
@@ -12,8 +14,22 @@ export type RunAllDiagnosticsOptions = {
   source?: string;
 };
 
-export async function runAllDiagnostics(options: RunAllDiagnosticsOptions): Promise<Diagnostic[]> {
-  return [
+export type RunAllDiagnosticsResult = {
+  diagnostics: Diagnostic[];
+  config: CaatingaConfig | undefined;
+};
+
+export async function runAllDiagnostics(
+  options: RunAllDiagnosticsOptions
+): Promise<RunAllDiagnosticsResult> {
+  let config: CaatingaConfig | undefined;
+  try {
+    config = await loadConfig();
+  } catch {
+    // Config may not load; diagnostics will report the issue.
+  }
+
+  const diagnostics = [
     nodeDiagnostic(),
     await stellarDiagnostic(),
     await sdkDiagnostic(),
@@ -25,4 +41,6 @@ export async function runAllDiagnostics(options: RunAllDiagnosticsOptions): Prom
     await networkDiagnostic(options.network),
     await sourceDiagnostic(options.source),
   ].filter((diagnostic): diagnostic is Diagnostic => diagnostic !== undefined);
+
+  return { diagnostics, config };
 }

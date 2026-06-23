@@ -3,7 +3,7 @@ import { Command } from "commander";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { registerZkInitCommand } from "./zk-init.command.js";
+import { registerZkInitCommand, mergeZkIntoConfigSource } from "./zk-init.command.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
@@ -110,19 +110,19 @@ export default defineConfig({
   contracts: {
     counter: {
       path: "./contracts/counter",
-      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm"
-    }
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+    },
   },
   networks: {
     testnet: {
       rpcUrl: "https://soroban-testnet.stellar.org",
-      networkPassphrase: "Test SDF Network ; September 2015"
-    }
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
   },
   frontend: {
     framework: "vite-react",
-    bindingsOutput: "./src/contracts/generated"
-  }
+    bindingsOutput: "./src/contracts/generated",
+  },
 });
 `,
       "utf8"
@@ -161,6 +161,82 @@ export default defineConfig({
     expect(mergedConfig).toContain("verifier");
     expect(mergedConfig).toContain("zk:");
     expect(mergedConfig).toContain('verifierContract: "verifier"');
+  });
+
+  describe("mergeZkIntoConfigSource", () => {
+    it("should_merge_official_template_format_with_trailing_commas", () => {
+      const source = `import { defineConfig } from "@caatinga/core";
+
+export default defineConfig({
+  project: "counter-app",
+  defaultNetwork: "testnet",
+  contracts: {
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+    },
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
+  frontend: {
+    framework: "vite-react",
+    bindingsOutput: "./src/contracts/generated",
+  },
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain("verifier:");
+      expect(merged).toContain("zk:");
+      expect(merged).toMatch(/\n {4}\},\n {4}verifier: \{/);
+      expect(merged).not.toContain("},,");
+    });
+
+    it("should_merge_multi_contract_configs", () => {
+      const source = `export default defineConfig({
+  project: "multi",
+  defaultNetwork: "testnet",
+  contracts: {
+    counter: {
+      path: "./contracts/counter",
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+    },
+    token: {
+      path: "./contracts/token",
+      wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
+    },
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain("verifier:");
+      expect(merged).toContain("token:");
+      expect(merged.indexOf("verifier:")).toBeGreaterThan(merged.indexOf("token:"));
+    });
+
+    it("should_not_modify_when_merge_patterns_do_not_match", () => {
+      const source = `export default defineConfig({ project: "x" });`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(false);
+      expect(merged).toBe(source);
+    });
   });
 
   it("fails before overwriting existing zk files unless --force is passed", async () => {

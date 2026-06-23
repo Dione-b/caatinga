@@ -47,54 +47,109 @@ async function assertCanWriteZkScaffold(cwd: string, force: boolean): Promise<vo
   }
 }
 
-function mergeZkIntoConfigSource(source: string): string {
+const ZK_VERIFIER_BLOCK = [
+  "    verifier: {",
+  '      path: "./contracts/verifier",',
+  '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"',
+  "    },",
+].join("\n");
+
+const ZK_CONFIG_BLOCK = [
+  "  zk: {",
+  "    circuits: {",
+  "      main: {",
+  '        path: "./circuits",',
+  '        protocol: "groth16",',
+  '        curve: "bls12381",',
+  '        verifierContract: "verifier"',
+  "      }",
+  "    }",
+  "  }",
+].join("\n");
+
+function mergeZkIntoConfigSource(source: string): { merged: string; changed: boolean } {
   let next = source;
 
-  if (!next.includes("verifier:")) {
+  const needsVerifier = !next.includes("verifier:");
+  const needsZk = !next.includes("zk:");
+
+  if (!needsVerifier && !needsZk) {
+    return { merged: source, changed: false };
+  }
+
+  if (needsVerifier) {
+    const before = next;
+    // Match contracts block closing at 2-space indent (not inner contract entries).
     next = next.replace(
       /contracts:\s*\{([\s\S]*?)\n {2}\},/,
-      `contracts: {$1
-    verifier: {
-      path: "./contracts/verifier",
-      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"
-    },
-  },`
+      "contracts: {$1\n" + ZK_VERIFIER_BLOCK + "\n  },"
     );
-  }
-
-  if (!next.includes("zk:")) {
-    next = next.replace(
-      /\n\}\);\s*$/,
-      `,
-  zk: {
-    circuits: {
-      main: {
-        path: "./circuits",
-        protocol: "groth16",
-        curve: "bls12381",
-        verifierContract: "verifier"
-      }
+    if (next === before) {
+      return { merged: source, changed: false };
     }
   }
-});
-`
-    );
+
+  if (needsZk) {
+    const before = next;
+    if (/,\n\}\);?\s*$/.test(next)) {
+      next = next.replace(/,\n\}\);?\s*$/, ",\n" + ZK_CONFIG_BLOCK + "\n});\n");
+    } else {
+      next = next.replace(/\n\}\);?\s*$/, ",\n" + ZK_CONFIG_BLOCK + "\n});\n");
+    }
+    if (next === before) {
+      return { merged: source, changed: false };
+    }
   }
 
-  return next;
+  const complete = next.includes("verifier:") && next.includes("zk:");
+  if (!complete || next === source) {
+    return { merged: source, changed: false };
+  }
+
+  return { merged: next, changed: true };
 }
 
-async function mergeZkIntoConfig(cwd: string): Promise<void> {
+function printManualZkConfigInstructions(): void {
+  logger.warn("Could not automatically add ZK config to caatinga.config.ts.");
+  logger.info("Add the following to your caatinga.config.ts manually:");
+  logger.info("");
+  logger.info('  1. In the "contracts" section, add:');
+  logger.info("     verifier: {");
+  logger.info('       path: "./contracts/verifier",');
+  logger.info('       wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"');
+  logger.info("     },");
+  logger.info("");
+  logger.info("  2. Before the closing });, add:");
+  logger.info("  zk: {");
+  logger.info("    circuits: {");
+  logger.info("      main: {");
+  logger.info('        path: "./circuits",');
+  logger.info('        protocol: "groth16",');
+  logger.info('        curve: "bls12381",');
+  logger.info('        verifierContract: "verifier"');
+  logger.info("      }");
+  logger.info("    }");
+  logger.info("  }");
+  logger.info("");
+}
+
+export { mergeZkIntoConfigSource };
+
+async function mergeZkIntoConfig(cwd: string): Promise<boolean> {
   const configPath = path.join(cwd, "caatinga.config.ts");
   if (!(await exists(configPath))) {
-    return;
+    return false;
   }
 
   const source = await readFile(configPath, "utf8");
-  const merged = mergeZkIntoConfigSource(source);
-  if (merged !== source) {
+  const { merged, changed } = mergeZkIntoConfigSource(source);
+  if (changed) {
     await writeFile(configPath, merged, "utf8");
+    return true;
   }
+
+  printManualZkConfigInstructions();
+  return false;
 }
 
 export function registerZkInitCommand(program: Command): void {
@@ -145,7 +200,14 @@ export function registerZkInitCommand(program: Command): void {
             force: true,
             projectFiles: false,
           });
-          await mergeZkIntoConfig(cwd);
+          const configMerged = await mergeZkIntoConfig(cwd);
+          if (!configMerged) {
+            logger.warn(
+              "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
+            );
+            process.exitCode = 1;
+            return;
+          }
           logger.success("Added minimal ZK circuit and verifier scaffold to the current project");
           return;
         }
@@ -161,7 +223,14 @@ export function registerZkInitCommand(program: Command): void {
             relativePath === "contracts/verifier" ||
             relativePath.startsWith("contracts/verifier/"),
         });
-        await mergeZkIntoConfig(cwd);
+        const configMerged = await mergeZkIntoConfig(cwd);
+        if (!configMerged) {
+          logger.warn(
+            "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
+          );
+          process.exitCode = 1;
+          return;
+        }
 
         logger.success("Added ZK circuit and verifier scaffold to the current project");
       });

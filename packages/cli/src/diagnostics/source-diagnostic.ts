@@ -4,7 +4,9 @@ import type { Diagnostic } from "./types.js";
 export async function sourceDiagnostic(
   source: string | undefined
 ): Promise<Diagnostic | undefined> {
-  if (!source) return undefined;
+  if (!source) {
+    return { ok: true, label: "source identity (skipped — no --source provided)" };
+  }
 
   const unsafeSource = validateSourceShape(source);
   if (unsafeSource) {

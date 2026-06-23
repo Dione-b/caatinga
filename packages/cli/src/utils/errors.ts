@@ -3,7 +3,7 @@ import { toCaatingaError } from "@caatinga/core";
 
 const SEPARATOR = chalk.gray("─".repeat(50));
 
-function printError(error: unknown): void {
+export function printError(error: unknown): void {
   const caatingaError = toCaatingaError(error);
 
   console.error("");

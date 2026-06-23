@@ -1,7 +1,16 @@
 import { Command } from "commander";
-import { loadConfig, resolveNetwork, rollbackContractArtifact } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  loadConfig,
+  resolveNetwork,
+  rollbackContractArtifact,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+
+/** Stellar contract IDs are base-32 encoded 56-char strings starting with C, or hex 64-char strings. */
+const VALID_CONTRACT_ID = /^(C[A-Z2-7]{55}|[0-9a-fA-F]{64})$/;
 
 export function registerRollbackCommand(program: Command): void {
   program
@@ -12,6 +21,14 @@ export function registerRollbackCommand(program: Command): void {
     .option("-n, --network <network>", "Configured network name")
     .action((contractName: string, options: { to: string; network?: string }) =>
       runCliAction(async () => {
+        if (!VALID_CONTRACT_ID.test(options.to)) {
+          throw new CaatingaError(
+            `Invalid contract ID format: ${options.to}`,
+            CaatingaErrorCode.INVALID_CONFIG,
+            "Contract ID must be a base-32 encoded string (C..., 56 chars) or hex-encoded string (64 chars)."
+          );
+        }
+
         const config = await loadConfig();
         const { name: networkName } = resolveNetwork(config, options.network);
 

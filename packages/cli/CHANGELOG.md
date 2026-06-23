@@ -1,5 +1,23 @@
 ## Breaking changes policy
 
+## 3.4.1
+
+### Patch Changes
+
+- Security and DX improvements across setup, zk init, doctor, and input validation:
+
+  - **`caatinga setup`**: replace unverified `curl | sh` with HTTPS download of rustup-init verified by SHA256 checksum and host allowlist; add configurable subprocess timeouts via `CAATINGA_SUBPROCESS_TIMEOUT`; use the `semver` library for Rust version checks.
+  - **`caatinga zk init`**: fix config merge regression with official templates (trailing commas and multi-contract layouts); print manual instructions and set a non-zero exit code when the config cannot be auto-updated.
+  - **`caatinga doctor`**: reuse config from `runAllDiagnostics` instead of calling `loadConfig` again; show explicit skip lines when `--network` / `--source` are omitted; use `STELLAR_CLI_LAST_TESTED_VERSION` in install hints.
+  - **`caatinga rollback`**: validate `--to` contract ID format (Soroban `C...` StrKey or 64-char hex) before calling core.
+  - **`caatinga invoke` / `caatinga read`**: remove `allowUnknownOption` and `allowExcessArguments` — unknown flags are now rejected by Commander instead of being forwarded silently.
+  - **Global**: format unhandled errors via `printError` in the top-level catch; preflight sets `process.exitCode` instead of calling `process.exit`.
+  - **Template resolution**: reduce bundled template walk depth from 8 to 5; route debug resolution output through `logger.muted`.
+
+- Updated dependencies
+  - @caatinga/core@3.4.1
+  - @caatinga/zk@3.4.1
+
 ## 3.4.0
 
 ### Minor Changes

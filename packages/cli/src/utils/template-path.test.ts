@@ -45,21 +45,21 @@ describe("resolveTemplateDir", () => {
 
   it("prints the candidates it tried when CAATINGA_DEBUG_TEMPLATE_RESOLUTION=1", async () => {
     process.env.CAATINGA_DEBUG_TEMPLATE_RESOLUTION = "1";
-    const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
       await expect(resolveTemplateDir("__caatinga_nonexistent_template__")).rejects.toMatchObject({
         code: CaatingaErrorCode.TEMPLATE_NOT_FOUND,
       });
 
-      const output = stderrSpy.mock.calls.map((call) => call[0]).join("");
+      const output = logSpy.mock.calls.map((call) => call[0]).join("");
       expect(output).toContain(
-        'caatinga: template resolution candidates for "__caatinga_nonexistent_template__"'
+        'template resolution candidates for "__caatinga_nonexistent_template__"'
       );
       expect(output).toContain("env=");
       expect(output).toContain("cwd=");
     } finally {
-      stderrSpy.mockRestore();
+      logSpy.mockRestore();
     }
   });
 

@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.4.1
+
+### Patch Changes
+
+- Version alignment for `@caatinga/cli` 3.4.1 security and DX release.
+
 ## 3.4.0
 
 ## 3.3.1

@@ -14,8 +14,6 @@ export function registerInvokeCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign (for example alice)"
     )
-    .allowUnknownOption(true)
-    .allowExcessArguments(true)
     .action(
       (
         target: string,

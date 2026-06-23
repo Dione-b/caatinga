@@ -1,4 +1,9 @@
-import { CaatingaError, checkStellarCliVersion, type CompatibilityWarning } from "@caatinga/core";
+import {
+  CaatingaError,
+  checkStellarCliVersion,
+  STELLAR_CLI_LAST_TESTED_VERSION,
+  type CompatibilityWarning,
+} from "@caatinga/core";
 import { logger } from "../utils/logger.js";
 import type { Diagnostic, DiagnosticWarning } from "./types.js";
 
@@ -23,7 +28,8 @@ export async function stellarDiagnostic(): Promise<Diagnostic> {
         ok: false,
         label: "Stellar CLI not ready",
         fix:
-          error.hint ?? "Install Stellar CLI: cargo install --locked stellar-cli --version 25.2.0",
+          error.hint ??
+          `Install Stellar CLI: cargo install --locked stellar-cli --version ${STELLAR_CLI_LAST_TESTED_VERSION}`,
       };
     }
 
@@ -31,7 +37,7 @@ export async function stellarDiagnostic(): Promise<Diagnostic> {
     return {
       ok: false,
       label: "Stellar CLI not ready",
-      fix: "Install Stellar CLI: cargo install --locked stellar-cli --version 25.2.0",
+      fix: `Install Stellar CLI: cargo install --locked stellar-cli --version ${STELLAR_CLI_LAST_TESTED_VERSION}`,
     };
   }
 }
