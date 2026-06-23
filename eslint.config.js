@@ -12,6 +12,7 @@ export default tsEslint.config(
       "**/.pnpm-store/**",
       "**/.worktrees/**",
       "**/coverage/**",
+      "**/.vitepress/cache/**",
       "**/contracts/generated/**",
       "**/bindings/**",
       "pnpm-lock.yaml",

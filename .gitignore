@@ -11,6 +11,7 @@ dist
 .DS_Store
 coverage
 .vite
+**/.vitepress/cache/
 .idea
 *.tsbuildinfo
 smoke-ci-out/
