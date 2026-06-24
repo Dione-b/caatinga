@@ -337,6 +337,7 @@ describe("installStellarCliStep", () => {
 
     expect(result.ok).toBe(false);
     expect(result.label).toContain("installation failed");
+    expect(result.label).toContain("libssl-dev");
     expect(result.label).toContain("cargo binstall stellar-cli");
   });
 });
@@ -492,9 +493,7 @@ describe("runSetup", () => {
       // rustc ok
       .mockResolvedValueOnce({ stdout: "rustc 1.87.0 (abc)", stderr: "", all: "" })
       // wasm ok
-      .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" })
-      // identity ok
-      .mockResolvedValueOnce({ stdout: "GABC...", stderr: "", all: "" });
+      .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" });
     // stellar not found, cargo install fails
     checkStellarCliVersionMock.mockRejectedValueOnce(new Error("not found"));
     execaMock.mockRejectedValueOnce(new Error("cargo failed"));
@@ -503,6 +502,26 @@ describe("runSetup", () => {
     try {
       await runSetup({ source: "alice", network: "testnet" });
       expect(process.exitCode).toBe(1);
+      const output = logSpy.mock.calls.map((c) => c[0]).join("\n");
+      expect(output).toContain("skipped (Stellar CLI step failed)");
+      expect(output).not.toContain("spawn stellar");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("should_skip_identity_when_stellar_cli_install_fails", async () => {
+    runCommandMock
+      .mockResolvedValueOnce({ stdout: "rustc 1.87.0 (abc)", stderr: "", all: "" })
+      .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" });
+    checkStellarCliVersionMock.mockRejectedValueOnce(new Error("not found"));
+    execaMock.mockRejectedValueOnce(new Error("cargo failed"));
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    try {
+      await runSetup({ source: "alice", network: "testnet" });
+      const stellarCalls = execaMock.mock.calls.filter(([cmd]) => cmd === "stellar");
+      expect(stellarCalls).toHaveLength(0);
     } finally {
       logSpy.mockRestore();
     }

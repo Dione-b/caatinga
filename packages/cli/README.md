@@ -5,9 +5,11 @@ Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `dep
 ## Install
 
 ```bash
-npm install -g @caatinga/cli
+npm install -g @caatinga/cli@next
 caatinga --help
 ```
+
+Use `@next` (3.4.x) for `caatinga setup`. The `latest` tag may lag until the 3.4 line is promoted.
 
 Inside a generated project, prefer `npx caatinga` so the project-local workflow stays explicit.
 
@@ -61,10 +63,18 @@ The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> i
 
 ### `setup`
 
-- One-step bootstrap for a fresh machine: checks Node, installs/updates Rust via `rustup`, adds the `wasm32v1-none` target, installs the version-pinned Stellar CLI, and creates a funded local identity
+- One-step bootstrap for a fresh machine: checks Node, installs/updates Rust via verified `rustup-init` download, adds the `wasm32v1-none` target, installs the version-pinned Stellar CLI, and creates a funded local identity
 - Each step is idempotent — anything already present and compatible is reported and skipped
 - `--skip-rust`, `--skip-stellar`, `--skip-identity` skip individual steps
 - Run it before `caatinga init` on a fresh machine; `caatinga doctor` is the read-only counterpart that checks the same prerequisites afterward
+- First Stellar CLI install via cargo can take 5–15 minutes; prebuilt binaries or `cargo binstall` are faster
+
+**System dependencies (Linux)** — required when `cargo install stellar-cli` compiles from source:
+
+```bash
+# Debian/Ubuntu
+sudo apt install build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev
+```
 
 ### `init`
 

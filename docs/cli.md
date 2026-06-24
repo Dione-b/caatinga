@@ -24,7 +24,7 @@ five steps is idempotent: anything already present and compatible is reported an
 | Step                  | What it does                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Node.js            | Verifies Node meets the minimum (22+). Cannot auto-install Node — aborts with upgrade guidance if too old.                                                                     |
-| 2. Rust toolchain     | Installs Rust via `rustup` (`curl \| sh`) when missing, or updates it via `rustup update` when below the minimum.                                                              |
+| 2. Rust toolchain     | Installs Rust via verified `rustup-init` download (HTTPS + SHA256 checksum + host allowlist) when missing, or updates it via `rustup update` when below the minimum.           |
 | 3. WebAssembly target | Adds the `wasm32v1-none` target required to build Soroban contracts.                                                                                                           |
 | 4. Stellar CLI        | Validates the installed CLI against the supported minimum; installs the last-tested version (`cargo install --locked stellar-cli --version <pinned>`) when missing or too old. |
 | 5. Local identity     | Generates the `--source` identity; funds it via friendbot on fundable networks (`testnet`, `futurenet`, `local`, `standalone`).                                                |
@@ -37,17 +37,23 @@ caatinga setup --skip-rust --skip-stellar    # only create the local identity
 
 Notes:
 
+- **`caatinga setup` requires `@caatinga/cli@next` (3.4.x)** until that line is promoted to `latest`. The current `latest` tag (3.3.x) does not include the `setup` command.
 - The Stellar CLI is **version-pinned** to the last-tested release so `caatinga doctor` never reports
   an untested version after setup. An already-installed CLI below the supported minimum is reinstalled
   at the pinned version.
-- On **Windows**, Rust cannot be auto-installed (the `rustup` flow is Unix-only) — setup prints manual
+- On **Linux**, the first Stellar CLI install via `cargo install` can take **5–15 minutes** (compiling from source). Faster alternatives: `cargo binstall stellar-cli` or a [prebuilt release binary](https://github.com/stellar/stellar-cli/releases).
+- If the Stellar CLI build from source fails, install system headers first:
+  - **Debian/Ubuntu:** `sudo apt install build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev`
+  - **Fedora:** `sudo dnf install gcc pkg-config openssl-devel systemd-devel dbus-devel`
+  - Setup also prints these commands in the error message, plus a `cargo binstall`/prebuilt-binary alternative.
+- During `cargo install stellar-cli`, you may see `warning: package slipped10 … is yanked` from the upstream lockfile. This is advisory and does not block installation.
+- On **Windows**, Rust cannot be auto-installed (the rustup flow is Unix-only) — setup prints manual
   `winget`/`rustup-init.exe` instructions instead of failing cryptically.
 - On a **non-`testnet`/non-fundable network** (for example `mainnet`), the identity is created but **not**
   funded — fund it manually before deploying.
 - When tools are freshly installed, restart your terminal or run `source "$HOME/.cargo/env"` so `cargo`
   and `stellar` resolve in the current shell.
-- If the Stellar CLI build from source fails (it needs a C toolchain and headers), setup prints the
-  per-platform build dependencies and a faster `cargo binstall`/prebuilt-binary alternative.
+- If the Stellar CLI step fails, identity creation (step 5) is skipped automatically.
 
 `caatinga doctor` is the read-only counterpart: setup _installs_ prerequisites, doctor _checks_ them
 (plus project config, artifacts, and deploy/binding coverage).

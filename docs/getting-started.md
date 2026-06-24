@@ -14,7 +14,9 @@ Install published packages from npm. Pin `@next` or an exact version in apps whe
 - Optional: Freighter or another wallet adapter for browser-side `@caatinga/client` calls
 
 On a fresh machine, install everything above (except Node.js) in one step with `caatinga setup` — it
-detects what's missing and installs only that, then creates a funded local identity:
+detects what's missing and installs only that, then creates a funded local identity.
+
+**Note:** `caatinga setup` is available in `@caatinga/cli@next` (3.4.x). The npm `latest` tag (3.3.x) does not include it yet. See [system dependencies for Linux](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) when Stellar CLI must compile from source.
 
 ```bash
 npx caatinga@next setup                 # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet

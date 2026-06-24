@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.4.2
+
+### Patch Changes
+
+- Fix `caatinga setup` DX from Ubuntu smoke-test findings: include `libssl-dev` in Stellar CLI build dependency hints, skip identity creation when Stellar CLI install fails, log compile-time expectations before `cargo install`, and expand post-setup next steps.
+
 ## 3.4.1
 
 ### Patch Changes

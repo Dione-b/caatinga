@@ -180,13 +180,17 @@ function rustWindowsMessage(detected: string | null): string {
   ].join("\n  ");
 }
 
+const STELLAR_CLI_UBUNTU_BUILD_DEPS =
+  "build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev";
+const STELLAR_CLI_FEDORA_BUILD_DEPS = "gcc pkg-config openssl-devel systemd-devel dbus-devel";
+
 function stellarInstallFailureMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   return [
     `Stellar CLI installation failed: ${message}`,
     "Building from source needs a C toolchain and headers:",
-    "  • Debian/Ubuntu: sudo apt install build-essential pkg-config libudev-dev libdbus-1-dev",
-    "  • Fedora: sudo dnf install gcc pkg-config systemd-devel dbus-devel",
+    `  • Debian/Ubuntu: sudo apt install ${STELLAR_CLI_UBUNTU_BUILD_DEPS}`,
+    `  • Fedora: sudo dnf install ${STELLAR_CLI_FEDORA_BUILD_DEPS}`,
     "  • macOS: xcode-select --install",
     "Or install a prebuilt binary (faster, no compiler needed):",
     `  cargo binstall stellar-cli --version ${STELLAR_CLI_LAST_TESTED_VERSION}`,
@@ -225,7 +229,7 @@ export async function installRustStep(): Promise<StepResult> {
     };
   }
 
-  // Auto-install is Unix-only (curl | sh flow).
+  // Auto-install is Unix-only (verified rustup-init download).
   if (process.platform === "win32") {
     return { ok: false, label: rustWindowsMessage(detected) };
   }
@@ -313,13 +317,15 @@ export async function installStellarCliStep(): Promise<StepResult> {
 
     if (belowMin) {
       logger.info(
-        `  ⧗ Installed Stellar CLI is below the supported minimum ${STELLAR_CLI_MIN_VERSION}. Installing ${STELLAR_CLI_LAST_TESTED_VERSION} via cargo (this may take several minutes)...`
+        `  ⧗ Installed Stellar CLI is below the supported minimum ${STELLAR_CLI_MIN_VERSION}. Installing ${STELLAR_CLI_LAST_TESTED_VERSION} via cargo...`
       );
     } else {
       logger.info(
-        `  ⧗ Stellar CLI not found. Installing ${STELLAR_CLI_LAST_TESTED_VERSION} via cargo (this may take several minutes)...`
+        `  ⧗ Stellar CLI not found. Installing ${STELLAR_CLI_LAST_TESTED_VERSION} via cargo...`
       );
     }
+    logger.info("  ⧗ First install may take 5–15 minutes (compiling from source)...");
+    logger.info("  ⧗ Faster alternative: cargo binstall stellar-cli or a prebuilt release binary.");
 
     try {
       await execa(
@@ -502,6 +508,8 @@ export async function runSetup(
   if (options.skipIdentity) {
     logger.info("  — skipped (--skip-identity)");
     skippedSteps += 1;
+  } else if (!stellarOk) {
+    logger.info("  — skipped (Stellar CLI step failed)");
   } else {
     emit({ step: 5, title: `Local identity "${options.source}"`, status: "start" });
     const identityResult = await createIdentityStep(options.source, options.network);
@@ -542,7 +550,8 @@ export async function runSetup(
 
     logger.info("");
     logger.info("Next steps:");
-    logger.info("  caatinga init my-dapp");
+    logger.info("  caatinga init my-dapp              # React + counter template (default)");
+    logger.info("  caatinga init my-app --minimal     # CLI + Soroban stub only (contract: app)");
     logger.info("  cd my-dapp && npm install");
     logger.info("  caatinga doctor");
   } else {
