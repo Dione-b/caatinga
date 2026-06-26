@@ -16,9 +16,9 @@
     "caatinga:zk:setup": "npx caatinga zk build main && npx caatinga zk prove main"
   },
   "dependencies": {
-    "@caatinga/client": "^3.4.2",
-    "@caatinga/core": "^3.4.2",
-    "@caatinga/zk": "^3.4.2",
+    "@caatinga/client": "^3.5.0",
+    "@caatinga/core": "^3.5.0",
+    "@caatinga/zk": "^3.5.0",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "@stellar/stellar-sdk": "^16.0.1",
     "@vitejs/plugin-react": "^4.3.4",
@@ -28,7 +28,7 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^3.4.2",
+    "@caatinga/cli": "^3.5.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"

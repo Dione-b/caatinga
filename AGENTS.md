@@ -16,9 +16,10 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 
 - **`latest`**: **`3.3.1`** (stable; does **not** include `caatinga setup`)
-- **`next`**: **`3.4.2`** (includes `caatinga setup`; pending promotion to `latest`)
+- **`next`**: **`3.5.0`** (post-deploy hooks, `${source.address}`, `wire`, `sync-env`, `buildRoot`)
+- **`latest`**: **`3.3.1`** until `next` is promoted
 
-Repository packages are version **`3.4.2`**. After publish, promote `next` → `latest` per
+Repository packages are version **`3.5.0`**. After publish, promote `next` → `latest` per
 [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
 
 Highlights queued for the `3.5.x` line:
