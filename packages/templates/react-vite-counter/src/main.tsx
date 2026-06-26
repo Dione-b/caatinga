@@ -1,3 +1,4 @@
+import "./polyfills"; // must be first: sets up Buffer before stellar-sdk loads
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
