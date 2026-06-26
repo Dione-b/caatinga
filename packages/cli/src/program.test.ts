@@ -33,6 +33,8 @@ describe("createProgram", () => {
         "invoke",
         "read",
         "status",
+        "wire",
+        "sync-env",
       ])
     );
   });

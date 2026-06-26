@@ -146,6 +146,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/contracts/deploy-contract.test.ts",
     trigger: "deployContract(",
   },
+  [CaatingaErrorCode.SOURCE_ADDRESS_UNRESOLVED]: {
+    file: "packages/core/src/contracts/resolve-deploy-args.test.ts",
+    trigger: "resolveDeployArgs(",
+  },
   [CaatingaErrorCode.BINDING_CLIENT_NOT_FOUND]: {
     file: "packages/client/src/bindings/default-binding-adapter.test.ts",
     trigger: "createDefaultBindingAdapter(",

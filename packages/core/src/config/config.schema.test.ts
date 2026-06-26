@@ -84,6 +84,33 @@ describe("CaatingaConfigSchema", () => {
     ).toThrow();
   });
 
+  it("accepts workspace buildRoot, postDeploy hooks, and frontend env mapping", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      buildRoot: ".",
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "set_minter",
+          args: { new_minter: "${contracts.counter.contractId}" },
+        },
+      ],
+      frontend: {
+        framework: "vite-react",
+        bindingsOutput: "./frontend/src/contracts",
+        envFile: "./frontend/.env.local",
+        env: {
+          counter: "VITE_COUNTER",
+          rpcUrl: "VITE_RPC_URL",
+        },
+      },
+    });
+
+    expect(result.buildRoot).toBe(".");
+    expect(result.postDeploy).toHaveLength(1);
+    expect(result.frontend?.envFile).toBe("./frontend/.env.local");
+  });
+
   it("accepts contract dependencies and deploy args", () => {
     const result = CaatingaConfigSchema.parse({
       project: "marketplace-app",

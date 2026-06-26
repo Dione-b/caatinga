@@ -12,6 +12,7 @@ import { parseContractId } from "../stellar-cli/parse-contract-id.js";
 import { tryRecoverContractIdFromDeployFailure } from "../stellar-cli/recover-deploy-contract-id.js";
 import { isTransientDeployFailure } from "./is-transient-deploy-failure.js";
 import { buildDependencyGraph } from "./dependency-graph.js";
+import { formatConstructorCliArgs } from "./format-cli-args.js";
 import { resolveDeployArgs, type DeployArgValue } from "./resolve-deploy-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
@@ -48,26 +49,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function toSnakeCaseFlag(key: string): string {
-  return key
-    .replace(/([A-Z])/g, "_$1")
-    .replace(/^_/, "")
-    .toLowerCase();
-}
-
-function formatConstructorCliArgs(resolved: Record<string, DeployArgValue>): string[] {
-  const entries = Object.entries(resolved);
-  if (entries.length === 0) {
-    return [];
-  }
-
-  const tail: string[] = ["--"];
-  for (const [key, value] of entries) {
-    tail.push(`--${toSnakeCaseFlag(key)}`, String(value));
-  }
-  return tail;
 }
 
 export async function deployContract(options: DeployContractOptions) {
@@ -117,10 +98,12 @@ export async function deployContract(options: DeployContractOptions) {
   if (options.resolvedDeployArgs !== undefined) {
     resolvedDeployArgs = options.resolvedDeployArgs;
   } else if (hasConfiguredArgs) {
-    resolvedDeployArgs = resolveDeployArgs({
+    resolvedDeployArgs = await resolveDeployArgs({
       deployArgs: rawDeployArgs,
       artifacts: artifactsBefore,
       network: network.name,
+      source,
+      cwd,
     });
   } else {
     resolvedDeployArgs = {};
@@ -136,7 +119,7 @@ export async function deployContract(options: DeployContractOptions) {
     }
   }
 
-  const constructorArgs = formatConstructorCliArgs(resolvedDeployArgs);
+  const constructorArgs = ["--", ...formatConstructorCliArgs(resolvedDeployArgs)];
 
   const stellarArgs = [
     "contract",

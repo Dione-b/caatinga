@@ -98,7 +98,7 @@ the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`,
 `unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
 is advisory only — it never flips doctor to `blocked`.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--allow-dev-ceremony]`
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient testnet failures
@@ -121,6 +121,23 @@ After a successful deploy, Caatinga **automatically generates TypeScript binding
 contracts it just deployed. Pass `--no-generate` to skip (useful in CI jobs that only deploy).
 If generation fails, the deploy still succeeds (exit code `0`) — the CLI prints a warning with
 the recovery command `npx caatinga generate --network <network>`.
+
+When deploying the **full contract graph** (no `contract` argument), Caatinga also runs configured
+`postDeploy` wiring hooks (`caatinga wire`) and writes `frontend.envFile` when configured
+(`caatinga sync-env`), unless `--no-wire` or `--no-sync-env` is passed.
+
+## `caatinga wire [--network testnet] --source <identity>`
+
+Runs every `postDeploy` hook from `caatinga.config.ts` in order. Each hook invokes a deployed
+contract method with resolved placeholders (`${contracts.*.contractId}`, `${source.address}`).
+Use after a full deploy when wiring was skipped with `--no-wire`, or to re-apply authority edges
+on testnet after a partial failure.
+
+## `caatinga sync-env [--network testnet]`
+
+Writes `frontend.envFile` from `caatinga.artifacts.json` using the `frontend.env` mapping in
+config. Contract keys map to deployed contract IDs; `rpcUrl` and `networkPassphrase` map to the
+selected network config. Quoted values are emitted when the network passphrase contains spaces.
 
 ## `caatinga generate [contract] [--network testnet]`
 

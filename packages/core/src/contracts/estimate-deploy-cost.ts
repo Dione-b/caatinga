@@ -6,6 +6,7 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
+import { formatConstructorCliArgs } from "./format-cli-args.js";
 import { resolveDeployArgs, type DeployArgValue } from "./resolve-deploy-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
@@ -30,24 +31,9 @@ export type EstimateDeployCostOptions = {
   cwd?: string;
 };
 
-function toSnakeCaseFlag(key: string): string {
-  return key
-    .replace(/([A-Z])/g, "_$1")
-    .replace(/^_/, "")
-    .toLowerCase();
-}
-
-function formatConstructorCliArgs(resolved: Record<string, DeployArgValue>): string[] {
-  const entries = Object.entries(resolved);
-  if (entries.length === 0) {
-    return [];
-  }
-
-  const tail: string[] = ["--"];
-  for (const [key, value] of entries) {
-    tail.push(`--${toSnakeCaseFlag(key)}`, String(value));
-  }
-  return tail;
+function formatConstructorCliArgsForEstimate(resolved: Record<string, DeployArgValue>): string[] {
+  const args = formatConstructorCliArgs(resolved);
+  return args.length > 0 ? ["--", ...args] : [];
 }
 
 function parseFeeStroops(output: string): { inclusion?: number; resource?: number } {
@@ -80,14 +66,16 @@ export async function estimateDeployCost(
   const rawDeployArgs = contract.config.deployArgs;
   const resolvedDeployArgs =
     Object.keys(rawDeployArgs).length > 0
-      ? resolveDeployArgs({
+      ? await resolveDeployArgs({
           deployArgs: rawDeployArgs,
           artifacts,
           network: network.name,
+          source,
+          cwd,
         })
       : {};
 
-  const constructorArgs = formatConstructorCliArgs(resolvedDeployArgs);
+  const constructorArgs = formatConstructorCliArgsForEstimate(resolvedDeployArgs);
 
   const deployArgs = [
     "contract",

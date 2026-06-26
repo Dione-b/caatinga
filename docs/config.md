@@ -37,6 +37,7 @@ Root config:
 | ---------------- | -------------------------------- | -------- | ----------- | ------------------------------------------- |
 | `project`        | string (min 1)                   | yes      | —           |                                             |
 | `defaultNetwork` | string (min 1)                   | no       | `"testnet"` |                                             |
+| `buildRoot`      | string (min 1)                   | no       | —           | Cargo workspace root for a single `stellar contract build` |
 | `contracts`      | `Record<string, ContractConfig>` | yes      | —           | at least one entry                          |
 | `networks`       | `Record<string, NetworkConfig>`  | yes      | —           | at least one entry                          |
 | `frontend`       | `FrontendConfig`                 | no       | —           | optional frontend configuration (see below) |
@@ -57,6 +58,22 @@ Root config:
 | ---------------- | -------------- | -------- | -------------- | -------------------------------------------------------------------------- |
 | `framework`      | `"vite-react"` | no       | `"vite-react"` | Official templates are Vite + React only; no Next.js or Astro adapter yet. |
 | `bindingsOutput` | string (min 1) | yes      | —              | path for generated bindings                                                |
+| `envFile`        | string (min 1) | no       | —              | frontend env file written by `caatinga sync-env`                           |
+| `env`            | `Record<string, string>` | no | —              | maps config contract keys (or `rpcUrl` / `networkPassphrase`) to env var names |
+
+`postDeploy` (optional root field):
+
+| Field        | Type   | Required | Notes                                      |
+| ------------ | ------ | -------- | ------------------------------------------ |
+| `postDeploy` | array  | no       | admin-signed invokes run after full deploy |
+
+Each `postDeploy` entry:
+
+| Field      | Type                                          | Required | Notes                                |
+| ---------- | --------------------------------------------- | -------- | ------------------------------------ |
+| `contract` | string (min 1)                                | yes      | configured contract name             |
+| `method`   | string (min 1)                                | yes      | Soroban method to invoke             |
+| `args`     | `Record<string, string \| number \| boolean>` | no       | supports the same placeholders as `deployArgs` |
 
 `NetworkConfig` (each value in `networks`):
 
@@ -177,11 +194,13 @@ contracts: {
    - A `dependsOn` entry that is not a configured contract throws
      `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`.
 2. **Placeholder resolution** (`resolveDeployArgs`): a `deployArgs` value that is a
-   string containing `${` must match exactly
-   `${contracts.<name>.contractId}` (`/^\$\{contracts\.([A-Za-z0-9_-]+)\.contractId\}$/`).
-   This is the **only** supported placeholder form — there is no `${env.*}` and no
-   `$(...)` shell interpolation. Deploy args are data passed to the Stellar CLI, not a
-   second templating language (see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md)).
+   string containing `${` must match exactly one of:
+   - `${contracts.<name>.contractId}` — resolved from `caatinga.artifacts.json`
+   - `${source.address}` — resolved from `stellar keys address <source>` at deploy/wire time
+   There is no `${env.*}` and no `$(...)` shell interpolation. Deploy args are data passed
+   to the Stellar CLI, not a second templating language (see
+   [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) and
+   [ADR 0006](./adr/0006-post-deploy-hooks.md)).
    - A `${...}` value that does not match throws `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`.
    - The `contractId` is read from `artifacts.networks[<network>].contracts[<name>].contractId`;
      when absent it throws `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND` (deploy the

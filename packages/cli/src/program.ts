@@ -17,6 +17,8 @@ import { registerRollbackCommand } from "./commands/rollback.command.js";
 import { registerEstimateCommand } from "./commands/estimate.command.js";
 import { registerInspectCommand } from "./commands/inspect.command.js";
 import { registerSetupCommand } from "./commands/setup.command.js";
+import { registerWireCommand } from "./commands/wire.command.js";
+import { registerSyncEnvCommand } from "./commands/sync-env.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
 export function createProgram(): Command {
@@ -45,6 +47,8 @@ export function createProgram(): Command {
   registerEstimateCommand(program);
   registerInspectCommand(program);
   registerSetupCommand(program);
+  registerWireCommand(program);
+  registerSyncEnvCommand(program);
 
   return program;
 }

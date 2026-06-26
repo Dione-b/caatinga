@@ -3,6 +3,8 @@ import {
   deployContractGraph,
   estimateDeployCost,
   generateBindingsGraph,
+  runPostDeployHooks,
+  syncFrontendEnv,
   toCaatingaError,
   CaatingaError,
   CaatingaErrorCode,
@@ -33,6 +35,8 @@ export function registerDeployCommand(program: Command): void {
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
     .option("--no-generate", "Skip TypeScript bindings generation after deploy")
+    .option("--no-wire", "Skip configured post-deploy wiring hooks after a full deploy")
+    .option("--no-sync-env", "Skip frontend env sync after a full deploy")
     .option(
       "--allow-dev-ceremony",
       "Allow deploying ZK verifier contracts with dev-ceremony artifacts on mainnet (not for production)"
@@ -50,6 +54,8 @@ export function registerDeployCommand(program: Command): void {
           staleCheck?: boolean;
           verifyDeps?: boolean;
           generate?: boolean;
+          wire?: boolean;
+          syncEnv?: boolean;
           allowDevCeremony?: boolean;
         }
       ) =>
@@ -132,6 +138,56 @@ export function registerDeployCommand(program: Command): void {
             logger.info(`  Contract ID: ${contract.contractId}`);
           }
           logger.info("Artifacts updated: caatinga.artifacts.json");
+
+          const isFullDeploy = !contractName;
+
+          if (isFullDeploy && options.wire !== false && config.postDeploy && config.postDeploy.length > 0) {
+            try {
+              const wireResults = await runPostDeployHooks({
+                config,
+                networkName: options.network,
+                source: options.source,
+              });
+              logger.info("");
+              logger.success("Wire complete");
+              for (const hook of wireResults) {
+                logger.info(`  ${hook.contract}.${hook.method}`);
+              }
+            } catch (error) {
+              const caatingaError = toCaatingaError(error);
+              logger.warn("Deploy succeeded, but post-deploy wiring failed.");
+              logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
+              if (caatingaError.hint) {
+                logger.warn(`  Hint: ${caatingaError.hint}`);
+              }
+              logger.info("");
+              logger.info("Recover with:");
+              logger.info(`  npx caatinga wire --network ${result.network.name} --source ${options.source}`);
+            }
+          }
+
+          if (
+            isFullDeploy &&
+            options.syncEnv !== false &&
+            config.frontend?.envFile &&
+            config.frontend.env
+          ) {
+            try {
+              const envResult = await syncFrontendEnv({
+                config,
+                networkName: options.network,
+              });
+              logger.info("");
+              logger.success(`Frontend env written: ${envResult.envFile}`);
+            } catch (error) {
+              const caatingaError = toCaatingaError(error);
+              logger.warn("Deploy succeeded, but frontend env sync failed.");
+              logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
+              logger.info("");
+              logger.info("Recover with:");
+              logger.info(`  npx caatinga sync-env --network ${result.network.name}`);
+            }
+          }
 
           if (result.deployedContracts.length === 0) {
             return;

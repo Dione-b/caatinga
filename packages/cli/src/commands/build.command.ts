@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import {
   buildContract,
+  buildWorkspace,
   CaatingaError,
   CaatingaErrorCode,
   loadConfig,
@@ -19,16 +20,24 @@ export function registerBuildCommand(program: Command): void {
       runCliAction(async () => {
         const config = await loadConfig();
 
-        const contractNames = contractName ? [contractName] : Object.keys(config.contracts);
+        if (config.buildRoot && !contractName) {
+          const result = await buildWorkspace({ config });
+          logger.success(`Workspace built: ${result.buildPath}`);
+          for (const contract of result.contracts) {
+            logger.info(`  ${contract.name}: ${contract.config.wasm}`);
+          }
+        } else {
+          const contractNames = contractName ? [contractName] : Object.keys(config.contracts);
 
-        for (const name of contractNames) {
-          const result = await buildContract({
-            config,
-            contractName: name,
-          });
+          for (const name of contractNames) {
+            const result = await buildContract({
+              config,
+              contractName: name,
+            });
 
-          logger.success(`Contract built: ${result.contract.name}`);
-          logger.info(`  WASM: ${result.contract.config.wasm}`);
+            logger.success(`Contract built: ${result.contract.name}`);
+            logger.info(`  WASM: ${result.contract.config.wasm}`);
+          }
         }
 
         await warnIfDefaultNetworkNeedsDeploy(config);

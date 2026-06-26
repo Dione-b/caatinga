@@ -9,3 +9,4 @@ Index of ADRs for Caatinga. Each record captures context, decision, and conseque
 | [0003](./0003-template-manifest-compatibility.md)    | Accepted | Template manifest compatibility        |
 | [0004](./0004-error-codes-as-public-api.md)          | Accepted | Stable `CAATINGA_*` error codes        |
 | [0005](./0005-multi-contract-dependency-deploy.md)   | Accepted | Multi-contract `dependsOn` deploy      |
+| [0006](./0006-post-deploy-hooks.md)                | Accepted | Post-deploy hooks and frontend env sync |

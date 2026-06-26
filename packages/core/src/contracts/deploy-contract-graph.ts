@@ -59,10 +59,12 @@ export async function deployContractGraph(options: {
       });
     }
 
-    const resolvedDeployArgs = resolveDeployArgs({
+    const resolvedDeployArgs = await resolveDeployArgs({
       deployArgs: contractConfig.deployArgs,
       artifacts,
       network: network.name,
+      source: options.source,
+      cwd,
     });
 
     if (existing?.contractId && !options.force) {

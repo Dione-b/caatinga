@@ -27,9 +27,16 @@ const ZkConfigSchema = z
   })
   .optional();
 
+const PostDeployHookSchema = z.object({
+  contract: z.string().min(1),
+  method: z.string().min(1),
+  args: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+});
+
 export const CaatingaConfigSchema = z.object({
   project: z.string().min(1),
   defaultNetwork: z.string().min(1).default("testnet"),
+  buildRoot: z.string().min(1).optional(),
   contracts: z
     .record(z.string().min(1), ContractConfigSchema)
     .refine(
@@ -46,10 +53,15 @@ export const CaatingaConfigSchema = z.object({
     .object({
       framework: z.literal("vite-react").default("vite-react"),
       bindingsOutput: z.string().min(1),
+      envFile: z.string().min(1).optional(),
+      env: z.record(z.string().min(1), z.string().min(1)).optional(),
     })
     .optional(),
+  postDeploy: z.array(PostDeployHookSchema).optional(),
   zk: ZkConfigSchema,
 });
+
+export type PostDeployHook = z.infer<typeof PostDeployHookSchema>;
 
 export type CaatingaConfig = z.infer<typeof CaatingaConfigSchema>;
 export type ContractConfig = z.infer<typeof ContractConfigSchema>;
