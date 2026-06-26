@@ -236,7 +236,7 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Linha atual **`3.3.0`** no npm **`next`** (`latest` = **`3.1.2`** até promoção). Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `caatinga read`, guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`, cerimônia dev com guardrails em mainnet), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`caatinga build` sem argumento), overrides de dependências nos templates.
+- **Status:** alpha. Linha atual **`3.5.1`** no npm **`latest`** e **`next`**. Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `caatinga read`, post-deploy hooks (`caatinga wire`), frontend env sync (`caatinga sync-env`), `${source.address}` placeholder, `buildRoot` para workspaces Cargo, retry de falhas transientes (TxBadSeq), guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`, cerimônia dev com guardrails em mainnet), `caatinga status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`caatinga build` sem argumento), overrides de dependências nos templates.
 - **Client:** single-invoker wallet signing até v1.0; multisig / `signAuthEntry` fora do escopo alpha.
 - **Distribuição:** dist-tag `latest` em todos os pacotes publicados; `next` segue candidatos pré-release.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).

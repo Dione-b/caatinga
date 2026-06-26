@@ -37,7 +37,7 @@ caatinga setup --skip-rust --skip-stellar    # only create the local identity
 
 Notes:
 
-- **`caatinga setup` requires `@caatinga/cli@next` (3.4.x)** until that line is promoted to `latest`. The current `latest` tag (3.3.x) does not include the `setup` command.
+- **`caatinga setup` is available on `@caatinga/cli@latest` (3.4.0+).**
 - The Stellar CLI is **version-pinned** to the last-tested release so `caatinga doctor` never reports
   an untested version after setup. An already-installed CLI below the supported minimum is reinstalled
   at the pinned version.
@@ -135,6 +135,9 @@ Runs every `postDeploy` hook from `caatinga.config.ts` in order. Each hook invok
 contract method with resolved placeholders (`${contracts.*.contractId}`, `${source.address}`).
 Use after a full deploy when wiring was skipped with `--no-wire`, or to re-apply authority edges
 on testnet after a partial failure.
+
+Transient failures (TxBadSeq, timeouts, connection resets) are retried automatically with
+exponential backoff (2s/5s default) before failing with `CAATINGA_INVOKE_FAILED`.
 
 ## `caatinga sync-env [--network testnet]`
 

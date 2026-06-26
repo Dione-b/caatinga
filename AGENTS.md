@@ -15,12 +15,10 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 
-- **`latest`**: **`3.3.1`** (stable; does **not** include `caatinga setup`)
-- **`next`**: **`3.5.0`** (post-deploy hooks, `${source.address}`, `wire`, `sync-env`, `buildRoot`)
-- **`latest`**: **`3.3.1`** until `next` is promoted
+- **`latest`**: **`3.5.1`** (stable; includes `caatinga setup`, post-deploy hooks, `wire`, `sync-env`)
+- **`next`**: **`3.5.1`** (same as `latest`)
 
-Repository packages are version **`3.5.0`**. After publish, promote `next` → `latest` per
-[docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
+Repository packages are version **`3.5.1`**.
 
 Highlights queued for the `3.5.x` line:
 
@@ -28,6 +26,8 @@ Highlights queued for the `3.5.x` line:
   `buildRoot` workspace builds, `postDeploy` hooks via `caatinga wire`, and
   `frontend.envFile` / `frontend.env` sync via `caatinga sync-env`. Full graph deploys
   run wire and env sync automatically unless `--no-wire` or `--no-sync-env` is passed.
+- `3.5.1`: retry transient post-deploy hook failures (TxBadSeq, timeouts, connection
+  resets) with exponential backoff during `caatinga wire` and after `caatinga deploy`.
 
 Highlights from the `3.4.x` line:
 
