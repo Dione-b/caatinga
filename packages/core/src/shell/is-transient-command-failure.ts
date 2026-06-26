@@ -7,7 +7,7 @@ const NO_RETRY_CAATINGA_SUBSTRINGS = [
 ];
 
 const TRANSIENT_COMMAND_FAILURE_PATTERN =
-  /timeout|i\/o timeout|econnreset|connection reset|503|502|429|rate limit|temporar|bad gateway|fetch failed|network error|unavailable/i;
+  /timeout|i\/o timeout|econnreset|connection reset|503|502|429|rate limit|temporar|bad gateway|fetch failed|network error|unavailable|tx_?bad_?seq|bad sequence|bad seq/i;
 
 export function isTransientCommandFailure(logText: string): boolean {
   if (!logText.trim()) {

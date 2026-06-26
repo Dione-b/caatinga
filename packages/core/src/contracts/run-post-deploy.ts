@@ -3,6 +3,7 @@ import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
+import { isTransientCommandFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { formatNamedCliArgs } from "./format-cli-args.js";
@@ -14,6 +15,14 @@ export type RunPostDeployHooksOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
+  onTransientHookRetry?: (info: {
+    hook: PostDeployHookResult;
+    attempt: number;
+    maxAttempts: number;
+    delayMs: number;
+  }) => void;
+  /** Override retry backoff delays (primarily for tests). */
+  hookRetryDelaysMs?: readonly number[];
 };
 
 export type PostDeployHookResult = {
@@ -21,6 +30,22 @@ export type PostDeployHookResult = {
   method: string;
   result?: string;
 };
+
+const DEFAULT_HOOK_RETRY_DELAYS_MS = [2000, 5000] as const;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function isTransientHookFailure(error: unknown): boolean {
+  if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.INVOKE_FAILED) {
+    return false;
+  }
+
+  return isTransientCommandFailure(`${error.message}\n${error.hint ?? ""}`);
+}
 
 export async function runPostDeployHooks(
   options: RunPostDeployHooksOptions
@@ -76,26 +101,55 @@ export async function runPostDeployHooks(
     }
 
     const namedArgs = formatNamedCliArgs(resolvedArgs);
+    const retryDelaysMs = options.hookRetryDelaysMs ?? DEFAULT_HOOK_RETRY_DELAYS_MS;
+    const maxHookAttempts = retryDelaysMs.length + 1;
+    let result: { stdout: string; stderr: string; all: string } = undefined!;
 
-    const result = await runCommand(
-      "stellar",
-      [
-        "contract",
-        "invoke",
-        "--id",
-        contractArtifact.contractId,
-        "--source-account",
-        source,
-        ...buildStellarNetworkArgs(network),
-        "--",
-        hook.method,
-        ...namedArgs,
-      ],
-      {
-        cwd,
-        failureCode: CaatingaErrorCode.INVOKE_FAILED,
+    for (let attempt = 0; attempt < maxHookAttempts; attempt++) {
+      try {
+        result = await runCommand(
+          "stellar",
+          [
+            "contract",
+            "invoke",
+            "--id",
+            contractArtifact.contractId,
+            "--source-account",
+            source,
+            ...buildStellarNetworkArgs(network),
+            "--",
+            hook.method,
+            ...namedArgs,
+          ],
+          {
+            cwd,
+            failureCode: CaatingaErrorCode.INVOKE_FAILED,
+          }
+        );
+        break;
+      } catch (error) {
+        const isLastAttempt = attempt === maxHookAttempts - 1;
+        if (!isTransientHookFailure(error) || isLastAttempt) {
+          throw error;
+        }
+
+        const delayMs = retryDelaysMs[attempt];
+        try {
+          options.onTransientHookRetry?.({
+            hook: {
+              contract: hook.contract,
+              method: hook.method,
+            },
+            attempt: attempt + 1,
+            maxAttempts: maxHookAttempts,
+            delayMs,
+          });
+        } catch {
+          // Callback error is non-fatal; original transient error takes precedence.
+        }
+        await sleep(delayMs);
       }
-    );
+    }
 
     results.push({
       contract: hook.contract,

@@ -25,6 +25,11 @@ export function registerWireCommand(program: Command): void {
           config,
           networkName: options.network,
           source: options.source,
+          onTransientHookRetry: ({ hook, attempt, maxAttempts, delayMs }) => {
+            logger.warn(
+              `Post-deploy hook ${hook.contract}.${hook.method} hit a transient post-deploy error (attempt ${attempt}/${maxAttempts}). Retrying in ${Math.round(delayMs / 1000)}s...`
+            );
+          },
         });
 
         logger.success("Wire complete");

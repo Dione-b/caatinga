@@ -14,6 +14,12 @@ describe("isTransientCommandFailure", () => {
     expect(isTransientCommandFailure("ECONNRESET")).toBe(true);
   });
 
+  it("should_return_true_when_log_contains_stellar_bad_sequence", () => {
+    expect(isTransientCommandFailure("transaction failed: TxBadSeq")).toBe(true);
+    expect(isTransientCommandFailure("tx_bad_seq")).toBe(true);
+    expect(isTransientCommandFailure("bad sequence number")).toBe(true);
+  });
+
   it("should_return_false_when_log_contains_unsupported_cli_code", () => {
     expect(isTransientCommandFailure("Error CAATINGA_UNSUPPORTED_CLI_VERSION: bump stellar")).toBe(
       false

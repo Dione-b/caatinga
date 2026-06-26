@@ -9,6 +9,7 @@ import { registerDeployCommand } from "./deploy.command.js";
 const deployContractGraphMock = vi.hoisted(() => vi.fn());
 const generateBindingsGraphMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn());
+const runPostDeployHooksMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
@@ -17,6 +18,7 @@ vi.mock("@caatinga/core", async () => {
     deployContractGraph: deployContractGraphMock,
     generateBindingsGraph: generateBindingsGraphMock,
     loadConfig: loadConfigMock,
+    runPostDeployHooks: runPostDeployHooksMock,
   };
 });
 
@@ -81,6 +83,7 @@ describe("deploy command", () => {
     loadConfigMock.mockResolvedValue(config);
     deployContractGraphMock.mockResolvedValue(deployResult);
     generateBindingsGraphMock.mockResolvedValue(generateResult);
+    runPostDeployHooksMock.mockResolvedValue([]);
     process.exitCode = undefined;
   });
 
@@ -170,6 +173,45 @@ describe("deploy command", () => {
 
       expect(generateBindingsGraph).not.toHaveBeenCalled();
     } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("logs transient post-deploy retry warnings during full deploy wiring", async () => {
+    const configWithHooks: CaatingaConfig = {
+      ...config,
+      postDeploy: [{ contract: "counter", method: "set_minter", args: {} }],
+    };
+    loadConfigMock.mockResolvedValue(configWithHooks);
+    runPostDeployHooksMock.mockImplementation(async ({ onTransientHookRetry }) => {
+      onTransientHookRetry({
+        hook: { contract: "counter", method: "set_minter" },
+        attempt: 1,
+        maxAttempts: 3,
+        delayMs: 2000,
+      });
+      return [{ contract: "counter", method: "set_minter" }];
+    });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
+
+      expect(runPostDeployHooksMock).toHaveBeenCalledWith({
+        config: configWithHooks,
+        networkName: undefined,
+        source: "alice",
+        onTransientHookRetry: expect.any(Function),
+      });
+
+      const warnOutput = warnSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(warnOutput).toContain(
+        "Post-deploy hook counter.set_minter hit a transient post-deploy error"
+      );
+      expect(warnOutput).toContain("Retrying in 2s");
+    } finally {
+      warnSpy.mockRestore();
       logSpy.mockRestore();
     }
   });
