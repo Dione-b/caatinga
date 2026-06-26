@@ -80,6 +80,11 @@ export default withMermaid(
               text: "Contract upgrade",
               link: "/tutorials/contract-upgrade",
             },
+            { text: "ADRs", link: "/adr/" },
+            {
+              text: "stellar-album case study",
+              link: "/case-studies/stellar-album",
+            },
           ],
         },
       ],

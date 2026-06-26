@@ -180,7 +180,8 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 
 - **Templates:** start as **opinionated snapshots** (`react-vite-counter`, etc.). Parameterized generators (`--tailwind`, wallet flavor, i18n) come later—they expand the test matrix quickly.
 - **Template contract:** every template includes a **`caatinga.template.json` manifest** (name, version, `compatibleCore`, paths) so templates and core semver are validated at `init`—see [ADR 0003](./adr/0003-template-manifest-compatibility.md).
-- **Plugins:** defer until a concrete need templates cannot cover (e.g. **post-deploy hooks**, CI presets, indexer hooks). First strong candidate is often `postDeploy`; still wait until multi-contract flow is validated.
+- **Post-deploy hooks:** `postDeploy` is now a first-class config surface for deterministic, admin-signed contract wiring after full graph deploys — see [ADR 0006](./adr/0006-post-deploy-hooks.md). This solves the validated multi-contract need without adding a general plugin loader.
+- **Plugins:** still deferred for broader extension points (for example CI presets or indexer hooks). Keep hooks declarative and data-only until a concrete use case requires executable plugin code.
 
 ## Ecosystem: official vs community templates
 
@@ -199,7 +200,7 @@ Suggested naming: `@caatinga/template-*` for official; `@scope/caatinga-template
 
 ## Multi-contract
 
-Deploy order **should** be supported in core for declared dependencies (DAG / topological sort), starting simple—see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) when designing **how** dependent contracts receive upstream `contractId` (the sensitive part is injection, not sorting).
+Deploy order is supported in core for declared dependencies (DAG / topological sort), with artifact-safe constructor arg injection through `${contracts.<name>.contractId}` — see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md). The next layer is runtime wiring: `${source.address}`, `postDeploy`, `caatinga wire`, frontend env sync, and workspace builds are covered by [ADR 0006](./adr/0006-post-deploy-hooks.md).
 
 ## CI and secrets
 

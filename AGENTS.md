@@ -21,6 +21,13 @@ Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
 Repository packages are version **`3.4.2`**. After publish, promote `next` → `latest` per
 [docs/internal/release/publish-checklist.md](docs/internal/release/publish-checklist.md).
 
+Highlights queued for the `3.5.x` line:
+
+- Declarative multi-contract workflow: `${source.address}` deploy arg placeholder,
+  `buildRoot` workspace builds, `postDeploy` hooks via `caatinga wire`, and
+  `frontend.envFile` / `frontend.env` sync via `caatinga sync-env`. Full graph deploys
+  run wire and env sync automatically unless `--no-wire` or `--no-sync-env` is passed.
+
 Highlights from the `3.4.x` line:
 
 - `3.4.0`: add `caatinga setup`, a one-step bootstrap (Node check, Rust/`rustup`,

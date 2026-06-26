@@ -18,16 +18,16 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Reference
 
-| Doc                                 | What you get                                                                   |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| [CLI](./cli.md)                     | Every command: init, doctor, build, deploy, generate, status, invoke, read, zk |
-| [ZK module](./zk.md)                | Circom + Groth16 scaffold, build, prove, and verifier invoke                   |
-| [Config](./config.md)               | `caatinga.config.ts` schema: contracts, networks, frontend                     |
-| [Client](./client.md)               | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings        |
-| [Soroban types](./soroban-types.md) | Symbol vs string and other binding footguns                                    |
-| [Wallets](./wallets.md)             | Adapter contract, Stellar Wallets Kit, wallet session, React hooks             |
-| [Templates](./templates.md)         | Official templates and their package-manager quirks                            |
-| [Errors](./errors.md)               | Every public `CAATINGA_*` error code with fixes                                |
+| Doc                                 | What you get                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [CLI](./cli.md)                     | Every command: init, doctor, build, deploy, wire, sync-env, generate, status, invoke, read, zk |
+| [ZK module](./zk.md)                | Circom + Groth16 scaffold, build, prove, and verifier invoke                                   |
+| [Config](./config.md)               | `caatinga.config.ts` schema: contracts, networks, frontend, `postDeploy`, workspace builds     |
+| [Client](./client.md)               | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings                        |
+| [Soroban types](./soroban-types.md) | Symbol vs string and other binding footguns                                                    |
+| [Wallets](./wallets.md)             | Adapter contract, Stellar Wallets Kit, wallet session, React hooks                             |
+| [Templates](./templates.md)         | Official templates and their package-manager quirks                                            |
+| [Errors](./errors.md)               | Every public `CAATINGA_*` error code with fixes                                                |
 
 ## Internals & process
 
@@ -40,13 +40,15 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | [Production readiness](./production-readiness.md)                 | Pre-mainnet checklist                      |
 | [Packages](./packages.md)                                         | What each npm package contains             |
 | [ADRs](./adr/index.md)                                            | Architecture decision records              |
+| [stellar-album case study](./case-studies/stellar-album.md)       | Multi-contract workflow with hooks and env |
 
 For maintainers: release process, publish checklists, testing policy, and internal specs live in [`docs/internal/`](./internal/) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 ## Quick orientation
 
 - **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
-  `caatinga.artifacts.json` and auto-generates TypeScript bindings.
+  `caatinga.artifacts.json`, auto-generates TypeScript bindings, and can run configured
+  `postDeploy` hooks plus frontend env sync after full graph deploys.
 - **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in
   the browser. React apps add `@caatinga/client/react` for `WalletProvider`/`useWallet`.
 - **Errors are API:** automation should key on `CAATINGA_*` codes, never on message text.

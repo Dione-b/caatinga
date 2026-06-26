@@ -1,6 +1,6 @@
 # @caatinga/cli
 
-Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `generate`, `status`, and `invoke`.
+Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `wire`, `sync-env`, `generate`, `status`, and `invoke`.
 
 ## Install
 
@@ -43,7 +43,7 @@ npx caatinga status --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`build` only compiles the WASM file. `deploy` writes contract IDs to `caatinga.artifacts.json` and then generates TypeScript bindings automatically under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`); pass `--no-generate` to skip. `status` shows what's deployed per network and whether bindings are fresh.
+`build` compiles WASM files (or one Cargo workspace when `buildRoot` is configured). `deploy` writes contract IDs to `caatinga.artifacts.json` and then generates TypeScript bindings automatically under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`); pass `--no-generate` to skip. Full graph deploys also run configured `postDeploy` hooks and sync frontend env files when configured. `status` shows what's deployed per network and whether bindings are fresh.
 
 ## Commands
 
@@ -54,12 +54,14 @@ npx caatinga invoke counter.increment --network testnet --source alice
 | `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
 | `caatinga build [contract]`                                   | Compile contract WASM through Stellar CLI (default contract: `counter`)                    |
 | `caatinga deploy [contract]`                                  | Deploy one contract or the full configured graph; record IDs in artifacts                  |
+| `caatinga wire --source <identity>`                           | Run configured `postDeploy` hooks against deployed contracts                               |
+| `caatinga sync-env`                                           | Write configured frontend env vars from deployment artifacts                               |
 | `caatinga generate [contract]`                                | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts     |
 | `caatinga status [--network <name>] [--json]`                 | Show deployed contracts and binding freshness per network                                  |
 | `caatinga invoke <contract.method>`                           | Invoke a deployed contract method; extra args forward to Stellar CLI                       |
 | `caatinga read <contract.method>`                             | Simulate a read-only contract method (no signing or submission)                            |
 
-The supported CLI flow is `init -> build -> deploy (bindings auto-generate) -> invoke`.
+The supported CLI flow is `init -> build -> deploy (bindings auto-generate; full deploys can wire and sync env) -> invoke`.
 
 ### `setup`
 
@@ -84,7 +86,8 @@ sudo apt install build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev
 
 ### `build`
 
-- `[contract]` defaults to `counter` when omitted
+- Omit `[contract]` to build every configured contract
+- When `buildRoot` is configured and `[contract]` is omitted, Caatinga runs one `stellar contract build` from that Cargo workspace root
 - prints a deploy reminder when the default network lacks a `contractId` in `caatinga.artifacts.json`; this warning does not fail the build
 
 ### `doctor`
@@ -103,10 +106,19 @@ sudo apt install build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev
 - `--verify-deps` confirms each dependency's contract ID exists on-chain before resolving deploy arguments
 - `--no-stale-check` skips the WASM-older-than-sources warning
 - `--no-generate` skips the automatic bindings generation after deploy
+- `--no-wire` skips configured `postDeploy` hooks after a full graph deploy
+- `--no-sync-env` skips frontend env sync after a full graph deploy
 
-Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts.
+Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts or `${source.address}` resolved from the local Stellar CLI identity.
 
-After a successful deploy, bindings generate automatically for the deployed contracts. A generation failure never fails the deploy — the CLI prints a warning plus the recovery command (`npx caatinga generate --network <network>`).
+After a successful deploy, bindings generate automatically for the deployed contracts. A generation failure never fails the deploy — the CLI prints a warning plus the recovery command (`npx caatinga generate --network <network>`). When deploying the full graph, Caatinga also runs `postDeploy` hooks and writes `frontend.envFile` when configured; recover with `caatinga wire` or `caatinga sync-env` if either step is skipped or fails.
+
+### `wire` and `sync-env`
+
+- `wire` requires `--source <identity>` because hooks are submitted as signed `stellar contract invoke` calls
+- `wire` resolves `${contracts.<name>.contractId}` and `${source.address}` in `postDeploy` args
+- `sync-env` writes `frontend.envFile` from `caatinga.artifacts.json` using the `frontend.env` mapping
+- `frontend.env` supports contract keys plus `rpcUrl` and `networkPassphrase`
 
 ### `generate`, `status`, and `invoke`
 
@@ -141,6 +153,7 @@ Common codes:
 - `CAATINGA_CONTRACT_ID_NOT_FOUND`, `CAATINGA_SOURCE_ACCOUNT_REQUIRED`, `CAATINGA_UNSAFE_SOURCE_ACCOUNT`
 - `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`, `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
 - `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`, `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
+- `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`
 - `CAATINGA_TEMPLATE_MANIFEST_NOT_FOUND`, `CAATINGA_TEMPLATE_INCOMPATIBLE`
 
 Full table: [docs/errors.md](https://github.com/Dione-b/caatinga/blob/main/docs/errors.md)

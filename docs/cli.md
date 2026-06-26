@@ -81,6 +81,9 @@ caatinga init my-contract-app --minimal
 
 Builds one configured contract with `stellar contract build`. Omit `contract` to build **every**
 contract listed in `caatinga.config.ts` (same batch semantics as `caatinga deploy` without a name).
+When `buildRoot` is configured and `contract` is omitted, Caatinga runs a single
+`stellar contract build` from that Cargo workspace root and then resolves each configured WASM.
+Pass a contract name to keep the per-contract build behavior.
 
 ## `caatinga doctor [--network testnet] [--source alice]`
 

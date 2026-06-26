@@ -40,7 +40,7 @@ Caatinga already supports topological deploy and `${contracts.<name>.contractId}
 - Frontends that do not use `@caatinga/client` can still consume Caatinga deploy state via
   generated `.env.local` files.
 - `caatinga wire` failures after deploy do not roll back artifacts; recovery is explicit
-  (`caatinga wire` or `caatinga deploy --force`).
+  (`caatinga wire`, or `caatinga deploy --force` when redeploy is also desired).
 
 ## Related
 
