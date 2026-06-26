@@ -31,9 +31,7 @@ describe("ensureBufferDependency", () => {
     const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
 
     expect(result?.added).toBe(true);
-    const pkg = JSON.parse(
-      await readFile(path.join(cwd, "frontend", "package.json"), "utf8")
-    );
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
     expect(pkg.dependencies.buffer).toBeDefined();
     expect(pkg.dependencies.react).toBe("^18.0.0");
   });

@@ -7,13 +7,13 @@ graph, post-deploy wiring, and frontend env sync).
 
 ## Why it matters for Caatinga
 
-| stellar-album need | Caatinga feature |
-| ------------------ | ---------------- |
-| 7 contracts, shared workspace WASMs | `buildRoot: "."` |
-| Constructor args use deployer address | `${source.address}` |
-| Cross-contract deploy order | `dependsOn` + `${contracts.*.contractId}` |
-| Four `set_minter` / `set_burner` invokes | `postDeploy` + `caatinga wire` |
-| Vite frontend with `VITE_*` env vars | `frontend.env` + `caatinga sync-env` |
+| stellar-album need                       | Caatinga feature                          |
+| ---------------------------------------- | ----------------------------------------- |
+| 7 contracts, shared workspace WASMs      | `buildRoot: "."`                          |
+| Constructor args use deployer address    | `${source.address}`                       |
+| Cross-contract deploy order              | `dependsOn` + `${contracts.*.contractId}` |
+| Four `set_minter` / `set_burner` invokes | `postDeploy` + `caatinga wire`            |
+| Vite frontend with `VITE_*` env vars     | `frontend.env` + `caatinga sync-env`      |
 
 ## Typical workflow
 

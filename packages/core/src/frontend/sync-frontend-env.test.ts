@@ -10,7 +10,13 @@ import { syncFrontendEnv } from "./sync-frontend-env.js";
 const tempDirs: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(tempDirs.splice(0).map((dir) => import("node:fs/promises").then((fs) => fs.rm(dir, { recursive: true, force: true }))));
+  await Promise.all(
+    tempDirs
+      .splice(0)
+      .map((dir) =>
+        import("node:fs/promises").then((fs) => fs.rm(dir, { recursive: true, force: true }))
+      )
+  );
 });
 
 describe("syncFrontendEnv", () => {

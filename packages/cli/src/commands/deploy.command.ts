@@ -141,7 +141,12 @@ export function registerDeployCommand(program: Command): void {
 
           const isFullDeploy = !contractName;
 
-          if (isFullDeploy && options.wire !== false && config.postDeploy && config.postDeploy.length > 0) {
+          if (
+            isFullDeploy &&
+            options.wire !== false &&
+            config.postDeploy &&
+            config.postDeploy.length > 0
+          ) {
             try {
               const wireResults = await runPostDeployHooks({
                 config,
@@ -162,7 +167,9 @@ export function registerDeployCommand(program: Command): void {
               }
               logger.info("");
               logger.info("Recover with:");
-              logger.info(`  npx caatinga wire --network ${result.network.name} --source ${options.source}`);
+              logger.info(
+                `  npx caatinga wire --network ${result.network.name} --source ${options.source}`
+              );
             }
           }
 
