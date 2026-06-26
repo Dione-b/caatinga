@@ -1,5 +1,13 @@
 ## Breaking changes policy
 
+## 3.5.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.5.1
+  - @caatinga/zk@3.5.1
+
 ## 3.5.0
 
 ### Minor Changes

@@ -99,10 +99,10 @@ importers:
   packages/cli:
     dependencies:
       '@caatinga/core':
-        specifier: ^3.5.0
+        specifier: ^3.5.1
         version: link:../core
       '@caatinga/zk':
-        specifier: ^3.5.0
+        specifier: ^3.5.1
         version: link:../zk
       chalk:
         specifier: ^5.4.1
@@ -136,7 +136,7 @@ importers:
   packages/client:
     dependencies:
       '@caatinga/core':
-        specifier: ^3.5.0
+        specifier: ^3.5.1
         version: link:../core
       '@stellar/freighter-api':
         specifier: ^4.0.0
@@ -204,7 +204,7 @@ importers:
   packages/zk:
     dependencies:
       '@caatinga/core':
-        specifier: ^3.5.0
+        specifier: ^3.5.1
         version: link:../core
     devDependencies:
       tsup:

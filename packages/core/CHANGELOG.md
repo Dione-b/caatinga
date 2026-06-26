@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.5.1
+
+### Patch Changes
+
+- Retry transient post-deploy hook failures (TxBadSeq, timeouts, connection resets) with exponential backoff during `caatinga wire` and after `caatinga deploy`. Detects transient errors via `isTransientCommandFailure` and retries with configurable delays (2s/5s default).
+
 ## 3.5.0
 
 ### Minor Changes
