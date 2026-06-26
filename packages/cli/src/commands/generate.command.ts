@@ -77,6 +77,15 @@ export function registerGenerateCommand(program: Command): void {
               );
             }
           }
+          const addedBuffer = results.find((result) => result.bufferDependency?.added);
+          if (addedBuffer?.bufferDependency) {
+            logger.info("");
+            logger.info(
+              `Added "buffer" to ${addedBuffer.bufferDependency.packageJsonPath} (backs the Buffer polyfill in the bindings).`
+            );
+            logger.info("Run your package manager's install (e.g. npm install) before npm run dev.");
+          }
+
           logger.info("");
           logger.info("Next: import bindings from the import path above, then run npm run dev");
         })

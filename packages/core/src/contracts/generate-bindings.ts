@@ -3,6 +3,7 @@ import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { writeBindingMarker, type BindingMarker } from "../bindings/binding-marker.js";
 import { patchGeneratedBindingPackage } from "../bindings/patch-generated-binding-package.js";
+import { ensureBufferDependency } from "../frontend/ensure-buffer-dependency.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -94,6 +95,14 @@ export async function generateBindings(options: GenerateBindingsOptions) {
 
   await patchGeneratedBindingPackage(outputDir);
 
+  // Generated bindings polyfill the `Buffer` global by importing `buffer`;
+  // make sure the frontend declares it so the import resolves under every
+  // package manager (notably pnpm, which won't hoist stellar-sdk's copy).
+  const bufferDependency = await ensureBufferDependency(
+    cwd,
+    options.config.frontend.bindingsOutput
+  );
+
   const marker: BindingMarker = {
     version: 1,
     contractId: contractArtifact.contractId,
@@ -110,6 +119,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     importPath: toBindingImportPath(options.config.frontend.bindingsOutput, options.contractName),
     legacyStubRemoved,
     marker,
+    bufferDependency,
     output: result.all || result.stdout,
   };
 }

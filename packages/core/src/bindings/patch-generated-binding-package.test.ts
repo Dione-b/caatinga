@@ -5,6 +5,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import {
   patchGeneratedBindingPackage,
+  POLYFILLS_CONTENT,
+  POLYFILLS_FILENAME,
+  POLYFILLS_IMPORT_LINE,
   ROOT_BINDING_INDEX_CONTENT,
 } from "./patch-generated-binding-package.js";
 
@@ -106,6 +109,32 @@ describe("patchGeneratedBindingPackage", () => {
     await patchGeneratedBindingPackage(tmpDir);
 
     expect(await readFile(path.join(tmpDir, "index.ts"), "utf8")).toBe(customRoot);
+  });
+
+  it("should_write_buffer_polyfill_and_import_it_from_src_index", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-patch-polyfill-"));
+    await writeSdkLikePackage(tmpDir);
+
+    await patchGeneratedBindingPackage(tmpDir);
+
+    expect(await readFile(path.join(tmpDir, "src", POLYFILLS_FILENAME), "utf8")).toBe(
+      POLYFILLS_CONTENT
+    );
+    const entry = await readFile(path.join(tmpDir, "src", "index.ts"), "utf8");
+    expect(entry.startsWith(`${POLYFILLS_IMPORT_LINE}\n`)).toBe(true);
+    expect(entry).toContain("export class Client {}");
+  });
+
+  it("should_not_duplicate_polyfill_import_on_repeated_patch", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-patch-polyfill-idempotent-"));
+    await writeSdkLikePackage(tmpDir);
+
+    await patchGeneratedBindingPackage(tmpDir);
+    await patchGeneratedBindingPackage(tmpDir);
+
+    const entry = await readFile(path.join(tmpDir, "src", "index.ts"), "utf8");
+    const occurrences = entry.split(POLYFILLS_IMPORT_LINE).length - 1;
+    expect(occurrences).toBe(1);
   });
 
   it("should_throw_BINDINGS_FAILED_when_src_index_ts_is_missing", async () => {
