@@ -28,6 +28,7 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 | [Wallets](./wallets.md)             | Adapter contract, Stellar Wallets Kit, wallet session, React hooks                             |
 | [Templates](./templates.md)         | Official templates and their package-manager quirks                                            |
 | [Errors](./errors.md)               | Every public `CAATINGA_*` error code with fixes                                                |
+| [AI Reference](./for-llms.md)       | Self-contained reference optimized for LLM consumption (also at `/llms-full.txt`)              |
 
 ## Internals & process
 
