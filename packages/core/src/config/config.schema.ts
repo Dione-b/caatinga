@@ -7,6 +7,7 @@ export const ContractConfigSchema = z.object({
   wasm: z.string().min(1),
   dependsOn: z.array(z.string().min(1)).default([]),
   deployArgs: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+  buildFeatures: z.array(z.string().min(1)).optional(),
 });
 
 export const NetworkConfigSchema = z.object({
