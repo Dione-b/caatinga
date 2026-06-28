@@ -7,6 +7,7 @@ export const ContractConfigSchema = z.object({
   wasm: z.string().min(1),
   dependsOn: z.array(z.string().min(1)).default([]),
   deployArgs: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+  buildFeatures: z.array(z.string().min(1)).optional(),
 });
 
 export const NetworkConfigSchema = z.object({
@@ -31,6 +32,8 @@ const PostDeployHookSchema = z.object({
   contract: z.string().min(1),
   method: z.string().min(1),
   args: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+  source: z.string().min(1).optional(),
+  expect: z.string().optional(),
 });
 
 export const CaatingaConfigSchema = z.object({

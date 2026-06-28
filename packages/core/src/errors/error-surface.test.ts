@@ -250,6 +250,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/client/transaction-submit.test.ts",
     trigger: "submitTransaction(",
   },
+  [CaatingaErrorCode.POST_DEPLOY_VERIFY_FAILED]: {
+    file: "packages/core/src/contracts/run-post-deploy.test.ts",
+    trigger: "runPostDeployHooks(",
+  },
 };
 
 function testBlocks(source: string): string[] {

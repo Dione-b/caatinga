@@ -50,6 +50,16 @@ export async function buildWorkspace(options: BuildWorkspaceOptions) {
     );
   }
 
+  const hasBuildFeatures = Object.values(options.config.contracts).some(
+    (c) => c.buildFeatures && c.buildFeatures.length > 0
+  );
+  if (hasBuildFeatures) {
+    console.warn(
+      "Warning: buildFeatures is set on one or more contracts but is ignored in workspace builds (buildRoot). " +
+        "Use individual contract builds (caatinga build <contract>) to apply buildFeatures."
+    );
+  }
+
   const buildPath = path.resolve(cwd, buildRoot);
 
   await checkBinary("rustc", "Install Rust before running caatinga build.");

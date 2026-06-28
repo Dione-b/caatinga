@@ -48,7 +48,12 @@ describe("runPostDeployHooks", () => {
 
   beforeEach(async () => {
     runCommand.mockReset();
-    runCommand.mockResolvedValue({ stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" });
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: "", stderr: "", all: "" };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
 
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wire-"));
     await mkdir(path.join(tmpDir, "rel"), { recursive: true });
@@ -108,6 +113,66 @@ describe("runPostDeployHooks", () => {
     expect(retries).toEqual([{ attempt: 1, maxAttempts: 2, delayMs: 0 }]);
   });
 
+  it("should_use_hook_source_override_when_provided", async () => {
+    const configWithSourceOverride: CaatingaConfig = {
+      ...config,
+      postDeploy: [{ contract: "coin", method: "set_minter", args: {}, source: "issuer" }],
+    };
+
+    const result = await runPostDeployHooks({
+      config: configWithSourceOverride,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+
+    const calls = invokeCalls();
+    expect(calls).toHaveLength(1);
+    expect(calls[0][1]).toContain("--source-account");
+    expect(calls[0][1]).toContain("issuer");
+  });
+
+  it("should_fallback_to_cli_source_when_hook_source_is_omitted", async () => {
+    const result = await runPostDeployHooks({
+      config,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+
+    const calls = invokeCalls();
+    expect(calls).toHaveLength(1);
+    expect(calls[0][1]).toContain("--source-account");
+    expect(calls[0][1]).toContain("alice");
+  });
+
+  it("should_throw_when_hook_source_is_a_secret_key", async () => {
+    const configWithBadSource: CaatingaConfig = {
+      ...config,
+      postDeploy: [
+        {
+          contract: "coin",
+          method: "set_minter",
+          args: {},
+          source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123",
+        },
+      ],
+    };
+
+    await expect(
+      runPostDeployHooks({
+        config: configWithBadSource,
+        source: "alice",
+        cwd: tmpDir,
+        hookRetryDelaysMs: [0],
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.SOURCE_IS_SECRET_KEY });
+  });
+
   it("should_not_retry_hook_when_failure_is_not_transient", async () => {
     runCommand.mockImplementation(async (command: string, args: string[]) => {
       if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
@@ -130,5 +195,81 @@ describe("runPostDeployHooks", () => {
     ).rejects.toMatchObject({ code: CaatingaErrorCode.INVOKE_FAILED });
 
     expect(invokeCalls()).toHaveLength(1);
+  });
+
+  it("should_pass_when_expect_matches_invoke_output", async () => {
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: "CADMINADDRESS123", stderr: "", all: "CADMINADDRESS123" };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
+
+    const configWithExpect: CaatingaConfig = {
+      ...config,
+      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
+    };
+
+    const result = await runPostDeployHooks({
+      config: configWithExpect,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: "CADMINADDRESS123" }]);
+  });
+
+  it("should_throw_when_expect_does_not_match_invoke_output", async () => {
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: "COTHERADDRESS", stderr: "", all: "COTHERADDRESS" };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
+
+    const configWithExpect: CaatingaConfig = {
+      ...config,
+      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
+    };
+
+    await expect(
+      runPostDeployHooks({
+        config: configWithExpect,
+        source: "alice",
+        cwd: tmpDir,
+        hookRetryDelaysMs: [0],
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.POST_DEPLOY_VERIFY_FAILED });
+  });
+
+  it("should_resolve_source_address_placeholder_in_expect", async () => {
+    const ALICE_ADDRESS = "G" + "A".repeat(20) + "L".repeat(18) + "I".repeat(17);
+
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "keys" && args[1] === "address") {
+        return { stdout: ALICE_ADDRESS, stderr: "", all: ALICE_ADDRESS };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: ALICE_ADDRESS, stderr: "", all: ALICE_ADDRESS };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
+
+    const configWithExpect: CaatingaConfig = {
+      ...config,
+      postDeploy: [
+        { contract: "coin", method: "get_admin", args: {}, expect: "${source.address}" },
+      ],
+    };
+
+    const result = await runPostDeployHooks({
+      config: configWithExpect,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: ALICE_ADDRESS }]);
   });
 });

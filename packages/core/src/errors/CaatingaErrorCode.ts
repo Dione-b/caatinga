@@ -55,6 +55,7 @@ export const CaatingaErrorCode = {
   ROLLBACK_TARGET_NOT_FOUND: "CAATINGA_ROLLBACK_TARGET_NOT_FOUND",
   ESTIMATE_FAILED: "CAATINGA_ESTIMATE_FAILED",
   MULTI_AUTH_REQUIRED: "CAATINGA_MULTI_AUTH_REQUIRED",
+  POST_DEPLOY_VERIFY_FAILED: "CAATINGA_POST_DEPLOY_VERIFY_FAILED",
 } as const;
 
 export type CaatingaErrorCodeValue = (typeof CaatingaErrorCode)[keyof typeof CaatingaErrorCode];

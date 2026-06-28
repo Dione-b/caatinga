@@ -68,6 +68,60 @@ describe("buildContract", () => {
     });
   });
 
+  it("should_pass_buildFeatures_flags_to_stellar_contract_build", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
+    const sourceDir = path.join(tmpDir, "contracts", "counter");
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(sourceDir, { recursive: true });
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
+
+    const config: CaatingaConfig = {
+      ...baseConfig,
+      contracts: {
+        counter: {
+          ...baseConfig.contracts.counter,
+          buildFeatures: ["--no-default-features", "--features", "testnet"],
+        },
+      },
+    };
+
+    await buildContract({
+      config,
+      contractName: "counter",
+      cwd: tmpDir,
+    });
+
+    expect(runCommand).toHaveBeenCalledWith(
+      "stellar",
+      ["contract", "build", "--no-default-features", "--features", "testnet"],
+      {
+        cwd: sourceDir,
+        failureCode: CaatingaErrorCode.BUILD_FAILED,
+      }
+    );
+  });
+
+  it("should_not_pass_flags_when_buildFeatures_is_omitted", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
+    const sourceDir = path.join(tmpDir, "contracts", "counter");
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(sourceDir, { recursive: true });
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
+
+    await buildContract({
+      config: baseConfig,
+      contractName: "counter",
+      cwd: tmpDir,
+    });
+
+    expect(runCommand).toHaveBeenCalledWith("stellar", ["contract", "build"], {
+      cwd: sourceDir,
+      failureCode: CaatingaErrorCode.BUILD_FAILED,
+    });
+  });
+
   it("should_throw_RUST_TARGET_NOT_FOUND_when_stellar_build_reports_missing_wasm32v1_none", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-build-"));
     const sourceDir = path.join(tmpDir, "contracts", "counter");

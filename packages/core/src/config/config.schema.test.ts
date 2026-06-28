@@ -84,6 +84,91 @@ describe("CaatingaConfigSchema", () => {
     ).toThrow();
   });
 
+  it("accepts buildFeatures array on a contract", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      contracts: {
+        token_sale: {
+          path: "./contracts/token_sale",
+          wasm: "./target/wasm32v1-none/release/token_sale.wasm",
+          buildFeatures: ["--no-default-features", "--features", "testnet"],
+        },
+      },
+    });
+
+    expect(result.contracts.token_sale.buildFeatures).toEqual([
+      "--no-default-features",
+      "--features",
+      "testnet",
+    ]);
+  });
+
+  it("buildFeatures defaults to undefined when omitted", () => {
+    const result = CaatingaConfigSchema.parse(minimalValid);
+    expect(result.contracts.counter.buildFeatures).toBeUndefined();
+  });
+
+  it("accepts per-hook source override", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+          source: "issuer",
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].source).toBe("issuer");
+  });
+
+  it("per-hook source defaults to undefined when omitted", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].source).toBeUndefined();
+  });
+
+  it("accepts expect field on postDeploy hook", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "get_admin",
+          expect: "${source.address}",
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].expect).toBe("${source.address}");
+  });
+
+  it("expect defaults to undefined when omitted", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].expect).toBeUndefined();
+  });
+
   it("accepts workspace buildRoot, postDeploy hooks, and frontend env mapping", () => {
     const result = CaatingaConfigSchema.parse({
       ...minimalValid,
