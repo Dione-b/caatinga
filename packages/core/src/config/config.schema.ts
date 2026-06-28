@@ -32,6 +32,7 @@ const PostDeployHookSchema = z.object({
   contract: z.string().min(1),
   method: z.string().min(1),
   args: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+  source: z.string().min(1).optional(),
 });
 
 export const CaatingaConfigSchema = z.object({

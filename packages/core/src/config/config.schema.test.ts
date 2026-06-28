@@ -108,6 +108,37 @@ describe("CaatingaConfigSchema", () => {
     expect(result.contracts.counter.buildFeatures).toBeUndefined();
   });
 
+  it("accepts per-hook source override", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+          source: "issuer",
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].source).toBe("issuer");
+  });
+
+  it("per-hook source defaults to undefined when omitted", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].source).toBeUndefined();
+  });
+
   it("accepts workspace buildRoot, postDeploy hooks, and frontend env mapping", () => {
     const result = CaatingaConfigSchema.parse({
       ...minimalValid,
