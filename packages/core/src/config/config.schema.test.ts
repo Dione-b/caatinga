@@ -139,6 +139,36 @@ describe("CaatingaConfigSchema", () => {
     expect(result.postDeploy![0].source).toBeUndefined();
   });
 
+  it("accepts expect field on postDeploy hook", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "get_admin",
+          expect: "${source.address}",
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].expect).toBe("${source.address}");
+  });
+
+  it("expect defaults to undefined when omitted", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "initialize",
+          args: {},
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].expect).toBeUndefined();
+  });
+
   it("accepts workspace buildRoot, postDeploy hooks, and frontend env mapping", () => {
     const result = CaatingaConfigSchema.parse({
       ...minimalValid,
