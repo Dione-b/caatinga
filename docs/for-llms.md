@@ -128,6 +128,7 @@ export default defineConfig({
     counter: {
       path: "./contracts/counter", // required: contract source dir
       wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm", // required: compiled WASM
+      buildFeatures: ["--no-default-features", "--features", "testnet"], // optional: Cargo features
       dependsOn: ["token"], // optional: contracts deployed first
       deployArgs: {
         // optional: constructor args; supports placeholders
@@ -152,6 +153,7 @@ export default defineConfig({
     env: {
       // optional: maps to env var names
       counter: "VITE_COUNTER_ID",
+      "counter.wasmHash": "VITE_COUNTER_WASM_HASH", // .wasmHash suffix
       rpcUrl: "VITE_RPC_URL",
       networkPassphrase: "VITE_NETWORK_PASSPHRASE",
     },
@@ -163,6 +165,12 @@ export default defineConfig({
       contract: "counter",
       method: "initialize",
       args: { owner: "${source.address}" },
+    },
+    {
+      contract: "counter",
+      method: "get_owner",
+      source: "issuer", // optional: override --source for this hook
+      expect: "${source.address}", // optional: assert stdout matches
     },
   ],
 
@@ -372,6 +380,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder              |
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time     |
 | `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source` |
+| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`             | `expect` value doesn't match invoke stdout  |
 
 ### Client errors
 
@@ -421,6 +430,10 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 12. **`caatinga doctor` deploy coverage is advisory** — never blocks exit code.
 13. **Stellar CLI compatibility** — hard floor 23.0.0, last tested 25.2.0. Newer versions produce advisory warnings only.
 14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
+15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
+16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
+17. **`postDeploy` expect** — if `expect` is set, stdout is compared; mismatch throws `CAATINGA_POST_DEPLOY_VERIFY_FAILED`. Supports `${source.address}` and `${contracts.*.contractId}` placeholders.
+18. **`frontend.env` suffixes** — env map keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, `.wasmPath` suffixes for artifact field sync.
 
 ---
 
