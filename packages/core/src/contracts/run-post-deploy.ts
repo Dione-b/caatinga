@@ -82,7 +82,7 @@ export async function runPostDeployHooks(
       );
     }
 
-    const hookSource = hook.source ?? source;
+    const hookSource = hook.source ? assertSafeSourceAccount(hook.source) : source;
 
     const resolvedArgs = await resolveDeployArgs({
       deployArgs: hook.args,

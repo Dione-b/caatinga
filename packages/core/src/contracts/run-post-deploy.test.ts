@@ -150,6 +150,24 @@ describe("runPostDeployHooks", () => {
     expect(calls[0][1]).toContain("alice");
   });
 
+  it("should_throw_when_hook_source_is_a_secret_key", async () => {
+    const configWithBadSource: CaatingaConfig = {
+      ...config,
+      postDeploy: [
+        { contract: "coin", method: "set_minter", args: {}, source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123" },
+      ],
+    };
+
+    await expect(
+      runPostDeployHooks({
+        config: configWithBadSource,
+        source: "alice",
+        cwd: tmpDir,
+        hookRetryDelaysMs: [0],
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.SOURCE_IS_SECRET_KEY });
+  });
+
   it("should_not_retry_hook_when_failure_is_not_transient", async () => {
     runCommand.mockImplementation(async (command: string, args: string[]) => {
       if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
