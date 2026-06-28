@@ -1,5 +1,11 @@
 ## Breaking changes policy
 
+## 3.6.1
+
+### Patch Changes
+
+- bump Stellar CLI last-tested to 27.0.0
+
 ## 3.6.0
 
 ### Minor Changes

@@ -8,7 +8,7 @@ Run through each item; `caatinga doctor` covers several automatically.
 
 | #   | Check                                               | Command / doc                                                                                                |
 | --- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (25.2.0 recommended) | `caatinga doctor`                                                                                            |
+| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (27.0.0 recommended) | `caatinga doctor`                                                                                            |
 | 2   | `@stellar/stellar-sdk` within supported range       | `caatinga doctor` (SDK diagnostic)                                                                           |
 | 3   | Signing identity funded and correct network         | `caatinga doctor --source <alias> --network <net>`                                                           |
 | 4   | All configured contracts deployed on target network | `caatinga status --network <net>`                                                                            |
@@ -51,7 +51,7 @@ flowchart TD
   status --> commit
 ```
 
-1. Pin Stellar CLI `25.2.0` and `@stellar/stellar-sdk ^16.0.1` in CI and locally.
+1. Pin Stellar CLI `27.0.0` and `@stellar/stellar-sdk ^16.0.1` in CI and locally.
 2. Run `caatinga doctor` on every PR that touches contracts.
 3. Estimate fees before mainnet deploys.
 4. Commit `caatinga.artifacts.json` after every deploy.

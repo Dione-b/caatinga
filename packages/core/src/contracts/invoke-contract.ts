@@ -86,7 +86,7 @@ export async function invokeContract(options: InvokeContractOptions) {
         error.code,
         [
           "Stellar CLI could not sign the invoke transaction (xdr value invalid).",
-          "Stellar CLI 22.x has a known invoke signing bug; upgrade to 23.0.0 or newer (25.2.0 recommended).",
+          "Stellar CLI 22.x has a known invoke signing bug; upgrade to 23.0.0 or newer (27.0.0 recommended).",
           "  stellar --version",
           "Then retry with a funded identity, for example:",
           "  stellar keys generate alice --fund --network testnet",

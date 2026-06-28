@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 3.6.1
+
+### Patch Changes
+
+- bump Stellar CLI last-tested to 27.0.0
+- Updated dependencies
+  - @caatinga/core@3.6.1
+  - @caatinga/zk@3.6.1
+
 ## 3.6.0
 
 ### Patch Changes

@@ -4,7 +4,7 @@ import { STELLAR_CLI_MIN_VERSION } from "./version.js";
 
 export { STELLAR_CLI_MIN_VERSION, parseStellarCliVersion } from "./version.js";
 
-export const STELLAR_CLI_LAST_TESTED_VERSION = "25.2.0";
+export const STELLAR_CLI_LAST_TESTED_VERSION = "27.0.0";
 
 export type CompatibilityStatus = "supported" | "untested" | "unsupported";
 

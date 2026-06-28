@@ -29,7 +29,7 @@ jobs:
           cache: pnpm
 
       - name: Install Stellar CLI
-        uses: stellar/stellar-cli@v25.2.0
+        uses: stellar/stellar-cli@v27.0.0
 
       - name: Verify Stellar CLI version
         run: stellar --version
@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stellar-version: ["23.0.0", "23.4.1", "25.2.0"]
+        stellar-version: ["23.0.0", "25.2.0", "27.0.0"]
 
     steps:
       - name: Checkout

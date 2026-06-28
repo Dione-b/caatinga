@@ -41,7 +41,7 @@ Live testnet smoke uses `CAATINGA_CI_IDENTITY_ALIAS` and `CAATINGA_CI_STELLAR_CO
 
 ### Stellar CLI config blob format
 
-With Stellar CLI `25.2.0`, the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
+With Stellar CLI `27.0.0`, the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
 
 To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
 

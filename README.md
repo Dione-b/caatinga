@@ -224,12 +224,12 @@ The Stellar CLI is the foundation — you keep using it. Caatinga adds the workf
 ## 📋 Requirements
 
 - **Node.js** 22+
-- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on your `PATH` _(25.2.0 recommended; 22.x unsupported)_
+- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on your `PATH` _(27.0.0 recommended; 22.x unsupported)_
 - **Rust** 1.84.0+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)
 
 ```bash
-cargo install --locked stellar-cli --version 25.2.0
+cargo install --locked stellar-cli --version 27.0.0
 rustup target add wasm32v1-none
 stellar keys generate alice --fund --network testnet
 ```
@@ -240,7 +240,7 @@ stellar keys generate alice --fund --network testnet
 <br />
 
 Caatinga hard-fails on Stellar CLI versions below `23.0.0` (`CAATINGA_UNSUPPORTED_CLI_VERSION`).
-Versions newer than the last-tested `25.2.0` run with a non-fatal stderr advisory and a `caatinga doctor` warning — no override flag required.
+Versions newer than the last-tested `27.0.0` run with a non-fatal stderr advisory and a `caatinga doctor` warning — no override flag required.
 See the [version contract](./docs/stellar-cli-version-contract.md).
 
 </details>

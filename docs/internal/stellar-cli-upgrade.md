@@ -10,7 +10,7 @@
 
 ## CI Rule
 
-CI installs Stellar CLI via `stellar/stellar-cli@v25.2.0` in `.github/workflows/ci.yml` for the main test job (adjust
+CI installs Stellar CLI via `stellar/stellar-cli@v27.0.0` in `.github/workflows/ci.yml` for the main test job (adjust
 the tag when raising `STELLAR_CLI_LAST_TESTED_VERSION`).
 
-A separate **`stellar-cli-matrix`** job installs `23.0.0`, `24.0.0`, and `25.2.0` and runs live capability probes plus parser fixture matrix tests (`stellar-cli-fixture-matrix.test.ts`). Parser fixture tests also run on every push in the main `ci` job.
+A separate **`stellar-cli-matrix`** job installs `23.0.0`, `25.2.0`, and `27.0.0` and runs live capability probes plus parser fixture matrix tests (`stellar-cli-fixture-matrix.test.ts`). Parser fixture tests also run on every push in the main `ci` job.

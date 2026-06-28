@@ -27,7 +27,7 @@ rustup target add wasm32v1-none
 stellar keys generate alice --fund --network testnet
 ```
 
-Stellar CLI versions newer than the last-tested `25.2.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning; no override flag is required.
+Stellar CLI versions newer than the last-tested `27.0.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning; no override flag is required.
 
 ## Quick start
 
