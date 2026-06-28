@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 3.6.0
+
+### Patch Changes
+
+- Updated dependencies [cfac892]
+  - @caatinga/core@3.6.0
+
 ## 3.5.1
 
 ### Patch Changes
