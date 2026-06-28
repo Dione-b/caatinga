@@ -45,12 +45,13 @@ Root config:
 
 `ContractConfig` (each value in `contracts`):
 
-| Field        | Type                                          | Required | Default | Notes                                   |
-| ------------ | --------------------------------------------- | -------- | ------- | --------------------------------------- |
-| `path`       | string (min 1)                                | yes      | —       | contract source directory               |
-| `wasm`       | string (min 1)                                | yes      | —       | compiled WASM path                      |
-| `dependsOn`  | `string[]`                                    | no       | `[]`    | contract names deployed first           |
-| `deployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | constructor args; supports placeholders |
+| Field          | Type                                          | Required | Default | Notes                                                  |
+| -------------- | --------------------------------------------- | -------- | ------- | ------------------------------------------------------ |
+| `path`         | string (min 1)                                | yes      | —       | contract source directory                              |
+| `wasm`         | string (min 1)                                | yes      | —       | compiled WASM path                                     |
+| `buildFeatures`| `string[]`                                    | no       | —       | Cargo features passed to `stellar contract build`      |
+| `dependsOn`    | `string[]`                                    | no       | `[]`    | contract names deployed first                          |
+| `deployArgs`   | `Record<string, string \| number \| boolean>` | no       | `{}`    | constructor args; supports placeholders                |
 
 `FrontendConfig` (optional root `frontend` field):
 
@@ -69,11 +70,13 @@ Root config:
 
 Each `postDeploy` entry:
 
-| Field      | Type                                          | Required | Notes                                          |
-| ---------- | --------------------------------------------- | -------- | ---------------------------------------------- |
-| `contract` | string (min 1)                                | yes      | configured contract name                       |
-| `method`   | string (min 1)                                | yes      | Soroban method to invoke                       |
-| `args`     | `Record<string, string \| number \| boolean>` | no       | supports the same placeholders as `deployArgs` |
+| Field      | Type                                          | Required | Notes                                                              |
+| ---------- | --------------------------------------------- | -------- | ------------------------------------------------------------------ |
+| `contract` | string (min 1)                                | yes      | configured contract name                                           |
+| `method`   | string (min 1)                                | yes      | Soroban method to invoke                                           |
+| `args`     | `Record<string, string \| number \| boolean>` | no       | supports the same placeholders as `deployArgs`                     |
+| `source`   | string (min 1)                                | no       | override `--source` for this hook (validated via `assertSafeSourceAccount`) |
+| `expect`   | string                                        | no       | expected stdout; throws `POST_DEPLOY_VERIFY_FAILED` on mismatch    |
 
 `NetworkConfig` (each value in `networks`):
 
