@@ -154,7 +154,12 @@ describe("runPostDeployHooks", () => {
     const configWithBadSource: CaatingaConfig = {
       ...config,
       postDeploy: [
-        { contract: "coin", method: "set_minter", args: {}, source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123" },
+        {
+          contract: "coin",
+          method: "set_minter",
+          args: {},
+          source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123",
+        },
       ],
     };
 

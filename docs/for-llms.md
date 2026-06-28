@@ -380,7 +380,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder              |
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time     |
 | `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source` |
-| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`             | `expect` value doesn't match invoke stdout  |
+| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` value doesn't match invoke stdout  |
 
 ### Client errors
 

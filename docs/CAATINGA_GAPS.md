@@ -149,6 +149,7 @@ postDeploy: [
 ```
 
 **Limitação restante:**
+
 - `accept_admin` requer delay de 24h e assinatura de chave diferente — não automatizável via `postDeploy`.
 
 ---
