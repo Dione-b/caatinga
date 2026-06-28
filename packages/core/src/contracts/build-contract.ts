@@ -47,8 +47,7 @@ export async function buildContract(options: BuildContractOptions) {
 
   let result;
   try {
-    const contractConfig = options.config.contracts[options.contractName];
-    const buildArgs = ["contract", "build", ...(contractConfig.buildFeatures ?? [])];
+    const buildArgs = ["contract", "build", ...(contract.config.buildFeatures ?? [])];
     result = await runCommand("stellar", buildArgs, {
       cwd: contract.sourcePath,
       failureCode: CaatingaErrorCode.BUILD_FAILED,
