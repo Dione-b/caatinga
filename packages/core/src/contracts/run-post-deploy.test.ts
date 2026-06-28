@@ -130,13 +130,10 @@ describe("runPostDeployHooks", () => {
 
     expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
 
-    const invokeCalls = runCommand.mock.calls.filter(
-      ([command, args]: [string, string[]]) =>
-        command === "stellar" && args[0] === "contract" && args[1] === "invoke"
-    );
-    expect(invokeCalls).toHaveLength(1);
-    expect(invokeCalls[0][1]).toContain("--source-account");
-    expect(invokeCalls[0][1]).toContain("issuer");
+    const calls = invokeCalls();
+    expect(calls).toHaveLength(1);
+    expect(calls[0][1]).toContain("--source-account");
+    expect(calls[0][1]).toContain("issuer");
   });
 
   it("should_fallback_to_cli_source_when_hook_source_is_omitted", async () => {
@@ -149,13 +146,10 @@ describe("runPostDeployHooks", () => {
 
     expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
 
-    const invokeCalls = runCommand.mock.calls.filter(
-      ([command, args]: [string, string[]]) =>
-        command === "stellar" && args[0] === "contract" && args[1] === "invoke"
-    );
-    expect(invokeCalls).toHaveLength(1);
-    expect(invokeCalls[0][1]).toContain("--source-account");
-    expect(invokeCalls[0][1]).toContain("alice");
+    const calls = invokeCalls();
+    expect(calls).toHaveLength(1);
+    expect(calls[0][1]).toContain("--source-account");
+    expect(calls[0][1]).toContain("alice");
   });
 
   it("should_not_retry_hook_when_failure_is_not_transient", async () => {
