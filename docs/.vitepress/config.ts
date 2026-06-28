@@ -15,6 +15,7 @@ export default withMermaid(
         { text: "Guide", link: "/getting-started" },
         { text: "Reference", link: "/cli" },
         { text: "AI agents", link: "/tutorials/integration-guide" },
+        { text: "AI Reference", link: "/for-llms" },
         {
           text: "GitHub",
           link: "https://github.com/Dione-b/caatinga",
