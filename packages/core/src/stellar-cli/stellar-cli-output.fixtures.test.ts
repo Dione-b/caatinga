@@ -22,4 +22,16 @@ describe("stellar CLI output fixtures", () => {
 
     expect(output).toMatch(/bindings/i);
   });
+
+  it("should_keep_v27_invoke_success_fixture", async () => {
+    const output = await fixture("v27.0.0/invoke-success.txt");
+
+    expect(output.trim().length).toBeGreaterThan(0);
+  });
+
+  it("should_keep_v27_bindings_success_fixture", async () => {
+    const output = await fixture("v27.0.0/bindings-success.txt");
+
+    expect(output).toMatch(/bindings/i);
+  });
 });

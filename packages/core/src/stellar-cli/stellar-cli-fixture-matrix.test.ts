@@ -38,9 +38,15 @@ const MATRIX: MatrixEntry[] = [
   },
   {
     version: "26.0.0",
-    status: "untested",
+    status: "supported",
     versionFixture: "v26.0.0/version.txt",
     deployFixture: "v26.0.0/deploy-success.txt",
+  },
+  {
+    version: "27.0.0",
+    status: "last-tested",
+    versionFixture: "v27.0.0/version.txt",
+    deployFixture: "v27.0.0/deploy-success.txt",
   },
 ];
 

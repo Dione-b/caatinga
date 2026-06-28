@@ -276,20 +276,20 @@ describe("installStellarCliStep", () => {
   beforeEach(resetMocks);
 
   it("should_skip_install_when_stellar_cli_meets_minimum", async () => {
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     const result = await installStellarCliStep();
 
     expect(result.ok).toBe(true);
     expect(result.skipped).toBe(true);
-    expect(result.label).toContain("25.2.0");
+    expect(result.label).toContain("27.0.0");
     expect(execaMock).not.toHaveBeenCalled();
   });
 
   it("should_install_pinned_version_when_not_found", async () => {
     checkStellarCliVersionMock
       .mockRejectedValueOnce(new Error("stellar not found"))
-      .mockResolvedValueOnce({ version: "25.2.0" });
+      .mockResolvedValueOnce({ version: "27.0.0" });
 
     execaMock.mockResolvedValueOnce({});
 
@@ -299,7 +299,7 @@ describe("installStellarCliStep", () => {
     expect(result.installed).toBe(true);
     expect(execaMock).toHaveBeenCalledWith(
       "cargo",
-      ["install", "--locked", "stellar-cli", "--version", "25.2.0"],
+      ["install", "--locked", "stellar-cli", "--version", "27.0.0"],
       { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
@@ -314,7 +314,7 @@ describe("installStellarCliStep", () => {
           "Install Stellar CLI 23.0.0 or newer."
         )
       )
-      .mockResolvedValueOnce({ version: "25.2.0" });
+      .mockResolvedValueOnce({ version: "27.0.0" });
 
     execaMock.mockResolvedValueOnce({});
 
@@ -324,7 +324,7 @@ describe("installStellarCliStep", () => {
     expect(result.installed).toBe(true);
     expect(execaMock).toHaveBeenCalledWith(
       "cargo",
-      ["install", "--locked", "stellar-cli", "--version", "25.2.0"],
+      ["install", "--locked", "stellar-cli", "--version", "27.0.0"],
       { stdio: "inherit", env: {}, cancelSignal: expect.any(AbortSignal) }
     );
   });
@@ -417,7 +417,7 @@ describe("runSetup", () => {
       // stellar keys public-key alice
       .mockResolvedValueOnce({ stdout: "GABC...", stderr: "", all: "" });
     // stellar CLI version check
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {
@@ -460,7 +460,7 @@ describe("runSetup", () => {
       .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" })
       // identity already exists
       .mockResolvedValueOnce({ stdout: "GABC...", stderr: "", all: "" });
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     // Mock https.get for rustup download
     const testScript = "#!/bin/sh\necho installing rustup";
@@ -531,7 +531,7 @@ describe("runSetup", () => {
     runCommandMock
       .mockResolvedValueOnce({ stdout: "rustc 1.87.0", stderr: "", all: "" })
       .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" });
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     const events: { step: number; title: string; status: string }[] = [];
     const onProgress = (event: { step: number; total: number; title: string; status: string }) => {
@@ -568,7 +568,7 @@ describe("registerSetupCommand", () => {
       .mockResolvedValueOnce({ stdout: "rustc 1.87.0", stderr: "", all: "" })
       .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" })
       .mockResolvedValueOnce({ stdout: "GABC...", stderr: "", all: "" });
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {
@@ -584,7 +584,7 @@ describe("registerSetupCommand", () => {
     runCommandMock
       .mockResolvedValueOnce({ stdout: "rustc 1.87.0", stderr: "", all: "" })
       .mockResolvedValueOnce({ stdout: "wasm32v1-none", stderr: "", all: "" });
-    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "25.2.0" });
+    checkStellarCliVersionMock.mockResolvedValueOnce({ version: "27.0.0" });
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {

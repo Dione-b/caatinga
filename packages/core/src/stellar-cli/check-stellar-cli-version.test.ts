@@ -51,9 +51,9 @@ describe("checkStellarCliVersion", () => {
 
   it("writes the default warning to stderr when no hook is provided", async () => {
     runCommandMock.mockResolvedValueOnce({
-      stdout: "stellar 26.0.0",
+      stdout: "stellar 28.0.0",
       stderr: "",
-      all: "stellar 26.0.0",
+      all: "stellar 28.0.0",
     });
 
     const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
@@ -63,7 +63,7 @@ describe("checkStellarCliVersion", () => {
       expect(report.status).toBe("untested");
       expect(stderrSpy).toHaveBeenCalled();
       const payload = stderrSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(payload).toContain("Stellar CLI 26.0.0");
+      expect(payload).toContain("Stellar CLI 28.0.0");
     } finally {
       stderrSpy.mockRestore();
     }

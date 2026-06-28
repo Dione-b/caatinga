@@ -112,10 +112,10 @@ Cada subdiretório de `packages/core/src/` é uma camada com responsabilidade is
 
 ### Contrato de versão da CLI (v2.0.0)
 
-Comportamento **feature-aware** (substituiu o lock rígido `23.0.0–25.2.0`):
+Comportamento **feature-aware** (substituiu o lock rígido `23.0.0–27.0.0`):
 
 - **Floor rígido `23.0.0`** — única falha fatal. Versões abaixo: `CAATINGA_UNSUPPORTED_CLI_VERSION`. `22.x` não é suportado.
-- **Última versão testada** (`25.2.0`) — agora apenas advisory. Versões mais novas rodam com aviso não-fatal no stderr e warning no `caatinga doctor`. Sem flag de override.
+- **Última versão testada** (`27.0.0`) — agora apenas advisory. Versões mais novas rodam com aviso não-fatal no stderr e warning no `caatinga doctor`. Sem flag de override.
 - API exposta em `@caatinga/core`: `evaluateStellarCliCompatibility`, `checkStellarCliVersion`.
 - Removidos: `STELLAR_CLI_TESTED_MAX_VERSION`, `assertSupportedStellarCliVersion`, `CAATINGA_UNTESTED_CLI_VERSION`, flag `--allow-untested-stellar-cli`, campo `allowUntestedStellarCli`.
 
@@ -124,7 +124,7 @@ Detalhe completo: `docs/stellar-cli-version-contract.md`.
 ### Requisitos de ambiente
 
 - Node.js 22+
-- Stellar CLI 23.0.0+ no PATH (25.2.0 recomendado)
+- Stellar CLI 23.0.0+ no PATH (27.0.0 recomendado)
 - Rust 1.84.0+ com target `wasm32v1-none`
 - Identidade local financiada na CLI Stellar (ex.: `alice`)
 

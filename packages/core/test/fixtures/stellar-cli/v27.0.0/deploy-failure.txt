@@ -1,0 +1,2 @@
+error: transaction simulation failed
+diagnostic: host error: Error(Contract, #1)

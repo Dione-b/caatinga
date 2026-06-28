@@ -10,7 +10,7 @@ Install Node.js 22+ and Rust first. Then install the supported Stellar CLI and W
 
 ```bash
 npm install -g @caatinga/cli@next
-cargo install --locked stellar-cli --version 25.2.0
+cargo install --locked stellar-cli --version 27.0.0
 rustup target add wasm32v1-none
 stellar --version
 rustc --version
@@ -55,7 +55,7 @@ Expected shape:
 Caatinga Doctor
 
 ✓ Node.js 22
-✓ Stellar CLI 25.2.0
+✓ Stellar CLI 27.0.0
 ✓ Rust 1.84.0
 ✓ wasm32v1-none target installed
 ✓ caatinga.config.ts found
@@ -75,7 +75,7 @@ semantics.
 If Stellar CLI is missing, install it:
 
 ```bash
-cargo install --locked stellar-cli --version 25.2.0
+cargo install --locked stellar-cli --version 27.0.0
 ```
 
 If the Wasm target is missing, install it:
@@ -172,7 +172,7 @@ default template, see [Wallets](../wallets.md).
   If you have `CARGO_TARGET_DIR` set, Stellar CLI writes the Wasm under that directory instead of `contracts/<name>/target`. Caatinga `2.4.1+` resolves the Wasm from `CARGO_TARGET_DIR` automatically, but if it still fails, unset `CARGO_TARGET_DIR` or update the `wasm` path in `caatinga.config.ts`.
 - Partial deploy coverage: `caatinga doctor` prints missing `contractId`s as an advisory section (exit code stays `0` when the toolchain is ready). Run the `caatinga deploy` commands it suggests before invoke/read on testnet.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
-- `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0 or newer (25.2.0 recommended). Versions newer than the last-tested 25.2.0 run with a non-fatal stderr advisory; no override flag is required.
+- `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0 or newer (27.0.0 recommended). Versions newer than the last-tested 27.0.0 run with a non-fatal stderr advisory; no override flag is required.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.
 - `CAATINGA_NETWORK_NOT_FOUND`: add the network to `caatinga.config.ts` or pass a configured `--network`.
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT`: pass a local Stellar CLI identity such as `alice`, not a public `G...` address or secret.

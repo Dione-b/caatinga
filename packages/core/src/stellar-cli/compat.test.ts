@@ -10,17 +10,17 @@ import {
 describe("evaluateStellarCliCompatibility", () => {
   it("declares the hard floor and the advisory last-tested version", () => {
     expect(STELLAR_CLI_MIN_VERSION).toBe("23.0.0");
-    expect(STELLAR_CLI_LAST_TESTED_VERSION).toBe("25.2.0");
+    expect(STELLAR_CLI_LAST_TESTED_VERSION).toBe("27.0.0");
   });
 
   it("returns supported with no warnings for the last-tested version", () => {
-    const report = evaluateStellarCliCompatibility({ version: "25.2.0" });
+    const report = evaluateStellarCliCompatibility({ version: "27.0.0" });
 
     expect(report).toEqual({
-      version: "25.2.0",
+      version: "27.0.0",
       status: "supported",
       minVersion: "23.0.0",
-      lastTestedVersion: "25.2.0",
+      lastTestedVersion: "27.0.0",
       warnings: [],
     });
   });
@@ -33,19 +33,19 @@ describe("evaluateStellarCliCompatibility", () => {
   });
 
   it("returns untested with a warning for a version above the last-tested", () => {
-    const report = evaluateStellarCliCompatibility({ version: "26.0.0" });
+    const report = evaluateStellarCliCompatibility({ version: "28.0.0" });
 
     expect(report.status).toBe("untested");
     expect(report.warnings).toEqual([
       expect.objectContaining({
         code: "STELLAR_CLI_UNTESTED_VERSION",
-        message: expect.stringContaining("Stellar CLI 26.0.0 is newer than the last-tested 25.2.0"),
+        message: expect.stringContaining("Stellar CLI 28.0.0 is newer than the last-tested 27.0.0"),
       }),
     ]);
   });
 
   it("returns untested for the adjacent version above the last-tested", () => {
-    const report = evaluateStellarCliCompatibility({ version: "25.2.1" });
+    const report = evaluateStellarCliCompatibility({ version: "27.0.1" });
 
     expect(report.status).toBe("untested");
     expect(report.warnings[0]?.code).toBe("STELLAR_CLI_UNTESTED_VERSION");

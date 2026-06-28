@@ -1,0 +1,3 @@
+stellar contract deploy --wasm target/wasm32v1-none/release/counter.wasm
+Contract deployed successfully.
+Contract ID: CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA

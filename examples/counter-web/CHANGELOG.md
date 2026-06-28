@@ -1,5 +1,21 @@
 # counter-web
 
+## 0.0.22
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.6.1
+  - @caatinga/client@3.6.1
+
+## 0.0.21
+
+### Patch Changes
+
+- Updated dependencies [cfac892]
+  - @caatinga/core@3.6.0
+  - @caatinga/client@3.6.0
+
 ## 0.0.20
 
 ### Patch Changes

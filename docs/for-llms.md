@@ -428,7 +428,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 10. **`caatinga.artifacts.json` is git-versioned** — the artifacts file stays in your repo even if you stop using Caatinga.
 11. **Binding freshness** is tracked by `.caatinga-bindings.json` marker. States: `fresh`, `stale`, `missing`, `unknown`.
 12. **`caatinga doctor` deploy coverage is advisory** — never blocks exit code.
-13. **Stellar CLI compatibility** — hard floor 23.0.0, last tested 25.2.0. Newer versions produce advisory warnings only.
+13. **Stellar CLI compatibility** — hard floor 23.0.0, last tested 27.0.0. Newer versions produce advisory warnings only.
 14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
 15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
 16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).

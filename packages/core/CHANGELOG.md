@@ -1,5 +1,23 @@
 ## Breaking changes policy
 
+## 3.6.1
+
+### Patch Changes
+
+- bump Stellar CLI last-tested to 27.0.0
+
+## 3.6.0
+
+### Minor Changes
+
+- cfac892: Add Radox gap resolution features:
+
+  - `buildFeatures` per contract for Cargo feature gates
+  - `.wasmHash` suffix in `frontend.env` mappings for WASM hash sync
+  - `source` override per `postDeploy` hook
+  - `expect` assertion in `postDeploy` hooks with `POST_DEPLOY_VERIFY_FAILED` error
+  - Validate per-hook `source` through `assertSafeSourceAccount`
+
 ## 3.5.1
 
 ### Patch Changes

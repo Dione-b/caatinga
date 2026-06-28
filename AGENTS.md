@@ -50,7 +50,7 @@ Highlights from the `3.0.0` line:
 
 Highlights from the `2.x` line:
 
-- Replaces the hard Stellar CLI upper bound (`25.2.0`) with a feature-aware
+- Replaces the hard Stellar CLI upper bound (`27.0.0`) with a feature-aware
   compatibility check: the hard floor (`23.0.0`) is the only hard failure, and the
   last-tested version is now advisory. See `docs/stellar-cli-version-contract.md`.
 - `2.4.5`: feedback fixes — `--source` on `zk invoke`, multi-contract `build`, embedded VK generation, `CAATINGA_ZK_VERIFICATION_FAILED`
