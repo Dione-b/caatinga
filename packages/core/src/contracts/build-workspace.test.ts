@@ -62,4 +62,38 @@ describe("buildWorkspace", () => {
     );
     warnSpy.mockRestore();
   });
+
+  it("should_not_warn_when_buildFeatures_is_absent", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-ws-"));
+    const wasmPath = path.join(tmpDir, "target", "wasm32v1-none", "release", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from([0x00, 0x61, 0x73, 0x6d]), "binary");
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const config: CaatingaConfig = {
+      project: "app",
+      defaultNetwork: "testnet",
+      buildRoot: ".",
+      contracts: {
+        counter: {
+          path: "./contracts/counter",
+          wasm: "./target/wasm32v1-none/release/counter.wasm",
+          dependsOn: [],
+          deployArgs: {},
+        },
+      },
+      networks: {
+        testnet: {
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
+      },
+    };
+
+    await buildWorkspace({ config, cwd: tmpDir });
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });
