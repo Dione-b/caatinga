@@ -82,11 +82,13 @@ export async function runPostDeployHooks(
       );
     }
 
+    const hookSource = hook.source ?? source;
+
     const resolvedArgs = await resolveDeployArgs({
       deployArgs: hook.args,
       artifacts,
       network: network.name,
-      source,
+      source: hookSource,
       cwd,
     });
 
@@ -115,7 +117,7 @@ export async function runPostDeployHooks(
             "--id",
             contractArtifact.contractId,
             "--source-account",
-            source,
+            hookSource,
             ...buildStellarNetworkArgs(network),
             "--",
             hook.method,

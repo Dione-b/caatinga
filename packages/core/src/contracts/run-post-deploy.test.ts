@@ -48,7 +48,12 @@ describe("runPostDeployHooks", () => {
 
   beforeEach(async () => {
     runCommand.mockReset();
-    runCommand.mockResolvedValue({ stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" });
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: "", stderr: "", all: "" };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
 
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-wire-"));
     await mkdir(path.join(tmpDir, "rel"), { recursive: true });
@@ -106,6 +111,51 @@ describe("runPostDeployHooks", () => {
     expect(result).toEqual([{ contract: "coin", method: "set_minter", result: "ok" }]);
     expect(invokeCalls()).toHaveLength(2);
     expect(retries).toEqual([{ attempt: 1, maxAttempts: 2, delayMs: 0 }]);
+  });
+
+  it("should_use_hook_source_override_when_provided", async () => {
+    const configWithSourceOverride: CaatingaConfig = {
+      ...config,
+      postDeploy: [
+        { contract: "coin", method: "set_minter", args: {}, source: "issuer" },
+      ],
+    };
+
+    const result = await runPostDeployHooks({
+      config: configWithSourceOverride,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+
+    const invokeCalls = runCommand.mock.calls.filter(
+      ([command, args]: [string, string[]]) =>
+        command === "stellar" && args[0] === "contract" && args[1] === "invoke"
+    );
+    expect(invokeCalls).toHaveLength(1);
+    expect(invokeCalls[0][1]).toContain("--source-account");
+    expect(invokeCalls[0][1]).toContain("issuer");
+  });
+
+  it("should_fallback_to_cli_source_when_hook_source_is_omitted", async () => {
+    const result = await runPostDeployHooks({
+      config,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+
+    const invokeCalls = runCommand.mock.calls.filter(
+      ([command, args]: [string, string[]]) =>
+        command === "stellar" && args[0] === "contract" && args[1] === "invoke"
+    );
+    expect(invokeCalls).toHaveLength(1);
+    expect(invokeCalls[0][1]).toContain("--source-account");
+    expect(invokeCalls[0][1]).toContain("alice");
   });
 
   it("should_not_retry_hook_when_failure_is_not_transient", async () => {
