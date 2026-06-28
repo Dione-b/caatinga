@@ -153,6 +153,27 @@ export async function runPostDeployHooks(
       }
     }
 
+    if (hook.expect !== undefined) {
+      const resolvedExpect = await resolveDeployArgs({
+        deployArgs: { expected: hook.expect },
+        artifacts,
+        network: network.name,
+        source: hookSource,
+        cwd,
+      });
+
+      const actual = (result.stdout || result.all || "").trim();
+      const expected = String(resolvedExpect.expected).trim();
+
+      if (actual !== expected) {
+        throw new CaatingaError(
+          `Post-deploy verification failed for "${hook.contract}.${hook.method}".`,
+          CaatingaErrorCode.POST_DEPLOY_VERIFY_FAILED,
+          `Expected "${expected}" but got "${actual}".`
+        );
+      }
+    }
+
     results.push({
       contract: hook.contract,
       method: hook.method,
