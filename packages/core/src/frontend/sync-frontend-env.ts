@@ -17,6 +17,7 @@ export type SyncFrontendEnvResult = {
 };
 
 const NETWORK_ENV_KEYS = new Set(["rpcUrl", "networkPassphrase"]);
+const WASM_HASH_PATTERN = /^(.+)\.wasmHash$/;
 
 function formatEnvValue(value: string): string {
   if (/[;\s]/.test(value)) {
@@ -67,15 +68,19 @@ export async function syncFrontendEnv(
         "Use rpcUrl or networkPassphrase for network values."
       );
     } else {
-      const contractArtifact = networkArtifacts.contracts[sourceKey];
+      const wasmHashMatch = sourceKey.match(WASM_HASH_PATTERN);
+      const lookupKey = wasmHashMatch ? wasmHashMatch[1] : sourceKey;
+
+      const contractArtifact = networkArtifacts.contracts[lookupKey];
       if (!contractArtifact?.contractId) {
         throw new CaatingaError(
-          `No deployed artifact found for "${sourceKey}" on "${network.name}".`,
+          `No deployed artifact found for "${lookupKey}" on "${network.name}".`,
           CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-          `Deploy ${sourceKey} before running caatinga sync-env.`
+          `Deploy ${lookupKey} before running caatinga sync-env.`
         );
       }
-      value = contractArtifact.contractId;
+
+      value = wasmHashMatch ? contractArtifact.wasmHash : contractArtifact.contractId;
     }
 
     entries.push({ key: envKey, value });
