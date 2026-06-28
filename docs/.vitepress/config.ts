@@ -64,6 +64,7 @@ export default withMermaid(
             { text: "Errors", link: "/errors" },
             { text: "ZK module", link: "/zk" },
             { text: "Soroban types", link: "/soroban-types" },
+            { text: "AI Reference (for-llms)", link: "/for-llms" },
           ],
         },
         {
