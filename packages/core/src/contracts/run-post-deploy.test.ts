@@ -116,9 +116,7 @@ describe("runPostDeployHooks", () => {
   it("should_use_hook_source_override_when_provided", async () => {
     const configWithSourceOverride: CaatingaConfig = {
       ...config,
-      postDeploy: [
-        { contract: "coin", method: "set_minter", args: {}, source: "issuer" },
-      ],
+      postDeploy: [{ contract: "coin", method: "set_minter", args: {}, source: "issuer" }],
     };
 
     const result = await runPostDeployHooks({
@@ -186,9 +184,7 @@ describe("runPostDeployHooks", () => {
 
     const configWithExpect: CaatingaConfig = {
       ...config,
-      postDeploy: [
-        { contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" },
-      ],
+      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
     };
 
     const result = await runPostDeployHooks({
@@ -198,9 +194,7 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([
-      { contract: "coin", method: "get_admin", result: "CADMINADDRESS123" },
-    ]);
+    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: "CADMINADDRESS123" }]);
   });
 
   it("should_throw_when_expect_does_not_match_invoke_output", async () => {
@@ -213,9 +207,7 @@ describe("runPostDeployHooks", () => {
 
     const configWithExpect: CaatingaConfig = {
       ...config,
-      postDeploy: [
-        { contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" },
-      ],
+      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
     };
 
     await expect(
@@ -255,8 +247,6 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([
-      { contract: "coin", method: "get_admin", result: ALICE_ADDRESS },
-    ]);
+    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: ALICE_ADDRESS }]);
   });
 });

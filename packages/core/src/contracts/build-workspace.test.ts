@@ -57,9 +57,7 @@ describe("buildWorkspace", () => {
 
     await buildWorkspace({ config, cwd: tmpDir });
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("buildFeatures")
-    );
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("buildFeatures"));
     warnSpy.mockRestore();
   });
 

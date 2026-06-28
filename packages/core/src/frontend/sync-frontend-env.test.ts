@@ -173,9 +173,9 @@ describe("syncFrontendEnv", () => {
       cwd
     );
 
-    await expect(
-      syncFrontendEnv({ config: badConfig, cwd })
-    ).rejects.toMatchObject({ code: CaatingaErrorCode.ARTIFACT_NOT_FOUND });
+    await expect(syncFrontendEnv({ config: badConfig, cwd })).rejects.toMatchObject({
+      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
+    });
   });
 
   it("fails when frontend env sync is not configured", async () => {
