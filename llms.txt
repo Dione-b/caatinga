@@ -1,6 +1,6 @@
 # Caatinga
 
-> Soroban deploy artifacts + TypeScript-native CLI. From init to wallet-ready browser client — git-driven, npm-first, no mandatory registry.
+> Git-versioned Soroban deploy artifacts and multi-contract orchestration for TypeScript teams.
 
 ## Core docs
 
@@ -14,7 +14,7 @@
 - [Cheatsheet](docs/cheatsheet.md): Command loop, flags, binding freshness — all on one page.
 - [Packages](docs/packages.md): `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk` — subpath exports.
 - [ZK module](docs/zk.md): Circom Groth16 — BLS12-381, dev ceremony, proof, on-chain verification.
-- [LLM reference](docs/for-llms.md): Self-contained reference for LLM consumption.
+- [LLM reference](docs/for-llms.md): Self-contained reference for agents (also at `/llms-full.txt`).
 
 ## Tutorials
 
@@ -24,7 +24,10 @@
 - [ZK project](docs/tutorials/zk-project.md): ZK dApp with Circom/Groth16.
 - [Project scaffolds comparison](docs/tutorials/project-scaffolds.md): When to use each path.
 - [Multi-contract case study](docs/case-studies/stellar-album.md): dependsOn, postDeploy, wire, sync-env.
+- [stellar-build integration](docs/tutorials/integration-guide.md): Optional agent workflow for Claude Code / Codex.
 
 ## Full reference
 
-For a self-contained reference covering all APIs, schemas, commands, and error codes in a single document, see [docs/for-llms.md](docs/for-llms.md).
+Self-contained API/schema/command/error reference: [docs/for-llms.md](docs/for-llms.md) or [llms-full.txt](llms-full.txt).
+
+Install: `npm install -g @caatinga/cli` (latest **3.6.1**). Alpha pre-1.0 — pin exact versions in CI.

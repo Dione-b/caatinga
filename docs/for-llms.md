@@ -1,8 +1,31 @@
-# Caatinga — AI-Optimized Reference
+# Caatinga — LLM Reference
 
-Caatinga is a **TypeScript-native CLI and browser toolkit** for Soroban smart contract deployment and dApp development on Stellar. It manages the full lifecycle: scaffold, build, deploy, generate TypeScript bindings, invoke, and wire browser clients — all git-driven, npm-first, with no mandatory registry.
+Caatinga is a TypeScript CLI and browser toolkit for Soroban on Stellar. It orchestrates scaffold → build → deploy → binding generation → invoke/read, with git-versioned `caatinga.artifacts.json` and no mandatory registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
 
-Equivalent content available at [`/llms-full.txt`](../llms-full.txt).
+Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/).
+
+## Install & release
+
+| Item | Value |
+| ---- | ----- |
+| npm dist-tag | `latest` and `next` → **3.6.1** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| Status | Alpha (pre-1.0). The `3.x` major does **not** imply API stability. |
+| Global install | `npm install -g @caatinga/cli` |
+| No global install | `npx caatinga <command>` |
+| Reproducible CI | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag |
+| Fresh machine | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity) |
+| Stellar CLI | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only |
+
+## Capability limits
+
+| Capability | Status |
+| ---------- | ------ |
+| Official frontend templates | Vite + React only (`vite-react`) |
+| `caatinga zk build` | Single-party **dev** ceremony; blocked on mainnet by default |
+| `caatinga zk invoke --embed-vk` | Not supported (experimental) |
+| Browser `invoke` via wallet | **Single-invoker only** until v1.0 |
+| Multi-signer / `signAuthEntry` | Application code → `CAATINGA_MULTI_AUTH_REQUIRED` |
+| Production ZK (MPC ceremony) | Out of scope |
 
 ---
 
@@ -94,6 +117,17 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 | ----------------------------------- | -------------------------------------- | ------------------------------------ |
 | `caatinga invoke <contract.method>` | Sign + submit a state-changing call    | `--network`, `--source`, `[args...]` |
 | `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `[args...]`             |
+
+### Artifacts & diagnostics (advanced)
+
+| Command                              | Purpose                                              | Flags                   |
+| ------------------------------------ | ---------------------------------------------------- | ----------------------- |
+| `caatinga estimate deploy <contract>` | Pre-deploy fee advisory (does not submit)             | `--network`, `--source` |
+| `caatinga inspect <contract>`         | Compare local artifacts vs on-chain reachability      | `--network`             |
+| `caatinga migrate artifacts`         | Upgrade `caatinga.artifacts.json` to schema v2        | —                       |
+| `caatinga rollback <contract>`         | Restore a prior contract ID in artifacts (logical)    | `--network`             |
+
+`caatinga deploy --dry-run` is an alias for `caatinga estimate deploy`.
 
 ### ZK Commands
 
@@ -485,3 +519,37 @@ my-dapp/
 │   └── App.tsx
 └── package.json
 ```
+
+---
+
+## 12. Agent guidance
+
+### Working on a Caatinga **project** (generated app)
+
+1. Run `caatinga doctor --network testnet --source alice` before changing deploy state.
+2. Order: `build` → `deploy` → (`generate` if `--no-generate`) → `invoke` / browser client.
+3. Parse **`CAATINGA_*` error codes**, never message text.
+4. `--source` = Stellar CLI identity alias only (`alice`), never `G...` / `S...` / seed phrase.
+5. Browser wallet flows: single-invoker until v1.0.
+
+Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents drive Caatinga commands from Claude Code or Codex — see [Integration guide](./tutorials/integration-guide.md).
+
+### Working on the **Caatinga monorepo**
+
+| Doc | Use when |
+| --- | -------- |
+| [AGENTS.md](../AGENTS.md) | Repo layout, build/test commands, version alignment, template overrides |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, commit style, compatibility contracts |
+| [Architecture](./architecture.md) | Product stance, Caatinga vs Scaffold Stellar |
+| [Errors](./errors.md) | Full `CAATINGA_*` catalog with fixes |
+| [CLI](./cli.md) | Authoritative command reference |
+| [Config](./config.md) | `caatinga.config.ts` schema details |
+
+Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
+
+### Public contracts (do not break without migration note)
+
+- `caatinga.artifacts.json` schema
+- `caatinga.config.ts` shape
+- `CaatingaErrorCode` values
+- Documented CLI commands, flags, and package `exports`
