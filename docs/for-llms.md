@@ -6,26 +6,26 @@ Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs
 
 ## Install & release
 
-| Item | Value |
-| ---- | ----- |
-| npm dist-tag | `latest` and `next` → **3.6.1** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
-| Status | Alpha (pre-1.0). The `3.x` major does **not** imply API stability. |
-| Global install | `npm install -g @caatinga/cli` |
-| No global install | `npx caatinga <command>` |
-| Reproducible CI | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag |
-| Fresh machine | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity) |
-| Stellar CLI | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only |
+| Item              | Value                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| npm dist-tag      | `latest` and `next` → **3.6.1** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
+| Global install    | `npm install -g @caatinga/cli`                                                                          |
+| No global install | `npx caatinga <command>`                                                                                |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
+| Fresh machine     | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity)               |
+| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
 
 ## Capability limits
 
-| Capability | Status |
-| ---------- | ------ |
-| Official frontend templates | Vite + React only (`vite-react`) |
-| `caatinga zk build` | Single-party **dev** ceremony; blocked on mainnet by default |
-| `caatinga zk invoke --embed-vk` | Not supported (experimental) |
-| Browser `invoke` via wallet | **Single-invoker only** until v1.0 |
-| Multi-signer / `signAuthEntry` | Application code → `CAATINGA_MULTI_AUTH_REQUIRED` |
-| Production ZK (MPC ceremony) | Out of scope |
+| Capability                      | Status                                                       |
+| ------------------------------- | ------------------------------------------------------------ |
+| Official frontend templates     | Vite + React only (`vite-react`)                             |
+| `caatinga zk build`             | Single-party **dev** ceremony; blocked on mainnet by default |
+| `caatinga zk invoke --embed-vk` | Not supported (experimental)                                 |
+| Browser `invoke` via wallet     | **Single-invoker only** until v1.0                           |
+| Multi-signer / `signAuthEntry`  | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`            |
+| Production ZK (MPC ceremony)    | Out of scope                                                 |
 
 ---
 
@@ -69,18 +69,18 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 
 ## 2. Package Reference
 
-| Package                                | Role                                                                  | Browser-safe         | Install command                     |
-| -------------------------------------- | --------------------------------------------------------------------- | -------------------- | ----------------------------------- |
+| Package                                | Role                                                                  | Browser-safe         | Install command                |
+| -------------------------------------- | --------------------------------------------------------------------- | -------------------- | ------------------------------ |
 | `@caatinga/cli`                        | CLI binary (`caatinga` command)                                       | No                   | `npm install -g @caatinga/cli` |
-| `@caatinga/core`                       | Config loading, artifact I/O, Stellar CLI orchestration, shell layer  | No (use `./browser`) | — (dep of cli)                      |
-| `@caatinga/core/browser`               | Errors + artifact types only; excludes Node-only modules              | Yes                  | — (dep of client)                   |
-| `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes                  | `npm install @caatinga/client`      |
-| `@caatinga/client/react`               | `WalletProvider` + `useWallet` (React >=18 optional peer)             | Yes                  | (subpath of client)                 |
-| `@caatinga/client/vite`                | SWK bundler helpers: `walletStubViteAliases`, `walletStubOverrides`   | Yes                  | (subpath of client)                 |
-| `@caatinga/client/freighter`           | Freighter wallet adapter                                              | Yes                  | (subpath of client)                 |
-| `@caatinga/client/stellar-wallets-kit` | Multi-wallet adapter (Freighter, xBull, etc.)                         | Yes                  | (subpath of client)                 |
-| `@caatinga/zk`                         | ZK proof serialization, Circom Groth16 helpers                        | No (use `./browser`) | — (dep of cli)                      |
-| `@caatinga/zk/browser`                 | Browser ZK binding helpers                                            | Yes                  | (subpath of zk)                     |
+| `@caatinga/core`                       | Config loading, artifact I/O, Stellar CLI orchestration, shell layer  | No (use `./browser`) | — (dep of cli)                 |
+| `@caatinga/core/browser`               | Errors + artifact types only; excludes Node-only modules              | Yes                  | — (dep of client)              |
+| `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes                  | `npm install @caatinga/client` |
+| `@caatinga/client/react`               | `WalletProvider` + `useWallet` (React >=18 optional peer)             | Yes                  | (subpath of client)            |
+| `@caatinga/client/vite`                | SWK bundler helpers: `walletStubViteAliases`, `walletStubOverrides`   | Yes                  | (subpath of client)            |
+| `@caatinga/client/freighter`           | Freighter wallet adapter                                              | Yes                  | (subpath of client)            |
+| `@caatinga/client/stellar-wallets-kit` | Multi-wallet adapter (Freighter, xBull, etc.)                         | Yes                  | (subpath of client)            |
+| `@caatinga/zk`                         | ZK proof serialization, Circom Groth16 helpers                        | No (use `./browser`) | — (dep of cli)                 |
+| `@caatinga/zk/browser`                 | Browser ZK binding helpers                                            | Yes                  | (subpath of zk)                |
 
 ---
 
@@ -120,12 +120,12 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 
 ### Artifacts & diagnostics (advanced)
 
-| Command                              | Purpose                                              | Flags                   |
-| ------------------------------------ | ---------------------------------------------------- | ----------------------- |
-| `caatinga estimate deploy <contract>` | Pre-deploy fee advisory (does not submit)             | `--network`, `--source` |
-| `caatinga inspect <contract>`         | Compare local artifacts vs on-chain reachability      | `--network`             |
-| `caatinga migrate artifacts`         | Upgrade `caatinga.artifacts.json` to schema v2        | —                       |
-| `caatinga rollback <contract>`         | Restore a prior contract ID in artifacts (logical)    | `--network`             |
+| Command                               | Purpose                                            | Flags                   |
+| ------------------------------------- | -------------------------------------------------- | ----------------------- |
+| `caatinga estimate deploy <contract>` | Pre-deploy fee advisory (does not submit)          | `--network`, `--source` |
+| `caatinga inspect <contract>`         | Compare local artifacts vs on-chain reachability   | `--network`             |
+| `caatinga migrate artifacts`          | Upgrade `caatinga.artifacts.json` to schema v2     | —                       |
+| `caatinga rollback <contract>`        | Restore a prior contract ID in artifacts (logical) | `--network`             |
 
 `caatinga deploy --dry-run` is an alias for `caatinga estimate deploy`.
 
@@ -536,14 +536,14 @@ Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents driv
 
 ### Working on the **Caatinga monorepo**
 
-| Doc | Use when |
-| --- | -------- |
-| [AGENTS.md](../AGENTS.md) | Repo layout, build/test commands, version alignment, template overrides |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, commit style, compatibility contracts |
-| [Architecture](./architecture.md) | Product stance, Caatinga vs Scaffold Stellar |
-| [Errors](./errors.md) | Full `CAATINGA_*` catalog with fixes |
-| [CLI](./cli.md) | Authoritative command reference |
-| [Config](./config.md) | `caatinga.config.ts` schema details |
+| Doc                                   | Use when                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| [AGENTS.md](../AGENTS.md)             | Repo layout, build/test commands, version alignment, template overrides |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, commit style, compatibility contracts                  |
+| [Architecture](./architecture.md)     | Product stance, Caatinga vs Scaffold Stellar                            |
+| [Errors](./errors.md)                 | Full `CAATINGA_*` catalog with fixes                                    |
+| [CLI](./cli.md)                       | Authoritative command reference                                         |
+| [Config](./config.md)                 | `caatinga.config.ts` schema details                                     |
 
 Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 
