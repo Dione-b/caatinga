@@ -37,35 +37,37 @@ const PostDeployHookSchema = z.object({
   expect: z.string().optional(),
 });
 
-export const CaatingaConfigSchema = z.object({
-  project: z.string().min(1),
-  defaultNetwork: z.string().min(1).default("testnet"),
-  buildRoot: z.string().min(1).optional(),
-  contracts: z
-    .record(z.string().min(1), ContractConfigSchema)
-    .refine(
-      (contracts) => Object.keys(contracts).length > 0,
-      "At least one contract must be configured."
-    ),
-  networks: z
-    .record(z.string().min(1), NetworkConfigSchema)
-    .refine(
-      (networks) => Object.keys(networks).length > 0,
-      "At least one network must be configured."
-    ),
-  frontend: z
-    .object({
-      framework: z.literal("vite-react").default("vite-react"),
-      bindingsOutput: z.string().min(1),
-      envFile: z.string().min(1).optional(),
-      env: z.record(z.string().min(1), z.string().min(1)).optional(),
-    })
-    .optional(),
-  postDeploy: z.array(PostDeployHookSchema).optional(),
-  zk: ZkConfigSchema,
-}).superRefine((config) => {
-  validateContractGraph(config.contracts);
-});
+export const CaatingaConfigSchema = z
+  .object({
+    project: z.string().min(1),
+    defaultNetwork: z.string().min(1).default("testnet"),
+    buildRoot: z.string().min(1).optional(),
+    contracts: z
+      .record(z.string().min(1), ContractConfigSchema)
+      .refine(
+        (contracts) => Object.keys(contracts).length > 0,
+        "At least one contract must be configured."
+      ),
+    networks: z
+      .record(z.string().min(1), NetworkConfigSchema)
+      .refine(
+        (networks) => Object.keys(networks).length > 0,
+        "At least one network must be configured."
+      ),
+    frontend: z
+      .object({
+        framework: z.literal("vite-react").default("vite-react"),
+        bindingsOutput: z.string().min(1),
+        envFile: z.string().min(1).optional(),
+        env: z.record(z.string().min(1), z.string().min(1)).optional(),
+      })
+      .optional(),
+    postDeploy: z.array(PostDeployHookSchema).optional(),
+    zk: ZkConfigSchema,
+  })
+  .superRefine((config) => {
+    validateContractGraph(config.contracts);
+  });
 
 export type PostDeployHook = z.infer<typeof PostDeployHookSchema>;
 
