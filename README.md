@@ -108,12 +108,12 @@ my-dapp/
 
 ## Packages
 
-| Package | Role |
-| ------- | ---- |
-| `@caatinga/cli` | `caatinga` command — init, build, deploy, wire, generate, status, doctor |
-| `@caatinga/core` | Config, shell orchestration, Stellar CLI adapters, error catalog |
-| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks |
-| `@caatinga/zk` | Circom Groth16 verifier workflow (niche) |
+| Package            | Role                                                                     |
+| ------------------ | ------------------------------------------------------------------------ |
+| `@caatinga/cli`    | `caatinga` command — init, build, deploy, wire, generate, status, doctor |
+| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog         |
+| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks               |
+| `@caatinga/zk`     | Circom Groth16 verifier workflow (niche)                                 |
 
 Full export map: [Packages](./docs/packages.md).
 

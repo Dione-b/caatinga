@@ -35,19 +35,19 @@ Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main
 
 ## Commands
 
-| Command | What it does |
-| ------- | ------------ |
-| `caatinga setup` | Bootstrap Node, Rust, Stellar CLI, and a funded identity |
-| `caatinga init <dir>` | Create a project from a bundled template |
-| `caatinga doctor` | Check toolchain, config, artifacts, and network setup |
-| `caatinga build [contract]` | Compile contract WASM |
-| `caatinga deploy [contract]` | Deploy, record IDs in artifacts, auto-generate bindings |
-| `caatinga wire` | Run configured `postDeploy` hooks |
-| `caatinga sync-env` | Write frontend env vars from artifacts |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings |
-| `caatinga status` | Show deployed contracts and binding freshness |
-| `caatinga invoke <contract.method>` | Call a state-changing contract method |
-| `caatinga read <contract.method>` | Simulate a read-only contract method |
+| Command                             | What it does                                             |
+| ----------------------------------- | -------------------------------------------------------- |
+| `caatinga setup`                    | Bootstrap Node, Rust, Stellar CLI, and a funded identity |
+| `caatinga init <dir>`               | Create a project from a bundled template                 |
+| `caatinga doctor`                   | Check toolchain, config, artifacts, and network setup    |
+| `caatinga build [contract]`         | Compile contract WASM                                    |
+| `caatinga deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings  |
+| `caatinga wire`                     | Run configured `postDeploy` hooks                        |
+| `caatinga sync-env`                 | Write frontend env vars from artifacts                   |
+| `caatinga generate [contract]`      | (Re)generate TypeScript bindings                         |
+| `caatinga status`                   | Show deployed contracts and binding freshness            |
+| `caatinga invoke <contract.method>` | Call a state-changing contract method                    |
+| `caatinga read <contract.method>`   | Simulate a read-only contract method                     |
 
 Command reference, flags, and error codes: [CLI docs](https://github.com/Dione-b/caatinga/blob/main/docs/cli.md) · [Cheatsheet](https://github.com/Dione-b/caatinga/blob/main/docs/cheatsheet.md).
 
