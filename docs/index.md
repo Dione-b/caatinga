@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: Quick start
-    details: Scaffold with npx, install dependencies, verify with doctor on testnet. Pin @next or an exact version for reproducible installs.
+    details: Scaffold with npx, install dependencies, verify with doctor on testnet. Pin an exact version for reproducible installs.
     link: /getting-started
     linkText: Full guide
   - title: Template dApp
@@ -37,7 +37,7 @@ features:
 ---
 
 ::: warning Alpha software
-Caatinga is pre-1.0. Formats and APIs may change. Install with `npx caatinga@next` or pin an exact version.
+Caatinga is pre-1.0. Formats and APIs may change. Pin an exact version for reproducible installs.
 :::
 
 **Recommended path for new users:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — scaffold, deploy, and invoke a counter on testnet.

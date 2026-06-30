@@ -2,7 +2,7 @@
 
 Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client` (single-invoker wallet signing until v1.0).
 
-Install published packages from npm. Pin `@next` or an exact version in apps when you need reproducibility.
+Install published packages from npm. Pin an exact version in apps when you need reproducibility.
 
 ## Prerequisites
 
@@ -14,12 +14,10 @@ Install published packages from npm. Pin `@next` or an exact version in apps whe
 - Optional: Freighter or another wallet adapter for browser-side `@caatinga/client` calls
 
 On a fresh machine, install everything above (except Node.js) in one step with `caatinga setup` — it
-detects what's missing and installs only that, then creates a funded local identity.
-
-**Note:** `caatinga setup` is available in `@caatinga/cli@next` (3.4.x). The npm `latest` tag (3.3.x) does not include it yet. See [system dependencies for Linux](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) when Stellar CLI must compile from source.
+detects what's missing and installs only that, then creates a funded local identity. See [system dependencies for Linux](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) when Stellar CLI must compile from source.
 
 ```bash
-npx caatinga@next setup                 # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
+npx caatinga setup                 # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
 ```
 
 See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) for flags and behavior. To verify an existing environment instead, run the dependency checks manually:
@@ -33,10 +31,10 @@ stellar --version
 ## Install from npm
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
-Without a global CLI install, use `npx caatinga@next` in the commands below.
+Without a global CLI install, use `npx caatinga` in the commands below.
 
 ## From the repository
 
@@ -60,7 +58,7 @@ The default template flow (`react-vite-counter`) is summarized below. Minimal an
 
 ## Generated app flow
 
-After `caatinga init` (global CLI on `@next`) or `npx caatinga@next init`:
+After `caatinga init` (global CLI) or `npx caatinga init`:
 
 ```bash
 cd my-dapp

@@ -5,7 +5,7 @@ Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `dep
 ## Install
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 caatinga --help
 ```
 

@@ -5,7 +5,7 @@
 
 Git-versioned Soroban deploy artifacts and multi-contract orchestration for TypeScript teams.
 
-> Alpha (pre-1.0). The `3.x` npm major does not imply API stability. Install with `npx caatinga@next` or pin an exact version. See [CHANGELOG](./packages/cli/CHANGELOG.md).
+> Alpha (pre-1.0). The `3.x` npm major does not imply API stability. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md).
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@ Git-versioned Soroban deploy artifacts and multi-contract orchestration for Type
 npm install -g @caatinga/cli
 ```
 
-Or run without a global install: `npx caatinga@next init my-dapp`
+Or run without a global install: `npx caatinga init my-dapp`
 
 ## Quick start
 

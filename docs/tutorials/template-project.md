@@ -28,7 +28,7 @@ npx caatinga zk init my-zk-dapp
 
 `pnpm install` also works. The `react-vite-counter` template ships `pnpm-workspace.yaml` for pnpm 10.26+/11.x — see [Templates — pnpm](../templates.md#pnpm-1026--11x).
 
-Without a global CLI install, use `npx caatinga@next init my-dapp`.
+Without a global CLI install, use `npx caatinga init my-dapp`.
 
 ## What gets generated
 

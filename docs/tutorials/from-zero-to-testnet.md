@@ -2,14 +2,14 @@
 
 This tutorial takes a new Caatinga project from scaffold to a deployed Soroban counter contract on Stellar testnet.
 
-Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. Pin `@next` or an exact version for reproducible installs.
+Install `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` from npm. Pin an exact version for reproducible installs.
 
 ## Prerequisites
 
 Install Node.js 22+ and Rust first. Then install the supported Stellar CLI and Wasm target:
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 cargo install --locked stellar-cli --version 27.0.0
 rustup target add wasm32v1-none
 stellar --version
@@ -34,7 +34,7 @@ npm install
 
 `pnpm install` also works. The default `react-vite-counter` template includes `pnpm-workspace.yaml` for pnpm 10.26+/11.x (see [Templates](../templates.md#pnpm-1026--11x)).
 
-Without a global CLI install, run `npx caatinga@next init my-dapp` instead of `caatinga init`.
+Without a global CLI install, run `npx caatinga init my-dapp` instead of `caatinga init`.
 
 The default template creates:
 

@@ -18,7 +18,7 @@ flowchart LR
 
 **Minimal loop:**
 ```bash
-npx caatinga@next init my-dapp && cd my-dapp && npm install
+npx caatinga init my-dapp && cd my-dapp && npm install
 npx caatinga doctor --network testnet --source alice   # verify env
 npx caatinga build counter                              # compile WASM
 npx caatinga deploy counter --network testnet --source alice  # deploy + auto-generate bindings
@@ -29,7 +29,7 @@ npx caatinga status --network testnet                   # deployed? bindings fre
 
 **One-step env setup on a fresh machine:**
 ```bash
-npx caatinga@next setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
+npx caatinga setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
 ```
 
 **Multi-contract graph deploy (with postDeploy hooks and frontend env sync):**
@@ -43,7 +43,7 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 
 | Package | Role | Browser-safe | Install command |
 |---------|------|-------------|-----------------|
-| `@caatinga/cli` | CLI binary (`caatinga` command) | No | `npm install -g @caatinga/cli@next` |
+| `@caatinga/cli` | CLI binary (`caatinga` command) | No | `npm install -g @caatinga/cli` |
 | `@caatinga/core` | Config loading, artifact I/O, Stellar CLI orchestration, shell layer | No (use `./browser`) | — (dep of cli) |
 | `@caatinga/core/browser` | Errors + artifact types only; excludes Node-only modules | Yes | — (dep of client) |
 | `@caatinga/client` | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes | `npm install @caatinga/client` |

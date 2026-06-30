@@ -25,8 +25,8 @@ Any exception must be called out in release notes and package changelogs.
 
 - `alpha`
 - `beta`
-- `latest` — currently `3.5.1` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
-- `next` — currently `3.5.1` (pre-release candidates until promoted to `latest`)
+- `latest` — currently `3.6.1` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
+- `next` — currently `3.6.1` (pre-release candidates until promoted to `latest`)
 
 ## Pre-1.0 semver note
 
