@@ -1,6 +1,384 @@
+/* ── Brutalist Dev-First theme: dark-only, CLI/terminal aesthetic ── */
+
 :root {
-  --vp-c-brand-1: #2d7d46;
-  --vp-c-brand-2: #256b3b;
-  --vp-c-brand-3: #1f5a32;
-  --vp-c-brand-soft: rgba(45, 125, 70, 0.14);
+  /* Brand / CTA — industrial yellow */
+  --vp-c-brand-1: #ffde00;
+  --vp-c-brand-2: #e6c800;
+  --vp-c-brand-3: #ccb300;
+  --vp-c-brand-soft: rgba(255, 222, 0, 0.12);
+
+  /* Backgrounds — pure black / graphite */
+  --vp-c-bg: #000000;
+  --vp-c-bg-alt: #111111;
+  --vp-c-bg-soft: #111111;
+  --vp-c-bg-elv: #111111;
+
+  /* Text — white / light gray */
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: #cccccc;
+  --vp-c-text-3: #999999;
+
+  /* Borders & dividers */
+  --vp-c-border: #333333;
+  --vp-c-divider: #333333;
+  --vp-c-gutter: #222222;
+
+  /* Typography */
+  --vp-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vp-font-family-mono:
+    "JetBrains Mono", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+
+  /* Buttons */
+  --vp-button-brand-bg: #ffde00;
+  --vp-button-brand-hover-bg: #e6c800;
+  --vp-button-brand-active-bg: #ccb300;
+  --vp-button-brand-text: #000000;
+  --vp-button-brand-border: #ffde00;
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: rgba(255, 255, 255, 0.06);
+  --vp-button-alt-text: #ffffff;
+  --vp-button-alt-border: #ffffff;
+
+  /* Nav */
+  --vp-nav-bg-color: #000000;
+  --vp-nav-text-color: #cccccc;
+  --vp-nav-title-text-color: #ffffff;
+
+  /* Sidebar */
+  --vp-sidebar-bg-color: #000000;
+  --vp-c-bg-elv-up: #111111;
+
+  /* Home hero */
+  --vp-home-hero-name-color: #ffde00;
+  --vp-home-hero-text-color: #ffffff;
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
+
+  /* Custom blocks */
+  --vp-custom-block-info-bg: #111111;
+  --vp-custom-block-info-border: #ffde00;
+  --vp-custom-block-tip-bg: #111111;
+  --vp-custom-block-tip-border: #ffde00;
+  --vp-custom-block-warning-bg: #111111;
+  --vp-custom-block-warning-border: #ffde00;
+  --vp-custom-block-danger-bg: #111111;
+  --vp-custom-block-danger-border: #ff4444;
+  --vp-custom-block-details-bg: #111111;
+  --vp-custom-block-details-border: #333333;
+
+  /* Code blocks */
+  --vp-code-block-bg: #111111;
+  --vp-code-color: #ffde00;
+  --vp-code-bg: #1a1a1a;
+
+  /* Hard edges everywhere */
+  --vp-c-radius: 0;
+  --vp-button-radius: 0;
+}
+
+/* ── Typography: display titles (Anton, uppercase) ── */
+
+.VPHero .name,
+.VPHero .text,
+.vp-doc h1,
+.vp-doc h2,
+.VPFeature .title {
+  font-family: "Anton", Impact, "Arial Narrow Bold", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.vp-doc h1 {
+  font-size: 2.4rem;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Section dividers — solid yellow block on the left */
+.vp-doc h2 {
+  font-size: 1.75rem;
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 0 0.6rem 1rem;
+  border-left: 4px solid #ffde00;
+  background: #111111;
+}
+
+/* Step subtitles — editorial serif with trailing period */
+.vp-doc h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.25rem;
+  color: #ffffff;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.vp-doc h3::after {
+  content: ".";
+}
+
+/* Body text */
+.vp-doc p,
+.vp-doc li,
+.vp-doc td,
+.vp-doc th {
+  color: #cccccc;
+  line-height: 1.7;
+}
+
+.vp-doc a {
+  color: #ffde00;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.vp-doc a:hover {
+  color: #ffffff;
+}
+
+/* ── Brutalist layout: negative space & hard borders ── */
+
+.VPHome {
+  padding-bottom: 4rem;
+}
+
+.VPHero {
+  padding-top: 6rem !important;
+  padding-bottom: 4rem !important;
+}
+
+.VPHero .tagline {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.95rem;
+  color: #cccccc;
+  max-width: 36rem;
+  margin-top: 1.5rem;
+  line-height: 1.6;
+}
+
+.VPFeatures {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+}
+
+.VPFeature {
+  border: 2px solid #333333 !important;
+  border-radius: 0 !important;
+  background: #111111 !important;
+  padding: 2rem !important;
+  transition: border-color 0.15s;
+}
+
+.VPFeature:hover {
+  border-color: #ffde00 !important;
+}
+
+.VPFeature .details {
+  color: #cccccc;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.VPFeature .link-text {
+  color: #ffde00;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Buttons ── */
+
+.VPButton.brand {
+  border-radius: 0 !important;
+  font-family: var(--vp-font-family-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 2px solid #ffde00 !important;
+}
+
+.VPButton.alt {
+  border-radius: 0 !important;
+  font-family: var(--vp-font-family-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+.VPButton.alt:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffde00 !important;
+  border-color: #ffde00 !important;
+}
+
+/* ── Inline code — pill tags emulating CLI parameters ── */
+
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85em;
+  color: #ffde00;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 999px;
+  padding: 0.15em 0.65em;
+  font-weight: 500;
+}
+
+/* ── Code blocks — hard-edged terminal panels ── */
+
+div[class*="language-"] {
+  border-radius: 0 !important;
+  border: 2px solid #333333;
+  margin: 1.5rem 0;
+}
+
+div[class*="language-"] pre,
+div[class*="language-"] code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+div[class*="language-"] button.copy {
+  border-radius: 0 !important;
+  border: 1px solid #333333;
+  background: #1a1a1a;
+  color: #cccccc;
+}
+
+div[class*="language-"] button.copy:hover {
+  border-color: #ffde00;
+  color: #ffde00;
+}
+
+/* ── Custom blocks — graphite panels with yellow accent bar ── */
+
+.custom-block {
+  border-radius: 0 !important;
+  border: 1px solid #333333 !important;
+  border-left: 4px solid #ffde00 !important;
+  background: #111111 !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1.5rem 0;
+}
+
+.custom-block.warning {
+  border-left-color: #ffde00 !important;
+}
+
+.custom-block.tip {
+  border-left-color: #ffde00 !important;
+}
+
+.custom-block.info {
+  border-left-color: #cccccc !important;
+}
+
+.custom-block.danger {
+  border-left-color: #ff4444 !important;
+}
+
+.custom-block .custom-block-title {
+  font-family: var(--vp-font-family-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  color: #ffde00;
+}
+
+/* ── Nav & sidebar ── */
+
+.VPNav {
+  border-bottom: 2px solid #222222 !important;
+}
+
+.VPNavBarTitle .title {
+  font-family: "Anton", Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+.VPSidebar {
+  border-right: 2px solid #222222 !important;
+}
+
+.VPSidebarItem .text {
+  font-size: 0.875rem;
+}
+
+.VPSidebarItem.is-active > .item > .text {
+  color: #ffde00 !important;
+  font-weight: 600;
+}
+
+.VPSidebarItem.level-0 > .item > .text {
+  font-family: var(--vp-font-family-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  color: #999999;
+}
+
+/* ── Search ── */
+
+.DocSearch-Button {
+  border-radius: 0 !important;
+  border: 1px solid #333333 !important;
+  background: #111111 !important;
+}
+
+/* ── Tables ── */
+
+.vp-doc table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: 1px solid #333333;
+  padding: 0.6rem 1rem;
+}
+
+.vp-doc th {
+  background: #111111;
+  font-family: var(--vp-font-family-mono);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: #ffde00;
+}
+
+.vp-doc tr:nth-child(even) {
+  background: #0a0a0a;
+}
+
+/* ── Footer ── */
+
+.VPFooter {
+  border-top: 2px solid #222222 !important;
+  background: #000000 !important;
+}
+
+/* ── Doc content spacing ── */
+
+.vp-doc {
+  padding-bottom: 4rem;
+}
+
+.vp-doc hr {
+  border: none;
+  border-top: 2px solid #222222;
+  margin: 3rem 0;
 }
