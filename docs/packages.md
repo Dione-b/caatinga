@@ -10,7 +10,7 @@
 Install for end users:
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 ```
 
 Monorepo development:

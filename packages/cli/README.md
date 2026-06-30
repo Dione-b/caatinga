@@ -5,175 +5,56 @@ Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `dep
 ## Install
 
 ```bash
-npm install -g @caatinga/cli@next
+npm install -g @caatinga/cli
 caatinga --help
 ```
-
-Use `@next` (3.4.x) for `caatinga setup`. The `latest` tag may lag until the 3.4 line is promoted.
 
 Inside a generated project, prefer `npx caatinga` so the project-local workflow stays explicit.
 
 ## Requirements
 
-Run `caatinga setup` on a fresh machine to install everything below automatically, or follow the manual steps:
+Run `caatinga setup` on a fresh machine to install Node, Rust, Stellar CLI, and a funded local identity. Manual requirements:
 
 - Node.js `>=22`
-- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (22.x breaks `caatinga invoke` signing)
-- Rust 1.84.0 or newer with the `wasm32v1-none` target (contract builds)
-- A funded Stellar CLI identity for `deploy` and `invoke` (for example `alice`)
-
-```bash
-rustup target add wasm32v1-none
-stellar keys generate alice --fund --network testnet
-```
-
-Stellar CLI versions newer than the last-tested `27.0.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning; no override flag is required.
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (27.0.0 recommended)
+- Rust 1.84.0+ with the `wasm32v1-none` target
+- A funded local Stellar CLI identity for `deploy` and `invoke` (e.g. `alice`)
 
 ## Quick start
 
 ```bash
 caatinga init my-dapp
-cd my-dapp
-npm install
-# pnpm alternative: pnpm install (template includes pnpm-workspace.yaml for pnpm 10.26+/11)
+cd my-dapp && npm install
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga status --network testnet
-npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-`build` compiles WASM files (or one Cargo workspace when `buildRoot` is configured). `deploy` writes contract IDs to `caatinga.artifacts.json` and then generates TypeScript bindings automatically under the path configured in `caatinga.config.ts` (templates default to `contracts/generated/`); pass `--no-generate` to skip. Full graph deploys also run configured `postDeploy` hooks and sync frontend env files when configured. `status` shows what's deployed per network and whether bindings are fresh.
+Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main/docs/getting-started.md).
 
 ## Commands
 
-| Command                                                       | What it does                                                                               |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `caatinga setup [--source alice] [--network testnet]`         | Install Node/Rust/Stellar CLI prerequisites and create a funded local identity             |
-| `caatinga init <projectName>`                                 | Create a project from a bundled template and write `caatinga.artifacts.json`               |
-| `caatinga doctor [--network <network>] [--source <identity>]` | Check local Node, Stellar CLI, Rust, config, artifacts, network, and source identity setup |
-| `caatinga build [contract]`                                   | Compile contract WASM through Stellar CLI (default contract: `counter`)                    |
-| `caatinga deploy [contract]`                                  | Deploy one contract or the full configured graph; record IDs in artifacts                  |
-| `caatinga wire --source <identity>`                           | Run configured `postDeploy` hooks against deployed contracts                               |
-| `caatinga sync-env`                                           | Write configured frontend env vars from deployment artifacts                               |
-| `caatinga generate [contract]`                                | (Re)generate TypeScript bindings; omit the name to generate for all deployed contracts     |
-| `caatinga status [--network <name>] [--json]`                 | Show deployed contracts and binding freshness per network                                  |
-| `caatinga invoke <contract.method>`                           | Invoke a deployed contract method; extra args forward to Stellar CLI                       |
-| `caatinga read <contract.method>`                             | Simulate a read-only contract method (no signing or submission)                            |
+| Command | What it does |
+| ------- | ------------ |
+| `caatinga setup` | Bootstrap Node, Rust, Stellar CLI, and a funded identity |
+| `caatinga init <dir>` | Create a project from a bundled template |
+| `caatinga doctor` | Check toolchain, config, artifacts, and network setup |
+| `caatinga build [contract]` | Compile contract WASM |
+| `caatinga deploy [contract]` | Deploy, record IDs in artifacts, auto-generate bindings |
+| `caatinga wire` | Run configured `postDeploy` hooks |
+| `caatinga sync-env` | Write frontend env vars from artifacts |
+| `caatinga generate [contract]` | (Re)generate TypeScript bindings |
+| `caatinga status` | Show deployed contracts and binding freshness |
+| `caatinga invoke <contract.method>` | Call a state-changing contract method |
+| `caatinga read <contract.method>` | Simulate a read-only contract method |
 
-The supported CLI flow is `init -> build -> deploy (bindings auto-generate; full deploys can wire and sync env) -> invoke`.
+Command reference, flags, and error codes: [CLI docs](https://github.com/Dione-b/caatinga/blob/main/docs/cli.md) · [Cheatsheet](https://github.com/Dione-b/caatinga/blob/main/docs/cheatsheet.md).
 
-### `setup`
+## Browser apps
 
-- One-step bootstrap for a fresh machine: checks Node, installs/updates Rust via verified `rustup-init` download, adds the `wasm32v1-none` target, installs the version-pinned Stellar CLI, and creates a funded local identity
-- Each step is idempotent — anything already present and compatible is reported and skipped
-- `--skip-rust`, `--skip-stellar`, `--skip-identity` skip individual steps
-- Run it before `caatinga init` on a fresh machine; `caatinga doctor` is the read-only counterpart that checks the same prerequisites afterward
-- First Stellar CLI install via cargo can take 5–15 minutes; prebuilt binaries or `cargo binstall` are faster
-
-**System dependencies (Linux)** — required when `cargo install stellar-cli` compiles from source:
-
-```bash
-# Debian/Ubuntu
-sudo apt install build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev
-```
-
-### `init`
-
-- `-t, --template <name>` selects a bundled template (default: `react-vite-counter`)
-- Official templates: `react-vite-counter` (single counter dApp); ZK projects use `caatinga zk init` with `zk-starter`
-- `init` validates `caatinga.template.json` before copying files
-
-### `build`
-
-- Omit `[contract]` to build every configured contract
-- When `buildRoot` is configured and `[contract]` is omitted, Caatinga runs one `stellar contract build` from that Cargo workspace root
-- prints a deploy reminder when the default network lacks a `contractId` in `caatinga.artifacts.json`; this warning does not fail the build
-
-### `doctor`
-
-- `-n, --network <network>` validates that the network exists in `caatinga.config.ts`
-- `-s, --source <identity>` validates that the local Stellar CLI identity exists
-- exits `0` when all diagnostics pass and non-zero when a blocking diagnostic fails
-
-### `deploy`
-
-- Omit `[contract]` to deploy the full configured dependency graph
-- `-n, --network <network>` selects a network from `caatinga.config.ts` (for example `testnet`)
-- `-s, --source <identity>` is required; must be a Stellar CLI identity alias that can sign (for example `alice`)
-- `--force` redeploys even when artifacts already store a contract ID
-- `--no-deps` skips dependency deployment for a single named contract (`--no-deps` requires `[contract]`)
-- `--verify-deps` confirms each dependency's contract ID exists on-chain before resolving deploy arguments
-- `--no-stale-check` skips the WASM-older-than-sources warning
-- `--no-generate` skips the automatic bindings generation after deploy
-- `--no-wire` skips configured `postDeploy` hooks after a full graph deploy
-- `--no-sync-env` skips frontend env sync after a full graph deploy
-
-Dependencies listed in `dependsOn` deploy first unless `--no-deps` is set. Deploy args may reference `${contracts.<name>.contractId}` placeholders resolved from artifacts or `${source.address}` resolved from the local Stellar CLI identity.
-
-After a successful deploy, bindings generate automatically for the deployed contracts. A generation failure never fails the deploy — the CLI prints a warning plus the recovery command (`npx caatinga generate --network <network>`). When deploying the full graph, Caatinga also runs `postDeploy` hooks and writes `frontend.envFile` when configured; recover with `caatinga wire` or `caatinga sync-env` if either step is skipped or fails.
-
-### `wire` and `sync-env`
-
-- `wire` requires `--source <identity>` because hooks are submitted as signed `stellar contract invoke` calls
-- `wire` resolves `${contracts.<name>.contractId}` and `${source.address}` in `postDeploy` args
-- `sync-env` writes `frontend.envFile` from `caatinga.artifacts.json` using the `frontend.env` mapping
-- `frontend.env` supports contract keys plus `rpcUrl` and `networkPassphrase`
-
-### `generate`, `status`, and `invoke`
-
-- `-n, --network <network>` selects the network used to resolve deployed contract IDs
-- `generate` prints binding freshness per contract before regenerating in all-contracts mode
-- `status` prints a per-network table (contract ID, WASM hash, deployed, binding freshness, dependencies); `--json` emits the machine-readable structure
-- `invoke` expects `<contract.method>` (for example `counter.increment`) and forwards `[args...]` to the underlying Stellar invocation
-- `read` simulates a read-only method without signing; `--source` is optional (defaults to `alice`)
-
-`caatinga dev` is reserved, hidden in pre-v1 builds, and not part of the stability promise. Use your frontend dev server (for example Vite) alongside the commands above.
-
-## Supported inputs
-
-- `--source` accepts a local Stellar CLI identity alias that can sign transactions; public `G...` addresses and secret keys are rejected
-- `--network` must match a network defined in `caatinga.config.ts`
-- Project commands require `caatinga.config.ts` in the working directory
-
-Unsupported input posture:
-
-- secret keys and seed phrases are not supported CLI inputs
-- undocumented private flags, internal repo paths, and hidden commands are not part of the package contract
-
-## Error behavior
-
-`@caatinga/cli` emits documented `CAATINGA_*` error codes for automation. Match on the error code, not human-readable text.
-
-Common codes:
-
-- `CAATINGA_CONFIG_NOT_FOUND`, `CAATINGA_INVALID_CONFIG`
-- `CAATINGA_STELLAR_CLI_NOT_FOUND`, `CAATINGA_UNSUPPORTED_CLI_VERSION`
-- `CAATINGA_BUILD_FAILED`, `CAATINGA_DEPLOY_FAILED`, `CAATINGA_BINDINGS_FAILED`, `CAATINGA_INVOKE_FAILED`
-- `CAATINGA_CONTRACT_ID_NOT_FOUND`, `CAATINGA_SOURCE_ACCOUNT_REQUIRED`, `CAATINGA_UNSAFE_SOURCE_ACCOUNT`
-- `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`, `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
-- `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`, `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
-- `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`
-- `CAATINGA_TEMPLATE_MANIFEST_NOT_FOUND`, `CAATINGA_TEMPLATE_INCOMPATIBLE`
-
-Full table: [docs/errors.md](https://github.com/Dione-b/caatinga/blob/main/docs/errors.md)
-
-## Browser and client apps
-
-For single-invoker wallet-backed invocation in the browser, use [`@caatinga/client`](https://www.npmjs.com/package/@caatinga/client) with generated bindings and `caatinga.artifacts.json`. Multi-signer / `signAuthEntry` orchestration is not supported until v1.0 — see [Client docs](https://github.com/Dione-b/caatinga/blob/main/docs/client.md#single-invoker-scope-until-v10).
-
-ZK workflows use dev-ceremony guardrails on mainnet — see [ZK module](https://github.com/Dione-b/caatinga/blob/main/docs/zk.md#production-guardrails).
+Use [`@caatinga/client`](https://www.npmjs.com/package/@caatinga/client) with generated bindings and `caatinga.artifacts.json`. Single-invoker scope until v1.0 — see [Client docs](https://github.com/Dione-b/caatinga/blob/main/docs/client.md#single-invoker-scope-until-v10).
 
 ## Relationship to `@caatinga/core`
 
-`@caatinga/cli` is the supported end-user entrypoint. It stays thin and delegates config loading, artifacts, command orchestration, Stellar CLI version checks, and shared errors to `@caatinga/core`.
-
-Prefer the CLI contract over importing `@caatinga/core` directly unless you are building advanced tooling on Caatinga internals.
-
-## Versioning and stability
-
-Stability applies to the documented commands, inputs, templates bundled with the published CLI, and `CAATINGA_*` error codes.
-
-Undocumented internals, private module paths, and hidden commands such as `caatinga dev` are not part of the stability promise.
-
-Further reference: [CLI docs](https://github.com/Dione-b/caatinga/blob/main/docs/cli.md), [config](https://github.com/Dione-b/caatinga/blob/main/docs/config.md), [Stellar CLI version contract](https://github.com/Dione-b/caatinga/blob/main/docs/stellar-cli-version-contract.md).
+The CLI delegates config, artifacts, orchestration, and errors to `@caatinga/core`. Prefer the CLI contract over importing core directly unless you are building advanced tooling.

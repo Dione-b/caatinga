@@ -13,55 +13,9 @@ Tests are colocated with source files and use `*.test.ts`, for example `packages
 
 ## Current release
 
-Published on npm (confirm with `npm view @caatinga/cli dist-tags`):
-
-- **`latest`**: **`3.5.1`** (stable; includes `caatinga setup`, post-deploy hooks, `wire`, `sync-env`)
-- **`next`**: **`3.5.1`** (same as `latest`)
-
-Repository packages are version **`3.5.1`**.
-
-Highlights queued for the `3.5.x` line:
-
-- Declarative multi-contract workflow: `${source.address}` deploy arg placeholder,
-  `buildRoot` workspace builds, `postDeploy` hooks via `caatinga wire`, and
-  `frontend.envFile` / `frontend.env` sync via `caatinga sync-env`. Full graph deploys
-  run wire and env sync automatically unless `--no-wire` or `--no-sync-env` is passed.
-- `3.5.1`: retry transient post-deploy hook failures (TxBadSeq, timeouts, connection
-  resets) with exponential backoff during `caatinga wire` and after `caatinga deploy`.
-
-Highlights from the `3.4.x` line:
-
-- `3.4.0`: add `caatinga setup`, a one-step bootstrap (Node check, Rust/`rustup`,
-  `wasm32v1-none` target, version-pinned Stellar CLI, funded local identity) for fresh
-  machines.
-
-Highlights from the `3.3.x` line:
-
-- `3.3.1`: fix four CLI bugs across `zk init`, `read`, and `doctor`; advisory doctor
-  deploy check; transient deploy retry; honest guardrails; VitePress docs site.
-- `3.3.0`: production readiness remediation — pre-publish gate, lint/docs checks.
-
-Highlights from the `3.0.0` line:
-
-- Node floor raised to **22** (`.nvmrc`, `engines`, CI workflows) for `@stellar/stellar-sdk` v16.
-- `caatinga generate` uses **`npx @stellar/stellar-sdk generate`** (no Stellar CLI for bindings).
-- Templates (`react-vite-counter`, `zk-starter`) on **`@stellar/stellar-sdk ^16.0.1`**; import path is package root (`./contracts/generated/<contract>`).
-- **`CAATINGA_MULTI_AUTH_REQUIRED`** for delegated AddressV2 / non-invoker auth entries.
-
-Highlights from the `2.x` line:
-
-- Replaces the hard Stellar CLI upper bound (`27.0.0`) with a feature-aware
-  compatibility check: the hard floor (`23.0.0`) is the only hard failure, and the
-  last-tested version is now advisory. See `docs/stellar-cli-version-contract.md`.
-- `2.4.5`: feedback fixes — `--source` on `zk invoke`, multi-contract `build`, embedded VK generation, `CAATINGA_ZK_VERIFICATION_FAILED`
-- `2.4.4`: align official templates with current core release, fix ci-snapshot-pack core version capture, narrow consumer isolation deprecated-dependency checks
-- `2.4.0`: `init --minimal`, `caatinga read`, doctor dependencies check, `@caatinga/client/vite` wallet stubs, read-call hints, project scaffold docs
-- `2.3.1`: hybrid zk-starter browser verify, `@caatinga/zk/browser`, client `Result` unwrap in read/simulate
-- `2.3.0`: ZK workflow — `@caatinga/zk`, CLI `zk-*` commands, and `zk-starter` template for Circom Groth16 verifiers on Soroban
-- `2.2.1`: restore template install-time overrides (clean `npm install` / `pnpm install` without deprecated wallet SDK transitives)
-- `2.2.0`: `caatinga status`, deploy auto-generates bindings, binding freshness
-  markers, `@caatinga/client/react` (`WalletProvider`/`useWallet`), and template DX
-  (`ContractNotDeployed` gate, custom `WalletModal`, SWK `fetchAddress` fallback).
+- npm `latest` / `next`: confirm with `npm view @caatinga/cli dist-tags`
+- Repo packages: see root `package.json` and `packages/*/package.json`
+- Release history: `packages/cli/CHANGELOG.md`
 
 ## Build, Test, and Development Commands
 

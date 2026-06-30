@@ -1,6 +1,6 @@
 # Contributing to Caatinga
 
-Thank you for your interest in contributing. This document covers the essentials for getting your environment ready and submitting quality PRs.
+This document covers environment setup and PR expectations. Repository layout, build commands, version alignment, and template overrides are in [AGENTS.md](./AGENTS.md).
 
 ## Prerequisites
 
@@ -30,16 +30,7 @@ From the repo root, pass CLI arguments directly after `pnpm dev` (do not insert 
 
 ## Project Structure
 
-```
-packages/
-  core/       # Config loading, shell orchestration, error catalog, Stellar CLI integration
-  client/     # Browser/Node contract-client helpers and wallet adapters
-  cli/        # caatinga binary, command handlers
-  templates/  # Scaffold templates used by `caatinga init`
-docs/         # User-facing documentation and ADRs
-scripts/      # CI helpers and consumer isolation tests
-examples/     # Sample consumer applications
-```
+See [AGENTS.md — Project Structure & Module Organization](./AGENTS.md#project-structure--module-organization).
 
 ## Running Checks
 
@@ -102,8 +93,4 @@ The following are treated as **public contracts** — changes require a compatib
 
 ## Version Alignment
 
-Before pushing changes that touch tooling or CI:
-
-- Keep the `packageManager` field in root `package.json` as the canonical pnpm version source.
-- Do not pin a separate pnpm version in workflow files; `pnpm/action-setup@v4` reads `packageManager` automatically.
-- After dependency changes, run `pnpm install` locally and commit the updated `pnpm-lock.yaml`.
+See [AGENTS.md — Version alignment before commit](./AGENTS.md#version-alignment-before-commit).

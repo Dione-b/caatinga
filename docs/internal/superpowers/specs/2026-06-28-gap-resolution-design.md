@@ -1,6 +1,6 @@
 # Caatinga Gap Resolution — Design Spec
 
-> Resolves Gaps 1, 3, 5, 8, and 13 from `docs/CAATINGA_GAPS.md`.
+> Resolves Gaps 1, 3, 5, 8, and 13 from `docs/internal/CAATINGA_GAPS.md`.
 >
 > **Date:** 2026-06-28
 > **Status:** Draft

@@ -1,89 +1,34 @@
-# **PROJECT_NAME**
+# react-vite-counter
 
-Caatinga counter dApp for Stellar/Soroban.
+Caatinga counter dApp template — Vite, React, Soroban counter contract, and `@caatinga/client` wallet integration.
 
-## CLI Flow
+## CLI flow
 
 ```bash
-npm install          # or: pnpm install
-npm test             # run Rust contract tests
-cargo test --manifest-path contracts/counter/Cargo.toml
+npm install
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga generate counter --network testnet
-npx caatinga invoke counter.increment --network testnet --source alice
-npm run dev          # or: pnpm dev
+npm run dev
 ```
 
-Run `build` before `deploy` (WASM required) and `deploy` before `generate` (contract ID required).
+Run `build` before `deploy` and `deploy` before `generate`. The checked-in binding stub under `src/contracts/generated/counter/` is a placeholder — run `caatinga generate` before `npm run dev`.
 
-The checked-in binding stub under `src/contracts/generated/counter/` is a placeholder so the template type-checks before you run `caatinga generate`. Run `caatinga generate` before `npm run dev` so the browser uses real `@stellar/stellar-sdk generate` bindings instead of the stub.
+Use a local Stellar CLI identity alias for `--source`; public `G...` addresses and secret keys are rejected.
 
-Use a local Stellar CLI identity alias for `--source`; public `G...` addresses, seed phrases, and secret keys are rejected for signing operations.
+## Client integration
+
+After `caatinga generate`, wire bindings via `@caatinga/client`. See [Client docs](https://github.com/Dione-b/caatinga/blob/main/docs/client.md) and [Template project tutorial](https://github.com/Dione-b/caatinga/blob/main/docs/tutorials/template-project.md).
+
+Single-invoker browser flows only until v1.0 — see [Client scope](https://github.com/Dione-b/caatinga/blob/main/docs/client.md#single-invoker-scope-until-v10).
 
 ## Package managers
 
-Templates default to npm, but pnpm 10.26+/11.x is supported via the shipped `pnpm-workspace.yaml` (`allowBuilds.esbuild: true`, `blockExoticSubdeps: false`).
-
-Package scripts wrap the CLI:
+Templates default to npm. pnpm 10.26+/11.x is supported via the shipped `pnpm-workspace.yaml`.
 
 ```bash
 npm run caatinga:build
 npm run caatinga:deploy -- --network testnet --source alice
-npm run caatinga:generate -- --network testnet
 ```
 
-With pnpm, use `pnpm run caatinga:build` (and the same pattern for deploy/generate). `npx caatinga build counter` works without going through the package manager.
-
-## Client Smoke Path
-
-> **Single-invoker only until v1.0** — `@caatinga/client` wallet `invoke` does not orchestrate `signAuthEntry` for delegated credentials (`CAATINGA_MULTI_AUTH_REQUIRED`).
-
-After `caatinga generate`, wire generated bindings to the client:
-
-```ts
-import { createCaatingaClient } from "@caatinga/client";
-import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
-
-const wallet = createStellarWalletsKitAdapter();
-
-export const caatingaClient = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
-  artifacts,
-  wallet,
-  contracts: {
-    counter: {
-      binding: Counter,
-    },
-  },
-});
-```
-
-Build XDR without wallet signing:
-
-```ts
-const tx = await caatingaClient.contract("counter").buildXdr("increment");
-console.log(tx.preparedXdr);
-```
-
-Read the on-chain counter through simulation:
-
-```ts
-const count = await caatingaClient.contract("counter").read<number>("get");
-console.log(count);
-```
-
-Invoke through a connected wallet:
-
-```ts
-const result = await caatingaClient.contract("counter").invoke("increment", {
-  debugXdr: true,
-});
-console.log(result.transactionHash);
-```
+With pnpm: `pnpm run caatinga:build` (same pattern for deploy/generate).

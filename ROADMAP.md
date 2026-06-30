@@ -2,19 +2,13 @@
 
 Caatinga is alpha software. The current goal is to stabilize the developer workflow before expanding into larger wallet, indexer, and framework abstractions.
 
-## Alpha
+## Alpha (in progress)
 
 - Stabilize `init`, `doctor`, `build`, `deploy`, `generate`, `invoke`, and `read`.
-- Minimal project scaffold via `caatinga init --minimal` (shipped).
-- ZK workflow via `@caatinga/zk` and `zk-*` commands (shipped).
 - Improve README, tutorials, troubleshooting, and architecture docs.
 - Keep `CAATINGA_*` errors documented and actionable.
 - Add full counter-web browser example coverage.
 - Publish GitHub releases for all public tags.
-- Decouple the hard Stellar CLI version lock from the advisory last-tested version via `evaluateStellarCliCompatibility`; raise `STELLAR_CLI_LAST_TESTED_VERSION` without breaking consumer installs. (Shipped in `2.0.0`.)
-- `@caatinga/client/react` with `WalletProvider` + `useWallet` hooks (shipped).
-- Wallet adapter documentation beyond Freighter (shipped in `docs/wallets.md`).
-- Multi-contract deploy with dependencies via `dependsOn` and deploy-arg placeholders (shipped, ADR 0005).
 
 ## Production Readiness (in progress)
 
@@ -48,3 +42,7 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 - Multisig orchestration (browser `signAuthEntry` — single-invoker only until v1.0; see [docs/client.md](docs/client.md#single-invoker-scope-until-v10)).
 - Full indexer abstraction.
 - Framework-owned web runtime.
+
+## Shipped (reference)
+
+Already available in current releases: `init --minimal`, ZK workflow (`@caatinga/zk`, `zk-*` commands), `@caatinga/client/react`, multi-contract deploy with `dependsOn`, Stellar CLI feature-aware compatibility (ADR 0001), wallet adapter docs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [ADRs](./docs/adr/index.md).
