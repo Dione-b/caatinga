@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateContractGraph } from "./validate-contract-graph.js";
 
 const DeployArgValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 
@@ -62,6 +63,8 @@ export const CaatingaConfigSchema = z.object({
     .optional(),
   postDeploy: z.array(PostDeployHookSchema).optional(),
   zk: ZkConfigSchema,
+}).superRefine((config) => {
+  validateContractGraph(config.contracts);
 });
 
 export type PostDeployHook = z.infer<typeof PostDeployHookSchema>;

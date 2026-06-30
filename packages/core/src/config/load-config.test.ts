@@ -100,6 +100,39 @@ describe("loadConfig", () => {
     await expect(loadConfig({ cwd: tmpDir })).rejects.toThrow("syntax boom");
   });
 
+  it("should_throw_INVALID_CONFIG_when_contract_graph_has_missing_dependsOn_for_deployArgs", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
+    await writeFile(
+      path.join(tmpDir, "caatinga.config.ts"),
+      `export default {
+  project: "tmp-app",
+  defaultNetwork: "testnet",
+  contracts: {
+    token: { path: "./contracts/token", wasm: "./target/token.wasm" },
+    marketplace: {
+      path: "./contracts/marketplace",
+      wasm: "./target/marketplace.wasm",
+      dependsOn: [],
+      deployArgs: { tokenContractId: "\${contracts.token.contractId}" }
+    }
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    }
+  },
+  frontend: { bindingsOutput: "./src/gen" }
+};
+`,
+      "utf8"
+    );
+
+    await expect(loadConfig({ cwd: tmpDir })).rejects.toMatchObject({
+      code: CaatingaErrorCode.INVALID_CONFIG,
+    });
+  });
+
   it("should_throw_CAATINGA_DEPENDENCIES_NOT_INSTALLED_when_caatinga_core_is_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
     await writeFile(
