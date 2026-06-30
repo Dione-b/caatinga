@@ -6,42 +6,36 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 
 ## Start here
 
-| Doc                                                             | What you get                                            |
-| --------------------------------------------------------------- | ------------------------------------------------------- |
-| [Getting started](./getting-started.md)                         | Install, scaffold, and the CLI → browser flow           |
-| [Choosing a project scaffold](./tutorials/project-scaffolds.md) | Template vs minimal vs ZK — pick your starting path     |
-| [Template project](./tutorials/template-project.md)             | `caatinga init` walkthrough                             |
-| [Minimal project](./tutorials/minimal-project.md)               | `caatinga init --minimal` CLI-only                      |
-| [ZK project](./tutorials/zk-project.md)                         | `caatinga zk init` walkthrough                          |
-| [From Zero to Testnet](./tutorials/from-zero-to-testnet.md)     | Full walkthrough: scaffold → deploy → invoke on testnet |
-| [Cheatsheet](./cheatsheet.md)                                   | The whole command loop and flags on one page            |
+- [Getting started](./getting-started.md) — install, scaffold, CLI-to-browser flow
+- [Choosing a project scaffold](./tutorials/project-scaffolds.md) — template vs minimal vs ZK
+- [Template project](./tutorials/template-project.md) — `caatinga init` walkthrough
+- [Minimal project](./tutorials/minimal-project.md) — `caatinga init --minimal` CLI-only
+- [ZK project](./tutorials/zk-project.md) — `caatinga zk init` walkthrough
+- [From Zero to Testnet](./tutorials/from-zero-to-testnet.md) — scaffold, deploy, invoke on testnet
+- [Cheatsheet](./cheatsheet.md) — command loop and flags on one page
 
 ## Reference
 
-| Doc                                 | What you get                                                                                   |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [CLI](./cli.md)                     | Every command: init, doctor, build, deploy, wire, sync-env, generate, status, invoke, read, zk |
-| [ZK module](./zk.md)                | Circom + Groth16 scaffold, build, prove, and verifier invoke                                   |
-| [Config](./config.md)               | `caatinga.config.ts` schema: contracts, networks, frontend, `postDeploy`, workspace builds     |
-| [Client](./client.md)               | `@caatinga/client`: read/simulate/invoke/XDR against generated bindings                        |
-| [Soroban types](./soroban-types.md) | Symbol vs string and other binding footguns                                                    |
-| [Wallets](./wallets.md)             | Adapter contract, Stellar Wallets Kit, wallet session, React hooks                             |
-| [Templates](./templates.md)         | Official templates and their package-manager quirks                                            |
-| [Errors](./errors.md)               | Every public `CAATINGA_*` error code with fixes                                                |
-| [AI Reference](./for-llms.md)       | Self-contained reference optimized for LLM consumption (also at `/llms-full.txt`)              |
+- [CLI](./cli.md) — init, doctor, build, deploy, wire, sync-env, generate, status, invoke, read, zk
+- [ZK module](./zk.md) — Circom + Groth16 scaffold, build, prove, verifier invoke
+- [Config](./config.md) — `caatinga.config.ts` schema
+- [Client](./client.md) — `@caatinga/client` read/simulate/invoke/XDR
+- [Soroban types](./soroban-types.md) — binding footguns
+- [Wallets](./wallets.md) — adapters, Stellar Wallets Kit, React hooks
+- [Templates](./templates.md) — official templates and package-manager quirks
+- [Errors](./errors.md) — public `CAATINGA_*` error codes
+- [LLM reference](./for-llms.md) — self-contained reference for LLM consumption (also at `/llms-full.txt`)
 
 ## Internals & process
 
-| Doc                                                               | What you get                               |
-| ----------------------------------------------------------------- | ------------------------------------------ |
-| [Architecture](./architecture.md)                                 | Package layout, layering rules, data flow  |
-| [Stellar CLI version contract](./stellar-cli-version-contract.md) | Supported Stellar CLI range and advisories |
-| [Stellar SDK version contract](./stellar-sdk-version-contract.md) | Supported `@stellar/stellar-sdk` range     |
-| [Signing strategy](./signing-strategy.md)                         | CLI and browser signing models             |
-| [Production readiness](./production-readiness.md)                 | Pre-mainnet checklist                      |
-| [Packages](./packages.md)                                         | What each npm package contains             |
-| [ADRs](./adr/index.md)                                            | Architecture decision records              |
-| [stellar-album case study](./case-studies/stellar-album.md)       | Multi-contract workflow with hooks and env |
+- [Architecture](./architecture.md) — package layout, layering, data flow
+- [Stellar CLI version contract](./stellar-cli-version-contract.md)
+- [Stellar SDK version contract](./stellar-sdk-version-contract.md)
+- [Signing strategy](./signing-strategy.md)
+- [Production readiness](./production-readiness.md)
+- [Packages](./packages.md)
+- [ADRs](./adr/index.md)
+- [stellar-album case study](./case-studies/stellar-album.md)
 
 For maintainers: release process, publish checklists, testing policy, and internal specs live in [`docs/internal/`](./internal/) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 

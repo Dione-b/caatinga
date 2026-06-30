@@ -421,7 +421,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 3. **Full graph deploy auto-runs `wire` + `sync-env`** — pass `--no-wire` / `--no-sync-env` to skip.
 4. **Browser invoke is single-invoker only until v1.0** — multi-signer (`signAuthEntry`) is application code and throws `CAATINGA_MULTI_AUTH_REQUIRED`.
 5. **ZK on mainnet is blocked by default** — dev ceremony artifacts require `--allow-dev-ceremony` (not for production).
-6. **zcash** — Install node 22+, `caatinga setup` does the rest.
+6. **Fresh machine** — Install Node 22+, `caatinga setup` does the rest.
 7. **Errors are public API** — automation must parse `CAATINGA_*` codes, not message text.
 8. **`read()` vs `invoke()`** — `read` = simulate (no sign), `invoke` = sign + submit.
 9. **Wallet adapters must reject on dismissal** — never leave promise pending.

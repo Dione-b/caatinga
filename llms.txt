@@ -14,7 +14,7 @@
 - [Cheatsheet](docs/cheatsheet.md): Command loop, flags, binding freshness — all on one page.
 - [Packages](docs/packages.md): `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk` — subpath exports.
 - [ZK module](docs/zk.md): Circom Groth16 — BLS12-381, dev ceremony, proof, on-chain verification.
-- [AI-optimized reference](docs/for-llms.md): Self-contained reference optimized for LLM consumption.
+- [LLM reference](docs/for-llms.md): Self-contained reference for LLM consumption.
 
 ## Tutorials
 
