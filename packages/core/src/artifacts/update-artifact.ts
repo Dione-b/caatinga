@@ -1,6 +1,8 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type {
   ArtifactSupersedeReason,
+  ArtifactUpgradeStrategy,
+  ArtifactUpgradeType,
   CaatingaArtifacts,
   ContractArtifact,
 } from "./artifact.schema.js";
@@ -8,11 +10,14 @@ import type {
 export type UpdateArtifactOptions = {
   dependencyGraph?: Record<string, string[]>;
   supersedeReason?: ArtifactSupersedeReason;
+  upgradeType?: ArtifactUpgradeType;
+  upgradeStrategy?: ArtifactUpgradeStrategy;
 };
 
 function appendHistory(
   existing: ContractArtifact | undefined,
-  reason: ArtifactSupersedeReason | undefined
+  reason: ArtifactSupersedeReason | undefined,
+  upgradeType?: ArtifactUpgradeType
 ): ContractArtifact["history"] {
   if (!existing || !reason) {
     return existing?.history;
@@ -25,6 +30,7 @@ function appendHistory(
     deployedAt: existing.deployedAt,
     supersededAt,
     reason,
+    ...(upgradeType ? { upgradeType } : {}),
   };
 
   return [...(existing.history ?? []), entry];
@@ -39,9 +45,17 @@ export function updateArtifact(
 ): CaatingaArtifacts {
   const existingNetwork = artifacts.networks[networkName] ?? { contracts: {}, dependencyGraph: {} };
   const existingContract = existingNetwork.contracts[contractName];
-  const history = appendHistory(existingContract, options.supersedeReason);
+  const history = appendHistory(
+    existingContract,
+    options.supersedeReason,
+    options.upgradeType
+  );
 
   const nextVersion = artifacts.version === 1 && options.supersedeReason ? 2 : artifacts.version;
+  const upgradeStrategy =
+    options.upgradeStrategy ??
+    contractArtifact.upgradeStrategy ??
+    existingContract?.upgradeStrategy;
 
   return {
     ...artifacts,
@@ -55,6 +69,7 @@ export function updateArtifact(
           ...existingNetwork.contracts,
           [contractName]: {
             ...contractArtifact,
+            ...(upgradeStrategy ? { upgradeStrategy } : {}),
             history: history ?? contractArtifact.history,
           },
         },

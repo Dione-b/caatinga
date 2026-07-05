@@ -57,6 +57,7 @@ export { runCommand, type RunCommandResult } from "./shell/run-command.js";
 export { resolveSubprocessEnv, isCargoBinMissingFromPath } from "./shell/resolve-subprocess-env.js";
 export { checkBinary } from "./shell/check-binary.js";
 export { parseContractId } from "./stellar-cli/parse-contract-id.js";
+export { parseWasmHash } from "./stellar-cli/parse-wasm-hash.js";
 export {
   checkStellarCliVersion,
   type CheckStellarCliVersionOptions,
@@ -101,6 +102,12 @@ export { resolveDefaultContractName } from "./contracts/resolve-default-contract
 export { buildContract, type BuildContractOptions } from "./contracts/build-contract.js";
 export { buildWorkspace, type BuildWorkspaceOptions } from "./contracts/build-workspace.js";
 export { deployContract, type DeployContractOptions } from "./contracts/deploy-contract.js";
+export { uploadWasm, type UploadWasmOptions, type UploadWasmResult } from "./contracts/upload-wasm.js";
+export {
+  upgradeContractInPlace,
+  type UpgradeContractOptions,
+  type UpgradeContractResult,
+} from "./contracts/upgrade-contract.js";
 export {
   deployContractGraph,
   type DeployContractGraphResult,

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { evaluateStellarCliCompatibility } from "./compat.js";
 import { parseContractId } from "./parse-contract-id.js";
+import { parseWasmHash } from "./parse-wasm-hash.js";
 import { parseStellarCliVersion } from "./version.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -15,6 +16,7 @@ type MatrixEntry = {
   status: "blocked" | "supported" | "last-tested" | "untested";
   versionFixture?: string;
   deployFixture?: string;
+  uploadFixture?: string;
 };
 
 const MATRIX: MatrixEntry[] = [
@@ -47,6 +49,7 @@ const MATRIX: MatrixEntry[] = [
     status: "last-tested",
     versionFixture: "v27.0.0/version.txt",
     deployFixture: "v27.0.0/deploy-success.txt",
+    uploadFixture: "v27.0.0/upload-success.txt",
   },
 ];
 
@@ -92,6 +95,17 @@ describe("stellar CLI version matrix (fixtures)", () => {
 
         const output = await readFixture(entry.deployFixture);
         expect(parseContractId(output)).toBe(CONTRACT_ID);
+      });
+
+      it("should_parse_upload_wasm_hash_fixture", async () => {
+        if (!entry.uploadFixture || entry.status === "blocked") {
+          return;
+        }
+
+        const output = await readFixture(entry.uploadFixture);
+        expect(parseWasmHash(output)).toBe(
+          "6ddb28e0980f643bb97350f7e3bacb0ff1fe74d846c6d4f2c625e766210fbb5b"
+        );
       });
     });
   }

@@ -41,6 +41,24 @@ npm run dev                                          # frontend against the depl
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
+### In-place upgrade (admin-gated contracts)
+
+When the contract exposes `upgrade(new_wasm_hash)` with admin auth (same `contractId`, new WASM):
+
+```bash
+npx caatinga upgrade counter --network testnet --source alice
+npx caatinga upgrade counter --if-changed --source alice --network testnet
+npx caatinga upgrade counter --source alice --generate --sync-env   # optional post-steps
+```
+
+For a **new contract instance** (no in-place entrypoint), use redeploy history instead:
+
+```bash
+npx caatinga deploy counter --upgrade --network testnet --source alice
+```
+
+See [Contract upgrade](./tutorials/contract-upgrade.md).
+
 `generate` is now a recovery/CI command — deploy runs it for you:
 
 ```bash
@@ -78,6 +96,7 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 | `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity       |
 | `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts        |
 | `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings            |
+| `caatinga upgrade <contract>`         | In-place WASM upgrade on existing `contractId` (upload + invoke)          |
 | `caatinga wire`                     | Run configured `postDeploy` hooks against deployed contracts              |
 | `caatinga sync-env`                 | Write configured frontend env vars from deploy artifacts                  |
 | `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs               |
@@ -93,10 +112,15 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 
 | Flag                    | Commands                                                              | Description                                                    |
 | ----------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `--network <name>`      | doctor, deploy, generate, status, invoke, wire, smoke, regression, ci | Network from `caatinga.config.ts`                              |
-| `--source <identity>`   | doctor, deploy, invoke, wire, smoke, regression, ci, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
+| `--network <name>`      | doctor, deploy, upgrade, generate, status, invoke, wire, smoke, regression, ci | Network from `caatinga.config.ts`                              |
+| `--source <identity>`   | doctor, deploy, upgrade, invoke, wire, smoke, regression, ci, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
 | `--force`               | deploy                                                                | Redeploy even when artifacts already hold a contract ID        |
-| `--if-changed`          | deploy, regression                                                    | Skip deploy when local WASM hash matches artifact              |
+| `--upgrade`             | deploy                                                                | Redeploy with upgrade history (new `contractId`)               |
+| `--if-changed`          | deploy, upgrade, regression                                           | Skip when local WASM hash matches artifact                     |
+| `--expected-hash`       | upgrade                                                               | Fail before upload if local WASM hash differs                  |
+| `--no-build`            | upgrade                                                               | Skip `caatinga build` before upload                            |
+| `--generate`            | upgrade                                                               | Regenerate bindings after successful in-place upgrade          |
+| `--sync-env`            | upgrade                                                               | Sync frontend env after successful in-place upgrade            |
 | `--no-generate`         | deploy                                                                | Skip automatic bindings generation (CI without binding needs)  |
 | `--no-wire`             | deploy                                                                | Skip automatic `postDeploy` hooks after a full graph deploy    |
 | `--no-sync-env`         | deploy                                                                | Skip automatic frontend env sync after a full graph deploy     |

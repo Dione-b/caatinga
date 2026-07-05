@@ -83,6 +83,61 @@ describe("updateArtifact", () => {
     expect(updated.networks.testnet.contracts.counter.history?.[0]?.contractId).toBe("COLD");
   });
 
+  it("appends_in_place_history_with_same_contract_id", () => {
+    const artifacts: CaatingaArtifacts = {
+      project: "app",
+      version: 2,
+      networks: {
+        testnet: {
+          contracts: {
+            sticker: {
+              contractId: "CSAME",
+              wasmHash: "oldhash",
+              deployedAt: "2026-05-11T00:00:00.000Z",
+              sourcePath: "./contracts/sticker",
+              wasmPath: "./target/sticker.wasm",
+              dependencies: [],
+              resolvedDeployArgs: {},
+              upgradeStrategy: "in-place",
+            },
+          },
+          dependencyGraph: {},
+        },
+      },
+    };
+
+    const updated = updateArtifact(
+      artifacts,
+      "testnet",
+      "sticker",
+      {
+        contractId: "CSAME",
+        wasmHash: "newhash",
+        deployedAt: "2026-06-21T00:00:00.000Z",
+        sourcePath: "./contracts/sticker",
+        wasmPath: "./target/sticker.wasm",
+        dependencies: [],
+        resolvedDeployArgs: {},
+        upgradeStrategy: "in-place",
+      },
+      {
+        supersedeReason: "upgrade",
+        upgradeType: "in-place",
+        upgradeStrategy: "in-place",
+      }
+    );
+
+    expect(updated.networks.testnet.contracts.sticker.contractId).toBe("CSAME");
+    expect(updated.networks.testnet.contracts.sticker.wasmHash).toBe("newhash");
+    expect(updated.networks.testnet.contracts.sticker.history).toHaveLength(1);
+    expect(updated.networks.testnet.contracts.sticker.history?.[0]).toMatchObject({
+      contractId: "CSAME",
+      wasmHash: "oldhash",
+      reason: "upgrade",
+      upgradeType: "in-place",
+    });
+  });
+
   it("throws_when_rollback_target_missing_from_history", () => {
     const artifacts: CaatingaArtifacts = {
       project: "app",

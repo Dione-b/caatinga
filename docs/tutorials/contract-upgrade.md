@@ -1,8 +1,41 @@
 # Contract Upgrade
 
-Soroban contracts are immutable on-chain. Upgrading contract logic means **deploying a new instance** and updating your artifacts — not patching the existing `contractId`.
+Caatinga supports two upgrade strategies. Choose based on whether your contract implements an admin-gated `upgrade(new_wasm_hash)` entrypoint.
 
-## Recommended workflow
+| Strategy | Command | On-chain effect | `contractId` |
+| -------- | ------- | --------------- | -------------- |
+| **In-place** | `caatinga upgrade` | Replaces WASM on the existing instance | **Preserved** |
+| **Redeploy** | `caatinga deploy --upgrade` | Deploys a new instance | **New ID** |
+
+## In-place upgrade (admin-gated contracts)
+
+Use when the contract calls `env.deployer().update_current_contract_wasm()` behind admin auth (for example stellar-album-style `upgrade()` helpers).
+
+```bash
+# Build, upload WASM, invoke upgrade(), update artifacts (same contractId)
+caatinga upgrade sticker --network testnet --source deployer
+
+# Skip when local WASM hash already matches artifacts
+caatinga upgrade sticker --if-changed --source deployer --network testnet
+
+# Optional: regenerate bindings and sync frontend env
+caatinga upgrade sticker --source deployer --network testnet --generate --sync-env
+
+# Fail early if local WASM hash does not match an expected value
+caatinga upgrade sticker --source deployer --expected-hash abc123... --network testnet
+```
+
+Requirements:
+
+- Contract already deployed (`caatinga.artifacts.json` has a `contractId`)
+- Contract exposes `upgrade(new_wasm_hash)` (Caatinga default; admin must authorize)
+- `--source` must be the admin identity that can sign the upgrade transaction
+
+Artifact history records prior WASM hashes with the **same** `contractId` and `upgradeType: "in-place"`. Rollback to a prior WASM hash via `caatinga rollback` is not supported for in-place history yet — rebuild from git and run `caatinga upgrade` again.
+
+## Redeploy upgrade (new contract instance)
+
+Use when the contract has **no** in-place upgrade entrypoint, or when you intentionally migrate to a new instance.
 
 ```bash
 # 1. Build new WASM
@@ -19,7 +52,7 @@ caatinga inspect my-contract --network testnet
 caatinga status --network testnet
 ```
 
-`--upgrade` is a semantic alias for `--force` that records the prior `contractId` in artifact history (schema v2).
+`deploy --upgrade` is a semantic alias for `--force` that records the prior `contractId` in artifact history (schema v2). It does **not** call `upgrade()` on the existing contract.
 
 ## Artifact history
 
@@ -33,13 +66,15 @@ After the first `--upgrade` or `--force` redeploy on a v1 artifacts file, Caatin
       "contracts": {
         "counter": {
           "contractId": "CNEW...",
+          "upgradeStrategy": "redeploy",
           "history": [
             {
               "contractId": "COLD...",
               "wasmHash": "...",
               "deployedAt": "...",
               "supersededAt": "...",
-              "reason": "upgrade"
+              "reason": "upgrade",
+              "upgradeType": "new-contract"
             }
           ]
         }
@@ -49,15 +84,17 @@ After the first `--upgrade` or `--force` redeploy on a v1 artifacts file, Caatin
 }
 ```
 
+In-place upgrades keep the same `contractId` and set `upgradeStrategy: "in-place"` with history entries that share that ID but record the previous `wasmHash`.
+
 Migrate existing projects without redeploying:
 
 ```bash
 caatinga migrate artifacts
 ```
 
-## Logical rollback
+## Logical rollback (redeploy only)
 
-Restore a prior `contractId` in artifacts (does **not** change on-chain state):
+Restore a prior `contractId` in artifacts after a **redeploy** upgrade (does **not** change on-chain state):
 
 ```bash
 caatinga rollback counter --to COLD... --network testnet
@@ -69,7 +106,7 @@ The previous on-chain deployment remains — only your **git-tracked artifact en
 caatinga generate counter --network testnet
 ```
 
-## Orphan contracts
+## Orphan contracts (redeploy)
 
 Each redeploy creates a new on-chain contract. Old instances are **orphaned** — they still exist but are no longer referenced in `caatinga.artifacts.json`. Plan for:
 
@@ -77,12 +114,15 @@ Each redeploy creates a new on-chain contract. Old instances are **orphaned** �
 - Communicating contract ID changes to integrators
 - Monitoring costs of abandoned instances (rent/storage)
 
-## When to use `--force` vs `--upgrade`
+In-place upgrades avoid orphan instances because the `contractId` stays the same.
 
-| Flag        | History reason   | Use case                                |
-| ----------- | ---------------- | --------------------------------------- |
-| `--upgrade` | `upgrade`        | Intentional contract version bump       |
-| `--force`   | `force-redeploy` | Recovery, accidental redeploy, CI reset |
+## When to use each command
+
+| Command / flag | History reason | Use case |
+| -------------- | -------------- | -------- |
+| `caatinga upgrade` | `upgrade` + `upgradeType: in-place` | Admin-gated WASM replacement on existing ID |
+| `deploy --upgrade` | `upgrade` + `upgradeType: new-contract` | Intentional version bump via new instance |
+| `deploy --force` | `force-redeploy` | Recovery, accidental redeploy, CI reset |
 
 ## Related docs
 

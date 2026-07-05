@@ -7,6 +7,8 @@ The CLI is intentionally thin. It delegates config, artifacts, command execution
 | Capability                        | Status                                                       |
 | --------------------------------- | ------------------------------------------------------------ |
 | Official frontend templates       | Vite + React only (`vite-react`)                             |
+| `caatinga upgrade`                | In-place WASM upgrade (upload + invoke `upgrade`)            |
+| `caatinga deploy --upgrade`         | Redeploy with new `contractId` + artifact history            |
 | `caatinga zk build`               | Single-party **dev** ceremony; blocked on mainnet by default |
 | `caatinga zk invoke --embed-vk`   | **Not supported** (experimental / end-to-end incomplete)     |
 | Browser `invoke` via wallet       | **Single-invoker only** until v1.0                           |
@@ -107,7 +109,7 @@ WASM drift and postDeploy alias advisories are **always advisory** — they prin
 change exit code. Doctor may also print a version matrix including `soroban-sdk` from each
 contract's `Cargo.toml`. Use `--all-networks` for a per-network deploy/bindings matrix.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--if-changed] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--upgrade] [--if-changed] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient testnet failures
@@ -136,6 +138,27 @@ the recovery command `npx caatinga generate --network <network>`.
 When deploying the **full contract graph** (no `contract` argument), Caatinga also runs configured
 `postDeploy` wiring hooks (`caatinga wire`) and writes `frontend.envFile` when configured
 (`caatinga sync-env`), unless `--no-wire` or `--no-sync-env` is passed.
+
+Use `deploy --upgrade` (alias for `--force` with upgrade history reason) when you want a **new
+contract instance** and artifact history keyed by prior `contractId`. For admin-gated in-place WASM
+replacement on the **existing** `contractId`, use `caatinga upgrade` instead.
+
+## `caatinga upgrade <contract> --source <identity> [--network testnet] [--if-changed] [--expected-hash <hash>] [--no-build] [--generate] [--sync-env]`
+
+Upgrades a deployed contract **in-place**: build (unless `--no-build`), `stellar contract upload`,
+then `stellar contract invoke … upgrade --new_wasm_hash <hash>` on the artifact's current
+`contractId`. The artifact keeps the same ID and records the previous `wasmHash` in `history[]`
+with `upgradeType: "in-place"`.
+
+Use `--if-changed` to skip when the local WASM hash already matches the artifact. Use
+`--expected-hash` to fail before upload when the local hash does not match. Pass `--generate` or
+`--sync-env` to refresh bindings or the frontend env after a successful upgrade (opt-in; unlike
+full deploy, upgrade does not run these automatically).
+
+Requires a contract that exposes an admin-gated `upgrade(new_wasm_hash)` entrypoint. If invoke
+fails, the CLI hints to use `caatinga deploy --upgrade` for redeploy-style upgrades. Upload
+failures exit with `CAATINGA_UPLOAD_FAILED`; missing hash in CLI output uses
+`CAATINGA_WASM_HASH_NOT_FOUND`.
 
 ## `caatinga wire [--network testnet] --source <identity>`
 

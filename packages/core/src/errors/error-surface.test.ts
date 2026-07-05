@@ -86,6 +86,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/contracts/deploy-contract.test.ts",
     trigger: "deployContract(",
   },
+  [CaatingaErrorCode.UPLOAD_FAILED]: {
+    file: "packages/core/src/contracts/upload-wasm.test.ts",
+    trigger: "uploadWasm(",
+  },
   [CaatingaErrorCode.BUILD_FAILED]: {
     file: "packages/core/src/contracts/build-contract.test.ts",
     trigger: "buildContract(",
@@ -117,6 +121,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
   [CaatingaErrorCode.CONTRACT_ID_NOT_FOUND]: {
     file: "packages/core/src/stellar-cli/parse-contract-id.test.ts",
     trigger: "parseContractId(",
+  },
+  [CaatingaErrorCode.WASM_HASH_NOT_FOUND]: {
+    file: "packages/core/src/stellar-cli/parse-wasm-hash.test.ts",
+    trigger: "parseWasmHash(",
   },
   [CaatingaErrorCode.CONTRACT_ARTIFACT_NOT_FOUND]: {
     file: "packages/client/src/artifacts/resolve-contract-id.test.ts",

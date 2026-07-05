@@ -239,7 +239,7 @@ export async function deployContract(options: DeployContractOptions) {
       dependencies,
       resolvedDeployArgs,
     },
-    { dependencyGraph, supersedeReason }
+    { dependencyGraph, supersedeReason, upgradeType: supersedeReason ? "new-contract" : undefined, upgradeStrategy: supersedeReason ? "redeploy" : undefined }
   );
   const artifactsPath = await writeArtifacts(nextArtifacts, cwd);
 

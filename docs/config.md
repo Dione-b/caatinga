@@ -220,6 +220,21 @@ After a deploy, each contract is recorded under
 | `wasmPath`           | string (min 1)                                | yes      | —       |                                          |
 | `dependencies`       | `string[]`                                    | no       | `[]`    | resolved dependency contract names       |
 | `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | deploy args after placeholder resolution |
+| `upgradeStrategy`    | `"in-place"` \| `"redeploy"`                  | no       | —       | set by `caatinga upgrade` or redeploy    |
+| `history`            | `ContractArtifactHistoryEntry[]`              | no       | —       | prior IDs / WASM hashes (schema v2)      |
+
+`ContractArtifactHistoryEntry` fields (optional on each history row):
+
+| Field           | Type                                          | Notes                                                                 |
+| --------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| `contractId`    | string                                        | prior on-chain ID (same as active for in-place upgrades)              |
+| `wasmHash`      | string                                        | prior WASM hash                                                       |
+| `deployedAt`    | ISO 8601                                      | when that version was active                                          |
+| `supersededAt`  | ISO 8601                                      | when replaced                                                         |
+| `reason`        | `"upgrade"` \| `"rollback"` \| `"force-redeploy"` | why it was superseded                                               |
+| `upgradeType`   | `"in-place"` \| `"new-contract"`                | in-place = same ID, new WASM; new-contract = redeploy               |
+
+See [Contract upgrade](./tutorials/contract-upgrade.md) for when to use `caatinga upgrade` vs `deploy --upgrade`.
 
 ### Multi-contract dependencies
 

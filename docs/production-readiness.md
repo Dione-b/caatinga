@@ -29,8 +29,9 @@ Run through each item; `caatinga doctor` covers several automatically.
 - **Verification:** `caatinga smoke`, `caatinga read --expect`, `caatinga regression` — post-deploy read checks with expect DSL.
 - **State inspection:** `caatinga status`, `caatinga inspect <contract>` — per-network deploy and binding state.
 - **Cost estimation:** `caatinga estimate deploy` — pre-deploy fee breakdown (advisory).
-- **Artifact history (v2):** prior `contractId`s preserved on `--force` / `--upgrade` redeploys.
-- **Rollback (logical):** `caatinga rollback <contract> --to <contractId>` — restore artifact entry (on-chain orphan warning applies).
+- **Artifact history (v2):** prior `contractId`s on redeploy (`deploy --upgrade` / `--force`); prior `wasmHash`es on in-place upgrade (`caatinga upgrade`).
+- **In-place upgrade:** `caatinga upgrade <contract>` — upload WASM + invoke admin-gated `upgrade()`; preserves `contractId`. See [Contract upgrade](./tutorials/contract-upgrade.md).
+- **Rollback (logical):** `caatinga rollback <contract> --to <contractId>` — restore artifact entry after **redeploy** upgrades (on-chain orphan warning applies). In-place WASM rollback is not supported yet.
 
 ## What Caatinga does not provide (alpha)
 
@@ -79,8 +80,9 @@ flowchart TD
 4. Use `deploy --if-changed` on testnet/staging to skip unchanged WASM.
 5. Run `caatinga smoke` after deploy on testnet.
 6. Commit `caatinga.artifacts.json` after every deploy.
-7. Use `--upgrade` (not blind `--force`) when redeploying contract logic.
-8. Document your signing alias and funding source outside the repo.
+7. Use `caatinga deploy --upgrade` (not blind `--force`) when redeploying to a **new contract instance**.
+8. Use `caatinga upgrade <contract>` when the contract exposes admin-gated in-place `upgrade(new_wasm_hash)` — preserves `contractId` and storage.
+9. Document your signing alias and funding source outside the repo.
 
 ## Multi-frontend projects
 

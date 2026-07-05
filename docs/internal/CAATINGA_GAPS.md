@@ -337,7 +337,7 @@ Se o stdout não bate com `expect`, lança `CAATINGA_POST_DEPLOY_VERIFY_FAILED`.
 
 ### Gap 14: WASM hash management (upload sem deploy)
 
-**Status:** Não suportado
+**Status:** Parcialmente suportado (v3.6.1+)
 
 **O que o Radox faz:**
 O WASM é uploaded separadamente do deploy. O hash fica em env var
@@ -352,11 +352,11 @@ SALE_WASM_HASH=<hex>  # usado por buildDeployXdr
 ```
 
 **O que o Caatinga faz:**
-`caatinga build` → `caatinga deploy` é pipeline acoplado.
-Não há separação entre upload de WASM e deploy de instância.
+- `caatinga build` → `caatinga deploy` continua acoplado para **primeiro deploy**.
+- **`caatinga upgrade`** usa `stellar contract upload` + invoke `upgrade()` para substituir WASM **in-place** no mesmo `contractId` (orquestrado; não expõe upload standalone).
+- `sync-env` suporta `.wasmHash` em `frontend.env`.
 
-**Impacto:** Para per-offer, o Radox precisa de upload único + N deploys.
-Caatinga não suporta este padrão.
+**Impacto restante:** upload WASM reutilizável **sem** upgrade/deploy (N instâncias com salts diferentes, per-offer Radox) ainda não orquestrado.
 
 ---
 

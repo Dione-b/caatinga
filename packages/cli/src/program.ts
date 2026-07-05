@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { registerBuildCommand } from "./commands/build.command.js";
 import { registerDeployCommand } from "./commands/deploy.command.js";
+import { registerUpgradeCommand } from "./commands/upgrade.command.js";
 import { registerDevCommand } from "./commands/dev.command.js";
 import { registerDoctorCommand } from "./commands/doctor.command.js";
 import { registerGenerateCommand } from "./commands/generate.command.js";
@@ -42,6 +43,7 @@ export function createProgram(): Command {
   registerDoctorCommand(program);
   registerBuildCommand(program);
   registerDeployCommand(program);
+  registerUpgradeCommand(program);
   registerGenerateCommand(program);
   registerInvokeCommand(program);
   registerReadCommand(program);

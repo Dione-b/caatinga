@@ -99,7 +99,8 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 | Command                        | Purpose                                                                  | Flags                                                                                                                                                                       |
 | ------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                           |
-| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
+| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
+| `caatinga upgrade <contract>`  | In-place WASM upgrade (upload + invoke `upgrade` on existing ID)       | `--network`, `--source`, `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                                      |
 | `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                     |
 | `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                 |
 | `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                             |
@@ -152,6 +153,8 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 - Transient testnet failures are retried with exponential backoff.
 - `caatinga doctor` checks deploy coverage (which contracts are deployed) but **never blocks on it**, even with `--strict`. `--strict` = `--strict-env` + `--strict-bindings` only.
 - `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
+- `caatinga upgrade` replaces WASM **in-place** (same `contractId`); `deploy --upgrade` redeploys to a **new** instance with history.
+- `upgrade --if-changed` skips when local WASM hash matches the artifact (no upload/invoke).
 - Expect DSL matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals` — shared by postDeploy, smoke, and `read --expect`.
 
 ---
@@ -282,6 +285,10 @@ Resolution happens after dependencies deploy. A cyclic dependency throws `CAATIN
 | `wasmPath`           | string   | yes              |                                          |
 | `dependencies`       | string[] | no, default `[]` | Resolved dependency contract names       |
 | `resolvedDeployArgs` | object   | no, default `{}` | Deploy args after placeholder resolution |
+| `upgradeStrategy`    | string   | no               | `"in-place"` or `"redeploy"`               |
+| `history`            | array    | no               | Prior versions (schema v2); see config doc |
+
+History entries include `contractId`, `wasmHash`, `deployedAt`, `supersededAt`, optional `reason`, and optional `upgradeType` (`"in-place"` \| `"new-contract"`).
 
 Schema **v2** is current. v1 files are auto-readable. Run `caatinga migrate artifacts` to bump version without redeploying.
 
@@ -405,6 +412,8 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 | `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` binary not in PATH           |
 | `CAATINGA_BUILD_FAILED`            | Contract build failed (Cargo error)    |
 | `CAATINGA_DEPLOY_FAILED`           | Deploy failed (Stellar CLI error)      |
+| `CAATINGA_UPLOAD_FAILED`           | WASM upload failed (`caatinga upgrade`) |
+| `CAATINGA_WASM_HASH_NOT_FOUND`     | Upload output missing WASM hash        |
 | `CAATINGA_BINDINGS_FAILED`         | Binding generation failed              |
 | `CAATINGA_INVOKE_FAILED`           | Contract invoke failed                 |
 | `CAATINGA_CONTRACT_NOT_FOUND`      | Unknown contract name in config        |

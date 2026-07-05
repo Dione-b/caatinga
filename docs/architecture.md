@@ -50,7 +50,7 @@ That does not mean hiding Stellar reality. Users keep a **stable Caatinga surfac
 
 1. **Alpha flow (current):** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
 2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then a dependent contract such as vault that injects the token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
-3. **Next:** upgrade / redeploy with **artifacts history** and clear migration story.
+3. **Shipped:** upgrade / redeploy with **artifacts history** — `caatinga deploy --upgrade` (new instance) and `caatinga upgrade` (in-place WASM replacement). See [Contract upgrade](./tutorials/contract-upgrade.md).
 
 ### Alpha flow diagram
 

@@ -1,0 +1,2 @@
+stellar contract upload --wasm target/wasm32v1-none/release/counter.wasm
+6ddb28e0980f643bb97350f7e3bacb0ff1fe74d846c6d4f2c625e766210fbb5b
