@@ -8,7 +8,7 @@ The CLI is intentionally thin. It delegates config, artifacts, command execution
 | --------------------------------- | ------------------------------------------------------------ |
 | Official frontend templates       | Vite + React only (`vite-react`)                             |
 | `caatinga upgrade`                | In-place WASM upgrade (upload + invoke `upgrade`)            |
-| `caatinga deploy --upgrade`         | Redeploy with new `contractId` + artifact history            |
+| `caatinga deploy --upgrade`       | Redeploy with new `contractId` + artifact history            |
 | `caatinga zk build`               | Single-party **dev** ceremony; blocked on mainnet by default |
 | `caatinga zk invoke --embed-vk`   | **Not supported** (experimental / end-to-end incomplete)     |
 | Browser `invoke` via wallet       | **Single-invoker only** until v1.0                           |

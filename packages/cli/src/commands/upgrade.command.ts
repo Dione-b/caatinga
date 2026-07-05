@@ -121,7 +121,9 @@ export function registerUpgradeCommand(program: Command): void {
               logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
               logger.info("");
               logger.info("Recover with:");
-              logger.info(`  npx caatinga generate ${result.contractName} --network ${networkName}`);
+              logger.info(
+                `  npx caatinga generate ${result.contractName} --network ${networkName}`
+              );
             }
           }
         })

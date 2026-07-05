@@ -96,19 +96,19 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 
 ### Build & Deploy
 
-| Command                        | Purpose                                                                  | Flags                                                                                                                                                                       |
-| ------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                           |
+| Command                        | Purpose                                                                  | Flags                                                                                                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                                        |
 | `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
-| `caatinga upgrade <contract>`  | In-place WASM upgrade (upload + invoke `upgrade` on existing ID)       | `--network`, `--source`, `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                                      |
-| `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                     |
-| `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                 |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                             |
-| `caatinga smoke`               | Run configured read-only smoke checks with expect DSL                    | `--network`, `--source`                                                                                                                                                     |
-| `caatinga regression`          | Recipe: test → build → deploy --if-changed → generate → smoke            | `--network`, `--source`, `--skip-*`                                                                                                                                         |
-| `caatinga ci run`              | CI helper: doctor → smoke                                                | `--network`, `--source`, `--strict`, `--skip-smoke`                                                                                                                         |
-| `caatinga identity export`     | Export Stellar CLI config as base64 tarball on stdout                    | `--path`                                                                                                                                                                    |
-| `caatinga identity import`     | Import base64 tarball file into Stellar CLI config                       | `[archive-file]`, `--path`                                                                                                                                                  |
+| `caatinga upgrade <contract>`  | In-place WASM upgrade (upload + invoke `upgrade` on existing ID)         | `--network`, `--source`, `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                                     |
+| `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                                  |
+| `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                              |
+| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                                          |
+| `caatinga smoke`               | Run configured read-only smoke checks with expect DSL                    | `--network`, `--source`                                                                                                                                                                  |
+| `caatinga regression`          | Recipe: test → build → deploy --if-changed → generate → smoke            | `--network`, `--source`, `--skip-*`                                                                                                                                                      |
+| `caatinga ci run`              | CI helper: doctor → smoke                                                | `--network`, `--source`, `--strict`, `--skip-smoke`                                                                                                                                      |
+| `caatinga identity export`     | Export Stellar CLI config as base64 tarball on stdout                    | `--path`                                                                                                                                                                                 |
+| `caatinga identity import`     | Import base64 tarball file into Stellar CLI config                       | `[archive-file]`, `--path`                                                                                                                                                               |
 
 ### Diagnostics & Status
 
@@ -276,15 +276,15 @@ Resolution happens after dependencies deploy. A cyclic dependency throws `CAATIN
 
 ### ContractArtifact fields
 
-| Field                | Type     | Required         | Notes                                    |
-| -------------------- | -------- | ---------------- | ---------------------------------------- |
-| `contractId`         | string   | yes              | On-chain deployed ID                     |
-| `wasmHash`           | string   | yes              | Hash of deployed WASM                    |
-| `deployedAt`         | ISO 8601 | yes              |                                          |
-| `sourcePath`         | string   | yes              |                                          |
-| `wasmPath`           | string   | yes              |                                          |
-| `dependencies`       | string[] | no, default `[]` | Resolved dependency contract names       |
-| `resolvedDeployArgs` | object   | no, default `{}` | Deploy args after placeholder resolution |
+| Field                | Type     | Required         | Notes                                      |
+| -------------------- | -------- | ---------------- | ------------------------------------------ |
+| `contractId`         | string   | yes              | On-chain deployed ID                       |
+| `wasmHash`           | string   | yes              | Hash of deployed WASM                      |
+| `deployedAt`         | ISO 8601 | yes              |                                            |
+| `sourcePath`         | string   | yes              |                                            |
+| `wasmPath`           | string   | yes              |                                            |
+| `dependencies`       | string[] | no, default `[]` | Resolved dependency contract names         |
+| `resolvedDeployArgs` | object   | no, default `{}` | Deploy args after placeholder resolution   |
 | `upgradeStrategy`    | string   | no               | `"in-place"` or `"redeploy"`               |
 | `history`            | array    | no               | Prior versions (schema v2); see config doc |
 
@@ -405,26 +405,26 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 
 ### Common CLI errors
 
-| Code                               | Trigger                                |
-| ---------------------------------- | -------------------------------------- |
-| `CAATINGA_CONFIG_NOT_FOUND`        | `caatinga.config.ts` not found         |
-| `CAATINGA_INVALID_CONFIG`          | Config failed validation               |
-| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` binary not in PATH           |
-| `CAATINGA_BUILD_FAILED`            | Contract build failed (Cargo error)    |
-| `CAATINGA_DEPLOY_FAILED`           | Deploy failed (Stellar CLI error)      |
+| Code                               | Trigger                                 |
+| ---------------------------------- | --------------------------------------- |
+| `CAATINGA_CONFIG_NOT_FOUND`        | `caatinga.config.ts` not found          |
+| `CAATINGA_INVALID_CONFIG`          | Config failed validation                |
+| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` binary not in PATH            |
+| `CAATINGA_BUILD_FAILED`            | Contract build failed (Cargo error)     |
+| `CAATINGA_DEPLOY_FAILED`           | Deploy failed (Stellar CLI error)       |
 | `CAATINGA_UPLOAD_FAILED`           | WASM upload failed (`caatinga upgrade`) |
-| `CAATINGA_WASM_HASH_NOT_FOUND`     | Upload output missing WASM hash        |
-| `CAATINGA_BINDINGS_FAILED`         | Binding generation failed              |
-| `CAATINGA_INVOKE_FAILED`           | Contract invoke failed                 |
-| `CAATINGA_CONTRACT_NOT_FOUND`      | Unknown contract name in config        |
-| `CAATINGA_NETWORK_NOT_FOUND`       | Unknown `--network` value              |
-| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts file or record       |
-| `CAATINGA_SOURCE_ACCOUNT_REQUIRED` | `--source` omitted                     |
-| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`            |
-| `CAATINGA_SOURCE_IS_SEED_PHRASE`   | Seed phrase passed as `--source`       |
-| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` address passed as `--source`    |
-| `CAATINGA_INVOKE_TARGET_INVALID`   | Target not in `contract.method` format |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)  |
+| `CAATINGA_WASM_HASH_NOT_FOUND`     | Upload output missing WASM hash         |
+| `CAATINGA_BINDINGS_FAILED`         | Binding generation failed               |
+| `CAATINGA_INVOKE_FAILED`           | Contract invoke failed                  |
+| `CAATINGA_CONTRACT_NOT_FOUND`      | Unknown contract name in config         |
+| `CAATINGA_NETWORK_NOT_FOUND`       | Unknown `--network` value               |
+| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts file or record        |
+| `CAATINGA_SOURCE_ACCOUNT_REQUIRED` | `--source` omitted                      |
+| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`             |
+| `CAATINGA_SOURCE_IS_SEED_PHRASE`   | Seed phrase passed as `--source`        |
+| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` address passed as `--source`     |
+| `CAATINGA_INVOKE_TARGET_INVALID`   | Target not in `contract.method` format  |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)   |
 
 ### Multi-contract / dependency errors
 

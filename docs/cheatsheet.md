@@ -96,7 +96,7 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 | `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity       |
 | `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts        |
 | `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings            |
-| `caatinga upgrade <contract>`         | In-place WASM upgrade on existing `contractId` (upload + invoke)          |
+| `caatinga upgrade <contract>`       | In-place WASM upgrade on existing `contractId` (upload + invoke)          |
 | `caatinga wire`                     | Run configured `postDeploy` hooks against deployed contracts              |
 | `caatinga sync-env`                 | Write configured frontend env vars from deploy artifacts                  |
 | `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs               |
@@ -110,31 +110,31 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 
 ## Flags
 
-| Flag                    | Commands                                                              | Description                                                    |
-| ----------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Flag                    | Commands                                                                       | Description                                                    |
+| ----------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
 | `--network <name>`      | doctor, deploy, upgrade, generate, status, invoke, wire, smoke, regression, ci | Network from `caatinga.config.ts`                              |
 | `--source <identity>`   | doctor, deploy, upgrade, invoke, wire, smoke, regression, ci, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
-| `--force`               | deploy                                                                | Redeploy even when artifacts already hold a contract ID        |
-| `--upgrade`             | deploy                                                                | Redeploy with upgrade history (new `contractId`)               |
-| `--if-changed`          | deploy, upgrade, regression                                           | Skip when local WASM hash matches artifact                     |
-| `--expected-hash`       | upgrade                                                               | Fail before upload if local WASM hash differs                  |
-| `--no-build`            | upgrade                                                               | Skip `caatinga build` before upload                            |
-| `--generate`            | upgrade                                                               | Regenerate bindings after successful in-place upgrade          |
-| `--sync-env`            | upgrade                                                               | Sync frontend env after successful in-place upgrade            |
-| `--no-generate`         | deploy                                                                | Skip automatic bindings generation (CI without binding needs)  |
-| `--no-wire`             | deploy                                                                | Skip automatic `postDeploy` hooks after a full graph deploy    |
-| `--no-sync-env`         | deploy                                                                | Skip automatic frontend env sync after a full graph deploy     |
-| `--no-deps`             | deploy                                                                | Deploy a single contract without its `dependsOn` graph         |
-| `--verify-deps`         | deploy                                                                | Confirm dependency contract IDs exist on-chain first           |
-| `--no-stale-check`      | deploy                                                                | Skip the WASM-older-than-sources warning                       |
-| `--strict-network`      | generate                                                              | Fail when network has no artifacts block                       |
-| `--strict`              | status, doctor, ci run                                                | status: fail on stale bindings; doctor/ci: strict env+bindings |
-| `--strict-env`          | doctor                                                                | Fail when frontend env file drifts from artifacts              |
-| `--strict-bindings`     | doctor                                                                | Fail when bindings are stale or missing                        |
-| `--all-networks`        | doctor                                                                | Report deploy/bindings matrix for every configured network     |
-| `--expect <dsl>`        | read                                                                  | Assert stdout with postDeploy expect DSL                       |
-| `--quiet` / `--summary` | read                                                                  | Compact output for large array payloads                        |
-| `--json`                | status                                                                | Machine-readable output for scripts                            |
+| `--force`               | deploy                                                                         | Redeploy even when artifacts already hold a contract ID        |
+| `--upgrade`             | deploy                                                                         | Redeploy with upgrade history (new `contractId`)               |
+| `--if-changed`          | deploy, upgrade, regression                                                    | Skip when local WASM hash matches artifact                     |
+| `--expected-hash`       | upgrade                                                                        | Fail before upload if local WASM hash differs                  |
+| `--no-build`            | upgrade                                                                        | Skip `caatinga build` before upload                            |
+| `--generate`            | upgrade                                                                        | Regenerate bindings after successful in-place upgrade          |
+| `--sync-env`            | upgrade                                                                        | Sync frontend env after successful in-place upgrade            |
+| `--no-generate`         | deploy                                                                         | Skip automatic bindings generation (CI without binding needs)  |
+| `--no-wire`             | deploy                                                                         | Skip automatic `postDeploy` hooks after a full graph deploy    |
+| `--no-sync-env`         | deploy                                                                         | Skip automatic frontend env sync after a full graph deploy     |
+| `--no-deps`             | deploy                                                                         | Deploy a single contract without its `dependsOn` graph         |
+| `--verify-deps`         | deploy                                                                         | Confirm dependency contract IDs exist on-chain first           |
+| `--no-stale-check`      | deploy                                                                         | Skip the WASM-older-than-sources warning                       |
+| `--strict-network`      | generate                                                                       | Fail when network has no artifacts block                       |
+| `--strict`              | status, doctor, ci run                                                         | status: fail on stale bindings; doctor/ci: strict env+bindings |
+| `--strict-env`          | doctor                                                                         | Fail when frontend env file drifts from artifacts              |
+| `--strict-bindings`     | doctor                                                                         | Fail when bindings are stale or missing                        |
+| `--all-networks`        | doctor                                                                         | Report deploy/bindings matrix for every configured network     |
+| `--expect <dsl>`        | read                                                                           | Assert stdout with postDeploy expect DSL                       |
+| `--quiet` / `--summary` | read                                                                           | Compact output for large array payloads                        |
+| `--json`                | status                                                                         | Machine-readable output for scripts                            |
 
 ## Binding freshness
 

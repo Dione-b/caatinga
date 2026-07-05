@@ -225,14 +225,14 @@ After a deploy, each contract is recorded under
 
 `ContractArtifactHistoryEntry` fields (optional on each history row):
 
-| Field           | Type                                          | Notes                                                                 |
-| --------------- | --------------------------------------------- | --------------------------------------------------------------------- |
-| `contractId`    | string                                        | prior on-chain ID (same as active for in-place upgrades)              |
-| `wasmHash`      | string                                        | prior WASM hash                                                       |
-| `deployedAt`    | ISO 8601                                      | when that version was active                                          |
-| `supersededAt`  | ISO 8601                                      | when replaced                                                         |
-| `reason`        | `"upgrade"` \| `"rollback"` \| `"force-redeploy"` | why it was superseded                                               |
-| `upgradeType`   | `"in-place"` \| `"new-contract"`                | in-place = same ID, new WASM; new-contract = redeploy               |
+| Field          | Type                                              | Notes                                                    |
+| -------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `contractId`   | string                                            | prior on-chain ID (same as active for in-place upgrades) |
+| `wasmHash`     | string                                            | prior WASM hash                                          |
+| `deployedAt`   | ISO 8601                                          | when that version was active                             |
+| `supersededAt` | ISO 8601                                          | when replaced                                            |
+| `reason`       | `"upgrade"` \| `"rollback"` \| `"force-redeploy"` | why it was superseded                                    |
+| `upgradeType`  | `"in-place"` \| `"new-contract"`                  | in-place = same ID, new WASM; new-contract = redeploy    |
 
 See [Contract upgrade](./tutorials/contract-upgrade.md) for when to use `caatinga upgrade` vs `deploy --upgrade`.
 

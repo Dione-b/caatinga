@@ -11,10 +11,7 @@ const EXPECTED_HASH = "6ddb28e0980f643bb97350f7e3bacb0ff1fe74d846c6d4f2c625e7662
 
 describe("parseWasmHash", () => {
   it("should_parse_hex_hash_from_upload_fixture", async () => {
-    const output = await readFile(
-      path.join(fixturesDir, "v27.0.0/upload-success.txt"),
-      "utf8"
-    );
+    const output = await readFile(path.join(fixturesDir, "v27.0.0/upload-success.txt"), "utf8");
     expect(parseWasmHash(output)).toBe(EXPECTED_HASH);
   });
 

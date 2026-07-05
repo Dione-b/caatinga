@@ -102,7 +102,11 @@ export { resolveDefaultContractName } from "./contracts/resolve-default-contract
 export { buildContract, type BuildContractOptions } from "./contracts/build-contract.js";
 export { buildWorkspace, type BuildWorkspaceOptions } from "./contracts/build-workspace.js";
 export { deployContract, type DeployContractOptions } from "./contracts/deploy-contract.js";
-export { uploadWasm, type UploadWasmOptions, type UploadWasmResult } from "./contracts/upload-wasm.js";
+export {
+  uploadWasm,
+  type UploadWasmOptions,
+  type UploadWasmResult,
+} from "./contracts/upload-wasm.js";
 export {
   upgradeContractInPlace,
   type UpgradeContractOptions,

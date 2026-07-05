@@ -352,6 +352,7 @@ SALE_WASM_HASH=<hex>  # usado por buildDeployXdr
 ```
 
 **O que o Caatinga faz:**
+
 - `caatinga build` → `caatinga deploy` continua acoplado para **primeiro deploy**.
 - **`caatinga upgrade`** usa `stellar contract upload` + invoke `upgrade()` para substituir WASM **in-place** no mesmo `contractId` (orquestrado; não expõe upload standalone).
 - `sync-env` suporta `.wasmHash` em `frontend.env`.

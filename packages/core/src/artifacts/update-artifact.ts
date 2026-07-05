@@ -45,11 +45,7 @@ export function updateArtifact(
 ): CaatingaArtifacts {
   const existingNetwork = artifacts.networks[networkName] ?? { contracts: {}, dependencyGraph: {} };
   const existingContract = existingNetwork.contracts[contractName];
-  const history = appendHistory(
-    existingContract,
-    options.supersedeReason,
-    options.upgradeType
-  );
+  const history = appendHistory(existingContract, options.supersedeReason, options.upgradeType);
 
   const nextVersion = artifacts.version === 1 && options.supersedeReason ? 2 : artifacts.version;
   const upgradeStrategy =

@@ -2,10 +2,10 @@
 
 Caatinga supports two upgrade strategies. Choose based on whether your contract implements an admin-gated `upgrade(new_wasm_hash)` entrypoint.
 
-| Strategy | Command | On-chain effect | `contractId` |
-| -------- | ------- | --------------- | -------------- |
-| **In-place** | `caatinga upgrade` | Replaces WASM on the existing instance | **Preserved** |
-| **Redeploy** | `caatinga deploy --upgrade` | Deploys a new instance | **New ID** |
+| Strategy     | Command                     | On-chain effect                        | `contractId`  |
+| ------------ | --------------------------- | -------------------------------------- | ------------- |
+| **In-place** | `caatinga upgrade`          | Replaces WASM on the existing instance | **Preserved** |
+| **Redeploy** | `caatinga deploy --upgrade` | Deploys a new instance                 | **New ID**    |
 
 ## In-place upgrade (admin-gated contracts)
 
@@ -118,11 +118,11 @@ In-place upgrades avoid orphan instances because the `contractId` stays the same
 
 ## When to use each command
 
-| Command / flag | History reason | Use case |
-| -------------- | -------------- | -------- |
-| `caatinga upgrade` | `upgrade` + `upgradeType: in-place` | Admin-gated WASM replacement on existing ID |
-| `deploy --upgrade` | `upgrade` + `upgradeType: new-contract` | Intentional version bump via new instance |
-| `deploy --force` | `force-redeploy` | Recovery, accidental redeploy, CI reset |
+| Command / flag     | History reason                          | Use case                                    |
+| ------------------ | --------------------------------------- | ------------------------------------------- |
+| `caatinga upgrade` | `upgrade` + `upgradeType: in-place`     | Admin-gated WASM replacement on existing ID |
+| `deploy --upgrade` | `upgrade` + `upgradeType: new-contract` | Intentional version bump via new instance   |
+| `deploy --force`   | `force-redeploy`                        | Recovery, accidental redeploy, CI reset     |
 
 ## Related docs
 
