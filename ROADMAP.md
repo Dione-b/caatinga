@@ -45,4 +45,6 @@ Caatinga is alpha software. The current goal is to stabilize the developer workf
 
 ## Shipped (reference)
 
-Already available in current releases: `init --minimal`, ZK workflow (`@caatinga/zk`, `zk-*` commands), `@caatinga/client/react`, multi-contract deploy with `dependsOn`, Stellar CLI feature-aware compatibility (ADR 0001), wallet adapter docs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [ADRs](./docs/adr/index.md).
+Already available in current releases: `init --minimal`, ZK workflow (`@caatinga/zk`, `zk-*` commands),
+`@caatinga/client/react`, multi-contract deploy with `dependsOn`, Stellar CLI feature-aware compatibility (ADR 0001),
+wallet adapter docs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [ADRs](./docs/adr/index.md).

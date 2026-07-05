@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import type { CaatingaConfig } from "@caatinga/core";
-import { generateBindingsGraph } from "@caatinga/core";
+import { CaatingaErrorCode, generateBindingsGraph } from "@caatinga/core";
 import { registerGenerateCommand } from "./generate.command.js";
 
 const generateBindingsGraphMock = vi.hoisted(() => vi.fn());
@@ -191,5 +191,23 @@ describe("generate command", () => {
     } finally {
       logSpy.mockRestore();
     }
+  });
+
+  it("fails generate when strict network has no artifacts", async () => {
+    readArtifactsMock.mockResolvedValue({ project: "counter-app", version: 1, networks: {} });
+    process.exitCode = undefined;
+
+    await createGenerateProgram().parseAsync([
+      "node",
+      "caatinga",
+      "generate",
+      "--network",
+      "testnet",
+      "--strict-network",
+    ]);
+
+    expect(process.exitCode).toBe(1);
+    expect(CaatingaErrorCode.NETWORK_ARTIFACTS_MISSING).toBe("CAATINGA_NETWORK_ARTIFACTS_MISSING");
+    expect(generateBindingsGraphMock).not.toHaveBeenCalled();
   });
 });

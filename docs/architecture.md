@@ -155,6 +155,8 @@ Notes encoded in the diagram:
 
 Rule of thumb: if Stellar CLI, `stellar-sdk`, Soroban SDK, or generated bindings already own it, Caatinga **composes, validates, or organizes**—it does not reimplement.
 
+**Product boundary:** Caatinga ends at the **typed client + resolved contract IDs** (`caatinga.artifacts.json`, generated bindings, synced env). HTTP APIs, databases, async jobs, transaction hash persistence, and caller-specific auth models are application concerns — a green Caatinga pipeline does not imply a green production app. See [production readiness](./production-readiness.md) and the app-side checklist in docs.
+
 ## Source of truth (MVP)
 
 Local project state is authoritative:

@@ -76,7 +76,19 @@ Each `postDeploy` entry:
 | `method`   | string (min 1)                                | yes      | Soroban method to invoke                                                    |
 | `args`     | `Record<string, string \| number \| boolean>` | no       | supports the same placeholders as `deployArgs`                              |
 | `source`   | string (min 1)                                | no       | override `--source` for this hook (validated via `assertSafeSourceAccount`) |
-| `expect`   | string                                        | no       | expected stdout; throws `POST_DEPLOY_VERIFY_FAILED` on mismatch             |
+| `expect`   | string or `{ matcher, value? }`               | no       | verify stdout with string equality or structural matchers (see below)       |
+| `kind`     | `"invoke"` \| `"read"`                        | no       | `"invoke"` (default) submits; `"read"` simulates without signing            |
+
+Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
+
+`postDeployRead` (optional): same shape as `postDeploy`; always simulated (`kind: "read"`). Use a read-only identity separate from write hooks when testnet state accumulates.
+
+`smoke` (optional):
+
+| Field            | Type    | Notes                                              |
+| ---------------- | ------- | -------------------------------------------------- |
+| `smoke.reads`    | array   | read checks for `caatinga smoke`                   |
+| `useFreshSymbol` | boolean | hint for ephemeral Symbol/UUID keys in integration |
 
 `NetworkConfig` (each value in `networks`):
 

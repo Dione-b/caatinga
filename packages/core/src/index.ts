@@ -113,6 +113,14 @@ export {
   type DeployArgValue,
   type ResolveDeployArgsOptions,
 } from "./contracts/resolve-deploy-args.js";
+export {
+  resolveMethodArgs,
+  resolveCliMethodArgs,
+  parseNamedCliArgs,
+  looksLikeStellarAlias,
+  STELLAR_ADDRESS_REGEX,
+  type ResolveMethodArgsOptions,
+} from "./contracts/resolve-method-args.js";
 export { resolveSourceAddress } from "./contracts/resolve-source-address.js";
 export {
   formatConstructorCliArgs,
@@ -126,10 +134,45 @@ export {
 } from "./contracts/run-post-deploy.js";
 export {
   syncFrontendEnv,
+  computeFrontendEnvEntries,
   type SyncFrontendEnvOptions,
   type SyncFrontendEnvResult,
 } from "./frontend/sync-frontend-env.js";
-export type { PostDeployHook } from "./config/config.schema.js";
+export {
+  evaluateEnvDrift,
+  evaluateWasmDrift,
+  type EnvDriftEntry,
+  type EnvDriftReport,
+} from "./frontend/evaluate-env-drift.js";
+export {
+  verifyExpect,
+  assertExpect,
+  parseExpectSpec,
+  formatExpectDescription,
+  type VerifyExpectOutcome,
+} from "./contracts/verify-expect.js";
+export {
+  runSmokeReads,
+  summarizeReadOutput,
+  type RunSmokeReadsOptions,
+  type SmokeReadResult,
+} from "./contracts/run-smoke.js";
+export {
+  createFreshSmokeSymbol,
+  withFreshSmokeArgs,
+  DEFAULT_FRESH_SYMBOL_KEY,
+  type FreshSmokeArgsOptions,
+} from "./contracts/smoke-args.js";
+export {
+  readContractSorobanSdkVersions,
+  type ContractSdkVersion,
+} from "./contracts/read-contract-sdk-version.js";
+export type {
+  PostDeployHook,
+  ExpectMatcher,
+  ExpectSpec,
+  SmokeRead,
+} from "./config/config.schema.js";
 export { generateBindings, type GenerateBindingsOptions } from "./contracts/generate-bindings.js";
 export {
   generateBindingsGraph,

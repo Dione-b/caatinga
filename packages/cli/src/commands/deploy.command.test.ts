@@ -180,7 +180,7 @@ describe("deploy command", () => {
   it("logs transient post-deploy retry warnings during full deploy wiring", async () => {
     const configWithHooks: CaatingaConfig = {
       ...config,
-      postDeploy: [{ contract: "counter", method: "set_minter", args: {} }],
+      postDeploy: [{ contract: "counter", method: "set_minter", args: {}, kind: "invoke" }],
     };
     loadConfigMock.mockResolvedValue(configWithHooks);
     runPostDeployHooksMock.mockImplementation(async ({ onTransientHookRetry }) => {

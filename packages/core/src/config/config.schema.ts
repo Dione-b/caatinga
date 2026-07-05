@@ -29,12 +29,42 @@ const ZkConfigSchema = z
   })
   .optional();
 
+export const ExpectMatcherSchema = z.enum([
+  "equals",
+  "reachable",
+  "isNull",
+  "isArray",
+  "minLength",
+  "maxLength",
+  "contains",
+  "matches",
+  "jsonEquals",
+]);
+
+export const ExpectObjectSchema = z.object({
+  matcher: ExpectMatcherSchema,
+  value: z.union([z.string(), z.number(), z.boolean()]).optional(),
+});
+
+export const ExpectSpecSchema = z.union([z.string(), ExpectObjectSchema]);
+
+const PostDeployHookKindSchema = z.enum(["invoke", "read"]);
+
 const PostDeployHookSchema = z.object({
   contract: z.string().min(1),
   method: z.string().min(1),
   args: z.record(z.string().min(1), DeployArgValueSchema).default({}),
   source: z.string().min(1).optional(),
-  expect: z.string().optional(),
+  expect: ExpectSpecSchema.optional(),
+  kind: PostDeployHookKindSchema.default("invoke"),
+});
+
+const SmokeReadSchema = z.object({
+  contract: z.string().min(1),
+  method: z.string().min(1),
+  args: z.record(z.string().min(1), DeployArgValueSchema).default({}),
+  source: z.string().min(1).optional(),
+  expect: ExpectSpecSchema.optional(),
 });
 
 export const CaatingaConfigSchema = z
@@ -63,13 +93,23 @@ export const CaatingaConfigSchema = z
       })
       .optional(),
     postDeploy: z.array(PostDeployHookSchema).optional(),
+    postDeployRead: z.array(PostDeployHookSchema).optional(),
+    smoke: z
+      .object({
+        reads: z.array(SmokeReadSchema).optional(),
+        useFreshSymbol: z.boolean().optional(),
+      })
+      .optional(),
     zk: ZkConfigSchema,
   })
   .superRefine((config) => {
     validateContractGraph(config.contracts);
   });
 
+export type ExpectMatcher = z.infer<typeof ExpectMatcherSchema>;
+export type ExpectSpec = z.infer<typeof ExpectSpecSchema>;
 export type PostDeployHook = z.infer<typeof PostDeployHookSchema>;
+export type SmokeRead = z.infer<typeof SmokeReadSchema>;
 
 export type CaatingaConfig = z.infer<typeof CaatingaConfigSchema>;
 export type ContractConfig = z.infer<typeof ContractConfigSchema>;

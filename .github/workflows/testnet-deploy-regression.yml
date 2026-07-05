@@ -1,0 +1,73 @@
+name: Testnet Deploy Regression
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+        with:
+          targets: wasm32v1-none
+
+      - name: Install Stellar CLI
+        uses: stellar/stellar-cli@v27.0.0
+
+      - name: Restore Stellar CLI config
+        env:
+          CAATINGA_CI_STELLAR_CONFIG_B64: ${{ secrets.CAATINGA_CI_STELLAR_CONFIG_B64 }}
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
+        run: |
+          set -euo pipefail
+          test -n "$CAATINGA_CI_STELLAR_CONFIG_B64"
+          test -n "$CAATINGA_CI_IDENTITY_ALIAS"
+          bash scripts/restore-stellar-ci-config.sh
+          stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS" >/dev/null
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Deploy regression on react-vite-counter template
+        env:
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
+        run: |
+          set -euo pipefail
+          WORKDIR="deploy-regression-counter"
+          rm -rf "$WORKDIR"
+          cp -R packages/templates/react-vite-counter "$WORKDIR"
+          cd "$WORKDIR"
+          pnpm install --ignore-workspace
+          pnpm exec caatinga build counter
+          pnpm exec caatinga deploy counter --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS" --if-changed
+          pnpm exec caatinga generate counter --network testnet --strict-network
+          pnpm exec caatinga doctor --network testnet --strict-bindings
+
+      - name: Remove Stellar CLI config
+        if: always()
+        run: |
+          rm -f "$HOME/.config/stellar/config.toml"
+          rm -rf "$HOME/.config/soroban/identity"

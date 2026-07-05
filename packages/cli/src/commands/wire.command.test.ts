@@ -26,7 +26,7 @@ describe("wire command", () => {
           networkPassphrase: "Test SDF Network ; September 2015",
         },
       },
-      postDeploy: [{ contract: "coin", method: "set_minter", args: {} }],
+      postDeploy: [{ contract: "coin", method: "set_minter", args: {}, kind: "invoke" }],
     });
     runPostDeployHooksMock.mockResolvedValue([{ contract: "coin", method: "set_minter" }]);
 
@@ -54,7 +54,7 @@ describe("wire command", () => {
           networkPassphrase: "Test SDF Network ; September 2015",
         },
       },
-      postDeploy: [{ contract: "coin", method: "set_minter", args: {} }],
+      postDeploy: [{ contract: "coin", method: "set_minter", args: {}, kind: "invoke" }],
     });
     runPostDeployHooksMock.mockImplementation(async ({ onTransientHookRetry }) => {
       onTransientHookRetry({

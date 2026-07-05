@@ -70,7 +70,10 @@ Run `caatinga setup` on a fresh machine to install the toolchain automatically. 
 
 ## How it fits together
 
-Caatinga orchestrates the official Stellar stack — build, deploy, and invoke still shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`. Deployed contract IDs live in `caatinga.artifacts.json`, committed to git, keyed per network. No mandatory hosted registry. See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
+Caatinga orchestrates the official Stellar stack — build, deploy, and invoke still shell out to Stellar CLI;
+`caatinga generate` runs `npx @stellar/stellar-sdk generate`. Deployed contract IDs live in
+`caatinga.artifacts.json`, committed to git, keyed per network. No mandatory hosted registry.
+See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
 
 For positioning vs Scaffold Stellar and other tools, see [Architecture — competitive stance](./docs/architecture.md#caatinga-vs-scaffold-stellar).
 

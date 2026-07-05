@@ -154,6 +154,42 @@ describe("CaatingaConfigSchema", () => {
     expect(result.postDeploy![0].expect).toBe("${source.address}");
   });
 
+  it("accepts structural expect object on postDeploy hook", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeploy: [
+        {
+          contract: "counter",
+          method: "list_items",
+          expect: { matcher: "isArray" },
+        },
+      ],
+    });
+
+    expect(result.postDeploy![0].expect).toEqual({ matcher: "isArray" });
+  });
+
+  it("accepts postDeployRead and smoke config", () => {
+    const result = CaatingaConfigSchema.parse({
+      ...minimalValid,
+      postDeployRead: [
+        {
+          contract: "counter",
+          method: "count",
+          kind: "read",
+          expect: { matcher: "reachable" },
+        },
+      ],
+      smoke: {
+        reads: [{ contract: "counter", method: "count", expect: { matcher: "reachable" } }],
+        useFreshSymbol: true,
+      },
+    });
+
+    expect(result.postDeployRead).toHaveLength(1);
+    expect(result.smoke?.useFreshSymbol).toBe(true);
+  });
+
   it("expect defaults to undefined when omitted", () => {
     const result = CaatingaConfigSchema.parse({
       ...minimalValid,

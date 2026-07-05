@@ -9,7 +9,7 @@
 - [Config schema](docs/config.md): `caatinga.config.ts` — contracts, networks, frontend, postDeploy, buildRoot.
 - [Client API](docs/client.md): `@caatinga/client` — createCaatingaClient, read/simulate/invoke, XDR debug, wallet adapters.
 - [Wallets](docs/wallets.md): CaatingaWalletAdapter contract, Stellar Wallets Kit, Freighter, React hooks.
-- [Architecture](docs/architecture.md): Package layout, data flow, multi-contract DAG, competitive stance.
+- [Architecture](docs/architecture.md): Package layout, data flow, multi-contract DAG, competitive stance. **Product boundary:** Caatinga ends at typed client + resolved contract IDs; HTTP/DB/async are app concerns.
 - [Errors](docs/errors.md): Every `CAATINGA_*` code with meaning, common cause, user action.
 - [Cheatsheet](docs/cheatsheet.md): Command loop, flags, binding freshness — all on one page.
 - [Packages](docs/packages.md): `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk` — subpath exports.

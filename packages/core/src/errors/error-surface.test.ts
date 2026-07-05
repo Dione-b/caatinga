@@ -254,6 +254,14 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/contracts/run-post-deploy.test.ts",
     trigger: "runPostDeployHooks(",
   },
+  [CaatingaErrorCode.ADDRESS_ALIAS_UNRESOLVED]: {
+    file: "packages/core/src/contracts/resolve-method-args.test.ts",
+    trigger: "resolveMethodArgs(",
+  },
+  [CaatingaErrorCode.NETWORK_ARTIFACTS_MISSING]: {
+    file: "packages/cli/src/commands/generate.command.test.ts",
+    trigger: "--strict-network",
+  },
 };
 
 function testBlocks(source: string): string[] {

@@ -31,6 +31,7 @@ export type DeployContractOptions = {
   cwd?: string;
   force?: boolean;
   upgrade?: boolean;
+  ifChanged?: boolean;
   checkStaleWasm?: boolean;
   resolvedDeployArgs?: Record<string, DeployArgValue>;
   dependencies?: string[];
@@ -79,16 +80,33 @@ export async function deployContract(options: DeployContractOptions) {
 
   const artifactsBefore = await readArtifacts(cwd);
   const existing = artifactsBefore.networks[network.name]?.contracts[contract.name];
+  const localWasmHash = await hashWasm(wasmPath);
+
   if (existing?.contractId && !options.force) {
-    return {
-      contract: contractWithWasm,
-      network,
-      contractId: existing.contractId,
-      artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
-      output: "",
-      skipped: true as const,
-      staleWasmWarning,
-    };
+    if (options.ifChanged) {
+      if (existing.wasmHash === localWasmHash) {
+        return {
+          contract: contractWithWasm,
+          network,
+          contractId: existing.contractId,
+          artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
+          output: "",
+          skipped: true as const,
+          staleWasmWarning,
+          skipReason: "unchanged-wasm" as const,
+        };
+      }
+    } else {
+      return {
+        contract: contractWithWasm,
+        network,
+        contractId: existing.contractId,
+        artifactsPath: path.resolve(cwd, "caatinga.artifacts.json"),
+        output: "",
+        skipped: true as const,
+        staleWasmWarning,
+      };
+    }
   }
 
   const rawDeployArgs = contract.config.deployArgs;
@@ -198,7 +216,7 @@ export async function deployContract(options: DeployContractOptions) {
   }
 
   const { output, contractId } = deployOutcome;
-  const wasmHash = await hashWasm(wasmPath);
+  const wasmHash = localWasmHash;
   const dependencyGraph = buildDependencyGraph(options.config.contracts);
   const dependencies = options.dependencies ?? contract.config.dependsOn;
   const supersedeReason =

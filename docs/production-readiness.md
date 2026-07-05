@@ -12,7 +12,7 @@ Run through each item; `caatinga doctor` covers several automatically.
 | 2   | `@stellar/stellar-sdk` within supported range       | `caatinga doctor` (SDK diagnostic)                                                                           |
 | 3   | Signing identity funded and correct network         | `caatinga doctor --source <alias> --network <net>`                                                           |
 | 4   | All configured contracts deployed on target network | `caatinga status --network <net>`                                                                            |
-| 5   | Bindings fresh (marker matches artifacts)           | `caatinga doctor` / `caatinga status`                                                                        |
+| 5   | Bindings fresh (marker matches artifacts)           | `caatinga doctor --strict-bindings` / `caatinga status --strict`                                             |
 | 6   | Deploy cost estimated                               | `caatinga estimate deploy <contract> --network <net>`                                                        |
 | 7   | Artifacts schema migrated (if using history)        | `caatinga migrate artifacts`                                                                                 |
 | 8   | Signing strategy documented for your team           | [Signing strategy](./signing-strategy.md)                                                                    |
@@ -34,6 +34,21 @@ Run through each item; `caatinga doctor` covers several automatically.
 - Multi-environment dimension (staging vs prod on same network) — use git branches or separate projects.
 - Hosted registry or deployment dashboard.
 - Guaranteed mainnet fee accuracy under congestion.
+- **HTTP/REST E2E, database persistence, async job reliability, or per-endpoint caller auth** — see [Architecture — product boundary](./architecture.md#meta-framework-boundary-orchestrate-workflow-not-mental-model).
+
+## App-side checklist (outside `caatinga doctor`)
+
+Run these in your application CI; they are not part of the Caatinga pipeline.
+
+| #   | Check                                                            | Notes                                                            |
+| --- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| A1  | Server invoke persists `tx_hash` (or Soroban hash) in your DB    | Caatinga CLI/client invoke success ≠ REST handler wrote a row    |
+| A2  | Async anchor/submit jobs expose failure to operators             | Fire-and-forget jobs fail silently without app-level monitoring  |
+| A3  | Each endpoint uses the intended signing identity                 | Org wallet vs server key mismatches are app config, not Caatinga |
+| A4  | JWT/session auth on mutating routes                              | Out of scope for `caatinga doctor`                               |
+| A5  | Poll or webhook confirms on-chain inclusion before returning 200 | Optional pattern for write APIs                                  |
+
+Template stub: `integration.app-e2e.ts` in `react-vite-counter` (replace with real tests).
 
 ## Recommended production workflow
 

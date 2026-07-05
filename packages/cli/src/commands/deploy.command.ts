@@ -29,6 +29,10 @@ export function registerDeployCommand(program: Command): void {
       "Stellar CLI identity alias that can sign (for example alice)"
     )
     .option("--force", "Redeploy contracts even if artifacts already contain contract IDs")
+    .option(
+      "--if-changed",
+      "Skip deploy when local WASM hash matches artifacts (redeploy when changed)"
+    )
     .option("--upgrade", "Redeploy with upgrade history (alias for --force with upgrade reason)")
     .option("--dry-run", "Estimate deploy cost without submitting (runs caatinga estimate deploy)")
     .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
@@ -48,6 +52,7 @@ export function registerDeployCommand(program: Command): void {
           network?: string;
           source: string;
           force?: boolean;
+          ifChanged?: boolean;
           upgrade?: boolean;
           dryRun?: boolean;
           deps?: boolean;
@@ -112,6 +117,7 @@ export function registerDeployCommand(program: Command): void {
             source: options.source,
             includeDependencies: options.deps !== false,
             force,
+            ifChanged: options.ifChanged === true,
             upgrade: options.upgrade === true,
             checkStaleWasm: options.staleCheck !== false,
             verifyDeps: options.verifyDeps === true,
@@ -145,7 +151,7 @@ export function registerDeployCommand(program: Command): void {
             isFullDeploy &&
             options.wire !== false &&
             config.postDeploy &&
-            config.postDeploy.length > 0
+            (config.postDeploy.length > 0 || (config.postDeployRead?.length ?? 0) > 0)
           ) {
             try {
               const wireResults = await runPostDeployHooks({

@@ -30,6 +30,7 @@ export async function deployContractGraph(options: {
   includeDependencies: boolean;
   force: boolean;
   upgrade?: boolean;
+  ifChanged?: boolean;
   checkStaleWasm?: boolean;
   verifyDeps?: boolean;
   onTransientDeployRetry?: DeployContractOptions["onTransientDeployRetry"];
@@ -67,7 +68,7 @@ export async function deployContractGraph(options: {
       cwd,
     });
 
-    if (existing?.contractId && !options.force) {
+    if (existing?.contractId && !options.force && !options.ifChanged) {
       skippedContracts.push(toSkippedContract(contractName, existing.contractId, network.name));
       continue;
     }
@@ -80,6 +81,7 @@ export async function deployContractGraph(options: {
       cwd,
       force: options.force,
       upgrade: options.upgrade,
+      ifChanged: options.ifChanged,
       checkStaleWasm: options.checkStaleWasm,
       resolvedDeployArgs,
       dependencies: contractConfig.dependsOn,

@@ -7,6 +7,7 @@ import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
+import { resolveCliMethodArgs } from "./resolve-method-args.js";
 
 const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
@@ -40,6 +41,11 @@ export async function invokeContract(options: InvokeContractOptions) {
 
   await checkBinary("stellar", "Install Stellar CLI before running caatinga invoke.");
 
+  const methodArgs = await resolveCliMethodArgs(options.args ?? [], {
+    source,
+    cwd,
+  });
+
   let result: Awaited<ReturnType<typeof runCommand>>;
 
   try {
@@ -55,7 +61,7 @@ export async function invokeContract(options: InvokeContractOptions) {
         ...buildStellarNetworkArgs(network),
         "--",
         target.method,
-        ...(options.args ?? []),
+        ...methodArgs,
       ],
       {
         cwd,

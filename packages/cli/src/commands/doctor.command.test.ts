@@ -19,6 +19,18 @@ vi.mock("./doctor-bindings.js", () => ({
   evaluateBindingCoverage: evaluateBindingCoverageMock,
 }));
 
+vi.mock("./doctor-env-sync.js", () => ({
+  evaluateEnvSyncDiagnostics: vi.fn().mockResolvedValue({ report: null, lines: [] }),
+}));
+
+vi.mock("./doctor-wasm-drift.js", () => ({
+  evaluateWasmDriftDiagnostics: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("./doctor-post-deploy.js", () => ({
+  evaluatePostDeployDiagnostics: vi.fn().mockReturnValue([]),
+}));
+
 const config: CaatingaConfig = {
   project: "minimal-app",
   defaultNetwork: "testnet",

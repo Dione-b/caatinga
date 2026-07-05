@@ -254,4 +254,51 @@ describe("invokeContract", () => {
       hint: expect.stringMatching(/caatinga read counter\.get/),
     });
   });
+
+  it("should_resolve_cli_alias_in_named_method_args", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-invoke-alias-"));
+    const ALICE_ADDRESS = "G" + "A".repeat(55);
+
+    const artifacts = createInitialArtifacts("app");
+    artifacts.networks.testnet = {
+      contracts: {
+        counter: {
+          contractId: CONTRACT_ID,
+          wasmHash: "abc",
+          deployedAt: "2026-05-11T12:00:00.000Z",
+          sourcePath: "./contracts/counter",
+          wasmPath: "./rel/counter.wasm",
+          dependencies: [],
+          resolvedDeployArgs: {},
+        },
+      },
+      dependencyGraph: {},
+    };
+    await writeArtifacts(artifacts, tmpDir);
+
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "keys" && args[1] === "address") {
+        return { stdout: ALICE_ADDRESS, stderr: "", all: ALICE_ADDRESS };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: "ok", stderr: "", all: "ok" };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    await invokeContract({
+      config: baseConfig,
+      target: "counter.set_owner",
+      args: ["--owner", "alice"],
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+    });
+
+    expect(runCommand).toHaveBeenCalledWith(
+      "stellar",
+      expect.arrayContaining(["--owner", ALICE_ADDRESS]),
+      expect.any(Object)
+    );
+  });
 });

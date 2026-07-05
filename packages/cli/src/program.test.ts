@@ -35,6 +35,10 @@ describe("createProgram", () => {
         "status",
         "wire",
         "sync-env",
+        "smoke",
+        "regression",
+        "ci",
+        "identity",
       ])
     );
   });

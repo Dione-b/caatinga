@@ -23,4 +23,23 @@ export default defineConfig({
     framework: "vite-react",
     bindingsOutput: "./src/contracts/generated",
   },
+  postDeployRead: [
+    {
+      contract: "counter",
+      method: "count",
+      kind: "read" as const,
+      args: {},
+      expect: { matcher: "reachable" as const },
+    },
+  ],
+  smoke: {
+    useFreshSymbol: false,
+    reads: [
+      {
+        contract: "counter",
+        method: "count",
+        expect: { matcher: "reachable" as const },
+      },
+    ],
+  },
 });

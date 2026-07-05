@@ -85,7 +85,7 @@ When `buildRoot` is configured and `contract` is omitted, Caatinga runs a single
 `stellar contract build` from that Cargo workspace root and then resolves each configured WASM.
 Pass a contract name to keep the per-contract build behavior.
 
-## `caatinga doctor [--network testnet] [--source alice]`
+## `caatinga doctor [--network testnet] [--source alice] [--all-networks] [--strict] [--strict-env] [--strict-bindings]`
 
 Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI,
 Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`), `caatinga.config.ts`,
@@ -94,14 +94,16 @@ Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`),
 With `--network`, doctor also compares every contract in `caatinga.config.ts` against
 `caatinga.artifacts.json` for that network. Each contract prints `✓` with its contract ID when
 deployed, or `✗` with a suggested `caatinga deploy` command when missing. Missing deploy coverage
-is advisory only — it never flips doctor to `blocked` or changes the exit code.
+is advisory only — it never flips doctor to `blocked` or changes the exit code unless `--strict`, `--strict-env`, or `--strict-bindings` is set.
 
 When the deploy coverage check passes, doctor also prints a `Bindings (<network>)` section with
 the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`, `missing`, or
 `unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
-is advisory only — it never flips doctor to `blocked`.
+is advisory unless `--strict-bindings` or `--strict` is set.
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
+Doctor may also report frontend env drift vs artifacts, local WASM drift, postDeploy alias advisories, and a version matrix including `soroban-sdk` from each contract's `Cargo.toml`. Use `--all-networks` for a per-network deploy/bindings matrix.
+
+## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--if-changed] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
 CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient testnet failures
@@ -109,6 +111,7 @@ CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient
 command exits with `CAATINGA_DEPLOY_FAILED`. Dependencies deploy first
 when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
 contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
+Use `--if-changed` to skip deploy when the local WASM hash matches the artifact (redeploy only when the build changed).
 Pass `--verify-deps` to confirm each dependency's contract ID exists on-chain (via
 `stellar contract info interface`) before resolving deploy arguments.
 
@@ -145,7 +148,7 @@ Writes `frontend.envFile` from `caatinga.artifacts.json` using the `frontend.env
 config. Contract keys map to deployed contract IDs; `rpcUrl` and `networkPassphrase` map to the
 selected network config. Quoted values are emitted when the network passphrase contains spaces.
 
-## `caatinga generate [contract] [--network testnet]`
+## `caatinga generate [contract] [--network testnet] [--strict-network]`
 
 Generates TypeScript bindings from the deployed contract ID via `npx @stellar/stellar-sdk generate` (Stellar CLI is not required). The contract name is
 optional: omit it to generate bindings for every contract already deployed on the
@@ -161,7 +164,9 @@ resets its state to `missing`.
 After generation, Caatinga patches each binding package's `package.json` so bundlers (Vite) resolve
 `./src/index.ts` directly — you do not need to run `tsc` inside the generated subpackage.
 
-## `caatinga status [--network <name>] [--json]`
+Pass `--strict-network` to fail when the selected network has no block in `caatinga.artifacts.json`.
+
+## `caatinga status [--network <name>] [--json] [--strict]`
 
 Shows, per network, every configured contract with its deployed contract ID, WASM hash,
 dependencies, and binding freshness in a table. Contracts not yet deployed on the network are
@@ -172,17 +177,44 @@ For every deployed contract whose bindings are not fresh, status prints the exac
 `caatinga generate` command that fixes it. `--json` prints the full machine-readable structure
 on stdout for scripts and CI.
 
+`--strict` exits with code `1` when any **deployed** contract has bindings other than `fresh`.
+Canonical CI check after `caatinga deploy --no-generate`: run `caatinga status --strict` and expect failure until `caatinga generate` runs.
+
+## `caatinga smoke [--network testnet] [--source alice]`
+
+Runs read-only smoke checks from `smoke.reads` or `postDeployRead` in config, using the same expect DSL as `postDeploy` (string equality or `{ matcher: "isArray" }`, etc.). Default expect is `{ matcher: "reachable" }` when omitted.
+
+When `smoke.useFreshSymbol` is `true`, each read gets an ephemeral `symbol` arg for testnet writes that should not pollute shared state.
+
+## `caatinga regression --source <identity> [--network testnet] [--skip-test] [--skip-build] [--skip-deploy] [--skip-generate] [--skip-smoke]`
+
+Orchestrates the recommended pipeline: `pnpm test` → `caatinga build` → `caatinga deploy --if-changed` → `caatinga generate` → `caatinga smoke`.
+
+## `caatinga ci run [--network testnet] [--source alice] [--strict] [--skip-smoke]`
+
+CI helper: runs `caatinga doctor` then `caatinga smoke`. Intended for GitHub Actions after restoring Stellar CLI identity secrets.
+
+## `caatinga identity export [--path ~/.config/stellar]`
+
+Exports the Stellar CLI config directory as a base64 tarball on stdout (for `CAATINGA_CI_STELLAR_CONFIG_B64`).
+
+## `caatinga identity import <archive> [--path ~/.config/stellar]`
+
+Imports a base64 tarball produced by `caatinga identity export`.
+
 ## `caatinga invoke <contract.method> --source <identity> [--network testnet] [args...]`
 
-Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI.
+Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI. CLI identity aliases in named args (for example `--owner alice`) are resolved to `G...` addresses before invoke.
 
 If Stellar CLI reports that the target is a read-only method, Caatinga suggests `caatinga read` (or `client.read()` / `client.simulate()` in browser code) instead of `force: true`.
 
-## `caatinga read <contract.method> [--network testnet] [args...]`
+## `caatinga read <contract.method> [--network testnet] [--source alice] [--expect <dsl>] [--quiet] [--summary] [args...]`
 
 Simulates a read-only contract method with `stellar contract invoke --send=no`. `--source` is optional; Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice` for the simulation account.
 
 Use `read` for getters and pure queries. Use `invoke` for increments, transfers, and other state-changing calls.
+
+`--expect` accepts the same DSL as `postDeploy` (plain string or JSON matcher). `--summary` / `--quiet` print compact output for large array payloads.
 
 ## ZK commands
 

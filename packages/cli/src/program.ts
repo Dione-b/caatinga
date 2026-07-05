@@ -19,6 +19,10 @@ import { registerInspectCommand } from "./commands/inspect.command.js";
 import { registerSetupCommand } from "./commands/setup.command.js";
 import { registerWireCommand } from "./commands/wire.command.js";
 import { registerSyncEnvCommand } from "./commands/sync-env.command.js";
+import { registerSmokeCommand } from "./commands/smoke.command.js";
+import { registerRegressionCommand } from "./commands/regression.command.js";
+import { registerCiCommand } from "./commands/ci.command.js";
+import { registerIdentityCommand } from "./commands/identity.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
 export function createProgram(): Command {
@@ -49,6 +53,10 @@ export function createProgram(): Command {
   registerSetupCommand(program);
   registerWireCommand(program);
   registerSyncEnvCommand(program);
+  registerSmokeCommand(program);
+  registerRegressionCommand(program);
+  registerCiCommand(program);
+  registerIdentityCommand(program);
 
   return program;
 }

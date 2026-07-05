@@ -3,12 +3,20 @@ import { runAllDiagnostics } from "../diagnostics/run-all.js";
 import { printDiagnostic, printFixes } from "../diagnostics/types.js";
 import { evaluateDeployCoverage, type DeployCoverageLine } from "./doctor-deploy-coverage.js";
 import { evaluateBindingCoverage, type BindingCoverageLine } from "./doctor-bindings.js";
+import { evaluateEnvSyncDiagnostics } from "./doctor-env-sync.js";
+import { evaluatePostDeployDiagnostics } from "./doctor-post-deploy.js";
+import { evaluateWasmDriftDiagnostics } from "./doctor-wasm-drift.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { loadConfig, readContractSorobanSdkVersions, WELL_KNOWN_NETWORKS } from "@caatinga/core";
 
 type DoctorOptions = {
   network?: string;
   source?: string;
+  allNetworks?: boolean;
+  strictEnv?: boolean;
+  strictBindings?: boolean;
+  strict?: boolean;
 };
 
 function printDeployCoverageLine(line: DeployCoverageLine): void {
@@ -50,18 +58,119 @@ function printBindingCoverageLine(line: BindingCoverageLine): void {
   if (line.fix) logger.info(`  ${line.fix}`);
 }
 
-/** Advisory only: stale bindings never flip doctor to blocked. */
-export async function reportBindingCoverage(networkName: string): Promise<void> {
+/** Advisory only: stale bindings never flip doctor to blocked unless --strict-bindings. */
+export async function reportBindingCoverage(
+  networkName: string,
+  strictBindings: boolean
+): Promise<boolean> {
   const coverage = await evaluateBindingCoverage({ networkName });
 
   if (coverage.lines.length === 0) {
-    return;
+    return false;
   }
 
   logger.info("");
   logger.info(`Bindings (${networkName}):`);
   for (const line of coverage.lines) {
     printBindingCoverageLine(line);
+  }
+
+  const stale = coverage.lines.some((line) => line.status !== "fresh");
+  if (stale && strictBindings) {
+    logger.info("");
+    logger.info("Strict: stale or missing bindings block readiness.");
+  }
+
+  return stale && strictBindings;
+}
+
+async function reportEnvDrift(networkName: string, strictEnv: boolean): Promise<boolean> {
+  const { report, lines } = await evaluateEnvSyncDiagnostics({ networkName });
+  if (!report) {
+    return false;
+  }
+
+  logger.info("");
+  logger.info(`Env sync (${networkName}) — ${report.envFile}:`);
+  if (report.inSync) {
+    logger.info("✓ env file matches artifacts");
+    return false;
+  }
+
+  for (const line of lines) {
+    logger.info(
+      `✗ ${line.envKey}: env=${line.envValue ?? "(missing)"} expected=${line.expectedValue}`
+    );
+    logger.info(`  ${line.fix}`);
+  }
+
+  if (strictEnv) {
+    logger.info("");
+    logger.info("Strict: env drift blocks readiness.");
+  }
+
+  return strictEnv;
+}
+
+async function reportPostDeployAdvisories(
+  config: Awaited<ReturnType<typeof loadConfig>>
+): Promise<void> {
+  const lines = evaluatePostDeployDiagnostics(config);
+  if (lines.length === 0) {
+    return;
+  }
+
+  logger.info("");
+  logger.info("Post-deploy args (advisory):");
+  for (const line of lines) {
+    logger.info(`✗ ${line.contract}.${line.method} arg "${line.arg}" = "${line.value}"`);
+    if (line.fix) logger.info(`  ${line.fix}`);
+  }
+}
+
+async function reportWasmDrift(networkName: string): Promise<void> {
+  const lines = await evaluateWasmDriftDiagnostics({ networkName });
+  if (lines.length === 0) {
+    return;
+  }
+
+  logger.info("");
+  logger.info(`WASM drift (${networkName}):`);
+  for (const line of lines) {
+    logger.info(
+      `✗ ${line.contract} — local ${line.localWasmHash?.slice(0, 8) ?? "?"} vs artifact ${line.artifactWasmHash?.slice(0, 8) ?? "?"}`
+    );
+    if (line.fix) logger.info(`  ${line.fix}`);
+  }
+}
+
+async function reportVersionMatrix(config: Awaited<ReturnType<typeof loadConfig>>): Promise<void> {
+  logger.info("");
+  logger.info("Version matrix (minimum):");
+  logger.info("  Stellar CLI: >= 23 (27 recommended)");
+  logger.info("  @stellar/stellar-sdk: >= 13");
+
+  const sdkVersions = await readContractSorobanSdkVersions(config);
+  if (sdkVersions.length > 0) {
+    logger.info("  soroban-sdk (from contract Cargo.toml):");
+    for (const entry of sdkVersions) {
+      if (entry.sorobanSdk) {
+        logger.info(`    ${entry.contract}: ${entry.sorobanSdk}`);
+      } else {
+        logger.info(`    ${entry.contract}: (not found in ${entry.cargoPath})`);
+      }
+    }
+  }
+}
+
+async function reportAllNetworks(config: Awaited<ReturnType<typeof loadConfig>>): Promise<void> {
+  logger.info("");
+  logger.info("All networks:");
+  for (const networkName of Object.keys(config.networks)) {
+    logger.info("");
+    logger.info(`  ${networkName}:`);
+    await reportDeployCoverage(networkName);
+    await reportBindingCoverage(networkName, false);
   }
 }
 
@@ -71,10 +180,17 @@ export function registerDoctorCommand(program: Command): void {
     .description("Check local Caatinga, Stellar CLI, Rust, config, and source identity setup")
     .option("-n, --network <network>", "Configured network name to validate")
     .option("-s, --source <source>", "Stellar CLI identity alias to validate")
+    .option("--all-networks", "Report deploy and bindings coverage for every configured network")
+    .option("--strict-env", "Fail when frontend env file drifts from artifacts")
+    .option("--strict-bindings", "Fail when bindings are stale or missing")
+    .option("--strict", "Enable --strict-env and --strict-bindings")
     .action((options: DoctorOptions) =>
       runCliAction(async () => {
         logger.info("Caatinga Doctor");
         logger.info("");
+
+        const strictEnv = options.strictEnv === true || options.strict === true;
+        const strictBindings = options.strictBindings === true || options.strict === true;
 
         const { diagnostics, config } = await runAllDiagnostics(options);
 
@@ -99,16 +215,29 @@ export function registerDoctorCommand(program: Command): void {
           deployNetwork = config.defaultNetwork;
         }
 
-        if (deployNetwork && ready) {
+        let blocked = !ready;
+
+        if (config && options.allNetworks) {
+          await reportAllNetworks(config);
+        } else if (deployNetwork && ready && config) {
           await reportDeployCoverage(deployNetwork);
-          await reportBindingCoverage(deployNetwork);
+          const bindingsBlocked = await reportBindingCoverage(deployNetwork, strictBindings);
+          blocked = blocked || bindingsBlocked;
+
+          const envBlocked = await reportEnvDrift(deployNetwork, strictEnv);
+          blocked = blocked || envBlocked;
+
+          await reportPostDeployAdvisories(config);
+          await reportWasmDrift(deployNetwork);
+          await reportVersionMatrix(config);
         }
 
         logger.info("");
-        logger.info(`Status: ${ready ? "ready" : "blocked"}`);
+        logger.info(`Status: ${blocked ? "blocked" : "ready"}`);
         logger.info("Production checklist: docs/production-readiness.md");
+        logger.info(`Known networks: ${Object.keys(WELL_KNOWN_NETWORKS).join(", ")}`);
 
-        if (!ready) {
+        if (blocked) {
           process.exitCode = 1;
         }
       })

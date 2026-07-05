@@ -34,7 +34,7 @@ const config: CaatingaConfig = {
       networkPassphrase: "Test SDF Network ; September 2015",
     },
   },
-  postDeploy: [{ contract: "coin", method: "set_minter", args: {} }],
+  postDeploy: [{ contract: "coin", method: "set_minter", args: {}, kind: "invoke" }],
 };
 
 function invokeCalls() {
@@ -108,7 +108,9 @@ describe("runPostDeployHooks", () => {
       },
     });
 
-    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: "ok" }]);
+    expect(result).toEqual([
+      { contract: "coin", method: "set_minter", result: "ok", kind: "invoke" },
+    ]);
     expect(invokeCalls()).toHaveLength(2);
     expect(retries).toEqual([{ attempt: 1, maxAttempts: 2, delayMs: 0 }]);
   });
@@ -116,7 +118,9 @@ describe("runPostDeployHooks", () => {
   it("should_use_hook_source_override_when_provided", async () => {
     const configWithSourceOverride: CaatingaConfig = {
       ...config,
-      postDeploy: [{ contract: "coin", method: "set_minter", args: {}, source: "issuer" }],
+      postDeploy: [
+        { contract: "coin", method: "set_minter", args: {}, source: "issuer", kind: "invoke" },
+      ],
     };
 
     const result = await runPostDeployHooks({
@@ -126,7 +130,9 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+    expect(result).toEqual([
+      { contract: "coin", method: "set_minter", result: undefined, kind: "invoke" },
+    ]);
 
     const calls = invokeCalls();
     expect(calls).toHaveLength(1);
@@ -142,7 +148,9 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([{ contract: "coin", method: "set_minter", result: undefined }]);
+    expect(result).toEqual([
+      { contract: "coin", method: "set_minter", result: undefined, kind: "invoke" },
+    ]);
 
     const calls = invokeCalls();
     expect(calls).toHaveLength(1);
@@ -159,6 +167,7 @@ describe("runPostDeployHooks", () => {
           method: "set_minter",
           args: {},
           source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123",
+          kind: "invoke",
         },
       ],
     };
@@ -207,7 +216,15 @@ describe("runPostDeployHooks", () => {
 
     const configWithExpect: CaatingaConfig = {
       ...config,
-      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
+      postDeploy: [
+        {
+          contract: "coin",
+          method: "get_admin",
+          args: {},
+          expect: "CADMINADDRESS123",
+          kind: "invoke",
+        },
+      ],
     };
 
     const result = await runPostDeployHooks({
@@ -217,7 +234,9 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: "CADMINADDRESS123" }]);
+    expect(result).toEqual([
+      { contract: "coin", method: "get_admin", result: "CADMINADDRESS123", kind: "invoke" },
+    ]);
   });
 
   it("should_throw_when_expect_does_not_match_invoke_output", async () => {
@@ -230,7 +249,15 @@ describe("runPostDeployHooks", () => {
 
     const configWithExpect: CaatingaConfig = {
       ...config,
-      postDeploy: [{ contract: "coin", method: "get_admin", args: {}, expect: "CADMINADDRESS123" }],
+      postDeploy: [
+        {
+          contract: "coin",
+          method: "get_admin",
+          args: {},
+          expect: "CADMINADDRESS123",
+          kind: "invoke",
+        },
+      ],
     };
 
     await expect(
@@ -259,7 +286,13 @@ describe("runPostDeployHooks", () => {
     const configWithExpect: CaatingaConfig = {
       ...config,
       postDeploy: [
-        { contract: "coin", method: "get_admin", args: {}, expect: "${source.address}" },
+        {
+          contract: "coin",
+          method: "get_admin",
+          args: {},
+          expect: "${source.address}",
+          kind: "invoke",
+        },
       ],
     };
 
@@ -270,6 +303,41 @@ describe("runPostDeployHooks", () => {
       hookRetryDelaysMs: [0],
     });
 
-    expect(result).toEqual([{ contract: "coin", method: "get_admin", result: ALICE_ADDRESS }]);
+    expect(result).toEqual([
+      { contract: "coin", method: "get_admin", result: ALICE_ADDRESS, kind: "invoke" },
+    ]);
+  });
+
+  it("should_pass_structural_isArray_expect_when_state_is_not_empty", async () => {
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        return { stdout: '[{"id":1}]', stderr: "", all: '[{"id":1}]' };
+      }
+      return { stdout: "stellar 23.0.0", stderr: "", all: "stellar 23.0.0" };
+    });
+
+    const configWithExpect: CaatingaConfig = {
+      ...config,
+      postDeploy: [
+        {
+          contract: "coin",
+          method: "list_items",
+          args: {},
+          expect: { matcher: "isArray" },
+          kind: "invoke",
+        },
+      ],
+    };
+
+    const result = await runPostDeployHooks({
+      config: configWithExpect,
+      source: "alice",
+      cwd: tmpDir,
+      hookRetryDelaysMs: [0],
+    });
+
+    expect(result).toEqual([
+      { contract: "coin", method: "list_items", result: '[{"id":1}]', kind: "invoke" },
+    ]);
   });
 });

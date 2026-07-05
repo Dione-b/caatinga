@@ -1,5 +1,12 @@
 import { Command } from "commander";
-import { describeCliSource, loadConfig, readContract } from "@caatinga/core";
+import {
+  assertExpect,
+  describeCliSource,
+  loadConfig,
+  parseExpectSpec,
+  readContract,
+  summarizeReadOutput,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -14,6 +21,12 @@ export function registerReadCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias for simulation context (defaults to CAATINGA_SOURCE, otherwise alice)"
     )
+    .option(
+      "--expect <expect>",
+      "Verify output using postDeploy expect DSL (string or JSON matcher)"
+    )
+    .option("--quiet", "Suppress full output; print summary only when combined with --summary")
+    .option("--summary", "Print compact summary for large array payloads")
     .action(
       (
         target: string,
@@ -21,6 +34,9 @@ export function registerReadCommand(program: Command): void {
         options: {
           network?: string;
           source?: string;
+          expect?: string;
+          quiet?: boolean;
+          summary?: boolean;
         }
       ) =>
         runCliAction(async () => {
@@ -43,6 +59,12 @@ export function registerReadCommand(program: Command): void {
             source: options.source,
           });
 
+          const output = result.result?.trim() ?? "";
+
+          if (options.expect) {
+            assertExpect(output, parseExpectSpec(options.expect), target);
+          }
+
           logger.success("Read complete");
           logger.info("");
           logger.info(`Network: ${result.network.name}`);
@@ -51,7 +73,15 @@ export function registerReadCommand(program: Command): void {
 
           if (result.result) {
             logger.info("");
-            logger.info(result.result);
+            if (options.summary || options.quiet) {
+              logger.info(summarizeReadOutput(output));
+            } else {
+              logger.info(result.result);
+            }
+          }
+
+          if (options.expect) {
+            logger.success(`Expect passed for ${target}`);
           }
         })
     );

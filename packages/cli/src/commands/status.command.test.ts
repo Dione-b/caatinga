@@ -138,6 +138,56 @@ describe("status command", () => {
     }
   });
 
+  it("exits_with_code_1_when_strict_and_deployed_bindings_are_stale", async () => {
+    process.exitCode = undefined;
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status", "--strict"]);
+
+      expect(process.exitCode).toBe(1);
+    } finally {
+      logSpy.mockRestore();
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("does_not_exit_when_strict_and_only_undeployed_contracts_are_stale", async () => {
+    process.exitCode = undefined;
+    collectProjectStatusMock.mockResolvedValue({
+      ...status,
+      networks: [
+        {
+          network: "testnet",
+          contracts: [
+            {
+              name: "token",
+              deployed: false,
+              dependencies: ["counter"],
+              bindings: {
+                contractName: "token",
+                status: "missing",
+                outputDir: "/tmp/token",
+                marker: null,
+                reason: 'not deployed on "testnet"',
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status", "--strict"]);
+      expect(process.exitCode).toBeUndefined();
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
   it("emits parseable JSON with --json", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 

@@ -5,8 +5,11 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
-import { resolveCliSource } from "./source-account.js";
+import { formatNamedCliArgs } from "./format-cli-args.js";
 import { parseInvokeTarget } from "./invoke-target.js";
+import { resolveDeployArgs } from "./resolve-deploy-args.js";
+import { resolveCliMethodArgs, resolveMethodArgs } from "./resolve-method-args.js";
+import { resolveCliSource } from "./source-account.js";
 
 export { buildReadCallHint, isReadCallFailure, READ_CALL_FAILURE_REGEX } from "./invoke-target.js";
 
@@ -17,6 +20,8 @@ export type ReadContractOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
+  /** Resolve record-style args through deploy placeholder + alias resolution. */
+  namedArgs?: Record<string, string | number | boolean>;
 };
 
 export async function readContract(options: ReadContractOptions) {
@@ -36,18 +41,36 @@ export async function readContract(options: ReadContractOptions) {
 
   await checkBinary("stellar", "Install Stellar CLI before running caatinga read.");
 
+  const source = resolveCliSource(options.source);
+  let cliArgs = await resolveCliMethodArgs(options.args ?? [], {
+    source,
+    cwd,
+  });
+
+  if (options.namedArgs) {
+    const resolved = await resolveDeployArgs({
+      deployArgs: options.namedArgs,
+      artifacts,
+      network: network.name,
+      source,
+      cwd,
+    });
+    const methodArgs = await resolveMethodArgs({ args: resolved, source, cwd });
+    cliArgs = formatNamedCliArgs(methodArgs);
+  }
+
   const stellarArgs = [
     "contract",
     "invoke",
     "--id",
     contractArtifact.contractId,
     "--source-account",
-    resolveCliSource(options.source),
+    source,
     "--send=no",
     ...buildStellarNetworkArgs(network),
     "--",
     target.method,
-    ...(options.args ?? []),
+    ...cliArgs,
   ];
 
   const result = await runCommand("stellar", stellarArgs, {

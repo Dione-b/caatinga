@@ -97,24 +97,29 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 | Command                        | Purpose                                                                  | Flags                                                                                                                                                       |
 | ------------------------------ | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                           |
-| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
+| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
 | `caatinga wire`                | Run `postDeploy` hooks after deploy (re-run if `--no-wire` was used)     | `--network`, `--source`                                                                                                                                     |
 | `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                 |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`                                                                                                                                                 |
+| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                             |
+| `caatinga smoke`               | Run configured read-only smoke checks with expect DSL                    | `--network`, `--source`                                                                                                                                     |
+| `caatinga regression`          | Recipe: test → build → deploy --if-changed → generate → smoke            | `--network`, `--source`, `--skip-test`, `--skip-build`, `--skip-deploy`, `--skip-generate`, `--skip-smoke`                                                  |
+| `caatinga ci run`              | CI helper: doctor → smoke                                                | `--network`, `--source`, `--strict`, `--skip-smoke`                                                                                                         |
+| `caatinga identity export`     | Export Stellar CLI config as base64 tarball                               | `--path`                                                                                                                                                    |
+| `caatinga identity import`     | Import base64 tarball into Stellar CLI config                             | `[archive]`, `--path`                                                                                                                                       |
 
 ### Diagnostics & Status
 
 | Command           | Purpose                                                             | Flags                   |
 | ----------------- | ------------------------------------------------------------------- | ----------------------- |
-| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity | `--network`, `--source` |
-| `caatinga status` | Table of deployed contracts + binding freshness per network         | `--network`, `--json`   |
+| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity | `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings` |
+| `caatinga status` | Table of deployed contracts + binding freshness per network         | `--network`, `--json`, `--strict`   |
 
 ### Invocation
 
 | Command                             | Purpose                                | Flags                                |
 | ----------------------------------- | -------------------------------------- | ------------------------------------ |
 | `caatinga invoke <contract.method>` | Sign + submit a state-changing call    | `--network`, `--source`, `[args...]` |
-| `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `[args...]`             |
+| `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `--source`, `--expect`, `--quiet`, `--summary`, `[args...]` |
 
 ### Artifacts & diagnostics (advanced)
 
@@ -464,7 +469,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
 15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
 16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
-17. **`postDeploy` expect** — if `expect` is set, stdout is compared; mismatch throws `CAATINGA_POST_DEPLOY_VERIFY_FAILED`. Supports `${source.address}` and `${contracts.*.contractId}` placeholders.
+17. **`postDeploy` expect** — if `expect` is set, stdout is verified with string equality or structural matchers (`isArray`, `reachable`, `minLength`, etc.). Supports `${source.address}` and `${contracts.*.contractId}` placeholders. Use `postDeployRead` or `kind: "read"` for simulate-only hooks.
 18. **`frontend.env` suffixes** — env map keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, `.wasmPath` suffixes for artifact field sync.
 
 ---

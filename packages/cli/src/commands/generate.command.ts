@@ -5,6 +5,8 @@ import {
   loadConfig,
   readArtifacts,
   resolveNetwork,
+  CaatingaError,
+  CaatingaErrorCode,
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -43,15 +45,29 @@ export function registerGenerateCommand(program: Command): void {
     .description("Generate TypeScript bindings for deployed contracts")
     .argument("[contract]", "Contract name (defaults to all deployed contracts)")
     .option("-n, --network <network>", "Configured network name")
+    .option("--strict-network", "Fail when the network has no deployment artifacts")
     .action(
       (
         contractName: string | undefined,
         options: {
           network?: string;
+          strictNetwork?: boolean;
         }
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
+
+          if (options.strictNetwork) {
+            const network = resolveNetwork(config, options.network);
+            const artifacts = await readArtifacts();
+            if (!artifacts.networks[network.name]) {
+              throw new CaatingaError(
+                `No deployment artifacts for network "${network.name}".`,
+                CaatingaErrorCode.NETWORK_ARTIFACTS_MISSING,
+                `Run caatinga deploy --network ${network.name} before generate.`
+              );
+            }
+          }
 
           if (!contractName) {
             await printFreshnessPreState(config, options.network);
