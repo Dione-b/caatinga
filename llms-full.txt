@@ -148,7 +148,9 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 - `caatinga deploy` auto-generates bindings unless `--no-generate` is passed.
 - Full graph deploy (no contract name) auto-runs `wire` + `sync-env` unless `--no-wire` / `--no-sync-env` is passed.
 - Transient testnet failures are retried with exponential backoff.
-- `caatinga doctor` checks deploy coverage (which contracts are deployed) but never blocks on it.
+- `caatinga doctor` checks deploy coverage (which contracts are deployed) but **never blocks on it**, even with `--strict`. `--strict` = `--strict-env` + `--strict-bindings` only.
+- `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
+- Expect DSL matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
 
 ---
 
@@ -202,14 +204,19 @@ export default defineConfig({
       contract: "counter",
       method: "initialize",
       args: { owner: "${source.address}" },
-    },
-    {
-      contract: "counter",
-      method: "get_owner",
-      source: "issuer", // optional: override --source for this hook
-      expect: "${source.address}", // optional: assert stdout matches
+      kind: "invoke",
+      expect: { matcher: "reachable" },
     },
   ],
+
+  postDeployRead: [
+    { contract: "counter", method: "count", kind: "read", expect: { matcher: "reachable" } },
+  ],
+
+  smoke: {
+    useFreshSymbol: false,
+    reads: [{ contract: "counter", method: "count", expect: { matcher: "reachable" } }],
+  },
 
   zk: {
     // optional: ZK circuit configuration
@@ -417,7 +424,9 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder              |
 | `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time     |
 | `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source` |
-| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` value doesn't match invoke stdout  |
+| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` mismatch in postDeploy, smoke, or `read --expect` |
+| `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`               | CLI alias in method arg could not be resolved                |
+| `CAATINGA_NETWORK_ARTIFACTS_MISSING`              | `generate --strict-network` with no artifacts for network    |
 
 ### Client errors
 
@@ -469,8 +478,12 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
 15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
 16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
-17. **`postDeploy` expect** — if `expect` is set, stdout is verified with string equality or structural matchers (`isArray`, `reachable`, `minLength`, etc.). Supports `${source.address}` and `${contracts.*.contractId}` placeholders. Use `postDeployRead` or `kind: "read"` for simulate-only hooks.
+17. **`postDeploy` expect** — stdout verified with string equality or structural matchers. Use `postDeployRead` or `kind: "read"` for simulate-only hooks. Also applies to `caatinga smoke` and `read --expect`.
 18. **`frontend.env` suffixes** — env map keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, `.wasmPath` suffixes for artifact field sync.
+19. **`doctor --strict`** — blocks on env drift and stale bindings only; deploy coverage and WASM drift stay advisory.
+20. **`caatinga regression`** — local CI recipe: test → build → deploy --if-changed → generate → smoke.
+21. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars).
+22. **`identity export/import`** — base64 tarball for CI secrets; import reads a base64 text file path.
 
 ---
 

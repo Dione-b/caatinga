@@ -15,7 +15,21 @@ Default CI does not require testnet access, Freighter, or private keys. Tests us
 
 ## Default CI
 
-The default GitHub Actions workflow runs typecheck, build, and tests.
+The default GitHub Actions workflow runs typecheck, docs check, build, and tests. No testnet access required.
+
+## Deploy regression (testnet)
+
+Workflow: `.github/workflows/testnet-deploy-regression.yml` — triggers: weekly schedule (Monday), `workflow_dispatch`.
+
+Typical steps: `caatinga deploy --if-changed` → `caatinga generate --strict-network` → `caatinga doctor --strict-bindings` → `caatinga smoke`.
+
+Local equivalent:
+
+```bash
+npx caatinga regression --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS"
+```
+
+Use `caatinga ci run --strict` in CI after restoring identity secrets when you only need doctor + smoke (no full regression).
 
 ## Live testnet smoke (release gate)
 
@@ -46,12 +60,16 @@ With Stellar CLI `27.0.0`, the safest secret format is a base64-encoded tar arch
 To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
 
 ```bash
+caatinga identity export > stellar-ci-config.b64
+# or manually:
 mkdir -p ci-stellar-config/.config
 cp -R ~/.config/stellar ci-stellar-config/.config/stellar
 cp -R ~/.config/soroban ci-stellar-config/.config/soroban
 tar -C ci-stellar-config -czf stellar-ci-config.tgz .config
 base64 -w0 stellar-ci-config.tgz
 ```
+
+Restore in CI with `caatinga identity import stellar-ci-config.b64` after decoding is not needed — the import command reads the base64 text file directly.
 
 Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
 

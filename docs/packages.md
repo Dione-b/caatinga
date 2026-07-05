@@ -1,11 +1,11 @@
 # Packages
 
-| Package            | Role                                                       |
-| ------------------ | ---------------------------------------------------------- |
-| `@caatinga/cli`    | End-user CLI (`caatinga` binary)                           |
-| `@caatinga/core`   | Config, artifacts, Stellar CLI orchestration               |
-| `@caatinga/client` | Browser/client interop over generated bindings             |
-| `@caatinga/zk`     | ZK proof serialization and Circom Groth16 workflow helpers |
+| Package            | Role                                                               |
+| ------------------ | ------------------------------------------------------------------ |
+| `@caatinga/cli`    | End-user CLI (`caatinga` binary)                                   |
+| `@caatinga/core`   | Config, artifacts, Stellar CLI orchestration, verification helpers |
+| `@caatinga/client` | Browser/client interop over generated bindings                     |
+| `@caatinga/zk`     | ZK proof serialization and Circom Groth16 workflow helpers         |
 
 Install for end users:
 
@@ -39,3 +39,18 @@ Each package exposes subpath exports for fine-grained imports:
 | `@caatinga/client` | `./vite`                 | Vite bundler helpers for SWK stubs                         |
 | `@caatinga/zk`     | `.`                      | ZK proof serialization + Circom workflow                   |
 | `@caatinga/zk`     | `./browser`              | Browser-only ZK binding helpers                            |
+
+### `@caatinga/core` tooling exports (Node)
+
+For custom CI scripts and integrators:
+
+| Export                                            | Purpose                                                               |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| `verifyExpect`, `parseExpectSpec`, `assertExpect` | Expect DSL used by postDeploy, smoke, and `read --expect`             |
+| `evaluateEnvDrift`                                | Compare `frontend.envFile` to artifacts                               |
+| `evaluateWasmDrift`                               | Compare local WASM hash to artifact record                            |
+| `runSmokeReads`                                   | Execute configured smoke reads programmatically                       |
+| `resolveMethodArgs`                               | Resolve `${source.address}`, aliases, and placeholders in method args |
+| `summarizeReadOutput`                             | Compact read output for large payloads                                |
+
+Browser-safe types and errors: import from `@caatinga/core/browser` only.

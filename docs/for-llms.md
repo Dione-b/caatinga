@@ -96,27 +96,32 @@ npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync
 
 ### Build & Deploy
 
-| Command                        | Purpose                                                                  | Flags                                                                                                                                                       |
-| ------------------------------ | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                           |
-| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
-| `caatinga wire`                | Run `postDeploy` hooks after deploy (re-run if `--no-wire` was used)     | `--network`, `--source`                                                                                                                                     |
-| `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                 |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`                                                                                                                                                 |
+| Command                        | Purpose                                                                  | Flags                                                                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                           |
+| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
+| `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                     |
+| `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                 |
+| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                             |
+| `caatinga smoke`               | Run configured read-only smoke checks with expect DSL                    | `--network`, `--source`                                                                                                                                                     |
+| `caatinga regression`          | Recipe: test → build → deploy --if-changed → generate → smoke            | `--network`, `--source`, `--skip-*`                                                                                                                                         |
+| `caatinga ci run`              | CI helper: doctor → smoke                                                | `--network`, `--source`, `--strict`, `--skip-smoke`                                                                                                                         |
+| `caatinga identity export`     | Export Stellar CLI config as base64 tarball on stdout                    | `--path`                                                                                                                                                                    |
+| `caatinga identity import`     | Import base64 tarball file into Stellar CLI config                       | `[archive-file]`, `--path`                                                                                                                                                  |
 
 ### Diagnostics & Status
 
-| Command           | Purpose                                                             | Flags                   |
-| ----------------- | ------------------------------------------------------------------- | ----------------------- |
-| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity | `--network`, `--source` |
-| `caatinga status` | Table of deployed contracts + binding freshness per network         | `--network`, `--json`   |
+| Command           | Purpose                                                             | Flags                                                                                      |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity | `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings` |
+| `caatinga status` | Table of deployed contracts + binding freshness per network         | `--network`, `--json`, `--strict`                                                          |
 
 ### Invocation
 
-| Command                             | Purpose                                | Flags                                |
-| ----------------------------------- | -------------------------------------- | ------------------------------------ |
-| `caatinga invoke <contract.method>` | Sign + submit a state-changing call    | `--network`, `--source`, `[args...]` |
-| `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `[args...]`             |
+| Command                             | Purpose                                | Flags                                                                         |
+| ----------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------- |
+| `caatinga invoke <contract.method>` | Sign + submit a state-changing call    | `--network`, `--source`, `[args...]` (aliases in named args resolved to `G…`) |
+| `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `--source`, `--expect`, `--quiet`, `--summary`, `[args...]`      |
 
 ### Artifacts & diagnostics (advanced)
 
@@ -145,7 +150,9 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 - `caatinga deploy` auto-generates bindings unless `--no-generate` is passed.
 - Full graph deploy (no contract name) auto-runs `wire` + `sync-env` unless `--no-wire` / `--no-sync-env` is passed.
 - Transient testnet failures are retried with exponential backoff.
-- `caatinga doctor` checks deploy coverage (which contracts are deployed) but never blocks on it.
+- `caatinga doctor` checks deploy coverage (which contracts are deployed) but **never blocks on it**, even with `--strict`. `--strict` = `--strict-env` + `--strict-bindings` only.
+- `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
+- Expect DSL matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals` — shared by postDeploy, smoke, and `read --expect`.
 
 ---
 
@@ -199,14 +206,20 @@ export default defineConfig({
       contract: "counter",
       method: "initialize",
       args: { owner: "${source.address}" },
-    },
-    {
-      contract: "counter",
-      method: "get_owner",
-      source: "issuer", // optional: override --source for this hook
-      expect: "${source.address}", // optional: assert stdout matches
+      kind: "invoke", // default
+      expect: { matcher: "reachable" },
     },
   ],
+
+  postDeployRead: [
+    // optional: simulate-only hooks (same shape as postDeploy)
+    { contract: "counter", method: "count", kind: "read", expect: { matcher: "reachable" } },
+  ],
+
+  smoke: {
+    useFreshSymbol: false, // inject ephemeral symbol arg when true
+    reads: [{ contract: "counter", method: "count", expect: { matcher: "reachable" } }],
+  },
 
   zk: {
     // optional: ZK circuit configuration
@@ -406,15 +419,17 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 
 ### Multi-contract / dependency errors
 
-| Code                                              | Trigger                                     |
-| ------------------------------------------------- | ------------------------------------------- |
-| `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`          | `dependsOn` references unknown contract     |
-| `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`              | Circular dependency detected                |
-| `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND` | Dependency not deployed yet                 |
-| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder              |
-| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time     |
-| `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source` |
-| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` value doesn't match invoke stdout  |
+| Code                                              | Trigger                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`          | `dependsOn` references unknown contract                    |
+| `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`              | Circular dependency detected                               |
+| `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND` | Dependency not deployed yet                                |
+| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder                             |
+| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time                    |
+| `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source`                |
+| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` mismatch in postDeploy, smoke, or `read --expect` |
+| `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`               | CLI alias in method arg could not be resolved              |
+| `CAATINGA_NETWORK_ARTIFACTS_MISSING`              | `generate --strict-network` with no artifacts for network  |
 
 ### Client errors
 
@@ -466,8 +481,12 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
 15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
 16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
-17. **`postDeploy` expect** — if `expect` is set, stdout is compared; mismatch throws `CAATINGA_POST_DEPLOY_VERIFY_FAILED`. Supports `${source.address}` and `${contracts.*.contractId}` placeholders.
+17. **`postDeploy` expect** — stdout verified with string equality or structural matchers. Use `postDeployRead` or `kind: "read"` for simulate-only hooks. Also applies to `caatinga smoke` and `read --expect`.
 18. **`frontend.env` suffixes** — env map keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, `.wasmPath` suffixes for artifact field sync.
+19. **`doctor --strict`** — blocks on env drift (`--strict-env`) and stale bindings (`--strict-bindings`) only; deploy coverage and WASM drift stay advisory.
+20. **`caatinga regression`** — local recipe mirroring CI: test → build → deploy --if-changed → generate → smoke.
+21. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars); prefer placeholders in config.
+22. **`identity export/import`** — base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`; import reads a base64 text file path.
 
 ---
 

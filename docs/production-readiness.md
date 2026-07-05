@@ -13,15 +13,20 @@ Run through each item; `caatinga doctor` covers several automatically.
 | 3   | Signing identity funded and correct network         | `caatinga doctor --source <alias> --network <net>`                                                           |
 | 4   | All configured contracts deployed on target network | `caatinga status --network <net>`                                                                            |
 | 5   | Bindings fresh (marker matches artifacts)           | `caatinga doctor --strict-bindings` / `caatinga status --strict`                                             |
+| 5b  | Frontend env matches artifacts                      | `caatinga doctor --strict-env` / `caatinga sync-env --network <net>`                                         |
+| 5c  | Post-deploy read checks pass                        | `caatinga smoke --network <net> --source <alias>`                                                            |
 | 6   | Deploy cost estimated                               | `caatinga estimate deploy <contract> --network <net>`                                                        |
 | 7   | Artifacts schema migrated (if using history)        | `caatinga migrate artifacts`                                                                                 |
 | 8   | Signing strategy documented for your team           | [Signing strategy](./signing-strategy.md)                                                                    |
 | 9   | Stellar CLI and SDK versions pinned in CI           | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md) |
+| 9b  | CI identity exported and rotated safely             | `caatinga identity export` → `CAATINGA_CI_STELLAR_CONFIG_B64` (see [Testing](./internal/testing.md))         |
 | 10  | Upgrade/rollback plan understood                    | [Contract upgrade](./tutorials/contract-upgrade.md)                                                          |
+| 10b | Deploy regression workflow green on testnet         | `caatinga regression` or `.github/workflows/testnet-deploy-regression.yml`                                   |
 
 ## What Caatinga provides today
 
-- **Diagnostics:** `caatinga doctor` — toolchain, config, artifacts, binding freshness, deploy coverage.
+- **Diagnostics:** `caatinga doctor` — toolchain, config, artifacts, binding freshness, deploy coverage, env drift, WASM drift advisories, version matrix.
+- **Verification:** `caatinga smoke`, `caatinga read --expect`, `caatinga regression` — post-deploy read checks with expect DSL.
 - **State inspection:** `caatinga status`, `caatinga inspect <contract>` — per-network deploy and binding state.
 - **Cost estimation:** `caatinga estimate deploy` — pre-deploy fee breakdown (advisory).
 - **Artifact history (v2):** prior `contractId`s preserved on `--force` / `--upgrade` redeploys.
@@ -54,24 +59,28 @@ Template stub: `integration.app-e2e.ts` in `react-vite-counter` (replace with re
 
 ```mermaid
 flowchart TD
-  doctor["caatinga doctor"]
+  doctor["caatinga doctor --strict"]
+  smoke["caatinga smoke"]
   estimate["caatinga estimate deploy"]
-  deploy["caatinga deploy --upgrade"]
-  status["caatinga status / inspect"]
+  deploy["caatinga deploy --if-changed"]
+  status["caatinga status --strict"]
   commit["git commit caatinga.artifacts.json"]
 
   doctor --> estimate
   estimate --> deploy
-  deploy --> status
+  deploy --> smoke
+  smoke --> status
   status --> commit
 ```
 
 1. Pin Stellar CLI `27.0.0` and `@stellar/stellar-sdk ^16.0.1` in CI and locally.
-2. Run `caatinga doctor` on every PR that touches contracts.
+2. Run `caatinga doctor --strict` on every PR that touches contracts.
 3. Estimate fees before mainnet deploys.
-4. Commit `caatinga.artifacts.json` after every deploy.
-5. Use `--upgrade` (not blind `--force`) when redeploying contract logic.
-6. Document your signing alias and funding source outside the repo.
+4. Use `deploy --if-changed` on testnet/staging to skip unchanged WASM.
+5. Run `caatinga smoke` after deploy on testnet.
+6. Commit `caatinga.artifacts.json` after every deploy.
+7. Use `--upgrade` (not blind `--force`) when redeploying contract logic.
+8. Document your signing alias and funding source outside the repo.
 
 ## Multi-frontend projects
 

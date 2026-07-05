@@ -5,8 +5,8 @@
 ## Core docs
 
 - [Getting started](docs/getting-started.md): Install, scaffold, CLI-to-browser flow. Start here.
-- [CLI reference](docs/cli.md): Every command — init, setup, doctor, build, deploy, wire, sync-env, generate, status, invoke, read, zk.
-- [Config schema](docs/config.md): `caatinga.config.ts` — contracts, networks, frontend, postDeploy, buildRoot.
+- [CLI reference](docs/cli.md): init, setup, doctor, build, deploy, wire, sync-env, generate, status, smoke, regression, ci, identity, invoke, read, zk.
+- [Config schema](docs/config.md): `caatinga.config.ts` — contracts, networks, frontend, postDeploy, postDeployRead, smoke, buildRoot.
 - [Client API](docs/client.md): `@caatinga/client` — createCaatingaClient, read/simulate/invoke, XDR debug, wallet adapters.
 - [Wallets](docs/wallets.md): CaatingaWalletAdapter contract, Stellar Wallets Kit, Freighter, React hooks.
 - [Architecture](docs/architecture.md): Package layout, data flow, multi-contract DAG, competitive stance. **Product boundary:** Caatinga ends at typed client + resolved contract IDs; HTTP/DB/async are app concerns.
@@ -24,6 +24,7 @@
 - [ZK project](docs/tutorials/zk-project.md): ZK dApp with Circom/Groth16.
 - [Project scaffolds comparison](docs/tutorials/project-scaffolds.md): When to use each path.
 - [Multi-contract case study](docs/case-studies/stellar-album.md): dependsOn, postDeploy, wire, sync-env.
+- [Testnet hygiene](docs/internal/testnet-hygiene.md): shared testnet state, `useFreshSymbol`, read `--summary`.
 - [stellar-build integration](docs/tutorials/integration-guide.md): Optional agent workflow for Claude Code / Codex.
 
 ## Full reference

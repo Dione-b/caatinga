@@ -182,7 +182,8 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 
 - **Templates:** start as **opinionated snapshots** (`react-vite-counter`, etc.). Parameterized generators (`--tailwind`, wallet flavor, i18n) come later—they expand the test matrix quickly.
 - **Template contract:** every template includes a **`caatinga.template.json` manifest** (name, version, `compatibleCore`, paths) so templates and core semver are validated at `init`—see [ADR 0003](./adr/0003-template-manifest-compatibility.md).
-- **Post-deploy hooks:** `postDeploy` is now a first-class config surface for deterministic, admin-signed contract wiring after full graph deploys — see [ADR 0006](./adr/0006-post-deploy-hooks.md). This solves the validated multi-contract need without adding a general plugin loader.
+- **Post-deploy hooks:** `postDeploy`, `postDeployRead`, and `smoke` are first-class config surfaces for wiring, read verification, and CI smoke — see [ADR 0006](./adr/0006-post-deploy-hooks.md) and [Config — postDeploy](./config.md). Expect DSL matchers (`reachable`, `isArray`, etc.) apply to hooks, `caatinga read --expect`, and `caatinga smoke`.
+- **Verification layer:** `caatinga smoke`, `caatinga regression`, and `caatinga ci run` compose deploy/generate with read checks. `@caatinga/core` exports `verifyExpect`, `evaluateEnvDrift`, and `runSmokeReads` for custom tooling.
 - **Plugins:** still deferred for broader extension points (for example CI presets or indexer hooks). Keep hooks declarative and data-only until a concrete use case requires executable plugin code.
 
 ## Ecosystem: official vs community templates

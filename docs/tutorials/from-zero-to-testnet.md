@@ -101,7 +101,13 @@ Check the result at any time:
 
 ```bash
 npx caatinga status --network testnet
+npx caatinga smoke --network testnet --source alice
+npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
 ```
+
+`smoke` runs read checks from `caatinga.config.ts` (`smoke.reads` or `postDeployRead`). Use
+`deploy --if-changed` on repeat runs to skip unchanged WASM. See
+[Testnet hygiene](../internal/testnet-hygiene.md) when shared testnet state causes flaky expects.
 
 The table shows each contract's contract ID, whether it is deployed, and whether its bindings are
 still fresh (a redeploy marks them `stale` until the next generate).
@@ -171,6 +177,8 @@ default template, see [Wallets](../wallets.md).
   After a successful build, ensure `caatinga.config.ts` points to `target/wasm32v1-none/release/*.wasm`. Caatinga `0.2.2+` resolves legacy `wasm32-unknown-unknown` paths automatically.
   If you have `CARGO_TARGET_DIR` set, Stellar CLI writes the Wasm under that directory instead of `contracts/<name>/target`. Caatinga `2.4.1+` resolves the Wasm from `CARGO_TARGET_DIR` automatically, but if it still fails, unset `CARGO_TARGET_DIR` or update the `wasm` path in `caatinga.config.ts`.
 - Partial deploy coverage: `caatinga doctor` prints missing `contractId`s as an advisory section (exit code stays `0` when the toolchain is ready). Run the `caatinga deploy` commands it suggests before invoke/read on testnet.
+- `CAATINGA_POST_DEPLOY_VERIFY_FAILED`: an `expect` check failed in `postDeploy`, `smoke`, or `read --expect`. Prefer structural matchers (`isArray`, `reachable`) when testnet state is shared — see [Testnet hygiene](../internal/testnet-hygiene.md).
+- `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`: a hook or CLI arg looked like a Stellar CLI alias but could not be resolved. Use `${source.address}` in config or create the identity first.
 - `CAATINGA_STELLAR_CLI_NOT_FOUND`: install Stellar CLI and ensure `stellar` is on `PATH`.
 - `CAATINGA_UNSUPPORTED_CLI_VERSION`: install Stellar CLI 23.0.0 or newer (27.0.0 recommended). Versions newer than the last-tested 27.0.0 run with a non-fatal stderr advisory; no override flag is required.
 - `CAATINGA_RUST_TARGET_NOT_FOUND`: run `rustup target add wasm32v1-none`.

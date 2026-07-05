@@ -79,16 +79,58 @@ Each `postDeploy` entry:
 | `expect`   | string or `{ matcher, value? }`               | no       | verify stdout with string equality or structural matchers (see below)       |
 | `kind`     | `"invoke"` \| `"read"`                        | no       | `"invoke"` (default) submits; `"read"` simulates without signing            |
 
-Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
+Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`. See [CLI — Expect DSL](./cli.md#expect-dsl) for examples.
 
 `postDeployRead` (optional): same shape as `postDeploy`; always simulated (`kind: "read"`). Use a read-only identity separate from write hooks when testnet state accumulates.
 
 `smoke` (optional):
 
-| Field            | Type    | Notes                                              |
-| ---------------- | ------- | -------------------------------------------------- |
-| `smoke.reads`    | array   | read checks for `caatinga smoke`                   |
-| `useFreshSymbol` | boolean | hint for ephemeral Symbol/UUID keys in integration |
+| Field            | Type    | Notes                                             |
+| ---------------- | ------- | ------------------------------------------------- |
+| `smoke.reads`    | array   | read checks for `caatinga smoke`                  |
+| `useFreshSymbol` | boolean | inject ephemeral `symbol` arg (UUID) on each read |
+
+Each `smoke.reads` / `postDeployRead` entry uses the same fields as `postDeploy` (`contract`, `method`, `args`, `source`, `expect`, optional `kind`).
+
+When `useFreshSymbol` is `true`, Caatinga adds a `symbol` argument with a fresh UUID to each smoke read so testnet writes do not reuse shared keys. See [Testnet hygiene](./internal/testnet-hygiene.md).
+
+### Example: postDeploy, postDeployRead, and smoke
+
+From the `react-vite-counter` template:
+
+```ts
+postDeployRead: [
+  {
+    contract: "counter",
+    method: "count",
+    kind: "read",
+    args: {},
+    expect: { matcher: "reachable" },
+  },
+],
+smoke: {
+  useFreshSymbol: false,
+  reads: [
+    {
+      contract: "counter",
+      method: "count",
+      expect: { matcher: "reachable" },
+    },
+  ],
+},
+```
+
+### Address alias resolution in hook args
+
+Method args in `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga invoke`, and `caatinga read` may use:
+
+- `${source.address}` — resolved from the hook `--source` or CLI `--source`
+- `${contracts.<name>.contractId}` — resolved from artifacts
+- Raw CLI aliases (for example `alice`) — resolved via `stellar keys address` when the value looks like an alias (≥3 characters)
+
+Prefer `${source.address}` over raw aliases in config. Doctor prints advisory warnings for alias-like hook args. Unresolved aliases throw `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`.
+
+Run hooks with `caatinga wire`, read checks with `caatinga smoke`, or the full `caatinga regression` pipeline — see [CLI](./cli.md).
 
 `NetworkConfig` (each value in `networks`):
 

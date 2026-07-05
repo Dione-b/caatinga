@@ -46,10 +46,11 @@ npm install
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
+npx caatinga smoke --network testnet --source alice   # optional post-deploy read checks
 npx caatinga status --network testnet
 ```
 
-`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). Run `caatinga doctor` if setup fails.
+`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). For CI pipelines see [Cheatsheet — CI and regression](./docs/cheatsheet.md#ci-and-regression). Run `caatinga doctor` if setup fails.
 
 For scaffold options and a browser walkthrough, see [Getting started](./docs/getting-started.md) and [Project scaffolds](./docs/tutorials/project-scaffolds.md).
 
@@ -111,12 +112,12 @@ my-dapp/
 
 ## Packages
 
-| Package            | Role                                                                     |
-| ------------------ | ------------------------------------------------------------------------ |
-| `@caatinga/cli`    | `caatinga` command — init, build, deploy, wire, generate, status, doctor |
-| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog         |
-| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks               |
-| `@caatinga/zk`     | Circom Groth16 verifier workflow (niche)                                 |
+| Package            | Role                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| `@caatinga/cli`    | `caatinga` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
+| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                |
+| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                      |
+| `@caatinga/zk`     | Circom Groth16 verifier workflow (niche)                                                        |
 
 Full export map: [Packages](./docs/packages.md).
 

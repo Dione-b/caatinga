@@ -93,15 +93,19 @@ Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`),
 
 With `--network`, doctor also compares every contract in `caatinga.config.ts` against
 `caatinga.artifacts.json` for that network. Each contract prints `✓` with its contract ID when
-deployed, or `✗` with a suggested `caatinga deploy` command when missing. Missing deploy coverage
-is advisory only — it never flips doctor to `blocked` or changes the exit code unless `--strict`, `--strict-env`, or `--strict-bindings` is set.
+deployed, or `✗` with a suggested `caatinga deploy` command when missing. **Deploy coverage is
+always advisory** — it never blocks exit code, even with `--strict`.
 
 When the deploy coverage check passes, doctor also prints a `Bindings (<network>)` section with
 the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`, `missing`, or
 `unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
 is advisory unless `--strict-bindings` or `--strict` is set.
 
-Doctor may also report frontend env drift vs artifacts, local WASM drift, postDeploy alias advisories, and a version matrix including `soroban-sdk` from each contract's `Cargo.toml`. Use `--all-networks` for a per-network deploy/bindings matrix.
+`--strict` enables both `--strict-env` and `--strict-bindings`. `--strict-env` fails when
+`frontend.envFile` drifts from `caatinga.artifacts.json` (fix with `caatinga sync-env`).
+WASM drift and postDeploy alias advisories are **always advisory** — they print warnings but never
+change exit code. Doctor may also print a version matrix including `soroban-sdk` from each
+contract's `Cargo.toml`. Use `--all-networks` for a per-network deploy/bindings matrix.
 
 ## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--if-changed] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
 
@@ -111,7 +115,8 @@ CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient
 command exits with `CAATINGA_DEPLOY_FAILED`. Dependencies deploy first
 when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
 contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
-Use `--if-changed` to skip deploy when the local WASM hash matches the artifact (redeploy only when the build changed).
+Use `--if-changed` to skip deploy when the local WASM hash matches the artifact (redeploy only when
+the build changed). Skipped contracts print `[skipped] unchanged` and do not call Stellar CLI.
 Pass `--verify-deps` to confirm each dependency's contract ID exists on-chain (via
 `stellar contract info interface`) before resolving deploy arguments.
 
@@ -134,8 +139,14 @@ When deploying the **full contract graph** (no `contract` argument), Caatinga al
 
 ## `caatinga wire [--network testnet] --source <identity>`
 
-Runs every `postDeploy` hook from `caatinga.config.ts` in order. Each hook invokes a deployed
-contract method with resolved placeholders (`${contracts.*.contractId}`, `${source.address}`).
+Runs every `postDeploy` and `postDeployRead` hook from `caatinga.config.ts` in order. Each hook
+calls a deployed contract method with resolved placeholders (`${contracts.*.contractId}`,
+`${source.address}`). Hooks with `kind: "read"` (or entries in `postDeployRead`) simulate without
+signing; default `kind: "invoke"` submits a signed transaction.
+
+When `expect` is set, stdout is verified after each hook (string equality or structural matchers —
+see [Expect DSL](#expect-dsl)). Mismatch fails with `CAATINGA_POST_DEPLOY_VERIFY_FAILED`.
+
 Use after a full deploy when wiring was skipped with `--no-wire`, or to re-apply authority edges
 on testnet after a partial failure.
 
@@ -192,15 +203,19 @@ Orchestrates the recommended pipeline: `pnpm test` → `caatinga build` → `caa
 
 ## `caatinga ci run [--network testnet] [--source alice] [--strict] [--skip-smoke]`
 
-CI helper: runs `caatinga doctor` then `caatinga smoke`. Intended for GitHub Actions after restoring Stellar CLI identity secrets.
+CI helper: runs `caatinga doctor` then `caatinga smoke`. Intended for GitHub Actions after
+restoring Stellar CLI identity secrets. `--strict` is forwarded to `doctor` only (enables
+`--strict-env` and `--strict-bindings`); it does not run `status --strict`.
 
 ## `caatinga identity export [--path ~/.config/stellar]`
 
-Exports the Stellar CLI config directory as a base64 tarball on stdout (for `CAATINGA_CI_STELLAR_CONFIG_B64`).
+Exports the Stellar CLI config directory as a base64 tarball on stdout (for
+`CAATINGA_CI_STELLAR_CONFIG_B64`). Prefer this over hand-rolled tar commands — see
+[Testing — Stellar CLI config blob](./internal/testing.md#stellar-cli-config-blob-format).
 
-## `caatinga identity import <archive> [--path ~/.config/stellar]`
+## `caatinga identity import <archive-file> [--path ~/.config/stellar]`
 
-Imports a base64 tarball produced by `caatinga identity export`.
+Imports a base64-encoded tarball file produced by `caatinga identity export` (not a raw binary path).
 
 ## `caatinga invoke <contract.method> --source <identity> [--network testnet] [args...]`
 
@@ -214,7 +229,39 @@ Simulates a read-only contract method with `stellar contract invoke --send=no`. 
 
 Use `read` for getters and pure queries. Use `invoke` for increments, transfers, and other state-changing calls.
 
-`--expect` accepts the same DSL as `postDeploy` (plain string or JSON matcher). `--summary` / `--quiet` print compact output for large array payloads.
+Named args in `read` and `invoke` resolve CLI identity aliases (≥3 characters, for example
+`--owner alice`) to `G...` addresses before calling Stellar CLI. Prefer `${source.address}` in
+config hooks over raw aliases. Unresolved aliases fail with `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`.
+
+`--expect` accepts the same DSL as `postDeploy` (plain string or JSON matcher). Mismatch fails with
+`CAATINGA_POST_DEPLOY_VERIFY_FAILED`. `--summary` / `--quiet` print compact output for large array
+payloads (see [Testnet hygiene](./internal/testnet-hygiene.md)).
+
+## Expect DSL
+
+Shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga read --expect`, and `caatinga smoke`.
+
+| Form                                            | Example                                | Meaning                                         |
+| ----------------------------------------------- | -------------------------------------- | ----------------------------------------------- |
+| Plain string                                    | `"42"` or `"${source.address}"`        | Exact stdout match after placeholder resolution |
+| `{ matcher: "reachable" }`                      | default when `expect` omitted in smoke | Non-empty stdout                                |
+| `{ matcher: "equals", value: "42" }`            | numeric/string equality                | Same as plain string                            |
+| `{ matcher: "isArray" }`                        | list payloads                          | Parsed JSON is an array                         |
+| `{ matcher: "isNull" }`                         | optional fields                        | stdout is `null` or empty                       |
+| `{ matcher: "minLength", value: 1 }`            | array checks                           | Parsed JSON array length ≥ value                |
+| `{ matcher: "maxLength", value: 10 }`           | bounded lists                          | Parsed JSON array length ≤ value                |
+| `{ matcher: "contains", value: "abc" }`         | substring                              | stdout includes value                           |
+| `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | regex                                  | stdout matches pattern                          |
+| `{ matcher: "jsonEquals", value: "[1,2]" }`     | deep JSON                              | Parsed JSON deep-equals value                   |
+
+CLI usage:
+
+```bash
+npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
+npx caatinga read token.list --network testnet --expect '{"matcher":"isArray"}' --summary
+```
+
+Full schema and config examples: [Config — postDeploy and smoke](./config.md#postdeploy-hooks-and-smoke).
 
 ## ZK commands
 

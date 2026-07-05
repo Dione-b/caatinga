@@ -73,7 +73,14 @@ For read-only calls (getters, pure queries), use `read` instead of `invoke` — 
 
 ```bash
 npx caatinga read counter.get --network testnet
+npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
+npx caatinga smoke --network testnet --source alice   # checks from caatinga.config.ts smoke.reads
 ```
+
+After deploy, `caatinga smoke` runs configured read checks with the same expect DSL as `postDeploy`.
+For CI, use `caatinga regression` (full pipeline) or `caatinga ci run` (doctor + smoke). See
+[Cheatsheet — CI and regression](./cheatsheet.md#ci-and-regression) and
+[Testnet hygiene](./internal/testnet-hygiene.md).
 
 Run the CLI steps in order: `build` → `deploy` → `invoke` (or `npm run dev` / `pnpm dev` after
 deploy). `deploy` requires compiled WASM, writes the deployed `contractId` into

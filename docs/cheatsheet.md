@@ -54,7 +54,20 @@ Multi-contract projects can configure `postDeploy` hooks and frontend env output
 npx caatinga deploy --network testnet --source alice # full graph: deploy + wire + sync-env
 npx caatinga wire --network testnet --source alice   # re-run postDeploy hooks only
 npx caatinga sync-env --network testnet              # rewrite frontend.envFile only
+npx caatinga smoke --network testnet --source alice  # read-only checks from config
+npx caatinga regression --network testnet --source alice  # test → build → deploy --if-changed → generate → smoke
 ```
+
+## CI and regression
+
+```bash
+npx caatinga doctor --network testnet --strict-bindings   # fail on stale bindings
+npx caatinga status --network testnet --strict            # after deploy --no-generate
+npx caatinga ci run --network testnet --source alice --strict  # doctor + smoke in CI
+caatinga identity export > stellar-config.b64             # rotate CAATINGA_CI_STELLAR_CONFIG_B64
+```
+
+See [Production readiness](./production-readiness.md) and [Testing](./internal/testing.md) for workflow details.
 
 ## Commands
 
@@ -69,23 +82,35 @@ npx caatinga sync-env --network testnet              # rewrite frontend.envFile 
 | `caatinga sync-env`                 | Write configured frontend env vars from deploy artifacts                  |
 | `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs               |
 | `caatinga status`                   | Table of deployed contracts + binding freshness per network               |
+| `caatinga smoke`                    | Run configured read-only smoke checks with expect DSL                     |
+| `caatinga regression`               | Full pipeline: test → build → deploy --if-changed → generate → smoke      |
+| `caatinga ci run`                   | CI helper: `doctor` then `smoke`                                          |
+| `caatinga identity export\|import`  | Export/import Stellar CLI config as base64 tarball                        |
 | `caatinga invoke <contract.method>` | Call a contract method from the CLI                                       |
 | `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                         |
 
 ## Flags
 
-| Flag                  | Commands                                       | Description                                                    |
-| --------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `--network <name>`    | doctor, deploy, generate, status, invoke, wire | Network from `caatinga.config.ts`                              |
-| `--source <identity>` | doctor, deploy, invoke, wire, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
-| `--force`             | deploy                                         | Redeploy even when artifacts already hold a contract ID        |
-| `--no-generate`       | deploy                                         | Skip automatic bindings generation (CI without binding needs)  |
-| `--no-wire`           | deploy                                         | Skip automatic `postDeploy` hooks after a full graph deploy    |
-| `--no-sync-env`       | deploy                                         | Skip automatic frontend env sync after a full graph deploy     |
-| `--no-deps`           | deploy                                         | Deploy a single contract without its `dependsOn` graph         |
-| `--verify-deps`       | deploy                                         | Confirm dependency contract IDs exist on-chain first           |
-| `--no-stale-check`    | deploy                                         | Skip the WASM-older-than-sources warning                       |
-| `--json`              | status                                         | Machine-readable output for scripts                            |
+| Flag                    | Commands                                                              | Description                                                    |
+| ----------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `--network <name>`      | doctor, deploy, generate, status, invoke, wire, smoke, regression, ci | Network from `caatinga.config.ts`                              |
+| `--source <identity>`   | doctor, deploy, invoke, wire, smoke, regression, ci, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
+| `--force`               | deploy                                                                | Redeploy even when artifacts already hold a contract ID        |
+| `--if-changed`          | deploy, regression                                                    | Skip deploy when local WASM hash matches artifact              |
+| `--no-generate`         | deploy                                                                | Skip automatic bindings generation (CI without binding needs)  |
+| `--no-wire`             | deploy                                                                | Skip automatic `postDeploy` hooks after a full graph deploy    |
+| `--no-sync-env`         | deploy                                                                | Skip automatic frontend env sync after a full graph deploy     |
+| `--no-deps`             | deploy                                                                | Deploy a single contract without its `dependsOn` graph         |
+| `--verify-deps`         | deploy                                                                | Confirm dependency contract IDs exist on-chain first           |
+| `--no-stale-check`      | deploy                                                                | Skip the WASM-older-than-sources warning                       |
+| `--strict-network`      | generate                                                              | Fail when network has no artifacts block                       |
+| `--strict`              | status, doctor, ci run                                                | status: fail on stale bindings; doctor/ci: strict env+bindings |
+| `--strict-env`          | doctor                                                                | Fail when frontend env file drifts from artifacts              |
+| `--strict-bindings`     | doctor                                                                | Fail when bindings are stale or missing                        |
+| `--all-networks`        | doctor                                                                | Report deploy/bindings matrix for every configured network     |
+| `--expect <dsl>`        | read                                                                  | Assert stdout with postDeploy expect DSL                       |
+| `--quiet` / `--summary` | read                                                                  | Compact output for large array payloads                        |
+| `--json`                | status                                                                | Machine-readable output for scripts                            |
 
 ## Binding freshness
 
@@ -105,7 +130,7 @@ generated binding package.
 
 | File                          | Holds                                                                                                                                                                                              |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caatinga.config.ts`          | Contracts, WASM paths, networks, bindings output dir, optional `buildRoot`, `postDeploy`, and frontend env mapping                                                                                 |
+| `caatinga.config.ts`          | Contracts, WASM paths, networks, bindings output dir, optional `buildRoot`, `postDeploy`, `postDeployRead`, `smoke`, and frontend env mapping                                                      |
 | `caatinga.artifacts.json`     | Deployed contract IDs + WASM hashes per network                                                                                                                                                    |
 | `frontend/.env.local`         | Optional generated view of artifacts for custom frontends when `frontend.envFile` is configured                                                                                                    |
 | `contracts/generated/<name>/` | Self-contained binding package generated by `@stellar/stellar-sdk generate` (+ freshness marker); Caatinga patches `package.json` so Vite resolves `./src/index.ts` without a separate `tsc` build |

@@ -1,6 +1,6 @@
 # @caatinga/cli
 
-Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `wire`, `sync-env`, `generate`, `status`, and `invoke`.
+Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `wire`, `sync-env`, `generate`, `status`, `smoke`, `regression`, `ci`, and `invoke`.
 
 ## Install
 
@@ -28,6 +28,7 @@ cd my-dapp && npm install
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
+npx caatinga smoke --network testnet --source alice
 npx caatinga status --network testnet
 ```
 
@@ -39,15 +40,21 @@ Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main
 | ----------------------------------- | -------------------------------------------------------- |
 | `caatinga setup`                    | Bootstrap Node, Rust, Stellar CLI, and a funded identity |
 | `caatinga init <dir>`               | Create a project from a bundled template                 |
-| `caatinga doctor`                   | Check toolchain, config, artifacts, and network setup    |
+| `caatinga doctor`                   | Check toolchain, config, artifacts, env drift, bindings  |
 | `caatinga build [contract]`         | Compile contract WASM                                    |
 | `caatinga deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings  |
-| `caatinga wire`                     | Run configured `postDeploy` hooks                        |
+| `caatinga wire`                     | Run configured `postDeploy` + `postDeployRead` hooks     |
 | `caatinga sync-env`                 | Write frontend env vars from artifacts                   |
 | `caatinga generate [contract]`      | (Re)generate TypeScript bindings                         |
 | `caatinga status`                   | Show deployed contracts and binding freshness            |
+| `caatinga smoke`                    | Run configured read-only smoke checks                    |
+| `caatinga regression`               | test → build → deploy --if-changed → generate → smoke    |
+| `caatinga ci run`                   | `doctor` then `smoke` (CI helper)                        |
+| `caatinga identity export\|import`  | Export/import Stellar CLI config for CI secrets          |
 | `caatinga invoke <contract.method>` | Call a state-changing contract method                    |
 | `caatinga read <contract.method>`   | Simulate a read-only contract method                     |
+
+Notable flags: `--if-changed`, `--strict-network`, `--strict` / `--strict-env` / `--strict-bindings` (doctor), `status --strict`, `read --expect`.
 
 Command reference, flags, and error codes: [CLI docs](https://github.com/Dione-b/caatinga/blob/main/docs/cli.md) · [Cheatsheet](https://github.com/Dione-b/caatinga/blob/main/docs/cheatsheet.md).
 
