@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 3.7.0
+
+### Patch Changes
+
+- Updated dependencies [60954dd]
+- Updated dependencies
+  - @caatinga/core@3.7.0
+  - @caatinga/zk@3.7.0
+
 ## 3.6.1
 
 ### Patch Changes

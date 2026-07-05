@@ -337,7 +337,7 @@ Se o stdout não bate com `expect`, lança `CAATINGA_POST_DEPLOY_VERIFY_FAILED`.
 
 ### Gap 14: WASM hash management (upload sem deploy)
 
-**Status:** Parcialmente suportado (v3.6.1+)
+**Status:** Parcialmente suportado (v3.7.0+)
 
 **O que o Radox faz:**
 O WASM é uploaded separadamente do deploy. O hash fica em env var

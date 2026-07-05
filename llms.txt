@@ -31,4 +31,4 @@
 
 Self-contained API/schema/command/error reference: [docs/for-llms.md](docs/for-llms.md) or [llms-full.txt](llms-full.txt).
 
-Install: `npm install -g @caatinga/cli` (latest **3.6.1**). Alpha pre-1.0 — pin exact versions in CI.
+Install: `npm install -g @caatinga/cli` (latest **3.7.0**). Alpha pre-1.0 — pin exact versions in CI.

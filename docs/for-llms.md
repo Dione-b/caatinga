@@ -8,11 +8,11 @@ Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs
 
 | Item              | Value                                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` and `next` → **3.6.1** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| npm dist-tag      | `latest` and `next` → **3.7.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
 | Global install    | `npm install -g @caatinga/cli`                                                                          |
 | No global install | `npx caatinga <command>`                                                                                |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.7.0`), not a floating tag                                   |
 | Fresh machine     | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity)               |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
 

@@ -1,5 +1,19 @@
 ## Breaking changes policy
 
+## 3.7.0
+
+### Minor Changes
+
+- Add in-place Soroban contract upgrades via `caatinga upgrade`.
+
+  Orchestrates build, `stellar contract upload`, and admin-gated `upgrade(new_wasm_hash)` invokes while preserving the existing `contractId`. Records prior WASM hashes in artifact history (`upgradeStrategy: "in-place"`, `upgradeType: "in-place"`). Adds `uploadWasm`, `upgradeContractInPlace`, `parseWasmHash`, and error codes `CAATINGA_UPLOAD_FAILED` / `CAATINGA_WASM_HASH_NOT_FOUND`. Distinct from `deploy --upgrade`, which redeploys a new instance.
+
+### Patch Changes
+
+- 60954dd: Validate multi-contract dependency graphs while loading config.
+
+  Caatinga now fails fast when `dependsOn` references are missing, dependency cycles exist, or `${contracts.<name>.contractId}` deploy arg placeholders are not declared in `dependsOn`.
+
 ## 3.6.1
 
 ### Patch Changes
