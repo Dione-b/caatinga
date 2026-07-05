@@ -65,6 +65,26 @@ npx caatinga setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice`
 npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync-env
 ```
 
+**Contract upgrade (3.7.0) — choose strategy by contract design:**
+
+| Strategy     | Command                     | On-chain effect                        | `contractId`  |
+| ------------ | --------------------------- | -------------------------------------- | ------------- |
+| **In-place** | `caatinga upgrade`          | Replaces WASM on the existing instance | **Preserved** |
+| **Redeploy** | `caatinga deploy --upgrade` | Deploys a new instance                 | **New ID**    |
+
+```bash
+# In-place: admin-gated upgrade(new_wasm_hash) entrypoint (stellar-album style)
+npx caatinga upgrade counter --network testnet --source alice
+npx caatinga upgrade counter --if-changed --source alice --network testnet   # skip when WASM unchanged
+npx caatinga upgrade counter --source alice --generate --sync-env            # optional post-steps
+
+# Redeploy: no in-place upgrade entrypoint, or intentional new instance
+npx caatinga build counter
+npx caatinga deploy counter --upgrade --network testnet --source alice
+```
+
+In-place upgrade requires a deployed artifact, admin `--source`, and a contract exposing `upgrade(new_wasm_hash)`. `--generate` / `--sync-env` on upgrade are opt-in (unlike full deploy). In-place WASM rollback via `caatinga rollback` is not supported yet.
+
 ---
 
 ## 2. Package Reference
@@ -155,7 +175,22 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 - `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
 - `caatinga upgrade` replaces WASM **in-place** (same `contractId`); `deploy --upgrade` redeploys to a **new** instance with history.
 - `upgrade --if-changed` skips when local WASM hash matches the artifact (no upload/invoke).
-- Expect DSL matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals` — shared by postDeploy, smoke, and `read --expect`.
+- `status --strict` exits with code `1` when any **deployed** contract has bindings other than `fresh` (canonical check after `deploy --no-generate`).
+- `ci run --strict` forwards to `doctor` only (`--strict-env` + `--strict-bindings`); it does **not** run `status --strict`.
+- Expect DSL — shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga smoke`, and `read --expect`:
+
+| Form                                            | Example                         | Meaning                                         |
+| ----------------------------------------------- | ------------------------------- | ----------------------------------------------- |
+| Plain string                                    | `"42"` or `"${source.address}"` | Exact stdout match after placeholder resolution |
+| `{ matcher: "reachable" }`                      | default in smoke when omitted   | Non-empty stdout                                |
+| `{ matcher: "equals", value: "42" }`            | numeric/string equality         | Same as plain string                            |
+| `{ matcher: "isArray" }`                        | list payloads                   | Parsed JSON is an array                         |
+| `{ matcher: "isNull" }`                         | optional fields                 | stdout is `null` or empty                       |
+| `{ matcher: "minLength", value: 1 }`            | array checks                    | Parsed JSON array length ≥ value                |
+| `{ matcher: "maxLength", value: 10 }`           | bounded lists                   | Parsed JSON array length ≤ value                |
+| `{ matcher: "contains", value: "abc" }`         | substring                       | stdout includes value                           |
+| `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | regex                           | stdout matches pattern                          |
+| `{ matcher: "jsonEquals", value: "[1,2]" }`       | deep JSON                       | Parsed JSON deep-equals value                   |
 
 ---
 
@@ -245,7 +280,19 @@ export default defineConfig({
 | `${contracts.<name>.contractId}` | Deployed contract ID from `caatinga.artifacts.json`            | `${contracts.token.contractId}` |
 | `${source.address}`              | Stellar CLI identity address (`stellar keys address <source>`) | `${source.address}`             |
 
-Resolution happens after dependencies deploy. A cyclic dependency throws `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`. An unresolvable placeholder throws `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`.
+**Config load-time graph validation (3.7.0):** `loadConfig` fails fast before any command runs:
+
+- `dependsOn` entries must name configured contracts → `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`
+- Dependency cycles are rejected → `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
+- Every `${contracts.<name>.contractId}` in `deployArgs` must have `<name>` in `dependsOn` → `CAATINGA_INVALID_CONFIG`
+
+**Deploy-time resolution** happens after dependencies deploy:
+
+- Missing artifact for a dependency → `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND`
+- Placeholder still unresolved at deploy → `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
+- Malformed `${...}` syntax → `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`
+
+Deploy arg keys are converted camelCase → snake_case CLI flags (e.g. `tokenContractId` → `--token_contract_id`).
 
 ---
 
@@ -496,6 +543,9 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 20. **`caatinga regression`** — local recipe mirroring CI: test → build → deploy --if-changed → generate → smoke.
 21. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars); prefer placeholders in config.
 22. **`identity export/import`** — base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`; import reads a base64 text file path.
+23. **Config graph validation (3.7.0)** — `${contracts.*.contractId}` placeholders in `deployArgs` must be listed in `dependsOn`; validated at config load, not only at deploy.
+24. **`caatinga upgrade` vs `deploy --upgrade`** — in-place preserves `contractId` and records WASM history; redeploy creates a new instance with `upgradeType: "new-contract"` history.
+25. **`read --summary` / `--quiet`** — compact output for large array payloads on shared testnet state.
 
 ---
 
@@ -555,7 +605,7 @@ my-dapp/
 ### Working on a Caatinga **project** (generated app)
 
 1. Run `caatinga doctor --network testnet --source alice` before changing deploy state.
-2. Order: `build` → `deploy` → (`generate` if `--no-generate`) → `invoke` / browser client.
+2. Order: `build` → `deploy` (or `upgrade` for in-place WASM) → (`generate` if `--no-generate`) → `invoke` / browser client.
 3. Parse **`CAATINGA_*` error codes**, never message text.
 4. `--source` = Stellar CLI identity alias only (`alice`), never `G...` / `S...` / seed phrase.
 5. Browser wallet flows: single-invoker until v1.0.
@@ -572,6 +622,7 @@ Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents driv
 | [Errors](./errors.md)                 | Full `CAATINGA_*` catalog with fixes                                    |
 | [CLI](./cli.md)                       | Authoritative command reference                                         |
 | [Config](./config.md)                 | `caatinga.config.ts` schema details                                     |
+| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies (3.7.0)              |
 
 Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 
