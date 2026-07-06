@@ -2,18 +2,22 @@ import chalk from "chalk";
 
 export const logger = {
   info(message: string) {
-    console.log(message);
+    if (!message) {
+      console.log("");
+      return;
+    }
+    console.log(`${chalk.blue("ℹ")} ${message}`);
   },
   success(message: string) {
-    console.log(chalk.green(message));
+    console.log(`${chalk.green("✔")} ${chalk.green(message)}`);
   },
   warn(message: string) {
-    console.warn(chalk.yellow(message));
+    console.warn(`${chalk.yellow("⚠")} ${chalk.yellow(message)}`);
   },
   error(message: string) {
-    console.error(chalk.red(message));
+    console.error(`${chalk.red("✖")} ${chalk.red(message)}`);
   },
   muted(message: string) {
-    console.log(chalk.gray(message));
+    console.log(`${chalk.gray("›")} ${chalk.gray(message)}`);
   },
 };

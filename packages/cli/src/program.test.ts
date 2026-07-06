@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createProgram } from "./program.js";
+import chalk from "chalk";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +40,7 @@ describe("createProgram", () => {
         "regression",
         "ci",
         "identity",
+        "version",
       ])
     );
   });
@@ -89,7 +91,35 @@ describe("createProgram", () => {
           "--template",
           "react-vite-counter",
         ]);
-      expect(logSpy).toHaveBeenCalledWith("  npx caatinga build    counter");
+      expect(logSpy).toHaveBeenCalledWith(`${chalk.blue("ℹ")}   npx caatinga build    counter`);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("formats the help output categorized by domains", () => {
+    const program = createProgram();
+    const helpInformation = program.helpInformation();
+
+    expect(helpInformation).toContain("Scaffolding & Setup:");
+    expect(helpInformation).toContain("Deployment & Lifecycle:");
+    expect(helpInformation).toContain("Query & Execution:");
+    expect(helpInformation).toContain("Status & Diagnostics:");
+    expect(helpInformation).toContain("Zero-Knowledge (ZK) Proofs:");
+    expect(helpInformation).toContain("Automation & CI:");
+  });
+
+  it("prints CLI version via version command", async () => {
+    const packageJson = JSON.parse(
+      await readFile(path.resolve(__dirname, "../package.json"), "utf8")
+    ) as { version: string };
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createProgram().exitOverride().parseAsync(["node", "caatinga", "version"]);
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`@caatinga/cli: ${packageJson.version}`)
+      );
     } finally {
       logSpy.mockRestore();
     }

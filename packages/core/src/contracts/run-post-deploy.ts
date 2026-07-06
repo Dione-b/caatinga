@@ -12,6 +12,8 @@ import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveMethodArgs } from "./resolve-method-args.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { assertExpect } from "./verify-expect.js";
+import { resolvePlaceholders } from "./placeholder-engine.js";
+import { resolveSourceAddress } from "./resolve-source-address.js";
 
 export type RunPostDeployHooksOptions = {
   config: CaatingaConfig;
@@ -78,31 +80,36 @@ async function resolveHookExpect(
     return undefined;
   }
 
-  if (typeof hook.expect === "string" && hook.expect.includes("${")) {
-    const resolvedExpect = await resolveDeployArgs({
-      deployArgs: { expected: hook.expect },
-      artifacts: options.artifacts,
-      network: options.network,
-      source: options.hookSource,
-      cwd: options.cwd,
-    });
-    return String(resolvedExpect.expected);
+  const isStringPlaceholder = typeof hook.expect === "string" && hook.expect.includes("${");
+  const isObjectPlaceholder =
+    typeof hook.expect === "object" &&
+    typeof hook.expect.value === "string" &&
+    hook.expect.value.includes("${");
+
+  if (!isStringPlaceholder && !isObjectPlaceholder) {
+    return hook.expect;
   }
 
-  if (typeof hook.expect === "object" && typeof hook.expect.value === "string") {
-    if (hook.expect.value.includes("${")) {
-      const resolvedExpect = await resolveDeployArgs({
-        deployArgs: { expected: hook.expect.value },
-        artifacts: options.artifacts,
-        network: options.network,
-        source: options.hookSource,
-        cwd: options.cwd,
-      });
-      return { ...hook.expect, value: String(resolvedExpect.expected) };
-    }
+  const sourceAddress = await resolveSourceAddress({
+    source: options.hookSource,
+    cwd: options.cwd,
+  });
+
+  const context = {
+    artifacts: options.artifacts,
+    network: options.network,
+    sourceAddress,
+  };
+
+  if (isStringPlaceholder) {
+    return resolvePlaceholders(hook.expect as string, context);
   }
 
-  return hook.expect;
+  const expectObj = hook.expect as Exclude<typeof hook.expect, string | undefined>;
+  return {
+    ...expectObj,
+    value: resolvePlaceholders(expectObj.value as string, context),
+  };
 }
 
 export async function runPostDeployHooks(

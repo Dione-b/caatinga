@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createZkInstallProgress } from "./zk-install-progress.js";
+import chalk from "chalk";
 
 describe("createZkInstallProgress", () => {
   it("should_forward_status_messages_to_logger", () => {
@@ -8,7 +9,7 @@ describe("createZkInstallProgress", () => {
 
     progress.onStatus?.("Installing snarkjs...");
 
-    expect(info).toHaveBeenCalledWith("Installing snarkjs...");
+    expect(info).toHaveBeenCalledWith(`${chalk.blue("ℹ")} Installing snarkjs...`);
     info.mockRestore();
   });
 

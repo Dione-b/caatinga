@@ -103,4 +103,22 @@ describe("writeArtifacts and readArtifacts", () => {
 
     expect(artifacts.networks.testnet.dependencyGraph?.marketplace).toEqual(["token"]);
   });
+
+  it("should_throw_CAATINGA_ARTIFACT_INVALID_when_version_is_unsupported", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
+    const futureArtifacts = {
+      project: "future-app",
+      version: 99,
+      networks: {},
+    };
+    await writeFile(
+      path.join(tmpDir, "caatinga.artifacts.json"),
+      JSON.stringify(futureArtifacts),
+      "utf8"
+    );
+    await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
+      code: CaatingaErrorCode.ARTIFACT_INVALID,
+      message: expect.stringContaining("version 99 is not supported"),
+    });
+  });
 });

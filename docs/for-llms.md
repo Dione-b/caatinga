@@ -1,6 +1,6 @@
 # Caatinga — LLM Reference
 
-Caatinga is a TypeScript CLI and browser toolkit for Soroban on Stellar. It orchestrates scaffold → build → deploy → binding generation → invoke/read, with git-versioned `caatinga.artifacts.json` and no mandatory registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
+Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. It provides local, graph-aware deployment orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. It orchestrates scaffold → build → deploy → binding generation → invoke/read without requiring a mandatory on-chain registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
 
 Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/).
 
@@ -190,7 +190,7 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 | `{ matcher: "maxLength", value: 10 }`           | bounded lists                   | Parsed JSON array length ≤ value                |
 | `{ matcher: "contains", value: "abc" }`         | substring                       | stdout includes value                           |
 | `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | regex                           | stdout matches pattern                          |
-| `{ matcher: "jsonEquals", value: "[1,2]" }`       | deep JSON                       | Parsed JSON deep-equals value                   |
+| `{ matcher: "jsonEquals", value: "[1,2]" }`     | deep JSON                       | Parsed JSON deep-equals value                   |
 
 ---
 
@@ -614,15 +614,15 @@ Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents driv
 
 ### Working on the **Caatinga monorepo**
 
-| Doc                                   | Use when                                                                |
-| ------------------------------------- | ----------------------------------------------------------------------- |
-| [AGENTS.md](../AGENTS.md)             | Repo layout, build/test commands, version alignment, template overrides |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, commit style, compatibility contracts                  |
-| [Architecture](./architecture.md)     | Product stance, Caatinga vs Scaffold Stellar                            |
-| [Errors](./errors.md)                 | Full `CAATINGA_*` catalog with fixes                                    |
-| [CLI](./cli.md)                       | Authoritative command reference                                         |
-| [Config](./config.md)                 | `caatinga.config.ts` schema details                                     |
-| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies (3.7.0)              |
+| Doc                                                 | Use when                                                                |
+| --------------------------------------------------- | ----------------------------------------------------------------------- |
+| [AGENTS.md](../AGENTS.md)                           | Repo layout, build/test commands, version alignment, template overrides |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)               | PR expectations, commit style, compatibility contracts                  |
+| [Architecture](./architecture.md)                   | Product stance, Caatinga vs Scaffold Stellar                            |
+| [Errors](./errors.md)                               | Full `CAATINGA_*` catalog with fixes                                    |
+| [CLI](./cli.md)                                     | Authoritative command reference                                         |
+| [Config](./config.md)                               | `caatinga.config.ts` schema details                                     |
+| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies (3.7.0)                         |
 
 Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 

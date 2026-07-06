@@ -41,7 +41,41 @@ describe("resolveNetwork", () => {
       expect.fail("expected throw");
     } catch (error) {
       expect(error).toBeInstanceOf(CaatingaError);
-      expect((error as CaatingaError).code).toBe(CaatingaErrorCode.NETWORK_NOT_FOUND);
+      const ce = error as CaatingaError;
+      expect(ce.code).toBe(CaatingaErrorCode.NETWORK_NOT_FOUND);
+      expect(ce.hint).toContain("Stellar Futurenet Boilerplate:");
+    }
+  });
+
+  it("should_include_testnet_boilerplate_in_hint_when_testnet_is_missing", () => {
+    const configWithoutTestnet = {
+      ...baseConfig,
+      networks: { mainnet: baseConfig.networks.mainnet },
+    };
+    try {
+      resolveNetwork(configWithoutTestnet, "testnet");
+      expect.fail("expected throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CaatingaError);
+      const ce = error as CaatingaError;
+      expect(ce.code).toBe(CaatingaErrorCode.NETWORK_NOT_FOUND);
+      expect(ce.hint).toContain("Stellar Testnet Boilerplate:");
+    }
+  });
+
+  it("should_include_mainnet_boilerplate_in_hint_when_mainnet_is_missing", () => {
+    const configWithoutMainnet = {
+      ...baseConfig,
+      networks: { testnet: baseConfig.networks.testnet },
+    };
+    try {
+      resolveNetwork(configWithoutMainnet, "mainnet");
+      expect.fail("expected throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CaatingaError);
+      const ce = error as CaatingaError;
+      expect(ce.code).toBe(CaatingaErrorCode.NETWORK_NOT_FOUND);
+      expect(ce.hint).toContain("Stellar Mainnet Boilerplate:");
     }
   });
 });

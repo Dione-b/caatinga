@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Caatinga
-  text: Soroban deploy artifacts + TypeScript CLI
-  tagline: Git-versioned deployment state, multi-contract orchestration, npm-first workflow.
+  text: Deployment Orchestration + Versioned Artifacts for Soroban
+  tagline: Local, graph-aware deployment orchestration and portable, Git-versioned artifacts for TypeScript teams.
   actions:
     - theme: brand
       text: Get started
@@ -36,8 +36,8 @@ features:
     linkText: Integration guide
 ---
 
-::: warning Alpha software
-Caatinga is pre-1.0. Formats and APIs may change. Pin an exact version for reproducible installs.
+::: info v1.0 stable contract
+Caatinga v1.0 is a **contract milestone** on npm major `3.x`. Pin an exact version for reproducible installs. See [Public API](/public-api) and [Troubleshooting](/troubleshooting).
 :::
 
 **Recommended path for new users:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — scaffold, deploy, and invoke a counter on testnet.

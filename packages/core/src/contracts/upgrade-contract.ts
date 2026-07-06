@@ -1,6 +1,7 @@
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
+import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -166,6 +167,12 @@ export async function upgradeContractInPlace(
     }
   }
 
+  const metadata = await collectDeploymentMetadata({
+    networkName: network.name,
+    wasmHash: upload.wasmHash,
+    cwd,
+  });
+
   const deployedAt = new Date().toISOString();
   const nextArtifacts = updateArtifact(
     artifactsBefore,
@@ -180,6 +187,7 @@ export async function upgradeContractInPlace(
       dependencies: existing.dependencies ?? contract.config.dependsOn ?? [],
       resolvedDeployArgs: existing.resolvedDeployArgs ?? {},
       upgradeStrategy: "in-place",
+      metadata,
     },
     {
       supersedeReason: "upgrade",

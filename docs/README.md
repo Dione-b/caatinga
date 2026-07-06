@@ -24,15 +24,29 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 - [Wallets](./wallets.md) — adapters, Stellar Wallets Kit, React hooks
 - [Templates](./templates.md) — official templates and package-manager quirks
 - [Errors](./errors.md) — public `CAATINGA_*` error codes
+- [Troubleshooting](./troubleshooting.md) — symptom-first fixes for common failures
+- [Public API](./public-api.md) — v1.0 supported surface (Tier 1/2/3)
+- [Recovery scenarios](./recovery-scenarios.md) — interrupted deploy, invalid artifacts, RPC offline
 - [LLM reference](./for-llms.md) — self-contained reference for LLM consumption (also at `/llms-full.txt`)
 
 ## Internals & process
 
 - [Architecture](./architecture.md) — package layout, layering, data flow
+- [Scope Policy](./scope.md) — feature classification and scope limits
+- [Artifacts Specification](./artifacts-spec.md) — format and schema details
+- [Artifacts Versioning](./artifacts-versioning.md) — evolution and compatibility rules
+- [Deploy & Upgrade Specification](./deploy-upgrade-spec.md) — contract lifecycle operations
+- [Architecture Freeze](./architecture-freeze.md) — formal architecture freeze declaration
+- [Lifecycle & Hooks Specification](./lifecycle-hooks-spec.md) — execution phases and hook schemas
+- [Network Setup Guide](./network-setup.md) — common Stellar network boilerplates and configurations
+- [Runtime & Invoke Pipeline](./runtime-invoke-pipeline.md) — Runtime API, WalletAdapter contract, and invoke pipeline
+- [Automation Pipeline](./automation.md) — doctor, smoke, and ci run commands
+- [Conceptual Naming Policy](./conceptual-naming.md) — terminology and guidelines
 - [Stellar CLI version contract](./stellar-cli-version-contract.md)
 - [Stellar SDK version contract](./stellar-sdk-version-contract.md)
 - [Signing strategy](./signing-strategy.md)
 - [Production readiness](./production-readiness.md)
+- [Release Candidate Checklist](./release-candidate-checklist.md) — v1.0 acceptance criteria
 - [Packages](./packages.md)
 - [ADRs](./adr/index.md)
 - [stellar-album case study](./case-studies/stellar-album.md)
@@ -41,9 +55,9 @@ For maintainers: release process, publish checklists, testing policy, and intern
 
 ## Quick orientation
 
-- **CLI-first:** `init → doctor → build → deploy → status → dev`. Deploy records contract IDs in
-  `caatinga.artifacts.json`, auto-generates TypeScript bindings, and can run configured
-  `postDeploy` hooks plus frontend env sync after full graph deploys.
-- **Client second:** `@caatinga/client` wires generated bindings + artifacts + a wallet adapter in
-  the browser. React apps add `@caatinga/client/react` for `WalletProvider`/`useWallet`.
-- **Errors are API:** automation should key on `CAATINGA_*` codes, never on message text.
+Caatinga operates strictly under four core pillars:
+
+- **Deployment:** Powered by the **Orchestration Engine** (`init → build → deploy → status → dev`), managing topological graphs (`dependsOn`), placeholders, and lifecycle hooks.
+- **Artifacts:** A portable, Git-versioned state contract (`caatinga.artifacts.json`) linking deployments to frontend consumers.
+- **Runtime:** Managed by the **Integration SDK** (`@caatinga/client`) and its **Transaction Pipeline**, linking wallets, typescript bindings, and React hooks.
+- **Automation:** Developer diagnostics (`doctor`, `setup`), regression suites (`smoke`), and CI/CD stable error APIs.

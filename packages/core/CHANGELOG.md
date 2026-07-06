@@ -1,5 +1,15 @@
 ## Breaking changes policy
 
+## 3.8.0
+
+### Minor Changes
+
+- Add `docs/public-api.md` tier manifest and `export-manifest.test.ts` regression guard for `@caatinga/client` Tier 1 exports.
+- Add compatibility suite: artifacts v1/v2 fixtures, `migrateArtifactsFile` disk tests, package exports snapshot (`pnpm test:compat`).
+- Atomic `writeArtifacts` (temp file + rename) to prevent corrupted JSON on interrupted writes.
+- Add `recovery-scenarios.test.ts` and `docs/recovery-scenarios.md`.
+- Templates `compatibleCore` pinned to `^3.8.0`.
+
 ## 3.7.0
 
 ### Minor Changes
