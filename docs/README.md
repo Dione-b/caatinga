@@ -27,7 +27,17 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 - [Troubleshooting](./troubleshooting.md) — symptom-first fixes for common failures
 - [Public API](./public-api.md) — v1.0 supported surface (Tier 1/2/3)
 - [Recovery scenarios](./recovery-scenarios.md) — interrupted deploy, invalid artifacts, RPC offline
-- [LLM reference](./for-llms.md) — self-contained reference for LLM consumption (also at `/llms-full.txt`)
+
+## For LLMs & coding agents
+
+Start with the **context primer** at [`/llms.txt`](../llms.txt) (repo root) — identity, mental model, non-goals, preferred guidance, terminology, and doc routing in under 30 seconds.
+
+| File | Use when |
+| ---- | -------- |
+| [`llms.txt`](../llms.txt) | First read — scope, workflow, boundaries, where to navigate |
+| [`llms-full.txt`](../llms-full.txt) / [for-llms.md](./for-llms.md) | Full API, CLI flags, schemas, error catalog |
+
+The primer stays lean; detailed reference lives in `llms-full.txt` only.
 
 ## Internals & process
 

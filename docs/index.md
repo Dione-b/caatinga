@@ -34,6 +34,10 @@ features:
     details: Drive the Caatinga lifecycle from Claude Code or Codex with stellar-build agents. Optional — see the Integration guide.
     link: /tutorials/integration-guide
     linkText: Integration guide
+  - title: LLM / agent primer
+    details: Start at /llms.txt for identity, workflow, boundaries, and doc routing. Full API reference at /llms-full.txt.
+    link: https://github.com/Dione-b/caatinga/blob/main/llms.txt
+    linkText: llms.txt
 ---
 
 ::: info v1.0 stable contract
@@ -43,3 +47,5 @@ Caatinga v1.0 is a **contract milestone** on npm major `3.x`. Pin an exact versi
 **Recommended path for new users:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — scaffold, deploy, and invoke a counter on testnet.
 
 **Stuck?** Run `caatinga doctor` and check [Errors](/errors) for `CAATINGA_*` codes.
+
+**Coding agents:** read [`llms.txt`](https://github.com/Dione-b/caatinga/blob/main/llms.txt) first (identity, mental model, non-goals, preferred guidance). Detailed reference: [for-llms](/for-llms) or [`llms-full.txt`](https://github.com/Dione-b/caatinga/blob/main/llms-full.txt).
