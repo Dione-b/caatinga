@@ -78,9 +78,7 @@ describe("compatibility: artifacts schema", () => {
     expect(result.migrated).toBe(true);
     expect(result.artifacts.version).toBe(2);
 
-    const onDisk = JSON.parse(
-      await readFile(path.join(tmpDir, "caatinga.artifacts.json"), "utf8")
-    );
+    const onDisk = JSON.parse(await readFile(path.join(tmpDir, "caatinga.artifacts.json"), "utf8"));
     expect(onDisk.version).toBe(2);
   });
 });

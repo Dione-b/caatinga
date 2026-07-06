@@ -7,6 +7,7 @@ This document details the specifications, behaviors, and transition rules for co
 ## 1. Core Operations
 
 ### Deploy
+
 - **Definition:** The initial upload and instantiation of a Soroban smart contract.
 - **Behavior:**
   - Compiles the WASM binary (if necessary).
@@ -16,6 +17,7 @@ This document details the specifications, behaviors, and transition rules for co
 - **Triggers:** `caatinga deploy <contractName>` (when no prior deployment exists on the target network).
 
 ### Upgrade (In-place)
+
 - **Definition:** The update of a contract's backing WebAssembly byte-code on-chain without altering its address (`contractId`).
 - **Behavior:**
   - Uploads the new WASM binary to the network to obtain a new `wasmHash`.
@@ -25,6 +27,7 @@ This document details the specifications, behaviors, and transition rules for co
 - **Triggers:** `caatinga upgrade <contractName> --method <upgradeMethodName>`
 
 ### Redeploy
+
 - **Definition:** Deploying a brand new instance of a previously deployed contract, generating a new `contractId`.
 - **Behavior:**
   - Instantiates a fresh copy of the contract on the network.
@@ -33,12 +36,13 @@ This document details the specifications, behaviors, and transition rules for co
 - **Triggers:** `caatinga deploy <contractName> --force` (or `--upgrade` to mark as upgrade type).
 
 ### Rollback
+
 - **Definition:** Reverting the active contract registration in the artifacts file to a prior deployment state saved in the history.
 - **Behavior:**
   - Searches the `history` array of the target contract for a matching `contractId`.
   - Restores the matching contract state (contract ID, WASM hash, metadata) to the active contract entry.
   - Appends the superseded active instance to the `history` with reason `"rollback"`.
-  - *Note:* Rollback updates the local artifacts state registry. On-chain state restoration (e.g., re-running an on-chain upgrade to the old WASM hash) is an application concern.
+  - _Note:_ Rollback updates the local artifacts state registry. On-chain state restoration (e.g., re-running an on-chain upgrade to the old WASM hash) is an application concern.
 - **Triggers:** `caatinga rollback <contractName> --target <previousContractId>`
 
 ---
@@ -46,12 +50,14 @@ This document details the specifications, behaviors, and transition rules for co
 ## 2. Operation Flags & Mutators
 
 ### Force (`--force`)
+
 - **Purpose:** Bypasses state check optimizations.
 - **Behavior:**
   - By default, Caatinga skips deployment or builds if the local WASM hash matches the registry (`ifChanged` strategy).
   - Activating `--force` overrides this check, forcing a fresh compile, upload, and deployment transaction, pushing the current registry state to the history.
 
 ### If Changed (`--if-changed`)
+
 - **Purpose:** Optimizes CI/CD pipelines and local DX by avoiding redundant deploy transactions.
 - **Behavior:**
   - Compares the SHA-256 hash of the compiled WASM binary with the `wasmHash` stored in the current network scope of `caatinga.artifacts.json`.

@@ -10,9 +10,9 @@ The Caatinga Runtime lives in `@caatinga/client` and is responsible for the enti
 
 ### Packages
 
-| Package | Responsibility |
-|---|---|
-| `@caatinga/core` | Server/Node orchestration: build, deploy, upgrade, artifacts, bindings |
+| Package            | Responsibility                                                         |
+| ------------------ | ---------------------------------------------------------------------- |
+| `@caatinga/core`   | Server/Node orchestration: build, deploy, upgrade, artifacts, bindings |
 | `@caatinga/client` | Browser/Node runtime: wallet integration, signing, contract invocation |
 
 ### Minimal API
@@ -43,6 +43,7 @@ interface CaatingaWalletAdapter {
 ```
 
 **Contract rules:**
+
 - `getPublicKey()` must resolve to a valid Ed25519 public key (G-prefixed Stellar address).
 - `signTransaction()` must resolve to a Base64-encoded signed XDR string.
 - Both methods **must reject** (not leave the promise pending) when the user cancels or when the wallet is not connected.
@@ -88,10 +89,10 @@ built → prepared → signed → submitted → confirmed
 
 ### Error Codes
 
-| Situation | CaatingaErrorCode |
-|---|---|
+| Situation                              | CaatingaErrorCode      |
+| -------------------------------------- | ---------------------- |
 | Wallet not connected / key unavailable | `WALLET_NOT_CONNECTED` |
-| User dismissed signing | `XDR_SIGN_FAILED` |
-| Empty or invalid signed XDR | `XDR_SIGN_FAILED` |
-| Simulation failure | `XDR_PREPARE_FAILED` |
-| Submission/network failure | `XDR_SUBMIT_FAILED` |
+| User dismissed signing                 | `XDR_SIGN_FAILED`      |
+| Empty or invalid signed XDR            | `XDR_SIGN_FAILED`      |
+| Simulation failure                     | `XDR_PREPARE_FAILED`   |
+| Submission/network failure             | `XDR_SUBMIT_FAILED`    |

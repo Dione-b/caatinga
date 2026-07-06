@@ -11,7 +11,9 @@ Deployment Orchestration + Versioned Artifacts for Soroban.
 
 - **Mission:** Simplify the development, deployment, and integration of Soroban contracts for TypeScript teams through robust local orchestration and deterministic artifact versioning.
 - **Problem it Solves:** Fragmented deployment scripts and the difficulty of tracking and integrating contract IDs deployed across multiple environments (local, testnet, mainnet) into the frontend in a Git-friendly, deterministic way.
-- **Key Differentiator:** Graph-aware local deployment orchestration with portable, Git-versioned artifact tracking (`caatinga.artifacts.json`), eliminating mandatory on-chain registry dependencies for basic development while providing auto-generated type-safe client bindings and direct browser wallet integration.
+- **Key Differentiator:** Graph-aware local deployment orchestration with portable, Git-versioned artifact tracking
+  (`caatinga.artifacts.json`), eliminating mandatory on-chain registry dependencies for basic development while providing
+  auto-generated type-safe client bindings and direct browser wallet integration.
 
 ## Core Pillars
 
@@ -37,7 +39,6 @@ Every feature in Caatinga belongs to one of these four core pillars:
    - **Environment Diagnostics:** Check local environments, Rust compiler targets, and identity setups using `caatinga doctor` and `caatinga setup`.
    - **Regression & Smoke Checks:** Validate deployments with structured post-deploy checks (`postDeployRead`, `caatinga smoke`).
    - **Stable Logs:** Key automated pipelines on stable `CAATINGA_*` error codes rather than volatile stdout text.
-
 
 ## Table of Contents
 

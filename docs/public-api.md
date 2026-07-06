@@ -14,14 +14,14 @@ Automation and application code may depend on these surfaces without importing p
 
 Supported flow: `init → build → deploy → generate → invoke`
 
-| Domain | Commands |
-|--------|----------|
-| Scaffolding & Setup | `init`, `setup`, `identity` |
-| Build | `build` |
-| Deployment & Lifecycle | `deploy`, `upgrade`, `rollback`, `wire` |
-| Query & Execution | `read`, `invoke`, `estimate`, `dev` |
-| Status & Diagnostics | `status`, `inspect`, `doctor`, `sync-env`, `migrate`, `version` |
-| Automation & CI | `smoke`, `regression`, `ci` |
+| Domain                 | Commands                                                        |
+| ---------------------- | --------------------------------------------------------------- |
+| Scaffolding & Setup    | `init`, `setup`, `identity`                                     |
+| Build                  | `build`                                                         |
+| Deployment & Lifecycle | `deploy`, `upgrade`, `rollback`, `wire`                         |
+| Query & Execution      | `read`, `invoke`, `estimate`, `dev`                             |
+| Status & Diagnostics   | `status`, `inspect`, `doctor`, `sync-env`, `migrate`, `version` |
+| Automation & CI        | `smoke`, `regression`, `ci`                                     |
 
 All commands, flags, exit codes (`0` / `1`), and `CAATINGA_*` error codes are documented in [cli.md](./cli.md) and [errors.md](./errors.md).
 
@@ -74,15 +74,15 @@ All `CAATINGA_*` codes in [errors.md](./errors.md). Enforced by `error-surface.t
 
 Exported from `@caatinga/core` for power users and CI. **Additive changes are minor; removals or semantic changes are breaking.**
 
-| Area | Symbols |
-|------|---------|
-| Artifacts | `writeArtifacts`, `createInitialArtifacts`, `updateArtifact`, `restoreArtifactFromHistory`, `collectDeploymentMetadata`, `migrateArtifactsToV2`, `migrateArtifactsFile`, `rollbackContractArtifact`, `CURRENT_ARTIFACTS_SCHEMA_VERSION`, `collectProjectStatus` |
-| Deployment | `deployContract`, `deployContractGraph`, `upgradeContractInPlace`, `uploadWasm`, `buildContract`, `buildWorkspace`, `resolveDeployArgs`, `resolveDeployOrder`, `buildDependencyGraph`, `runPostDeployHooks` |
-| Bindings | `generateBindings`, `generateBindingsGraph`, `evaluateBindingFreshness`, `evaluateBindingsFreshness`, `readBindingMarker`, `writeBindingMarker` |
-| Invoke / read | `invokeContract`, `readContract`, `estimateDeployCost`, `inspectContract`, `verifyExpect`, `runSmokeReads` |
-| Networks | `resolveNetwork`, `WELL_KNOWN_NETWORKS` |
-| Config load | `loadConfig`, `CaatingaConfigSchema` |
-| Templates | `createProjectFromTemplate`, `TemplateManifestSchema` |
+| Area          | Symbols                                                                                                                                                                                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Artifacts     | `writeArtifacts`, `createInitialArtifacts`, `updateArtifact`, `restoreArtifactFromHistory`, `collectDeploymentMetadata`, `migrateArtifactsToV2`, `migrateArtifactsFile`, `rollbackContractArtifact`, `CURRENT_ARTIFACTS_SCHEMA_VERSION`, `collectProjectStatus` |
+| Deployment    | `deployContract`, `deployContractGraph`, `upgradeContractInPlace`, `uploadWasm`, `buildContract`, `buildWorkspace`, `resolveDeployArgs`, `resolveDeployOrder`, `buildDependencyGraph`, `runPostDeployHooks`                                                     |
+| Bindings      | `generateBindings`, `generateBindingsGraph`, `evaluateBindingFreshness`, `evaluateBindingsFreshness`, `readBindingMarker`, `writeBindingMarker`                                                                                                                 |
+| Invoke / read | `invokeContract`, `readContract`, `estimateDeployCost`, `inspectContract`, `verifyExpect`, `runSmokeReads`                                                                                                                                                      |
+| Networks      | `resolveNetwork`, `WELL_KNOWN_NETWORKS`                                                                                                                                                                                                                         |
+| Config load   | `loadConfig`, `CaatingaConfigSchema`                                                                                                                                                                                                                            |
+| Templates     | `createProjectFromTemplate`, `TemplateManifestSchema`                                                                                                                                                                                                           |
 
 ---
 
@@ -90,13 +90,13 @@ Exported from `@caatinga/core` for power users and CI. **Additive changes are mi
 
 Present in `@caatinga/core` for CLI and monorepo use. **Do not depend on these in application code.**
 
-| Area | Examples |
-|------|----------|
-| Shell | `runCommand`, `checkBinary`, `resolveSubprocessEnv`, `isCargoBinMissingFromPath` |
+| Area                 | Examples                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| Shell                | `runCommand`, `checkBinary`, `resolveSubprocessEnv`, `isCargoBinMissingFromPath`                |
 | Stellar CLI adapters | `parseContractId`, `parseWasmHash`, `checkStellarCliVersion`, `evaluateStellarCliCompatibility` |
-| Scaffolds | `createMinimalProject`, `createZkProject` |
-| CI helpers | `isTransientTestnetSmokeFailure` |
-| Source validation | `validateSourceShape`, `describeCliSource` |
+| Scaffolds            | `createMinimalProject`, `createZkProject`                                                       |
+| CI helpers           | `isTransientTestnetSmokeFailure`                                                                |
+| Source validation    | `validateSourceShape`, `describeCliSource`                                                      |
 
 ---
 

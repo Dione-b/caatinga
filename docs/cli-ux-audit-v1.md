@@ -11,36 +11,36 @@ Final review checklist before v1.0 contract freeze. Compare live `--help` output
 
 ## Flag consistency
 
-| Flag | Commands using it | Consistent? |
-|------|-------------------|-------------|
-| `--network` | deploy, upgrade, generate, invoke, read, doctor, smoke, … | Yes |
-| `--source` | deploy, upgrade, invoke, wire, setup | Yes |
-| `--force` | deploy, upgrade | Yes |
-| `-v, --version` | global | Yes |
+| Flag            | Commands using it                                         | Consistent? |
+| --------------- | --------------------------------------------------------- | ----------- |
+| `--network`     | deploy, upgrade, generate, invoke, read, doctor, smoke, … | Yes         |
+| `--source`      | deploy, upgrade, invoke, wire, setup                      | Yes         |
+| `--force`       | deploy, upgrade                                           | Yes         |
+| `-v, --version` | global                                                    | Yes         |
 
 ## Command review
 
-| Command | Help clear | Examples in docs | Notes |
-|---------|------------|------------------|-------|
-| init | ✓ | ✓ | |
-| setup | ✓ | ✓ | |
-| build | ✓ | ✓ | |
-| deploy | ✓ | ✓ | Transient retry messages documented |
-| upgrade | ✓ | ✓ | |
-| rollback | ✓ | ✓ | |
-| generate | ✓ | ✓ | |
-| invoke | ✓ | ✓ | |
-| read | ✓ | ✓ | |
-| doctor | ✓ | ✓ | |
-| migrate | ✓ | ✓ | |
-| version | ✓ | ✓ | Added Sprint 38 |
-| smoke | ✓ | ✓ | |
-| wire | ✓ | ✓ | |
-| sync-env | ✓ | ✓ | |
-| estimate | ✓ | ✓ | |
-| inspect | ✓ | ✓ | |
-| status | ✓ | ✓ | |
-| ci / regression | ✓ | ✓ | CI-oriented |
+| Command         | Help clear | Examples in docs | Notes                               |
+| --------------- | ---------- | ---------------- | ----------------------------------- |
+| init            | ✓          | ✓                |                                     |
+| setup           | ✓          | ✓                |                                     |
+| build           | ✓          | ✓                |                                     |
+| deploy          | ✓          | ✓                | Transient retry messages documented |
+| upgrade         | ✓          | ✓                |                                     |
+| rollback        | ✓          | ✓                |                                     |
+| generate        | ✓          | ✓                |                                     |
+| invoke          | ✓          | ✓                |                                     |
+| read            | ✓          | ✓                |                                     |
+| doctor          | ✓          | ✓                |                                     |
+| migrate         | ✓          | ✓                |                                     |
+| version         | ✓          | ✓                | Added Sprint 38                     |
+| smoke           | ✓          | ✓                |                                     |
+| wire            | ✓          | ✓                |                                     |
+| sync-env        | ✓          | ✓                |                                     |
+| estimate        | ✓          | ✓                |                                     |
+| inspect         | ✓          | ✓                |                                     |
+| status          | ✓          | ✓                |                                     |
+| ci / regression | ✓          | ✓                | CI-oriented                         |
 
 ## Gaps found
 

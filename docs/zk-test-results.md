@@ -4,12 +4,12 @@
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Sessions run | 0 |
-| Median time to deploy | — |
-| Most common blocker | — |
-| DX fixes shipped | — |
+| Metric                | Value |
+| --------------------- | ----- |
+| Sessions run          | 0     |
+| Median time to deploy | —     |
+| Most common blocker   | —     |
+| DX fixes shipped      | —     |
 
 ## Session log
 
@@ -30,5 +30,5 @@
 ## DX changes from this test
 
 | Issue | Fix | PR/commit |
-|-------|-----|-----------|
-| — | — | — |
+| ----- | --- | --------- |
+| —     | —   | —         |

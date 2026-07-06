@@ -47,9 +47,7 @@ describe("resolvePlaceholders", () => {
   });
 
   it("should throw CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND when contract artifact is missing", () => {
-    expect(() =>
-      resolvePlaceholders("${contracts.missing.contractId}", context)
-    ).toThrowError(
+    expect(() => resolvePlaceholders("${contracts.missing.contractId}", context)).toThrowError(
       expect.objectContaining({
         code: CaatingaErrorCode.CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND,
       })
@@ -58,9 +56,7 @@ describe("resolvePlaceholders", () => {
 
   it("should throw SOURCE_ADDRESS_UNRESOLVED when sourceAddress is missing", () => {
     const noSourceContext = { ...context, sourceAddress: undefined };
-    expect(() =>
-      resolvePlaceholders("${source.address}", noSourceContext)
-    ).toThrowError(
+    expect(() => resolvePlaceholders("${source.address}", noSourceContext)).toThrowError(
       expect.objectContaining({
         code: CaatingaErrorCode.SOURCE_ADDRESS_UNRESOLVED,
       })
@@ -68,9 +64,7 @@ describe("resolvePlaceholders", () => {
   });
 
   it("should throw DEPLOY_ARG_PLACEHOLDER_INVALID for malformed or unsupported placeholders", () => {
-    expect(() =>
-      resolvePlaceholders("Some ${invalid.placeholder} here", context)
-    ).toThrowError(
+    expect(() => resolvePlaceholders("Some ${invalid.placeholder} here", context)).toThrowError(
       expect.objectContaining({
         code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID,
       })

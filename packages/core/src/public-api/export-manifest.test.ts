@@ -25,7 +25,10 @@ function parseNamedExports(source: string): string[] {
       if (!trimmed || trimmed.startsWith("type ")) {
         continue;
       }
-      const exportName = trimmed.split(/\s+as\s+/).pop()?.trim();
+      const exportName = trimmed
+        .split(/\s+as\s+/)
+        .pop()
+        ?.trim();
       if (exportName) {
         names.add(exportName);
       }

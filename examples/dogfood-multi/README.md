@@ -4,10 +4,10 @@ Validates **Deployment Graph**, `dependsOn`, `${contracts.token.contractId}` pla
 
 ## Contracts
 
-| Contract | Role |
-|----------|------|
-| `token` | Standalone; exposes `supply` / `mint` |
-| `vault` | Depends on `token`; constructor receives token `Address` via placeholder |
+| Contract | Role                                                                     |
+| -------- | ------------------------------------------------------------------------ |
+| `token`  | Standalone; exposes `supply` / `mint`                                    |
+| `vault`  | Depends on `token`; constructor receives token `Address` via placeholder |
 
 ## Deploy graph
 

@@ -53,20 +53,24 @@ For a detailed breakdown of all features categorized into Core, Nice to Have, Ex
 Architecturally, Caatinga is structured around four pillars that compartmentalize responsibilities and prevent cross-boundary pollution:
 
 ### 1. Deployment (Orchestration Engine)
+
 This pillar encompasses the build and deployment pipeline. It manages contract compilation (via Stellar CLI shell orchestration), multi-contract dependency topological sorting (`dependsOn`), placeholder resolution (e.g. `${contracts.token.contractId}`), and executing post-deploy hooks (`postDeploy`).
-*Components responsible:* `@caatinga/core` (specifically `deploy-graph`, `load-config`), `@caatinga/cli`.
+_Components responsible:_ `@caatinga/core` (specifically `deploy-graph`, `load-config`), `@caatinga/cli`.
 
 ### 2. Artifacts (State Contract)
+
 This pillar represents the static state representation of all deployments. The per-network `caatinga.artifacts.json` file serves as the Git-versioned contract between compilation, deployment, and client integration, capturing contract IDs, compiler hashes, and metadata.
-*Components responsible:* `@caatinga/core` (schema validations, state read/write).
+_Components responsible:_ `@caatinga/core` (schema validations, state read/write).
 
 ### 3. Runtime (Client Integration Layer)
+
 This pillar exposes the APIs consumed by browser/Node applications. It includes the TypeScript clients, pluggable wallet adapters, React context providers/hooks (`@caatinga/client/react`), and transaction pipeline orchestration (simulate → sign → submit → watch).
-*Components responsible:* `@caatinga/client`.
+_Components responsible:_ `@caatinga/client`.
 
 ### 4. Automation (Developer Diagnostics & Safety)
+
 This pillar ensures local workspace reliability, setup automation, regression checking (`caatinga smoke` / `postDeployRead`), and CI/CD-friendly error APIs using stable error codes.
-*Components responsible:* `@caatinga/cli` (commands `doctor`, `smoke`, `setup`), `@caatinga/core` (stable errors module).
+_Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`, `setup`), `@caatinga/core` (stable errors module).
 
 ## Validation roadmap (flows)
 
@@ -126,7 +130,6 @@ Each box is either a file you commit, a CLI command you run, or a runtime compon
 
 For detailed package dependency boundaries and compliance rules, see [Package Boundaries & Isolation Rules](./packages.md#package-boundaries-isolation-rules).
 
-
 Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
 
 ### Dependency Map
@@ -173,7 +176,6 @@ Notes encoded in the diagram:
 - **CLI Isolation:** The CLI Interface depends on the Orchestration Engine (`core`), never the other way around.
 - **Node vs Browser Boundaries:** The Orchestration Engine is the only package that orchestrates subprocesses via CLI Adapters executing Stellar CLI commands. The Integration SDK (`@caatinga/client`) consumes only the browser-safe subpath `@caatinga/core/browser`, ensuring that Node-specific dependencies like `execa` or `fs` are never pulled into web applications.
 - **State Registry:** The Artifacts State (`caatinga.artifacts.json`) acts as the shared database between the Orchestration Engine (which writes it on deploy) and the Transaction Pipeline / Integration SDK (which reads it at runtime).
-
 
 ## Meta-framework boundary: orchestrate workflow, not mental model
 

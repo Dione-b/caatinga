@@ -2,9 +2,9 @@
 
 Issues found during dogfooding with **public APIs only**. Core changes are deferred until after v1.0 RC unless marked critical.
 
-| ID | Sprint | Severity | Description | Workaround | Core change? |
-|----|--------|----------|-------------|------------|--------------|
-| DF-001 | 41 | — | (placeholder) | — | No |
+| ID     | Sprint | Severity | Description   | Workaround | Core change? |
+| ------ | ------ | -------- | ------------- | ---------- | ------------ |
+| DF-001 | 41     | —        | (placeholder) | —          | No           |
 
 ## Rules
 

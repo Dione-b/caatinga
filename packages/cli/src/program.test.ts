@@ -117,7 +117,9 @@ describe("createProgram", () => {
 
     try {
       await createProgram().exitOverride().parseAsync(["node", "caatinga", "version"]);
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`@caatinga/cli: ${packageJson.version}`));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`@caatinga/cli: ${packageJson.version}`)
+      );
     } finally {
       logSpy.mockRestore();
     }

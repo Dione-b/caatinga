@@ -8,7 +8,9 @@ export type CollectMetadataInput = {
   cwd?: string;
 };
 
-export async function collectDeploymentMetadata(input: CollectMetadataInput): Promise<ContractMetadata> {
+export async function collectDeploymentMetadata(
+  input: CollectMetadataInput
+): Promise<ContractMetadata> {
   let gitCommit: string | undefined;
   try {
     const gitResult = await runCommand("git", ["rev-parse", "HEAD"], {

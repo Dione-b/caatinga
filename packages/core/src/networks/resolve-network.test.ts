@@ -48,7 +48,10 @@ describe("resolveNetwork", () => {
   });
 
   it("should_include_testnet_boilerplate_in_hint_when_testnet_is_missing", () => {
-    const configWithoutTestnet = { ...baseConfig, networks: { mainnet: baseConfig.networks.mainnet } };
+    const configWithoutTestnet = {
+      ...baseConfig,
+      networks: { mainnet: baseConfig.networks.mainnet },
+    };
     try {
       resolveNetwork(configWithoutTestnet, "testnet");
       expect.fail("expected throw");
@@ -61,7 +64,10 @@ describe("resolveNetwork", () => {
   });
 
   it("should_include_mainnet_boilerplate_in_hint_when_mainnet_is_missing", () => {
-    const configWithoutMainnet = { ...baseConfig, networks: { testnet: baseConfig.networks.testnet } };
+    const configWithoutMainnet = {
+      ...baseConfig,
+      networks: { testnet: baseConfig.networks.testnet },
+    };
     try {
       resolveNetwork(configWithoutMainnet, "mainnet");
       expect.fail("expected throw");

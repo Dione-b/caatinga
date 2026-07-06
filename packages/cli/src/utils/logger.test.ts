@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from "vitest";
 import { logger } from "./logger.js";
 import chalk from "chalk";
 
 describe("logger", () => {
-  let logSpy: any;
-  let warnSpy: any;
-  let errorSpy: any;
+  let logSpy: MockInstance;
+  let warnSpy: MockInstance;
+  let errorSpy: MockInstance;
 
   beforeEach(() => {
     logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -24,7 +24,9 @@ describe("logger", () => {
 
   it("should log success message with green check icon and text", () => {
     logger.success("operation successful");
-    expect(logSpy).toHaveBeenCalledWith(`${chalk.green("✔")} ${chalk.green("operation successful")}`);
+    expect(logSpy).toHaveBeenCalledWith(
+      `${chalk.green("✔")} ${chalk.green("operation successful")}`
+    );
   });
 
   it("should log warning message with yellow warning icon and text", () => {
