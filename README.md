@@ -5,7 +5,7 @@
 
 Deployment Orchestration + Versioned Artifacts for Soroban.
 
-> Alpha (pre-1.0). The `3.x` npm major does not imply API stability. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md).
+> **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [Public API](./docs/public-api.md).
 
 ## Core Identity
 
@@ -57,7 +57,7 @@ Every feature in Caatinga belongs to one of these four core pillars:
 - **Docs site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/)
 - [Getting started](./docs/getting-started.md) — install, scaffold, CLI-to-browser flow
 - [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) — full walkthrough
-- [CLI reference](./docs/cli.md) · [Cheatsheet](./docs/cheatsheet.md)
+- [CLI reference](./docs/cli.md) · [Cheatsheet](./docs/cheatsheet.md) · [Troubleshooting](./docs/troubleshooting.md)
 - [Architecture](./docs/architecture.md) · [ADRs](./docs/adr/index.md)
 - [Client](./docs/client.md) · [Wallets](./docs/wallets.md) · [Errors](./docs/errors.md)
 - [ROADMAP](./ROADMAP.md)
@@ -72,18 +72,33 @@ Or run without a global install: `npx caatinga init my-dapp`
 
 ## Quick start
 
+### Path A — Toolchain already installed (~10 minutes)
+
+Requires Rust + `wasm32v1-none` + Stellar CLI 23+ and a funded identity `alice`.
+
 ```bash
 npx caatinga init my-dapp
-cd my-dapp
-npm install
+cd my-dapp && npm install
 
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
-npx caatinga smoke --network testnet --source alice   # optional post-deploy read checks
-npx caatinga status --network testnet
+npx caatinga generate counter --network testnet   # if deploy used --no-generate
+npx caatinga read counter.get --network testnet
+
+npm run dev   # React template: wallet + @caatinga/client
 ```
 
-`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). For CI pipelines see [Cheatsheet — CI and regression](./docs/cheatsheet.md#ci-and-regression). Run `caatinga doctor` if setup fails.
+### Path B — Fresh machine
+
+```bash
+npm install -g @caatinga/cli
+caatinga setup --source alice --network testnet   # Rust, Stellar CLI, funded identity
+caatinga init my-dapp && cd my-dapp && npm install
+caatinga build counter
+caatinga deploy counter --network testnet --source alice
+```
+
+`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). Run `caatinga doctor` if setup fails.
 
 For scaffold options and a browser walkthrough, see [Getting started](./docs/getting-started.md) and [Project scaffolds](./docs/tutorials/project-scaffolds.md).
 

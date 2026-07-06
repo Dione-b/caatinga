@@ -109,9 +109,9 @@ describe("publish package manifests", () => {
     expect(packageJson.peerDependenciesMeta.react).toEqual({ optional: true });
   });
 
-  it("publish dry-run uses the pre-v1 next dist-tag", () => {
+  it("publish dry-run uses the v1.0 latest dist-tag", () => {
     const packageJson = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
-    expect(packageJson.scripts["publish:dry-run"]).toContain("--tag next");
+    expect(packageJson.scripts["publish:dry-run"]).toContain("--tag latest");
   });
 
   it("release matrix checks version alignment and pinned Stellar CLI before publish gates", () => {

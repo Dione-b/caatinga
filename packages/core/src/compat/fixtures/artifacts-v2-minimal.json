@@ -1,0 +1,10 @@
+{
+  "project": "modern-app",
+  "version": 2,
+  "networks": {
+    "testnet": {
+      "contracts": {},
+      "dependencyGraph": {}
+    }
+  }
+}

@@ -256,3 +256,71 @@ All sprints must strengthen one of the four core pillars:
   - Congelamento do schema dos artifacts. ✓
   - Congelamento da API. ✓
   - Congelamento dos comandos. ✓
+
+---
+
+## Fase 13 — Hardening da Plataforma
+
+### Sprint 38 — Auditoria Final da API Pública [x]
+- **Objetivo:** Revisar tudo que ficará público na v1.0.
+- **Entregáveis:**
+  - Manifesto [`docs/public-api.md`](docs/public-api.md) com tiers Supported/Advanced/Internal. ✓
+  - Teste de regressão de exports (`export-manifest.test.ts`). ✓
+  - ROADMAP Fases 13–16. ✓
+
+### Sprint 39 — Testes de Compatibilidade [x]
+- **Objetivo:** Garantir que atualizações futuras não quebrem projetos antigos.
+- **Entregáveis:**
+  - Fixtures artifacts v1/v2 + `pnpm test:compat`. ✓
+  - Snapshot de package exports. ✓
+
+### Sprint 40 — Recovery e Casos de Erro [x]
+- **Objetivo:** Tornar falhas previsíveis.
+- **Entregáveis:**
+  - [`docs/recovery-scenarios.md`](docs/recovery-scenarios.md). ✓
+  - `writeArtifacts` atômico. ✓
+  - Testes de cenários de recovery. ✓
+
+---
+
+## Fase 14 — Dogfooding
+
+### Sprint 41 — Construção de um dApp Real [x]
+- **Objetivo:** Projeto completo usando apenas APIs públicas.
+- **Entregáveis:**
+  - [`examples/dogfood-simple`](examples/dogfood-simple). ✓
+  - [`docs/dogfood-backlog.md`](docs/dogfood-backlog.md). ✓
+
+### Sprint 42 — Segundo Projeto (multi-contrato) [x]
+- **Objetivo:** Validar graph, placeholders, upgrades.
+- **Entregáveis:**
+  - [`examples/dogfood-multi`](examples/dogfood-multi). ✓
+  - [`docs/case-studies/multi-contract-dapp.md`](docs/case-studies/multi-contract-dapp.md). ✓
+
+---
+
+## Fase 15 — DX
+
+### Sprint 43 — README + Quick Start [x]
+- **Objetivo:** Primeiro deploy em menos de 10 minutos (toolchain instalada).
+- **Entregáveis:** README com caminhos "toolchain pronta" e "máquina limpa". ✓
+
+### Sprint 44 — Troubleshooting [x]
+- **Entregáveis:** [`docs/troubleshooting.md`](docs/troubleshooting.md). ✓
+
+---
+
+## Fase 16 — Release Candidate
+
+### Sprint 45 — UX Review da CLI [x]
+- **Entregáveis:** [`docs/cli-ux-audit-v1.md`](docs/cli-ux-audit-v1.md). ✓
+
+### Sprint 46 — Zero Knowledge Test [x]
+- **Entregáveis:** [`docs/zk-test-protocol.md`](docs/zk-test-protocol.md), [`docs/zk-test-results.md`](docs/zk-test-results.md). ✓
+
+### Sprint 47 — Release Candidate [x]
+- **Entregáveis:** Checklist RC atualizado; pacotes `3.8.0`; CHANGELOG. ✓
+
+### Sprint 48 — Release v1.0 [x]
+- **Objetivo:** Lançamento oficial (contrato v1.0, npm major `3.x`, dist-tag `latest`).
+- **Entregáveis:** Tag git `v1.0.0`; README v1.0 stable contract. ✓

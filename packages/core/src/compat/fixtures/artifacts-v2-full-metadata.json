@@ -1,0 +1,41 @@
+{
+  "project": "marketplace-app",
+  "version": 2,
+  "networks": {
+    "testnet": {
+      "contracts": {
+        "token": {
+          "contractId": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+          "wasmHash": "hash-token-v2",
+          "deployedAt": "2026-05-12T00:00:00.000Z",
+          "sourcePath": "./contracts/token",
+          "wasmPath": "./contracts/token.wasm",
+          "dependencies": [],
+          "metadata": {
+            "gitCommit": "abc1234",
+            "rustcVersion": "1.84.0",
+            "caatingaVersion": "3.8.0",
+            "network": "testnet",
+            "timestamp": "2026-05-12T00:00:00.000Z",
+            "checksum": "sha256:deadbeef"
+          }
+        },
+        "vault": {
+          "contractId": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC5",
+          "wasmHash": "hash-vault-v2",
+          "deployedAt": "2026-05-12T00:01:00.000Z",
+          "sourcePath": "./contracts/vault",
+          "wasmPath": "./contracts/vault.wasm",
+          "dependencies": ["token"],
+          "resolvedDeployArgs": {
+            "token": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4"
+          }
+        }
+      },
+      "dependencyGraph": {
+        "token": [],
+        "vault": ["token"]
+      }
+    }
+  }
+}

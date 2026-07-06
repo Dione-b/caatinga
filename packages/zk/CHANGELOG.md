@@ -1,5 +1,13 @@
 ## Breaking changes policy
 
+## 3.8.0
+
+### Patch Changes
+
+- v1.0 contract milestone — aligned with `@caatinga/core@3.8.0`.
+- Updated dependencies
+  - @caatinga/core@3.8.0
+
 ## 3.7.0
 
 ### Patch Changes

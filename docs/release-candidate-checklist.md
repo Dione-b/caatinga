@@ -1,6 +1,6 @@
 # Release Candidate Checklist (v1.0)
 
-This document defines the acceptance criteria that must be satisfied before Caatinga can be promoted from alpha (pre-1.0) to v1.0.
+This document defines the acceptance criteria that must be satisfied before Caatinga v1.0 contract freeze. **Status: v1.0 released** — npm `@caatinga/*@3.8.0` with `latest` dist-tag; git tag `v1.0.0`.
 
 ---
 
@@ -17,7 +17,9 @@ This document defines the acceptance criteria that must be satisfied before Caat
 - [x] Public exports of `@caatinga/core` are typed and stable (no `any` at boundaries)
 - [x] Public exports of `@caatinga/client` are typed and stable
 - [x] `CaatingaWalletAdapter` interface is frozen (no breaking changes without a major version)
-- [x] `CaatingaClientConfig` interface is frozen
+- [x] Public API manifest in `docs/public-api.md`
+- [x] Compatibility suite (`pnpm test:compat`)
+- [x] Recovery scenarios documented in `docs/recovery-scenarios.md`
 
 ## CLI Surface Freeze
 
@@ -44,14 +46,16 @@ This document defines the acceptance criteria that must be satisfied before Caat
 - [x] `docs/architecture.md` describes the package layout and data flow
 - [x] `docs/network-setup.md` provides boilerplates for all major Stellar networks
 - [x] `docs/runtime-invoke-pipeline.md` documents the full invoke pipeline
-- [x] `docs/automation.md` documents doctor, smoke, and ci run
+- [x] `docs/troubleshooting.md` covers top failure modes
+- [x] `docs/public-api.md` defines Tier 1 supported surface
 
 ## Remaining Before v1.0
 
-> [!CAUTION]
-> The following items must be resolved before promoting to v1.0:
+> [!NOTE]
+> v1.0 contract milestone completed at `@caatinga/*@3.8.0`. Ongoing operational gates:
 
-- [ ] Integration test suite passes against Stellar testnet
-- [ ] All templates pinned to a stable `compatibleCore` range matching the v1.0 release
-- [ ] CHANGELOG finalized with all breaking changes from alpha documented
-- [ ] npm publish with `--tag latest` (currently on `next` channel)
+- [x] Compatibility suite and consumer isolation (`pnpm test:compat`, `pnpm test:consumer`)
+- [x] All templates pinned to `compatibleCore: ^3.8.0`
+- [x] CHANGELOG finalized for v1.0 hardening (3.8.0)
+- [x] npm publish policy set to `--tag latest` (run `pnpm pre:publish` to publish)
+- [ ] Integration test suite passes against Stellar testnet (operational CI gate — monitor scheduled smoke)

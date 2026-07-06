@@ -41,3 +41,24 @@ When a future breaking change is introduced:
    - Update `migrateArtifactsFile` to invoke the chain of migrations sequentially (v1 → v2 → v3).
 3. **Test Coverage:**
    - Add unit test fixtures capturing old schema files and verify they convert correctly.
+
+---
+
+## 4. Automated compatibility tests
+
+Run from the repository root:
+
+```bash
+pnpm test:compat
+```
+
+This executes:
+
+- `packages/core/src/compat/compat.test.ts` — v1/v2 fixtures, migration roundtrip, `migrateArtifactsFile`
+- `packages/core/src/compat/exports-snapshot.test.ts` — `@caatinga/core` and `@caatinga/client` `package.json` exports
+- `packages/core/src/public-api/export-manifest.test.ts` — Tier 1 client export manifest
+- `packages/core/src/recovery/recovery-scenarios.test.ts` — artifact and CLI recovery paths
+
+Fixtures live in `packages/core/src/compat/fixtures/`.
+
+Consumer isolation (`pnpm test:consumer`) validates packed tarball installs end-to-end.

@@ -24,6 +24,9 @@ Documentation index for the Caatinga toolkit. Start at the top if you're new.
 - [Wallets](./wallets.md) — adapters, Stellar Wallets Kit, React hooks
 - [Templates](./templates.md) — official templates and package-manager quirks
 - [Errors](./errors.md) — public `CAATINGA_*` error codes
+- [Troubleshooting](./troubleshooting.md) — symptom-first fixes for common failures
+- [Public API](./public-api.md) — v1.0 supported surface (Tier 1/2/3)
+- [Recovery scenarios](./recovery-scenarios.md) — interrupted deploy, invalid artifacts, RPC offline
 - [LLM reference](./for-llms.md) — self-contained reference for LLM consumption (also at `/llms-full.txt`)
 
 ## Internals & process

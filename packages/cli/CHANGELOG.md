@@ -1,5 +1,18 @@
 ## Breaking changes policy
 
+## 3.8.0
+
+### Minor Changes
+
+- v1.0 contract milestone: public API manifest (`docs/public-api.md`), compatibility suite (`pnpm test:compat`), recovery scenarios, troubleshooting guide, atomic artifact writes, dogfood examples (`examples/dogfood-simple`, `examples/dogfood-multi`).
+- Promote npm dist-tag policy to `latest` for stable releases (npm major remains `3.x`).
+
+### Patch Changes
+
+- Updated dependencies
+  - @caatinga/core@3.8.0
+  - @caatinga/zk@3.8.0
+
 ## 3.7.0
 
 ### Patch Changes

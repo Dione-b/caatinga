@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "install:global": "pnpm build && NPM_CONFIG_PREFIX=\"$(dirname \"$(dirname \"$(command -v node)\")\")\" npm install -g ./packages/cli",
     "test": "turbo test",
+    "test:compat": "pnpm --filter @caatinga/core test -- src/compat src/public-api src/recovery",
     "docs:check": "node scripts/docs-check.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -32,8 +33,8 @@
     "ci:snapshot-pack": "bash scripts/ci-snapshot-pack.sh",
     "pre:publish": "bash scripts/pre-publish.sh",
     "pre:publish:keep-going": "bash scripts/pre-publish.sh --keep-going",
-    "publish:dry-run": "pnpm publish -r --access public --dry-run --no-git-checks --tag next",
-    "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && bash scripts/check-fixture-references.sh && pnpm build && pnpm check:wasm-targets && pnpm test && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
+    "publish:dry-run": "pnpm publish -r --access public --dry-run --no-git-checks --tag latest",
+    "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && bash scripts/check-fixture-references.sh && pnpm build && pnpm check:wasm-targets && pnpm test && pnpm test:compat && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
