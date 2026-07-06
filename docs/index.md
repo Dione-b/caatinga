@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Caatinga
-  text: Soroban deploy artifacts + TypeScript CLI
-  tagline: Git-versioned deployment state, multi-contract orchestration, npm-first workflow.
+  text: Deployment Orchestration + Versioned Artifacts for Soroban
+  tagline: Local, graph-aware deployment orchestration and portable, Git-versioned artifacts for TypeScript teams.
   actions:
     - theme: brand
       text: Get started

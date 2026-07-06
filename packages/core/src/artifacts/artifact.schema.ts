@@ -12,6 +12,17 @@ export const ArtifactUpgradeStrategySchema = z.enum(["in-place", "redeploy"]);
 
 export type ArtifactUpgradeStrategy = z.infer<typeof ArtifactUpgradeStrategySchema>;
 
+export const ContractMetadataSchema = z.object({
+  gitCommit: z.string().optional(),
+  rustcVersion: z.string().optional(),
+  caatingaVersion: z.string().optional(),
+  network: z.string().optional(),
+  timestamp: z.string().optional(),
+  checksum: z.string().optional(),
+});
+
+export type ContractMetadata = z.infer<typeof ContractMetadataSchema>;
+
 export const ContractArtifactHistoryEntrySchema = z.object({
   contractId: z.string().min(1),
   wasmHash: z.string().min(1),
@@ -19,6 +30,7 @@ export const ContractArtifactHistoryEntrySchema = z.object({
   supersededAt: z.string().datetime(),
   reason: ArtifactSupersedeReasonSchema.optional(),
   upgradeType: ArtifactUpgradeTypeSchema.optional(),
+  metadata: ContractMetadataSchema.optional(),
 });
 
 export type ContractArtifactHistoryEntry = z.infer<typeof ContractArtifactHistoryEntrySchema>;
@@ -35,6 +47,7 @@ export const ContractArtifactSchema = z.object({
     .default({}),
   history: z.array(ContractArtifactHistoryEntrySchema).optional(),
   upgradeStrategy: ArtifactUpgradeStrategySchema.optional(),
+  metadata: ContractMetadataSchema.optional(),
 });
 
 const NetworkArtifactsSchema = z.object({

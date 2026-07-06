@@ -1,6 +1,6 @@
 # Caatinga
 
-> Git-versioned Soroban deploy artifacts and multi-contract orchestration for TypeScript teams.
+> Deployment Orchestration + Versioned Artifacts for Soroban.
 
 ## Core docs
 

@@ -3,12 +3,45 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Dione-b/caatinga/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Dione-b/caatinga/actions)
 [![npm](https://img.shields.io/npm/v/@caatinga/cli?label=%40caatinga%2Fcli&logo=npm)](https://www.npmjs.com/package/@caatinga/cli?activeTab=versions)
 
-Git-versioned Soroban deploy artifacts and multi-contract orchestration for TypeScript teams.
+Deployment Orchestration + Versioned Artifacts for Soroban.
 
 > Alpha (pre-1.0). The `3.x` npm major does not imply API stability. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md).
 
+## Core Identity
+
+- **Mission:** Simplify the development, deployment, and integration of Soroban contracts for TypeScript teams through robust local orchestration and deterministic artifact versioning.
+- **Problem it Solves:** Fragmented deployment scripts and the difficulty of tracking and integrating contract IDs deployed across multiple environments (local, testnet, mainnet) into the frontend in a Git-friendly, deterministic way.
+- **Key Differentiator:** Graph-aware local deployment orchestration with portable, Git-versioned artifact tracking (`caatinga.artifacts.json`), eliminating mandatory on-chain registry dependencies for basic development while providing auto-generated type-safe client bindings and direct browser wallet integration.
+
+## Core Pillars
+
+Every feature in Caatinga belongs to one of these four core pillars:
+
+1. **Deployment**
+   - **Local Orchestration:** Drive Stellar CLI contract builds and deployments locally.
+   - **Dependency Graphs:** Model and deploy multi-contract structures using topological ordering (`dependsOn`).
+   - **Reference Resolution:** Auto-resolve inter-contract references in configurations using placeholders like `${contracts.token.contractId}`.
+   - **Lifecycle Hooks:** Execute post-deploy actions (`postDeploy`) automatically.
+
+2. **Artifacts**
+   - **Git-versioned State:** Store all deployment state (contract IDs, WASM hashes) per network in `caatinga.artifacts.json`.
+   - **No Lock-in:** Use a portable registry that stays in your repository. No mandatory on-chain registry dependencies.
+   - **Metadata Tracking:** Trace compiler settings, git commits, and versions directly inside the artifacts.
+
+3. **Runtime**
+   - **Type-safe Client:** Read state and invoke contract methods with `@caatinga/client` using auto-generated TypeScript bindings.
+   - **Wallet Adapters:** Pluggable adapters for browser wallets (Freighter, Stellar Wallets Kit) with React bindings.
+   - **Execution Pipeline:** Explicitly simulate, sign, submit, and watch transaction lifecycle states.
+
+4. **Automation**
+   - **Environment Diagnostics:** Check local environments, Rust compiler targets, and identity setups using `caatinga doctor` and `caatinga setup`.
+   - **Regression & Smoke Checks:** Validate deployments with structured post-deploy checks (`postDeployRead`, `caatinga smoke`).
+   - **Stable Logs:** Key automated pipelines on stable `CAATINGA_*` error codes rather than volatile stdout text.
+
+
 ## Table of Contents
 
+- [Core Pillars](#core-pillars)
 - [Documentation](#documentation)
 - [Install](#install)
 - [Quick start](#quick-start)

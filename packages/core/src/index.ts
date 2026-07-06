@@ -23,6 +23,7 @@ export {
   type CreateInitialArtifactsOptions,
 } from "./artifacts/write-artifacts.js";
 export { updateArtifact, restoreArtifactFromHistory } from "./artifacts/update-artifact.js";
+export { collectDeploymentMetadata, type CollectMetadataInput } from "./artifacts/metadata.js";
 export { migrateArtifactsToV2 } from "./artifacts/migrate-artifacts.js";
 export { migrateArtifactsFile } from "./artifacts/migrate-artifacts-file.js";
 export { rollbackContractArtifact } from "./artifacts/rollback-artifact.js";

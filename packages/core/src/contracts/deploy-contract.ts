@@ -2,6 +2,7 @@ import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
+import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -226,6 +227,12 @@ export async function deployContract(options: DeployContractOptions) {
         : ("force-redeploy" as const)
       : undefined;
 
+  const metadata = await collectDeploymentMetadata({
+    networkName: network.name,
+    wasmHash,
+    cwd,
+  });
+
   const nextArtifacts = updateArtifact(
     artifactsBefore,
     network.name,
@@ -238,6 +245,7 @@ export async function deployContract(options: DeployContractOptions) {
       wasmPath: contract.config.wasm,
       dependencies,
       resolvedDeployArgs,
+      metadata,
     },
     {
       dependencyGraph,

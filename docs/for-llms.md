@@ -1,6 +1,6 @@
 # Caatinga — LLM Reference
 
-Caatinga is a TypeScript CLI and browser toolkit for Soroban on Stellar. It orchestrates scaffold → build → deploy → binding generation → invoke/read, with git-versioned `caatinga.artifacts.json` and no mandatory registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
+Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. It provides local, graph-aware deployment orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. It orchestrates scaffold → build → deploy → binding generation → invoke/read without requiring a mandatory on-chain registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
 
 Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/).
 
