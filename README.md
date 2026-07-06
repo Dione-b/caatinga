@@ -5,63 +5,25 @@
 
 Deployment Orchestration + Versioned Artifacts for Soroban.
 
+- Deploy multiple Soroban contracts.
+- Track deployments in Git.
+- Generate browser-ready TypeScript bindings.
+- No hosted registry required.
+
+```bash
+npm install -g @caatinga/cli
+npx caatinga init my-dapp
+```
+
 > **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [Public API](./docs/public-api.md).
 
-## Core Identity
+## Why Caatinga?
 
-- **Mission:** Simplify the development, deployment, and integration of Soroban contracts for TypeScript teams through robust local orchestration and deterministic artifact versioning.
-- **Problem it Solves:** Fragmented deployment scripts and the difficulty of tracking and integrating contract IDs deployed across multiple environments (local, testnet, mainnet) into the frontend in a Git-friendly, deterministic way.
-- **Key Differentiator:** Graph-aware local deployment orchestration with portable, Git-versioned artifact tracking
-  (`caatinga.artifacts.json`), eliminating mandatory on-chain registry dependencies for basic development while providing
-  auto-generated type-safe client bindings and direct browser wallet integration.
-
-## Core Pillars
-
-Every feature in Caatinga belongs to one of these four core pillars:
-
-1. **Deployment**
-   - **Local Orchestration:** Drive Stellar CLI contract builds and deployments locally.
-   - **Dependency Graphs:** Model and deploy multi-contract structures using topological ordering (`dependsOn`).
-   - **Reference Resolution:** Auto-resolve inter-contract references in configurations using placeholders like `${contracts.token.contractId}`.
-   - **Lifecycle Hooks:** Execute post-deploy actions (`postDeploy`) automatically.
-
-2. **Artifacts**
-   - **Git-versioned State:** Store all deployment state (contract IDs, WASM hashes) per network in `caatinga.artifacts.json`.
-   - **No Lock-in:** Use a portable registry that stays in your repository. No mandatory on-chain registry dependencies.
-   - **Metadata Tracking:** Trace compiler settings, git commits, and versions directly inside the artifacts.
-
-3. **Runtime**
-   - **Type-safe Client:** Read state and invoke contract methods with `@caatinga/client` using auto-generated TypeScript bindings.
-   - **Wallet Adapters:** Pluggable adapters for browser wallets (Freighter, Stellar Wallets Kit) with React bindings.
-   - **Execution Pipeline:** Explicitly simulate, sign, submit, and watch transaction lifecycle states.
-
-4. **Automation**
-   - **Environment Diagnostics:** Check local environments, Rust compiler targets, and identity setups using `caatinga doctor` and `caatinga setup`.
-   - **Regression & Smoke Checks:** Validate deployments with structured post-deploy checks (`postDeployRead`, `caatinga smoke`).
-   - **Stable Logs:** Key automated pipelines on stable `CAATINGA_*` error codes rather than volatile stdout text.
-
-## Table of Contents
-
-- [Core Pillars](#core-pillars)
-- [Documentation](#documentation)
-- [Install](#install)
-- [Quick start](#quick-start)
-- [Requirements](#requirements)
-- [How it fits together](#how-it-fits-together)
-- [Project layout](#project-layout)
-- [Packages](#packages)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Documentation
-
-- **Docs site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/)
-- [Getting started](./docs/getting-started.md) — install, scaffold, CLI-to-browser flow
-- [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) — full walkthrough
-- [CLI reference](./docs/cli.md) · [Cheatsheet](./docs/cheatsheet.md) · [Troubleshooting](./docs/troubleshooting.md)
-- [Architecture](./docs/architecture.md) · [ADRs](./docs/adr/index.md)
-- [Client](./docs/client.md) · [Wallets](./docs/wallets.md) · [Errors](./docs/errors.md)
-- [ROADMAP](./ROADMAP.md)
+- Graph-aware deployment for multiple contracts.
+- Git-versioned deployment artifacts.
+- Auto-generated TypeScript bindings.
+- Browser-ready runtime with wallet adapters.
+- Built on top of the official Stellar toolchain.
 
 ## Install
 
@@ -103,22 +65,39 @@ caatinga deploy counter --network testnet --source alice
 
 For scaffold options and a browser walkthrough, see [Getting started](./docs/getting-started.md) and [Project scaffolds](./docs/tutorials/project-scaffolds.md).
 
-## Requirements
+## What you get after deploy
 
-- **Node.js** 22+
-- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on `PATH` (27.0.0 recommended; 22.x unsupported)
-- **Rust** 1.84.0+ with the `wasm32v1-none` target
-- A funded local Stellar CLI identity (e.g. `alice`)
+**`caatinga.artifacts.json`** — committed to Git, keyed per network:
 
-```bash
-cargo install --locked stellar-cli --version 27.0.0
-rustup target add wasm32v1-none
-stellar keys generate alice --fund --network testnet
+```json
+{
+  "project": "my-dapp",
+  "version": 2,
+  "networks": {
+    "testnet": {
+      "contracts": {
+        "counter": {
+          "contractId": "CABCD...",
+          "wasmHash": "a1b2c3..."
+        }
+      }
+    }
+  }
+}
 ```
 
-Run `caatinga setup` on a fresh machine to install the toolchain automatically. Stellar CLI versions below 23.0.0 hard-fail; versions above 27.0.0 run with an advisory warning. See the [version contract](./docs/stellar-cli-version-contract.md).
+**Generated bindings + browser client** — type-safe calls from your frontend:
 
-## How it fits together
+```typescript
+import { caatingaClient } from "./caatinga";
+
+const count = await caatingaClient.contract("counter").read<number>("get");
+await caatingaClient.contract("counter").invoke("increment");
+```
+
+Under the hood, `caatinga generate` produces a `Client` class from the official Stellar SDK generator. `@caatinga/client` wires contract IDs from artifacts, network config, and your wallet adapter — no copy/paste of IDs into `.env`.
+
+## How it works
 
 Caatinga orchestrates the official Stellar stack — build, deploy, and invoke still shell out to Stellar CLI;
 `caatinga generate` runs `npx @stellar/stellar-sdk generate`. Deployed contract IDs live in
@@ -146,7 +125,49 @@ For positioning vs Scaffold Stellar and other tools, see [Architecture — compe
 
 `@caatinga/client` connects generated bindings, artifacts, network config, and a pluggable wallet adapter for single-invoker browser flows. See [Client docs](./docs/client.md) and [Wallets](./docs/wallets.md).
 
-Optional ZK workflow (Circom + Groth16 on Soroban): [ZK docs](./docs/zk.md).
+## Core Concepts
+
+| Concept      | What it does                                                                 |
+| ------------ | ---------------------------------------------------------------------------- |
+| **Deployment** | Graph-aware orchestration over the official Stellar CLI.                   |
+| **Artifacts**  | Git-versioned deployment metadata (`caatinga.artifacts.json`).           |
+| **Runtime**    | Type-safe browser client generated automatically from deployed contracts.  |
+| **Automation** | Diagnostics and CI-friendly workflows (`doctor`, `smoke`, stable errors). |
+
+## Why not package.json scripts?
+
+| Scripts approach              | Caatinga                              |
+| ----------------------------- | ------------------------------------- |
+| Manual deploy per contract    | Graph-aware deployment                |
+| Manual contract ID tracking   | Versioned artifacts in Git            |
+| Manual binding generation     | Generated automatically on deploy     |
+| Shell glue between steps      | Orchestrated workflow                 |
+| Copy/paste IDs into `.env`    | Artifacts synced to the browser client |
+
+## Requirements
+
+- **Node.js** 22+
+- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on `PATH` (27.0.0 recommended; 22.x unsupported)
+- **Rust** 1.84.0+ with the `wasm32v1-none` target
+- A funded local Stellar CLI identity (e.g. `alice`)
+
+```bash
+cargo install --locked stellar-cli --version 27.0.0
+rustup target add wasm32v1-none
+stellar keys generate alice --fund --network testnet
+```
+
+Run `caatinga setup` on a fresh machine to install the toolchain automatically. Stellar CLI versions below 23.0.0 hard-fail; versions above 27.0.0 run with an advisory warning. See the [version contract](./docs/stellar-cli-version-contract.md).
+
+## Documentation
+
+- **Docs site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/)
+- [Getting started](./docs/getting-started.md) — install, scaffold, CLI-to-browser flow
+- [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md) — full walkthrough
+- [CLI reference](./docs/cli.md) · [Cheatsheet](./docs/cheatsheet.md) · [Troubleshooting](./docs/troubleshooting.md)
+- [Architecture](./docs/architecture.md) · [ADRs](./docs/adr/index.md)
+- [Client](./docs/client.md) · [Wallets](./docs/wallets.md) · [Errors](./docs/errors.md)
+- [ZK workflow](./docs/zk.md) · [ROADMAP](./ROADMAP.md)
 
 ## Project layout
 
@@ -166,9 +187,8 @@ my-dapp/
 | `@caatinga/cli`    | `caatinga` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
 | `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                |
 | `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                      |
-| `@caatinga/zk`     | Circom Groth16 verifier workflow (niche)                                                        |
 
-Full export map: [Packages](./docs/packages.md).
+Full export map: [Packages](./docs/packages.md). Niche packages (e.g. `@caatinga/zk`) are documented separately.
 
 Public errors use stable `CAATINGA_*` codes — see [Errors](./docs/errors.md).
 
