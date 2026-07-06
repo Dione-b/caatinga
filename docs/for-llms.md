@@ -67,25 +67,29 @@ npx caatinga setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice`
 npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync-env
 ```
 
-**Contract upgrade (3.7.0) — choose strategy by contract design:**
+**Contract upgrade — choose strategy by contract design:**
 
-| Strategy     | Command                     | On-chain effect                        | `contractId`  |
-| ------------ | --------------------------- | -------------------------------------- | ------------- |
-| **In-place** | `caatinga upgrade`          | Replaces WASM on the existing instance | **Preserved** |
-| **Redeploy** | `caatinga deploy --upgrade` | Deploys a new instance                 | **New ID**    |
+| Strategy     | Command                     | On-chain effect                                                              | `contractId`  |
+| ------------ | --------------------------- | ---------------------------------------------------------------------------- | ------------- |
+| **In-place** | `caatinga upgrade`          | Auto-build, upload WASM, invoke `upgrade --new_wasm_hash` on existing instance | **Preserved** |
+| **Redeploy** | `caatinga deploy --upgrade` | Deploy new instance (`--upgrade` implies `--force` + upgrade history)        | **New ID**    |
 
 ```bash
-# In-place: admin-gated upgrade(new_wasm_hash) entrypoint (stellar-album style)
-npx caatinga upgrade counter --network testnet --source alice
-npx caatinga upgrade counter --if-changed --source alice --network testnet   # skip when WASM unchanged
-npx caatinga upgrade counter --source alice --generate --sync-env            # optional post-steps
+# In-place — contract must expose admin-gated upgrade(new_wasm_hash) (NOT the default counter template)
+npx caatinga upgrade my-contract --network testnet --source alice
+npx caatinga upgrade my-contract --if-changed --source alice --network testnet   # skip when WASM unchanged
+npx caatinga upgrade my-contract --source alice --no-build --generate          # optional: skip build / refresh bindings
 
-# Redeploy: no in-place upgrade entrypoint, or intentional new instance
+# Redeploy — react-vite-counter and contracts without upgrade() (e.g. default counter)
 npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice
+npx caatinga deploy counter --upgrade --network testnet --source alice           # auto-generate bindings unless --no-generate
 ```
 
-In-place upgrade requires a deployed artifact, admin `--source`, and a contract exposing `upgrade(new_wasm_hash)`. `--generate` / `--sync-env` on upgrade are opt-in (unlike full deploy). In-place WASM rollback via `caatinga rollback` is not supported yet.
+In-place: requires deployed artifact + admin `--source`. Builds by default (`--no-build` to skip). Runs `stellar contract upload` then `stellar contract invoke … upgrade --new_wasm_hash <hash>`. Updates `caatinga.artifacts.json` with `upgradeStrategy: "in-place"` and `history[].upgradeType: "in-place"`. Does **not** auto-run `wire`, `--generate`, or `--sync-env` (unlike full graph deploy).
+
+Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType: "new-contract"`). Single-contract deploy auto-generates bindings; it does **not** auto `sync-env` (only full graph deploy does, and only when `frontend.envFile` is set).
+
+**Vite / `react-vite-counter`:** the default template imports `caatinga.artifacts.json` directly (no `frontend.envFile`). After upgrade or redeploy, commit the updated artifacts — `--sync-env` applies only when `frontend.env` is configured. Use `--generate` after in-place upgrade when the contract interface changed; redeploy auto-generates unless `--no-generate`. In-place WASM rollback via `caatinga rollback` is not supported yet.
 
 ---
 
@@ -122,7 +126,7 @@ In-place upgrade requires a deployed artifact, admin `--source`, and a contract 
 | ------------------------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                                        |
 | `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
-| `caatinga upgrade <contract>`  | In-place WASM upgrade (upload + invoke `upgrade` on existing ID)         | `--network`, `--source`, `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                                     |
+| `caatinga upgrade <contract>`  | In-place WASM upgrade (auto-build, upload, invoke `upgrade --new_wasm_hash`) | `--network`, `--source` (required), `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                      |
 | `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                                  |
 | `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                              |
 | `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                                          |
@@ -175,8 +179,8 @@ Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk
 - Transient testnet failures are retried with exponential backoff.
 - `caatinga doctor` checks deploy coverage (which contracts are deployed) but **never blocks on it**, even with `--strict`. `--strict` = `--strict-env` + `--strict-bindings` only.
 - `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
-- `caatinga upgrade` replaces WASM **in-place** (same `contractId`); `deploy --upgrade` redeploys to a **new** instance with history.
-- `upgrade --if-changed` skips when local WASM hash matches the artifact (no upload/invoke).
+- `caatinga upgrade` replaces WASM **in-place** (same `contractId`; auto-builds unless `--no-build`); `deploy --upgrade` redeploys to a **new** instance with history (`--upgrade` implies `--force`).
+- `upgrade --if-changed` skips when local WASM hash matches the artifact (no upload/invoke). Default `react-vite-counter` has no `upgrade()` — use `deploy --upgrade` for that template.
 - `status --strict` exits with code `1` when any **deployed** contract has bindings other than `fresh` (canonical check after `deploy --no-generate`).
 - `ci run --strict` forwards to `doctor` only (`--strict-env` + `--strict-bindings`); it does **not** run `status --strict`.
 - Expect DSL — shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga smoke`, and `read --expect`:
@@ -546,7 +550,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 21. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars); prefer placeholders in config.
 22. **`identity export/import`** — base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`; import reads a base64 text file path.
 23. **Config graph validation (3.7.0)** — `${contracts.*.contractId}` placeholders in `deployArgs` must be listed in `dependsOn`; validated at config load, not only at deploy.
-24. **`caatinga upgrade` vs `deploy --upgrade`** — in-place preserves `contractId` and records WASM history; redeploy creates a new instance with `upgradeType: "new-contract"` history.
+24. **`caatinga upgrade` vs `deploy --upgrade`** — in-place preserves `contractId`, auto-builds, invokes `upgrade --new_wasm_hash`, records WASM history; redeploy (`--upgrade` = `--force` + history) creates a new instance with `upgradeType: "new-contract"`. Vite templates that import artifacts directly need no `--sync-env` after upgrade.
 25. **`read --summary` / `--quiet`** — compact output for large array payloads on shared testnet state.
 
 ---
@@ -607,7 +611,7 @@ my-dapp/
 ### Working on a Caatinga **project** (generated app)
 
 1. Run `caatinga doctor --network testnet --source alice` before changing deploy state.
-2. Order: `build` → `deploy` (or `upgrade` for in-place WASM) → (`generate` if `--no-generate`) → `invoke` / browser client.
+2. Order: `build` → `deploy` (or `upgrade` for in-place WASM — auto-builds) → (`generate` after in-place upgrade when ABI changed, or if deploy used `--no-generate`) → `invoke` / browser client.
 3. Parse **`CAATINGA_*` error codes**, never message text.
 4. `--source` = Stellar CLI identity alias only (`alice`), never `G...` / `S...` / seed phrase.
 5. Browser wallet flows: single-invoker until v1.0.
@@ -624,7 +628,7 @@ Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents driv
 | [Errors](./errors.md)                               | Full `CAATINGA_*` catalog with fixes                                    |
 | [CLI](./cli.md)                                     | Authoritative command reference                                         |
 | [Config](./config.md)                               | `caatinga.config.ts` schema details                                     |
-| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies (3.7.0)                         |
+| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies                                 |
 
 Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 
