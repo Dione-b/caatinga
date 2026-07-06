@@ -1,5 +1,7 @@
 # Caatinga — LLM Reference
 
+> **Quick context:** start at [`llms.txt`](../llms.txt) for identity, mental model, boundaries, and doc routing. This file and [`llms-full.txt`](../llms-full.txt) are the detailed reference.
+
 Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. It provides local, graph-aware deployment orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. It orchestrates scaffold → build → deploy → binding generation → invoke/read without requiring a mandatory on-chain registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
 
 Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/).
@@ -8,11 +10,11 @@ Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs
 
 | Item              | Value                                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` and `next` → **3.7.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| npm dist-tag      | `latest` → **3.6.1**; `next` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
 | Global install    | `npm install -g @caatinga/cli`                                                                          |
 | No global install | `npx caatinga <command>`                                                                                |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.7.0`), not a floating tag                                   |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
 | Fresh machine     | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity)               |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
 

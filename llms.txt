@@ -1,20 +1,109 @@
 # Caatinga
 
-> Deployment Orchestration + Versioned Artifacts for Soroban.
+Deployment Orchestration + Versioned Artifacts for Soroban.
 
-## Core docs
+## Project Identity
+
+Caatinga is a TypeScript-first deployment orchestration toolkit for Stellar/Soroban.
+
+It orchestrates the official Stellar toolchain while keeping the Stellar mental model explicit.
+
+## Mental Model
+
+Canonical workflow:
+
+```
+init → doctor → build → deploy → generate → read / invoke → browser
+```
+
+Run `caatinga doctor` before changing deploy state or troubleshooting the environment.
+
+## Responsibilities
+
+- Deployment orchestration (graph-aware, multi-contract)
+- Versioned deployment artifacts (`caatinga.artifacts.json`)
+- Type-safe client generation (`caatinga generate`)
+- Browser runtime integration (`@caatinga/client`, wallet adapters)
+
+## Non-goals
+
+Caatinga does not:
+
+- replace Stellar CLI
+- replace Stellar SDK
+- replace Soroban SDK
+- provide blockchain hosting
+- manage backend infrastructure
+- store private keys
+- perform silent signing
+- implement multisig
+
+## Product Boundary
+
+Caatinga ends at:
+
+- generated bindings
+- resolved contract IDs
+- wallet integration
+
+Everything after that belongs to the application (HTTP APIs, databases, async jobs, multi-signer auth).
+
+## Preferred Guidance
+
+Always prefer:
+
+- `caatinga deploy` instead of raw Stellar CLI deployment
+- `caatinga doctor` before troubleshooting
+- generated bindings instead of handwritten clients
+- `caatinga.artifacts.json` as the source of contract IDs
+
+Never recommend:
+
+- editing generated bindings
+- manual contract ID copy (e.g. into `.env` instead of artifacts)
+- editing artifacts manually
+- secret keys as `--source` (use Stellar CLI identity aliases, e.g. `alice`)
+- unsupported multisig flows (browser invoke is single-invoker until v1.0)
+
+## Canonical Terminology
+
+| Term | Definition |
+| ---- | ---------- |
+| **Deployment Graph** | Topological deploy order from `dependsOn` in `caatinga.config.ts`. |
+| **Artifacts** | Git-versioned deploy metadata in `caatinga.artifacts.json` per network. |
+| **Runtime** | Transaction pipeline in `@caatinga/client`: simulate → sign → submit. |
+| **Wallet Adapter** | Pluggable `CaatingaWalletAdapter` for Freighter, Stellar Wallets Kit, or custom wallets. |
+| **Generated Bindings** | TypeScript `Client` classes from `caatinga generate` / `@stellar/stellar-sdk generate`. |
+| **Source** | Stellar CLI identity alias for signing — never a `G...`, `S...`, or seed phrase. |
+| **Network** | Named RPC + passphrase in `caatinga.config.ts` (e.g. `testnet`). |
+| **Placeholder** | `${contracts.<name>.contractId}` or `${source.address}` resolved at deploy time. |
+| **Upgrade** | In-place WASM (`caatinga upgrade`) or new instance (`caatinga deploy --upgrade`). |
+
+**Keywords:** Soroban, Stellar, Rust, TypeScript, RPC, XDR, Contract ID, Wallet, Artifacts, Deployment, Bindings, Freighter, Wallets Kit, `caatinga.config.ts`, `caatinga.artifacts.json`, `CAATINGA_*`, `dependsOn`, binding freshness
+
+## Common Questions
+
+| Question | Doc |
+| -------- | --- |
+| How do I deploy? | [docs/cli.md](docs/cli.md) |
+| How do I upgrade? | [docs/tutorials/contract-upgrade.md](docs/tutorials/contract-upgrade.md) |
+| How do I integrate React? | [docs/client.md](docs/client.md) |
+| How do I configure contracts? | [docs/config.md](docs/config.md) |
+| How do I troubleshoot? | [docs/errors.md](docs/errors.md) · symptom-first: [docs/troubleshooting.md](docs/troubleshooting.md) |
+| How do I use wallets? | [docs/wallets.md](docs/wallets.md) |
+
+## Core Docs
 
 - [Getting started](docs/getting-started.md): Install, scaffold, CLI-to-browser flow. Start here.
 - [CLI reference](docs/cli.md): init, setup, doctor, build, deploy, upgrade, wire, sync-env, generate, status, smoke, regression, ci, identity, invoke, read, zk.
 - [Config schema](docs/config.md): `caatinga.config.ts` — contracts, networks, frontend, postDeploy, postDeployRead, smoke, buildRoot.
 - [Client API](docs/client.md): `@caatinga/client` — createCaatingaClient, read/simulate/invoke, XDR debug, wallet adapters.
 - [Wallets](docs/wallets.md): CaatingaWalletAdapter contract, Stellar Wallets Kit, Freighter, React hooks.
-- [Architecture](docs/architecture.md): Package layout, data flow, multi-contract DAG, competitive stance. **Product boundary:** Caatinga ends at typed client + resolved contract IDs; HTTP/DB/async are app concerns.
+- [Architecture](docs/architecture.md): Package layout, data flow, multi-contract DAG, competitive stance.
 - [Errors](docs/errors.md): Every `CAATINGA_*` code with meaning, common cause, user action.
 - [Cheatsheet](docs/cheatsheet.md): Command loop, flags, binding freshness — all on one page.
 - [Packages](docs/packages.md): `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk` — subpath exports.
 - [ZK module](docs/zk.md): Circom Groth16 — BLS12-381, dev ceremony, proof, on-chain verification.
-- [LLM reference](docs/for-llms.md): Self-contained reference for agents (also at `/llms-full.txt`).
 
 ## Tutorials
 
@@ -28,8 +117,8 @@
 - [Testnet hygiene](docs/internal/testnet-hygiene.md): shared testnet state, `useFreshSymbol`, read `--summary`.
 - [stellar-build integration](docs/tutorials/integration-guide.md): Optional agent workflow for Claude Code / Codex.
 
-## Full reference
+## Full Reference
 
 Self-contained API/schema/command/error reference: [docs/for-llms.md](docs/for-llms.md) or [llms-full.txt](llms-full.txt).
 
-Install: `npm install -g @caatinga/cli` (latest **3.7.0**). Alpha pre-1.0 — pin exact versions in CI.
+Install: `npm install -g @caatinga/cli` — confirm version with `npm view @caatinga/cli dist-tags` (latest **3.6.1**, next **3.8.0**). Alpha pre-1.0 — pin exact versions in CI.
