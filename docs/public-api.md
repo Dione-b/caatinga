@@ -25,7 +25,7 @@ Supported flow: `init → build → deploy → generate → invoke`
 
 All commands, flags, exit codes (`0` / `1`), and `CAATINGA_*` error codes are documented in [cli.md](./cli.md) and [errors.md](./errors.md).
 
-ZK commands (`zk-init`, `zk-build`, `zk-prove`, `zk-invoke`) are **experimental** — see [scope.md](./scope.md).
+ZK commands (`caatinga zk init`, `zk build`, `zk prove`, `zk invoke`) are **experimental** — see [scope.md](./scope.md).
 
 ### Runtime client (`@caatinga/client`)
 
@@ -74,15 +74,27 @@ All `CAATINGA_*` codes in [errors.md](./errors.md). Enforced by `error-surface.t
 
 Exported from `@caatinga/core` for power users and CI. **Additive changes are minor; removals or semantic changes are breaking.**
 
-| Area          | Symbols                                                                                                                                                                                                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Artifacts     | `writeArtifacts`, `createInitialArtifacts`, `updateArtifact`, `restoreArtifactFromHistory`, `collectDeploymentMetadata`, `migrateArtifactsToV2`, `migrateArtifactsFile`, `rollbackContractArtifact`, `CURRENT_ARTIFACTS_SCHEMA_VERSION`, `collectProjectStatus` |
-| Deployment    | `deployContract`, `deployContractGraph`, `upgradeContractInPlace`, `uploadWasm`, `buildContract`, `buildWorkspace`, `resolveDeployArgs`, `resolveDeployOrder`, `buildDependencyGraph`, `runPostDeployHooks`                                                     |
-| Bindings      | `generateBindings`, `generateBindingsGraph`, `evaluateBindingFreshness`, `evaluateBindingsFreshness`, `readBindingMarker`, `writeBindingMarker`                                                                                                                 |
-| Invoke / read | `invokeContract`, `readContract`, `estimateDeployCost`, `inspectContract`, `verifyExpect`, `runSmokeReads`                                                                                                                                                      |
-| Networks      | `resolveNetwork`, `WELL_KNOWN_NETWORKS`                                                                                                                                                                                                                         |
-| Config load   | `loadConfig`, `CaatingaConfigSchema`                                                                                                                                                                                                                            |
-| Templates     | `createProjectFromTemplate`, `TemplateManifestSchema`                                                                                                                                                                                                           |
+### Artifacts
+
+`writeArtifacts`, `createInitialArtifacts`, `updateArtifact`, `restoreArtifactFromHistory`, `collectDeploymentMetadata`, `migrateArtifactsToV2`, `migrateArtifactsFile`, `rollbackContractArtifact`, `CURRENT_ARTIFACTS_SCHEMA_VERSION`, `collectProjectStatus`
+
+### Deployment
+
+`deployContract`, `deployContractGraph`, `upgradeContractInPlace`, `uploadWasm`, `buildContract`, `buildWorkspace`, `resolveDeployArgs`, `resolveDeployOrder`, `buildDependencyGraph`, `runPostDeployHooks`
+
+### Bindings
+
+`generateBindings`, `generateBindingsGraph`, `evaluateBindingFreshness`, `evaluateBindingsFreshness`, `readBindingMarker`, `writeBindingMarker`
+
+### Invoke / read
+
+`invokeContract`, `readContract`, `estimateDeployCost`, `inspectContract`, `verifyExpect`, `runSmokeReads`
+
+### Networks / config / templates
+
+- Networks: `resolveNetwork`, `WELL_KNOWN_NETWORKS`
+- Config load: `loadConfig`, `CaatingaConfigSchema`
+- Templates: `createProjectFromTemplate`, `TemplateManifestSchema`
 
 ---
 

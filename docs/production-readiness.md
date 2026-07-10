@@ -1,6 +1,6 @@
 # Production Readiness
 
-Use this checklist before deploying to mainnet or handing a project to a production team. Caatinga v1.0 is a stable contract on npm `3.x` — pin exact versions in production CI.
+Use this checklist before deploying to mainnet or handing a project to a production team. Pin exact package versions in production CI — see [Public API](./public-api.md).
 
 ## Pre-flight checklist
 
@@ -92,5 +92,3 @@ One `caatinga.artifacts.json` per Caatinga project root. Multiple frontends (web
 
 - [Signing strategy](./signing-strategy.md)
 - [Public API](./public-api.md)
-- [Architecture — moat and boundaries](./architecture.md#competitive-moat)
-- [Case study: counter-web](./case-studies/counter-web.md)

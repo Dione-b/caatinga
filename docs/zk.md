@@ -18,7 +18,17 @@ official `groth16_verifier` pattern.
 
 ## Quick start
 
-Step-by-step walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet — ZK loop](./cheatsheet.md#zk-loop).
+```bash
+npx caatinga zk init my-zk-dapp
+cd my-zk-dapp && npm install
+npx caatinga zk build
+npx caatinga build verifier
+npx caatinga deploy verifier --network testnet --source alice
+npx caatinga zk prove
+npx caatinga zk invoke --network testnet --source alice
+```
+
+Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet — ZK loop](./cheatsheet.md#zk-loop).
 
 ## Commands
 
@@ -58,7 +68,7 @@ If you include a public output in `input.json`, `caatinga zk prove` fails with a
 
 After `caatinga zk build`, Circom emits WASM under:
 
-```
+```text
 .artifacts/zk/<circuit>/main_js/main.wasm
 ```
 
@@ -144,7 +154,10 @@ Use the default dynamic VK flow for end-to-end verification today.
 
 ## Production guardrails
 
-`caatinga zk build` always records a dev ceremony manifest (`.artifacts/zk/<circuit>/ceremony.json`).
+`caatinga zk build` always records a **single-party development ceremony**
+(`.artifacts/zk/<circuit>/ceremony.json`). Suitable for local testing only — production
+requires an external MPC powers-of-tau ceremony and audited circuit artifacts.
+
 Caatinga **blocks mainnet** operations that would use those artifacts:
 
 | Command                      | Guardrail                                                                      |
@@ -155,14 +168,6 @@ Caatinga **blocks mainnet** operations that would use those artifacts:
 
 Pass `--allow-dev-ceremony` only for conscious testing — not for production deployments.
 The CLI surfaces `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` when a guardrail trips.
-
-Production ZK still requires an **external MPC powers-of-tau ceremony** and audited circuit artifacts; Caatinga does not run MPC today.
-
-## Trusted setup warning
-
-`caatinga zk build` runs a **single-party development ceremony** by default. Suitable for local
-testing only. Production deployments require a proper MPC powers-of-tau ceremony and audited
-circuit artifacts.
 
 ## Cost reference
 

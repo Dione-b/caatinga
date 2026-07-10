@@ -75,57 +75,51 @@ When `buildRoot` is configured and `contract` is omitted, Caatinga runs a single
 `stellar contract build` from that Cargo workspace root and then resolves each configured WASM.
 Pass a contract name to keep the per-contract build behavior.
 
-## `caatinga doctor [--network testnet] [--source alice] [--all-networks] [--strict] [--strict-env] [--strict-bindings]`
+## `caatinga doctor`
 
-Checks local setup before build, deploy, generate, or invoke. It validates Node.js, Stellar CLI,
-Rust, `wasm32v1-none`, project npm dependencies (`node_modules/@caatinga/core`), `caatinga.config.ts`,
-`caatinga.artifacts.json`, an optional configured network, and an optional local Stellar CLI identity.
+Flags: `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings`
 
-With `--network`, doctor also compares every contract in `caatinga.config.ts` against
-`caatinga.artifacts.json` for that network. Each contract prints `✓` with its contract ID when
-deployed, or `✗` with a suggested `caatinga deploy` command when missing. **Deploy coverage is
-always advisory** — it never blocks exit code, even with `--strict`.
+Checks local setup before build, deploy, generate, or invoke:
 
-When the deploy coverage check passes, doctor also prints a `Bindings (<network>)` section with
-the freshness of each deployed contract's TypeScript bindings (`fresh`, `stale`, `missing`, or
-`unknown`) and a suggested `caatinga generate` command for anything not fresh. Binding freshness
-is advisory unless `--strict-bindings` or `--strict` is set.
+- Node.js, Stellar CLI, Rust, `wasm32v1-none`
+- Project npm deps (`node_modules/@caatinga/core`)
+- `caatinga.config.ts` and `caatinga.artifacts.json`
+- Optional configured network and local Stellar CLI identity
 
-`--strict` enables both `--strict-env` and `--strict-bindings`. `--strict-env` fails when
-`frontend.envFile` drifts from `caatinga.artifacts.json` (fix with `caatinga sync-env`).
-WASM drift and postDeploy alias advisories are **always advisory** — they print warnings but never
-change exit code. Doctor may also print a version matrix including `soroban-sdk` from each
-contract's `Cargo.toml`. Use `--all-networks` for a per-network deploy/bindings matrix.
+With `--network`:
 
-## `caatinga deploy [contract] --source <identity> [--network testnet] [--force] [--upgrade] [--if-changed] [--no-deps] [--verify-deps] [--no-stale-check] [--no-generate] [--no-wire] [--no-sync-env] [--allow-dev-ceremony]`
+- Compares every contract in config against artifacts (`✓` deployed / `✗` missing with suggested deploy)
+- **Deploy coverage is always advisory** — never blocks exit code, even with `--strict`
+- Prints a `Bindings (<network>)` freshness section (`fresh`, `stale`, `missing`, `unknown`)
 
-Deploys one contract (or the full configured graph when `contract` is omitted) through Stellar
-CLI and records contract IDs per network in `caatinga.artifacts.json`. Transient testnet failures
-(for example transaction submission timeouts) are retried automatically with backoff before the
-command exits with `CAATINGA_DEPLOY_FAILED`. Dependencies deploy first
-when the selected contract lists `dependsOn`, unless `--no-deps` is passed (requires a single
-contract name). Use `--force` to redeploy when an artifact already stores a contract ID.
-Use `--if-changed` to skip deploy when the local WASM hash matches the artifact (redeploy only when
-the build changed). Skipped contracts print `[skipped] unchanged` and do not call Stellar CLI.
-Pass `--verify-deps` to confirm each dependency's contract ID exists on-chain (via
-`stellar contract info interface`) before resolving deploy arguments.
+Strict flags:
 
-When a contract already has a `contractId` in `caatinga.artifacts.json` for the selected network,
-Caatinga prints `[skipped]` and does not call Stellar CLI unless `--force` is set. Newly deployed
-contracts are labeled `[deployed]` with their contract IDs.
+- `--strict` enables both `--strict-env` and `--strict-bindings`
+- `--strict-env` fails when `frontend.envFile` drifts from artifacts (fix with `caatinga sync-env`)
+- `--strict-bindings` fails when bindings are not `fresh`
+- WASM drift and postDeploy alias advisories are **always advisory**
 
-Before deploy, Caatinga compares the WASM file mtime with files under `contracts/<name>/src/` (best
-effort). If sources look newer than the WASM, it prints a **warning** and continues deploy. Use
-`--no-stale-check` to skip this check.
+Use `--all-networks` for a per-network deploy/bindings matrix. Doctor may also print a version matrix including `soroban-sdk` from each contract's `Cargo.toml`.
 
-After a successful deploy, Caatinga **automatically generates TypeScript bindings** for the
-contracts it just deployed. Pass `--no-generate` to skip (useful in CI jobs that only deploy).
-If generation fails, the deploy still succeeds (exit code `0`) — the CLI prints a warning with
-the recovery command `npx caatinga generate --network <network>`.
+## `caatinga deploy`
 
-When deploying the **full contract graph** (no `contract` argument), Caatinga also runs configured
-`postDeploy` wiring hooks (`caatinga wire`) and writes `frontend.envFile` when configured
-(`caatinga sync-env`), unless `--no-wire` or `--no-sync-env` is passed.
+Flags: `--source` (required), `--network`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony`
+
+Deploys one contract (or the full configured graph when `contract` is omitted) and records contract IDs in `caatinga.artifacts.json`. Transient testnet failures retry with backoff before `CAATINGA_DEPLOY_FAILED`.
+
+Behavior:
+
+- Dependencies deploy first when `dependsOn` is set (unless `--no-deps`, which requires a single contract name)
+- `--force` redeploys when an artifact already stores a contract ID
+- `--if-changed` skips when local WASM hash matches the artifact (`[skipped] unchanged`)
+- `--verify-deps` confirms each dependency's contract ID exists on-chain before resolving deploy args
+- Without `--force`, an existing `contractId` prints `[skipped]` and does not call Stellar CLI
+- Before deploy, Caatinga warns if sources look newer than the WASM (skip with `--no-stale-check`)
+
+After a successful deploy:
+
+- **Auto-generates TypeScript bindings** (skip with `--no-generate`). Generation failure does not fail deploy — recovery: `npx caatinga generate --network <network>`
+- Full graph deploy also runs `postDeploy` wiring (`caatinga wire`) and `sync-env` when configured (skip with `--no-wire` / `--no-sync-env`)
 
 Use `deploy --upgrade` (alias for `--force` with upgrade history reason) when you want a **new
 contract instance** and artifact history keyed by prior `contractId`. For admin-gated in-place WASM
@@ -306,7 +300,7 @@ CLI).
 ## Current limits
 
 - `--source` must be a local Stellar CLI identity alias that can sign transactions. Public `G...` addresses, secret keys, and seed phrases are rejected.
-- `caatinga dev` is reserved and hidden in pre-v1 builds. Use your frontend dev server (for example Vite) alongside `caatinga build`, `deploy`, `generate`, and `invoke`.
+- `caatinga dev` is reserved and hidden. Use your frontend dev server (for example Vite) alongside `caatinga build`, `deploy`, `generate`, and `invoke`.
 - CLI XDR commands and `caatinga generate --interop` are not implemented yet.
 
 ## Error codes
@@ -324,4 +318,4 @@ Caatinga emits public `CAATINGA_*` error codes for automation. Common examples:
 - `CAATINGA_XDR_SIGN_FAILED`
 - `CAATINGA_ZK_VERIFICATION_FAILED`
 
-See `docs/errors.md` for the full table.
+See [Errors](./errors.md) for the full table.

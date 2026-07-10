@@ -94,4 +94,3 @@ Including a public output in `input.json` causes `caatinga zk prove` to fail (fo
 
 - [ZK module](../zk.md) — command reference, library API, dynamic vs embedded VK
 - [Client](../client.md) — browser verify flows
-- [Minimal project](./minimal-project.md) — start CLI-only, then `caatinga zk init` to add ZK

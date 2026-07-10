@@ -64,15 +64,7 @@ Verifier + identity circuit only. No frontend — add UI yourself.
 
 See [Templates](../templates.md) for manifest details and package-manager notes.
 
-## Step-by-step guides
-
-- [Template project](./template-project.md) — `caatinga init` — full dApp scaffold
-- [Minimal project](./minimal-project.md) — `caatinga init --minimal` — CLI + contract only
-- [ZK project](./zk-project.md) — `caatinga zk init` — circuits, prove, on-chain verify
-
 ## Related docs
 
-- [From Zero to Testnet](./from-zero-to-testnet.md) — deep walkthrough of the default counter template on testnet
-- [Getting started](../getting-started.md) — install, browser client overview
-- [CLI](../cli.md) — every command and flag
-- [ZK module](../zk.md) — ZK command reference and library API
+- [Getting started](../getting-started.md)
+- [From Zero to Testnet](./from-zero-to-testnet.md)

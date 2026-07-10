@@ -16,7 +16,7 @@ Caatinga workspace; it is optional and not required to use Caatinga.
 ## Prerequisites
 
 - A working Caatinga project. If you do not have one yet, follow
-  [From Zero to Testnet](./from-zero-to-testnet.md) first.
+  [Getting started](../getting-started.md) first.
 - [Claude Code](https://github.com/anthropics/claude-code) or the Codex CLI installed.
 - `git`, used by party-mode to isolate subagents in worktrees.
 

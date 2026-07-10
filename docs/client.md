@@ -271,18 +271,25 @@ await session.connect(); // modal when the adapter has one, else getPublicKey()
 await session.restore(); // silent reconnect on page load — never throws
 ```
 
-## React hooks
+## React Hooks
 
 React apps (`react >= 18`, optional peer) get a provider and hook from the `react` subpath:
 
 ```tsx
 import { WalletProvider, useWallet } from "@caatinga/client/react";
 
-<WalletProvider adapter={wallet} options={{ persist: true }}>
-  <App />
-</WalletProvider>;
+export default function App() {
+  return (
+    <WalletProvider adapter={wallet} options={{ persist: true }}>
+      <Body />
+    </WalletProvider>
+  );
+}
 
-const { publicKey, connected, connecting, error, connect, disconnect, session } = useWallet();
+function Body() {
+  const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
+  // ...
+}
 ```
 
 `useWallet` is backed by `useSyncExternalStore`; `WalletProvider` restores persisted sessions on

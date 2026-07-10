@@ -60,36 +60,7 @@ npx caatinga deploy counter --network testnet --source alice --force
 
 ## Browser client
 
-After deploy:
-
-```bash
-npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
-```
-
-Browser `invoke` is single-invoker; see [Client — Single-invoker scope](../client.md#single-invoker-scope).
-
-```ts
-import { createCaatingaClient } from "@caatinga/client";
-import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
-import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
-
-const client = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
-  artifacts,
-  wallet: createStellarWalletsKitAdapter(),
-  contracts: { counter: { binding: Counter } },
-});
-
-await client.contract("counter").read<number>("get");
-await client.contract("counter").invoke<number>("increment");
-```
-
-See [Client](../client.md) and [Wallets](../wallets.md).
+After deploy, install client packages and wire `@caatinga/client` as in [Getting started — Browser client](../getting-started.md#browser-client). Full API: [Client](../client.md) and [Wallets](../wallets.md).
 
 ## Troubleshooting
 

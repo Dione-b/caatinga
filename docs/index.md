@@ -10,8 +10,8 @@ hero:
       text: Get started
       link: /getting-started
     - theme: alt
-      text: From Zero to Testnet
-      link: /tutorials/from-zero-to-testnet
+      text: Cheatsheet
+      link: /cheatsheet
     - theme: alt
       text: GitHub
       link: https://github.com/Dione-b/caatinga
@@ -39,15 +39,3 @@ features:
     link: https://github.com/Dione-b/caatinga/blob/main/llms.txt
     linkText: llms.txt
 ---
-
-::: info v1.0 stable contract
-Caatinga v1.0 is a **contract milestone** on npm major `3.x`. Pin an exact version for reproducible installs. See [Public API](/public-api) and [Troubleshooting](/troubleshooting).
-:::
-
-**Start here:** [Getting started](/getting-started) — install, scaffold, and the CLI-to-browser loop.
-
-**Optional walkthrough:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — deploy and invoke a counter on testnet after the basics.
-
-**Stuck?** Run `caatinga doctor` and check [Errors](/errors) for `CAATINGA_*` codes.
-
-**Coding agents:** read [`llms.txt`](https://github.com/Dione-b/caatinga/blob/main/llms.txt) first. Detailed reference: [for-llms](/for-llms) or [`llms-full.txt`](https://github.com/Dione-b/caatinga/blob/main/llms-full.txt).

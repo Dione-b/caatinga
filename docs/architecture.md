@@ -74,11 +74,11 @@ _Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`, `setup`),
 
 ## Validation roadmap (flows)
 
-1. **Alpha flow (current):** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
+1. **Supported v1 flow:** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
 2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then a dependent contract such as vault that injects the token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
 3. **Shipped:** upgrade / redeploy with **artifacts history** — `caatinga deploy --upgrade` (new instance) and `caatinga upgrade` (in-place WASM replacement). See [Contract upgrade](./tutorials/contract-upgrade.md).
 
-### Alpha flow diagram
+### Supported v1 flow diagram
 
 ```mermaid
 flowchart LR
@@ -293,10 +293,5 @@ Semver applies to monorepo packages **and** to serialized formats (`caatinga.art
 
 ## Related docs
 
-- [`getting-started.md`](./getting-started.md)
-- [`cli.md`](./cli.md)
-- [`client.md`](./client.md)
-- [`config.md`](./config.md)
-- [`templates.md`](./templates.md)
-- [`errors.md`](./errors.md)
-- [`testing.md`](./internal/testing.md)
+- [Getting started](./getting-started.md)
+- [Public API](./public-api.md)

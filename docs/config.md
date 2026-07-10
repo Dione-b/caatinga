@@ -94,6 +94,28 @@ Each `smoke.reads` / `postDeployRead` entry uses the same fields as `postDeploy`
 
 When `useFreshSymbol` is `true`, Caatinga adds a `symbol` argument with a fresh UUID to each smoke read so testnet writes do not reuse shared keys. See [Testnet hygiene](./internal/testnet-hygiene.md).
 
+`NetworkConfig` (each value in `networks`):
+
+| Field               | Type               | Required | Notes |
+| ------------------- | ------------------ | -------- | ----- |
+| `rpcUrl`            | string (valid URL) | yes      |       |
+| `networkPassphrase` | string (min 1)     | yes      |       |
+
+`ZkConfig` (optional root `zk` field):
+
+| Field         | Type                              | Required | Notes                      |
+| ------------- | --------------------------------- | -------- | -------------------------- |
+| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes      | at least one circuit entry |
+
+`ZkCircuitConfig` (each value in `zk.circuits`):
+
+| Field              | Type           | Required | Notes                                   |
+| ------------------ | -------------- | -------- | --------------------------------------- |
+| `path`             | string (min 1) | yes      | directory containing `.circom` files    |
+| `protocol`         | `"groth16"`    | yes      | only Groth16 supported today            |
+| `curve`            | `"bls12381"`   | yes      | only BLS12-381 supported today          |
+| `verifierContract` | string         | no       | contract name for on-chain verification |
+
 ### Example: postDeploy, postDeployRead, and smoke
 
 From the `react-vite-counter` template:
@@ -132,28 +154,6 @@ Prefer `${source.address}` over raw aliases in config. Doctor prints advisory wa
 
 Run hooks with `caatinga wire`, read checks with `caatinga smoke`, or the full `caatinga regression` pipeline — see [CLI](./cli.md).
 
-`NetworkConfig` (each value in `networks`):
-
-| Field               | Type               | Required | Notes |
-| ------------------- | ------------------ | -------- | ----- |
-| `rpcUrl`            | string (valid URL) | yes      |       |
-| `networkPassphrase` | string (min 1)     | yes      |       |
-
-`ZkConfig` (optional root `zk` field):
-
-| Field         | Type                              | Required | Notes                      |
-| ------------- | --------------------------------- | -------- | -------------------------- |
-| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes      | at least one circuit entry |
-
-`ZkCircuitConfig` (each value in `zk.circuits`):
-
-| Field              | Type           | Required | Notes                                   |
-| ------------------ | -------------- | -------- | --------------------------------------- |
-| `path`             | string (min 1) | yes      | directory containing `.circom` files    |
-| `protocol`         | `"groth16"`    | yes      | only Groth16 supported today            |
-| `curve`            | `"bls12381"`   | yes      | only BLS12-381 supported today          |
-| `verifierContract` | string         | no       | contract name for on-chain verification |
-
 ## Artifacts
 
 Artifacts are network-scoped so `counter` can have different contract IDs on testnet and mainnet.
@@ -164,8 +164,11 @@ file version without redeploying.
 admin, mobile wrapper) should import the same artifacts file and generated bindings — do not fork
 artifacts per frontend.
 
-**Multi-environment** (staging vs production on the same network) is **not** supported yet. Use git
-branches, separate Caatinga projects, or wait for a future `environments` dimension in v1.0+.
+**Multi-environment** (staging vs production on the same network) is **not** supported yet. Options:
+
+- Separate git branches
+- Separate Caatinga projects
+- Wait for a future `environments` dimension
 
 Top-level shape: `project` (string), `version` (`1` or `2`), and `networks`
 (`Record<network, { contracts, dependencyGraph }>`). New projects initialize with `version: 2`.
@@ -269,20 +272,22 @@ contracts: {
    string containing `${` must match exactly one of:
    - `${contracts.<name>.contractId}` — resolved from `caatinga.artifacts.json`
    - `${source.address}` — resolved from `stellar keys address <source>` at deploy/wire time
-     There is no `${env.*}` and no `$(...)` shell interpolation. Deploy args are data passed
-     to the Stellar CLI, not a second templating language (see
-     [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) and
-     [ADR 0006](./adr/0006-post-deploy-hooks.md)).
    - A `${...}` value that does not match throws `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`.
    - The `contractId` is read from `artifacts.networks[<network>].contracts[<name>].contractId`;
      when absent it throws `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND` (deploy the
      dependency first).
    - A placeholder still unresolved at deploy time throws
      `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`.
+
+   There is no `${env.*}` and no `$(...)` shell interpolation. Deploy args are data passed
+   to the Stellar CLI, not a second templating language (see
+   [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) and
+   [ADR 0006](./adr/0006-post-deploy-hooks.md)).
+
 3. **CLI flag derivation** (`toSnakeCaseFlag` / `formatConstructorCliArgs`): resolved
    args are passed to `stellar contract deploy` after a `--` separator. Each key is
-   converted camelCase → snake*case (insert `*`before each uppercase letter, strip a
-leading`\_`, lowercase). For example `tokenContractId`becomes`--token_contract_id`.
+   converted camelCase → snake_case (insert `_` before each uppercase letter, strip a
+   leading `_`, lowercase). For example `tokenContractId` becomes `--token_contract_id`.
 
 End-to-end: with `deployArgs: { tokenContractId: "${contracts.token.contractId}" }`,
 `token` deploys first, its `contractId` is recorded in `caatinga.artifacts.json`, and the

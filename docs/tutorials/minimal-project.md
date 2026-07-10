@@ -98,5 +98,4 @@ The `react-vite-counter` template is a full reference implementation, not a requ
 ## Next steps
 
 - [Client](../client.md) — browser interop with generated bindings
-- [Soroban types](../soroban-types.md) — Symbol vs string footguns
-- [ZK project](./zk-project.md) — add Groth16 circuits to an existing minimal project with `caatinga zk init`
+- [ZK project](./zk-project.md) — add Groth16 with `caatinga zk init`

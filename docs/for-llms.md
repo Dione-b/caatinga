@@ -2,21 +2,23 @@
 
 > **Quick context:** start at [`llms.txt`](../llms.txt) for identity, mental model, boundaries, and doc routing. This file and [`llms-full.txt`](../llms-full.txt) are the detailed reference.
 
-Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. It provides local, graph-aware deployment orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. It orchestrates scaffold → build → deploy → binding generation → invoke/read without requiring a mandatory on-chain registry. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
+Caatinga is Deployment Orchestration + Versioned Artifacts for Soroban: local, graph-aware deploy orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. Build/deploy/invoke shell out to Stellar CLI; `caatinga generate` runs `npx @stellar/stellar-sdk generate`.
 
-Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/).
+Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). Authoritative command/API detail: [CLI](./cli.md), [Config](./config.md), [Client](./client.md), [Errors](./errors.md), [Cheatsheet](./cheatsheet.md).
 
 ## Install & release
 
-| Item              | Value                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` → **3.6.1**; `next` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
-| Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
-| Global install    | `npm install -g @caatinga/cli`                                                                          |
-| No global install | `npx caatinga <command>`                                                                                |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
-| Fresh machine     | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity)               |
-| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
+| Item              | Value                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| npm dist-tag      | `latest` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. |
+| Global install    | `npm install -g @caatinga/cli`                                                            |
+| No global install | `npx caatinga <command>`                                                                  |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.8.0`), not a floating tag                     |
+| Fresh machine     | Node 22+, then `npx caatinga setup`                                                       |
+| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only              |
+
+See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-cli-version-contract.md).
 
 ## Capability limits
 
@@ -25,7 +27,7 @@ Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs
 | Official frontend templates     | Vite + React only (`vite-react`)                             |
 | `caatinga zk build`             | Single-party **dev** ceremony; blocked on mainnet by default |
 | `caatinga zk invoke --embed-vk` | Not supported (experimental)                                 |
-| Browser `invoke` via wallet     | **Single-invoker only** until v1.0                           |
+| Browser `invoke` via wallet     | **Single-invoker only**                                      |
 | Multi-signer / `signAuthEntry`  | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`            |
 | Production ZK (MPC ceremony)    | Out of scope                                                 |
 
@@ -37,322 +39,105 @@ Equivalent content available at [`/llms-full.txt`](../llms-full.txt). Human docs
 flowchart LR
   init["caatinga init"] --> build["caatinga build"]
   build --> deploy["caatinga deploy"]
-  deploy --> generate["caatinga generate<br/>(auto after deploy)"]
-  generate --> bindings["TypeScript bindings"]
-  bindings --> invoke["caatinga invoke / read"]
-  bindings --> client["@caatinga/client in browser"]
+  deploy --> generate["bindings auto"]
+  generate --> invoke["caatinga invoke / read"]
+  generate --> client["@caatinga/client"]
 ```
-
-**Minimal loop:**
 
 ```bash
 npx caatinga init my-dapp && cd my-dapp && npm install
-npx caatinga doctor --network testnet --source alice   # verify env
-npx caatinga build counter                              # compile WASM
-npx caatinga deploy counter --network testnet --source alice  # deploy + auto-generate bindings
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga read counter.get --network testnet         # read-only, no signing
-npx caatinga status --network testnet                   # deployed? bindings fresh?
-```
-
-**One-step env setup on a fresh machine:**
-
-```bash
-npx caatinga setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
-```
-
-**Multi-contract graph deploy (with postDeploy hooks and frontend env sync):**
-
-```bash
-npx caatinga deploy --network testnet --source alice    # deploy all, wire, sync-env
-```
-
-**Contract upgrade — choose strategy by contract design:**
-
-| Strategy     | Command                     | On-chain effect                                                              | `contractId`  |
-| ------------ | --------------------------- | ---------------------------------------------------------------------------- | ------------- |
-| **In-place** | `caatinga upgrade`          | Auto-build, upload WASM, invoke `upgrade --new_wasm_hash` on existing instance | **Preserved** |
-| **Redeploy** | `caatinga deploy --upgrade` | Deploy new instance (`--upgrade` implies `--force` + upgrade history)        | **New ID**    |
-
-```bash
-# In-place — contract must expose admin-gated upgrade(new_wasm_hash) (NOT the default counter template)
-npx caatinga upgrade my-contract --network testnet --source alice
-npx caatinga upgrade my-contract --if-changed --source alice --network testnet   # skip when WASM unchanged
-npx caatinga upgrade my-contract --source alice --no-build --generate          # optional: skip build / refresh bindings
-
-# Redeploy — react-vite-counter and contracts without upgrade() (e.g. default counter)
+npx caatinga doctor --network testnet --source alice
 npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice           # auto-generate bindings unless --no-generate
+npx caatinga deploy counter --network testnet --source alice
+npx caatinga invoke counter.increment --network testnet --source alice
+npx caatinga read counter.get --network testnet
+npx caatinga status --network testnet
 ```
 
-In-place: requires deployed artifact + admin `--source`. Builds by default (`--no-build` to skip). Runs `stellar contract upload` then `stellar contract invoke … upgrade --new_wasm_hash <hash>`. Updates `caatinga.artifacts.json` with `upgradeStrategy: "in-place"` and `history[].upgradeType: "in-place"`. Does **not** auto-run `wire`, `--generate`, or `--sync-env` (unlike full graph deploy).
+Fresh machine: `npx caatinga setup`. Full graph: `npx caatinga deploy --network testnet --source alice`.
 
-Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType: "new-contract"`). Single-contract deploy auto-generates bindings; it does **not** auto `sync-env` (only full graph deploy does, and only when `frontend.envFile` is set).
+| Strategy     | Command                     | `contractId`  |
+| ------------ | --------------------------- | ------------- |
+| **In-place** | `caatinga upgrade`          | **Preserved** |
+| **Redeploy** | `caatinga deploy --upgrade` | **New ID**    |
 
-**Vite / `react-vite-counter`:** the default template imports `caatinga.artifacts.json` directly (no `frontend.envFile`). After upgrade or redeploy, commit the updated artifacts — `--sync-env` applies only when `frontend.env` is configured. Use `--generate` after in-place upgrade when the contract interface changed; redeploy auto-generates unless `--no-generate`. In-place WASM rollback via `caatinga rollback` is not supported yet.
+Default `react-vite-counter` has no `upgrade()` — use `deploy --upgrade` for that template. See [Contract upgrade](./tutorials/contract-upgrade.md) and [Cheatsheet](./cheatsheet.md).
 
 ---
 
 ## 2. Package Reference
 
-| Package                                | Role                                                                  | Browser-safe         | Install command                |
-| -------------------------------------- | --------------------------------------------------------------------- | -------------------- | ------------------------------ |
-| `@caatinga/cli`                        | CLI binary (`caatinga` command)                                       | No                   | `npm install -g @caatinga/cli` |
-| `@caatinga/core`                       | Config loading, artifact I/O, Stellar CLI orchestration, shell layer  | No (use `./browser`) | — (dep of cli)                 |
-| `@caatinga/core/browser`               | Errors + artifact types only; excludes Node-only modules              | Yes                  | — (dep of client)              |
-| `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes                  | `npm install @caatinga/client` |
-| `@caatinga/client/react`               | `WalletProvider` + `useWallet` (React >=18 optional peer)             | Yes                  | (subpath of client)            |
-| `@caatinga/client/vite`                | SWK bundler helpers: `walletStubViteAliases`, `walletStubOverrides`   | Yes                  | (subpath of client)            |
-| `@caatinga/client/freighter`           | Freighter wallet adapter                                              | Yes                  | (subpath of client)            |
-| `@caatinga/client/stellar-wallets-kit` | Multi-wallet adapter (Freighter, xBull, etc.)                         | Yes                  | (subpath of client)            |
-| `@caatinga/zk`                         | ZK proof serialization, Circom Groth16 helpers                        | No (use `./browser`) | — (dep of cli)                 |
-| `@caatinga/zk/browser`                 | Browser ZK binding helpers                                            | Yes                  | (subpath of zk)                |
+| Package                                | Role                                                                  | Browser-safe |
+| -------------------------------------- | --------------------------------------------------------------------- | ------------ |
+| `@caatinga/cli`                        | CLI binary                                                            | No           |
+| `@caatinga/core`                       | Config, artifacts, Stellar CLI orchestration                          | No (`./browser` yes) |
+| `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes          |
+| `@caatinga/client/react`               | `WalletProvider` + `useWallet`                                        | Yes          |
+| `@caatinga/client/vite`                | SWK bundler stubs                                                     | Yes          |
+| `@caatinga/client/freighter`           | Freighter adapter                                                     | Yes          |
+| `@caatinga/client/stellar-wallets-kit` | Multi-wallet adapter                                                  | Yes          |
+| `@caatinga/zk` / `@caatinga/zk/browser`| ZK helpers                                                            | browser subpath |
 
 ---
 
-## 3. CLI Command Reference
+## 3. CLI — agent-critical rules
 
-### Setup & Scaffold
+Full flags and tables: [CLI](./cli.md) · [Cheatsheet](./cheatsheet.md).
 
-| Command                  | Purpose                                                          | Flags                                                                       |
-| ------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `caatinga setup`         | Install prerequisites (Rust, wasm target, Stellar CLI, identity) | `--source`, `--network`, `--skip-rust`, `--skip-stellar`, `--skip-identity` |
-| `caatinga init <dir>`    | Scaffold project from template (default: react-vite-counter)     | `-t`, `--minimal`, `--empty`                                                |
-| `caatinga zk init [dir]` | Scaffold ZK project (zk-starter)                                 | `--minimal`                                                                 |
+- `--source` = **local Stellar CLI identity alias** (`alice`), never `G...` / `S...` / seed phrase.
+- `deploy` auto-generates bindings unless `--no-generate`.
+- Full graph deploy (no contract name) auto-runs `wire` + `sync-env` unless `--no-wire` / `--no-sync-env`.
+- `doctor --strict` = `--strict-env` + `--strict-bindings` only; deploy coverage never blocks exit code.
+- `upgrade` = in-place WASM (same `contractId`); `deploy --upgrade` = new instance + history.
+- `status --strict` fails when deployed contracts have bindings other than `fresh`.
+- Expect DSL (smoke / `read --expect` / postDeploy): `reachable`, `equals`, `contains`, `matches`, `jsonEquals`, `isArray`, `isNull`, `minLength`, `maxLength` — see [CLI](./cli.md).
 
-### Build & Deploy
-
-| Command                        | Purpose                                                                  | Flags                                                                                                                                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caatinga build [contract]`    | Compile WASM with `stellar contract build`. Omit name = build all        | —                                                                                                                                                                                        |
-| `caatinga deploy [contract]`   | Deploy, record artifacts, auto-generate bindings. Omit name = full graph | `--network`, `--source`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony` |
-| `caatinga upgrade <contract>`  | In-place WASM upgrade (auto-build, upload, invoke `upgrade --new_wasm_hash`) | `--network`, `--source` (required), `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env`                                                                      |
-| `caatinga wire`                | Run `postDeploy` + `postDeployRead` hooks after deploy                   | `--network`, `--source`                                                                                                                                                                  |
-| `caatinga sync-env`            | Write `frontend.envFile` from artifacts                                  | `--network`                                                                                                                                                                              |
-| `caatinga generate [contract]` | (Re)generate TypeScript bindings. Omit name = all deployed               | `--network`, `--strict-network`                                                                                                                                                          |
-| `caatinga smoke`               | Run configured read-only smoke checks with expect DSL                    | `--network`, `--source`                                                                                                                                                                  |
-| `caatinga regression`          | Recipe: test → build → deploy --if-changed → generate → smoke            | `--network`, `--source`, `--skip-*`                                                                                                                                                      |
-| `caatinga ci run`              | CI helper: doctor → smoke                                                | `--network`, `--source`, `--strict`, `--skip-smoke`                                                                                                                                      |
-| `caatinga identity export`     | Export Stellar CLI config as base64 tarball on stdout                    | `--path`                                                                                                                                                                                 |
-| `caatinga identity import`     | Import base64 tarball file into Stellar CLI config                       | `[archive-file]`, `--path`                                                                                                                                                               |
-
-### Diagnostics & Status
-
-| Command           | Purpose                                                             | Flags                                                                                      |
-| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `caatinga doctor` | Check Node, Stellar CLI, Rust, config, artifacts, network, identity | `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings` |
-| `caatinga status` | Table of deployed contracts + binding freshness per network         | `--network`, `--json`, `--strict`                                                          |
-
-### Invocation
-
-| Command                             | Purpose                                | Flags                                                                         |
-| ----------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------- |
-| `caatinga invoke <contract.method>` | Sign + submit a state-changing call    | `--network`, `--source`, `[args...]` (aliases in named args resolved to `G…`) |
-| `caatinga read <contract.method>`   | Simulate a read-only call (no signing) | `--network`, `--source`, `--expect`, `--quiet`, `--summary`, `[args...]`      |
-
-### Artifacts & diagnostics (advanced)
-
-| Command                               | Purpose                                            | Flags                   |
-| ------------------------------------- | -------------------------------------------------- | ----------------------- |
-| `caatinga estimate deploy <contract>` | Pre-deploy fee advisory (does not submit)          | `--network`, `--source` |
-| `caatinga inspect <contract>`         | Compare local artifacts vs on-chain reachability   | `--network`             |
-| `caatinga migrate artifacts`          | Upgrade `caatinga.artifacts.json` to schema v2     | —                       |
-| `caatinga rollback <contract>`        | Restore a prior contract ID in artifacts (logical) | `--network`             |
-
-`caatinga deploy --dry-run` is an alias for `caatinga estimate deploy`.
-
-### ZK Commands
-
-| Command                        | Purpose                               | Flags                       |
-| ------------------------------ | ------------------------------------- | --------------------------- |
-| `caatinga zk build [circuit]`  | Compile Circom + dev trusted setup    | `--embed-vk` (experimental) |
-| `caatinga zk prove [circuit]`  | Generate `proof.json` + `public.json` | —                           |
-| `caatinga zk invoke [circuit]` | Call on-chain `verify_proof`          | `--source`, `--network`     |
-
-Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk`.
-
-### Important Rules
-
-- `--source` must be a **local Stellar CLI identity alias** (e.g. `alice`), never a `G...` address, secret key (`S...`), or seed phrase.
-- `caatinga deploy` auto-generates bindings unless `--no-generate` is passed.
-- Full graph deploy (no contract name) auto-runs `wire` + `sync-env` unless `--no-wire` / `--no-sync-env` is passed.
-- Transient testnet failures are retried with exponential backoff.
-- `caatinga doctor` checks deploy coverage (which contracts are deployed) but **never blocks on it**, even with `--strict`. `--strict` = `--strict-env` + `--strict-bindings` only.
-- `deploy --if-changed` skips unchanged WASM with `[skipped] unchanged`.
-- `caatinga upgrade` replaces WASM **in-place** (same `contractId`; auto-builds unless `--no-build`); `deploy --upgrade` redeploys to a **new** instance with history (`--upgrade` implies `--force`).
-- `upgrade --if-changed` skips when local WASM hash matches the artifact (no upload/invoke). Default `react-vite-counter` has no `upgrade()` — use `deploy --upgrade` for that template.
-- `status --strict` exits with code `1` when any **deployed** contract has bindings other than `fresh` (canonical check after `deploy --no-generate`).
-- `ci run --strict` forwards to `doctor` only (`--strict-env` + `--strict-bindings`); it does **not** run `status --strict`.
-- Expect DSL — shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga smoke`, and `read --expect`:
-
-| Form                                            | Example                         | Meaning                                         |
-| ----------------------------------------------- | ------------------------------- | ----------------------------------------------- |
-| Plain string                                    | `"42"` or `"${source.address}"` | Exact stdout match after placeholder resolution |
-| `{ matcher: "reachable" }`                      | default in smoke when omitted   | Non-empty stdout                                |
-| `{ matcher: "equals", value: "42" }`            | numeric/string equality         | Same as plain string                            |
-| `{ matcher: "isArray" }`                        | list payloads                   | Parsed JSON is an array                         |
-| `{ matcher: "isNull" }`                         | optional fields                 | stdout is `null` or empty                       |
-| `{ matcher: "minLength", value: 1 }`            | array checks                    | Parsed JSON array length ≥ value                |
-| `{ matcher: "maxLength", value: 10 }`           | bounded lists                   | Parsed JSON array length ≤ value                |
-| `{ matcher: "contains", value: "abc" }`         | substring                       | stdout includes value                           |
-| `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | regex                           | stdout matches pattern                          |
-| `{ matcher: "jsonEquals", value: "[1,2]" }`     | deep JSON                       | Parsed JSON deep-equals value                   |
+Core commands: `setup`, `init`, `zk init`, `build`, `deploy`, `upgrade`, `generate`, `doctor`, `status`, `invoke`, `read`, `smoke`, `regression`, `ci run`, `wire`, `sync-env`, `estimate deploy`, `inspect`, `migrate artifacts`, `rollback`, `zk build|prove|invoke`.
 
 ---
 
-## 4. Config Schema (`caatinga.config.ts`)
+## 4. Config & artifacts (summary)
+
+Authoritative schema: [Config](./config.md). Minimal shape:
 
 ```ts
 import { defineConfig } from "@caatinga/core";
 
 export default defineConfig({
-  project: "my-dapp", // required, string min 1
-  defaultNetwork: "testnet", // optional, default "testnet"
-
+  project: "my-dapp",
   contracts: {
     counter: {
-      path: "./contracts/counter", // required: contract source dir
-      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm", // required: compiled WASM
-      buildFeatures: ["--no-default-features", "--features", "testnet"], // optional: Cargo features
-      dependsOn: ["token"], // optional: contracts deployed first
-      deployArgs: {
-        // optional: constructor args; supports placeholders
-        tokenContractId: "${contracts.token.contractId}",
-      },
+      path: "./contracts/counter",
+      wasm: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
+      dependsOn: ["token"], // optional
+      deployArgs: { tokenContractId: "${contracts.token.contractId}" }, // optional
     },
   },
-
-  buildRoot: "./contracts", // optional: Cargo workspace root for single stellar contract build
-
   networks: {
     testnet: {
-      rpcUrl: "https://soroban-testnet.stellar.org", // required
-      networkPassphrase: "Test SDF Network ; September 2015", // required
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
   },
-
   frontend: {
-    framework: "vite-react", // optional, default "vite-react"
-    bindingsOutput: "./src/contracts/generated", // required if frontend is set
-    envFile: "./frontend/.env.local", // optional: written by sync-env
-    env: {
-      // optional: maps to env var names
-      counter: "VITE_COUNTER_ID",
-      "counter.wasmHash": "VITE_COUNTER_WASM_HASH", // .wasmHash suffix
-      rpcUrl: "VITE_RPC_URL",
-      networkPassphrase: "VITE_NETWORK_PASSPHRASE",
-    },
-  },
-
-  postDeploy: [
-    // optional: admin-signed invokes after full deploy
-    {
-      contract: "counter",
-      method: "initialize",
-      args: { owner: "${source.address}" },
-      kind: "invoke", // default
-      expect: { matcher: "reachable" },
-    },
-  ],
-
-  postDeployRead: [
-    // optional: simulate-only hooks (same shape as postDeploy)
-    { contract: "counter", method: "count", kind: "read", expect: { matcher: "reachable" } },
-  ],
-
-  smoke: {
-    useFreshSymbol: false, // inject ephemeral symbol arg when true
-    reads: [{ contract: "counter", method: "count", expect: { matcher: "reachable" } }],
-  },
-
-  zk: {
-    // optional: ZK circuit configuration
-    circuits: {
-      main: {
-        path: "./circuits/main",
-        protocol: "groth16",
-        curve: "bls12381",
-        verifierContract: "verifier",
-      },
-    },
+    bindingsOutput: "./src/contracts/generated",
   },
 });
 ```
 
-### Deploy args placeholder resolution
+Placeholders: `${contracts.<name>.contractId}`, `${source.address}`. Load-time validation requires `dependsOn` for every `${contracts.*.contractId}` in `deployArgs`.
 
-| Placeholder                      | Resolved to                                                    | Example                         |
-| -------------------------------- | -------------------------------------------------------------- | ------------------------------- |
-| `${contracts.<name>.contractId}` | Deployed contract ID from `caatinga.artifacts.json`            | `${contracts.token.contractId}` |
-| `${source.address}`              | Stellar CLI identity address (`stellar keys address <source>`) | `${source.address}`             |
-
-**Config load-time graph validation (3.7.0):** `loadConfig` fails fast before any command runs:
-
-- `dependsOn` entries must name configured contracts → `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`
-- Dependency cycles are rejected → `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
-- Every `${contracts.<name>.contractId}` in `deployArgs` must have `<name>` in `dependsOn` → `CAATINGA_INVALID_CONFIG`
-
-**Deploy-time resolution** happens after dependencies deploy:
-
-- Missing artifact for a dependency → `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND`
-- Placeholder still unresolved at deploy → `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
-- Malformed `${...}` syntax → `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`
-
-Deploy arg keys are converted camelCase → snake_case CLI flags (e.g. `tokenContractId` → `--token_contract_id`).
+Artifacts (`caatinga.artifacts.json`): schema **v2**, git-versioned, per-network `contractId` + `wasmHash` + optional `history`. Migrate with `caatinga migrate artifacts`. See [artifacts-spec](./artifacts-spec.md).
 
 ---
 
-## 5. Artifacts Schema (`caatinga.artifacts.json`)
+## 5. Client API (summary)
 
-```json
-{
-  "project": "my-dapp",
-  "version": 2,
-  "networks": {
-    "testnet": {
-      "contracts": {
-        "counter": {
-          "contractId": "C...",
-          "wasmHash": "...",
-          "deployedAt": "2026-01-01T00:00:00.000Z",
-          "sourcePath": "./contracts/counter",
-          "wasmPath": "./contracts/counter/target/wasm32v1-none/release/counter.wasm",
-          "dependencies": [],
-          "resolvedDeployArgs": {}
-        }
-      },
-      "dependencyGraph": {}
-    }
-  }
-}
-```
-
-### ContractArtifact fields
-
-| Field                | Type     | Required         | Notes                                      |
-| -------------------- | -------- | ---------------- | ------------------------------------------ |
-| `contractId`         | string   | yes              | On-chain deployed ID                       |
-| `wasmHash`           | string   | yes              | Hash of deployed WASM                      |
-| `deployedAt`         | ISO 8601 | yes              |                                            |
-| `sourcePath`         | string   | yes              |                                            |
-| `wasmPath`           | string   | yes              |                                            |
-| `dependencies`       | string[] | no, default `[]` | Resolved dependency contract names         |
-| `resolvedDeployArgs` | object   | no, default `{}` | Deploy args after placeholder resolution   |
-| `upgradeStrategy`    | string   | no               | `"in-place"` or `"redeploy"`               |
-| `history`            | array    | no               | Prior versions (schema v2); see config doc |
-
-History entries include `contractId`, `wasmHash`, `deployedAt`, `supersededAt`, optional `reason`, and optional `upgradeType` (`"in-place"` \| `"new-contract"`).
-
-Schema **v2** is current. v1 files are auto-readable. Run `caatinga migrate artifacts` to bump version without redeploying.
-
----
-
-## 6. Client API (`@caatinga/client`)
-
-### createCaatingaClient
+Full API: [Client](./client.md) · [Wallets](./wallets.md).
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
+import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
 import * as Counter from "./contracts/generated/counter";
 import artifacts from "../caatinga.artifacts.json";
 
@@ -363,278 +148,137 @@ const client = createCaatingaClient({
     networkPassphrase: "Test SDF Network ; September 2015",
   },
   artifacts,
-  wallet: myWalletAdapter, // CaatingaWalletAdapter
-  contracts: {
-    counter: {
-      binding: Counter, // generated binding (must export `Client`)
-      contractId: "C...", // optional: override artifacts lookup
-    },
-  },
-  walletTimeout: 30_000, // optional: ms timeout for wallet calls
+  wallet: createStellarWalletsKitAdapter(),
+  contracts: { counter: { binding: Counter } },
 });
+
+await client.contract("counter").read<number>("get");
+await client.contract("counter").invoke<number>("increment");
 ```
 
-### Contract methods
+| API          | Signs? | Submits? |
+| ------------ | ------ | -------- |
+| `read()`     | No     | No       |
+| `simulate()` | No     | No       |
+| `invoke()`   | Yes    | Yes      |
+| `buildXdr()` | No     | No       |
 
-```ts
-// Read-only — returns parsed value directly
-const value = await client.contract("counter").read<number>("get");
-
-// Simulate — returns full result with metadata
-const sim = await client.contract("counter").simulate<number>("get", { debugRaw: true });
-
-// State-changing — signs and submits
-const result = await client.contract("counter").invoke<number>("increment");
-// result = { status, contract, method, contractId, transactionHash, result? }
-
-// With args
-await client.contract("token").invoke("transfer", { to: addr, amount: 100n });
-
-// Build XDR only (no sign, no submit)
-const tx = await client.contract("counter").buildXdr("increment");
-// tx = { unsignedXdr, preparedXdr }
-
-// Debug XDR
-const result = await client.contract("counter").invoke("increment", {
-  debugXdr: true, // includes xdr.unsigned, xdr.prepared, xdr.signed
-  debugRaw: true, // includes raw binding output
-});
-```
-
-### Read vs Simulate vs Invoke
-
-| API          | Signs? | Submits? | Returns                                                        |
-| ------------ | ------ | -------- | -------------------------------------------------------------- |
-| `read()`     | No     | No       | Parsed value directly                                          |
-| `simulate()` | No     | No       | `{ status, contractId, result, raw? }`                         |
-| `invoke()`   | Yes    | Yes      | `{ status, contractId, transactionHash, result?, xdr?, raw? }` |
-
-### Wallet adapter interface
-
-```ts
-interface CaatingaWalletAdapter {
-  getPublicKey(): Promise<string>;
-  signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
-}
-```
-
-Rules:
-
-- **Must reject on user dismissal** (never leave promise pending).
-- Caatinga imposes no default timeout. Pass `walletTimeout` on config.
-
-### Wallet session (framework-agnostic)
-
-```ts
-import { createWalletSession } from "@caatinga/client";
-
-const session = createWalletSession(adapter, { persist: true });
-session.subscribe(() => render(session.getState()));
-await session.connect(); // modal when available, else getPublicKey
-await session.restore(); // silent reconnect on page load — never rejects
-await session.disconnect();
-```
-
-### React hooks
-
-```tsx
-import { WalletProvider, useWallet } from "@caatinga/client/react";
-
-<WalletProvider adapter={wallet} options={{ persist: true }}>
-  <App />
-</WalletProvider>;
-
-function App() {
-  const { publicKey, connected, connecting, error, connect, disconnect } = useWallet();
-  // ...
-}
-```
+Wallet adapters must **reject on user dismissal**. React: `WalletProvider` / `useWallet` from `@caatinga/client/react`.
 
 ---
 
-## 7. Error Codes
+## 6. Error Codes
 
-All errors use `CAATINGA_*` codes. **Automation must key on the code, never on message text.**
+Automation must key on `CAATINGA_*` codes, never message text. Full catalog: [Errors](./errors.md).
 
-### Common CLI errors
+| Code                               | Trigger                                      |
+| ---------------------------------- | -------------------------------------------- |
+| `CAATINGA_CONFIG_NOT_FOUND`        | Missing `caatinga.config.ts`                 |
+| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` not on PATH                        |
+| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts / contract record          |
+| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` passed as `--source`                  |
+| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`                  |
+| `CAATINGA_PLACEHOLDER_BINDING`     | Scaffold bindings still in use               |
+| `CAATINGA_MULTI_AUTH_REQUIRED`     | Multi-signer needed (app-owned)              |
+| `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` | Dev ceremony on mainnet without allow flag   |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)        |
 
-| Code                               | Trigger                                 |
-| ---------------------------------- | --------------------------------------- |
-| `CAATINGA_CONFIG_NOT_FOUND`        | `caatinga.config.ts` not found          |
-| `CAATINGA_INVALID_CONFIG`          | Config failed validation                |
-| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` binary not in PATH            |
-| `CAATINGA_BUILD_FAILED`            | Contract build failed (Cargo error)     |
-| `CAATINGA_DEPLOY_FAILED`           | Deploy failed (Stellar CLI error)       |
-| `CAATINGA_UPLOAD_FAILED`           | WASM upload failed (`caatinga upgrade`) |
-| `CAATINGA_WASM_HASH_NOT_FOUND`     | Upload output missing WASM hash         |
-| `CAATINGA_BINDINGS_FAILED`         | Binding generation failed               |
-| `CAATINGA_INVOKE_FAILED`           | Contract invoke failed                  |
-| `CAATINGA_CONTRACT_NOT_FOUND`      | Unknown contract name in config         |
-| `CAATINGA_NETWORK_NOT_FOUND`       | Unknown `--network` value               |
-| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts file or record        |
-| `CAATINGA_SOURCE_ACCOUNT_REQUIRED` | `--source` omitted                      |
-| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`             |
-| `CAATINGA_SOURCE_IS_SEED_PHRASE`   | Seed phrase passed as `--source`        |
-| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` address passed as `--source`     |
-| `CAATINGA_INVOKE_TARGET_INVALID`   | Target not in `contract.method` format  |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)   |
-
-### Multi-contract / dependency errors
-
-| Code                                              | Trigger                                                    |
-| ------------------------------------------------- | ---------------------------------------------------------- |
-| `CAATINGA_CONTRACT_DEPENDENCY_NOT_FOUND`          | `dependsOn` references unknown contract                    |
-| `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`              | Circular dependency detected                               |
-| `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND` | Dependency not deployed yet                                |
-| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`         | Malformed `${...}` placeholder                             |
-| `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`      | Placeholder not resolved at deploy time                    |
-| `CAATINGA_SOURCE_ADDRESS_UNRESOLVED`              | `${source.address}` used without `--source`                |
-| `CAATINGA_POST_DEPLOY_VERIFY_FAILED`              | `expect` mismatch in postDeploy, smoke, or `read --expect` |
-| `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`               | CLI alias in method arg could not be resolved              |
-| `CAATINGA_NETWORK_ARTIFACTS_MISSING`              | `generate --strict-network` with no artifacts for network  |
-
-### Client errors
-
-| Code                                   | Trigger                                          |
-| -------------------------------------- | ------------------------------------------------ |
-| `CAATINGA_CONTRACT_ARTIFACT_NOT_FOUND` | Contract not deployed on selected network        |
-| `CAATINGA_BINDING_CLIENT_NOT_FOUND`    | Generated binding missing `Client` export        |
-| `CAATINGA_BINDING_METHOD_NOT_FOUND`    | Method not found in binding                      |
-| `CAATINGA_PLACEHOLDER_BINDING`         | Still using scaffold placeholder; run `generate` |
-| `CAATINGA_WALLET_NOT_CONNECTED`        | `getPublicKey()` rejected                        |
-| `CAATINGA_WALLET_TIMEOUT`              | Wallet call exceeded `walletTimeout`             |
-| `CAATINGA_XDR_BUILD_FAILED`            | Could not build transaction XDR                  |
-| `CAATINGA_XDR_SIGN_FAILED`             | Wallet rejected signing                          |
-| `CAATINGA_XDR_SUBMIT_FAILED`           | RPC rejected submission                          |
-| `CAATINGA_READ_RESULT_MISSING`         | Simulated read returned no result                |
-| `CAATINGA_MULTI_AUTH_REQUIRED`         | Multi-signer needed; not supported until v1.0    |
-
-### ZK errors
-
-| Code                               | Trigger                                                          |
-| ---------------------------------- | ---------------------------------------------------------------- |
-| `CAATINGA_ZK_VERIFICATION_FAILED`  | On-chain verify_proof returned false                             |
-| `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` | Dev ceremony artifacts on mainnet without `--allow-dev-ceremony` |
-
-### Stellar CLI warnings (advisory, non-fatal)
-
-| Code                           | Meaning                            |
-| ------------------------------ | ---------------------------------- |
-| `STELLAR_CLI_UNTESTED_VERSION` | CLI newer than last-tested version |
-| `STELLAR_CLI_MISSING_FEATURE`  | Required feature not advertised    |
+Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 
 ---
 
-## 8. Key Gotchas & Rules
+## 7. Key Gotchas & Rules
 
 1. **`--source` must be a CLI identity alias** — never a `G...`, `S...`, or seed phrase.
 2. **Deploy auto-generates bindings** — pass `--no-generate` to skip in CI.
 3. **Full graph deploy auto-runs `wire` + `sync-env`** — pass `--no-wire` / `--no-sync-env` to skip.
-4. **Browser invoke is single-invoker only until v1.0** — multi-signer (`signAuthEntry`) is application code and throws `CAATINGA_MULTI_AUTH_REQUIRED`.
-5. **ZK on mainnet is blocked by default** — dev ceremony artifacts require `--allow-dev-ceremony` (not for production).
-6. **Fresh machine** — Install Node 22+, `caatinga setup` does the rest.
-7. **Errors are public API** — automation must parse `CAATINGA_*` codes, not message text.
+4. **Browser invoke is single-invoker only** — multi-signer throws `CAATINGA_MULTI_AUTH_REQUIRED`.
+5. **ZK on mainnet is blocked by default** — `--allow-dev-ceremony` is not for production.
+6. **Fresh machine** — Node 22+, then `caatinga setup`.
+7. **Errors are public API** — parse `CAATINGA_*` codes, not message text.
 8. **`read()` vs `invoke()`** — `read` = simulate (no sign), `invoke` = sign + submit.
 9. **Wallet adapters must reject on dismissal** — never leave promise pending.
-10. **`caatinga.artifacts.json` is git-versioned** — the artifacts file stays in your repo even if you stop using Caatinga.
-11. **Binding freshness** is tracked by `.caatinga-bindings.json` marker. States: `fresh`, `stale`, `missing`, `unknown`.
-12. **`caatinga doctor` deploy coverage is advisory** — never blocks exit code.
-13. **Stellar CLI compatibility** — hard floor 23.0.0, last tested 27.0.0. Newer versions produce advisory warnings only.
-14. **`buildRoot`** — when set, a single `stellar contract build` runs from the Cargo workspace root instead of per-contract builds.
-15. **`buildFeatures`** — passed directly to `stellar contract build` as CLI args. Combine with `--no-default-features` to override defaults. Warning when used with `buildRoot`.
-16. **`postDeploy` source override** — per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
-17. **`postDeploy` expect** — stdout verified with string equality or structural matchers. Use `postDeployRead` or `kind: "read"` for simulate-only hooks. Also applies to `caatinga smoke` and `read --expect`.
-18. **`frontend.env` suffixes** — env map keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, `.wasmPath` suffixes for artifact field sync.
-19. **`doctor --strict`** — blocks on env drift (`--strict-env`) and stale bindings (`--strict-bindings`) only; deploy coverage and WASM drift stay advisory.
-20. **`caatinga regression`** — local recipe mirroring CI: test → build → deploy --if-changed → generate → smoke.
-21. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars); prefer placeholders in config.
-22. **`identity export/import`** — base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`; import reads a base64 text file path.
-23. **Config graph validation (3.7.0)** — `${contracts.*.contractId}` placeholders in `deployArgs` must be listed in `dependsOn`; validated at config load, not only at deploy.
-24. **`caatinga upgrade` vs `deploy --upgrade`** — in-place preserves `contractId`, auto-builds, invokes `upgrade --new_wasm_hash`, records WASM history; redeploy (`--upgrade` = `--force` + history) creates a new instance with `upgradeType: "new-contract"`. Vite templates that import artifacts directly need no `--sync-env` after upgrade.
-25. **`read --summary` / `--quiet`** — compact output for large array payloads on shared testnet state.
+10. **`caatinga.artifacts.json` is git-versioned** — commit after deploy.
+11. **Binding freshness** — `fresh` / `stale` / `missing` / `unknown` via `.caatinga-bindings.json`.
+12. **`doctor` deploy coverage is advisory** — never blocks exit code.
+13. **Stellar CLI** — hard floor 23.0.0, last tested 27.0.0.
+14. **`caatinga upgrade` vs `deploy --upgrade`** — in-place preserves `contractId`; redeploy creates a new instance.
+15. **Config graph validation** — `${contracts.*.contractId}` in `deployArgs` must be listed in `dependsOn`.
+16. **`doctor --strict`** — env drift + stale bindings only.
+17. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars).
 
 ---
 
-## 9. Templates
+## 8. Templates
 
 | Template                       | Command                  | Description                                    |
 | ------------------------------ | ------------------------ | ---------------------------------------------- |
-| `react-vite-counter` (default) | `caatinga init <dir>`    | Vite + React + counter contract + wallet stubs |
-| `zk-starter`                   | `caatinga zk init <dir>` | Circom multiplier circuit + Groth16 verifier   |
-
-Minimal scaffolds (CLI-only, no frontend):
+| `react-vite-counter` (default) | `caatinga init <dir>`    | Vite + React + counter + wallet stubs          |
+| `zk-starter`                   | `caatinga zk init <dir>` | Circom multiplier + Groth16 verifier           |
 
 ```bash
-caatinga init <dir> --minimal     # Soroban contract stub
-caatinga zk init <dir> --minimal  # ZK-only with empty starter circuit
+caatinga init <dir> --minimal     # CLI-only
+caatinga zk init <dir> --minimal  # ZK-only
 ```
 
----
-
-## 10. Binding Freshness
-
-| State     | Meaning                                           | Fix                                        |
-| --------- | ------------------------------------------------- | ------------------------------------------ |
-| `fresh`   | Bindings match deployed `contractId` + `wasmHash` | —                                          |
-| `stale`   | Contract redeployed since last generate           | `caatinga generate <name> --network <net>` |
-| `missing` | No bindings on disk                               | `caatinga generate`                        |
-| `unknown` | Bindings exist but predate freshness tracking     | Regenerate once                            |
-
-Freshness tracked via `.caatinga-bindings.json` marker next to each generated binding package.
+See [Templates](./templates.md) and [Choosing a project scaffold](./tutorials/project-scaffolds.md).
 
 ---
 
-## 11. Project File Layout
+## 9. Binding Freshness
+
+| State     | Fix                                        |
+| --------- | ------------------------------------------ |
+| `fresh`   | —                                          |
+| `stale`   | `caatinga generate <name> --network <net>` |
+| `missing` | `caatinga generate`                        |
+| `unknown` | Regenerate once                            |
+
+---
+
+## 10. Project File Layout
 
 ```
 my-dapp/
-├── caatinga.config.ts           # Config: contracts, networks, frontend
-├── caatinga.artifacts.json      # Deployed contract IDs per network
-├── contracts/
-│   └── counter/                 # Soroban Rust contract
-│       ├── Cargo.toml
-│       └── src/lib.rs
-├── src/
-│   ├── contracts/generated/     # TypeScript bindings (auto-generated)
-│   │   └── counter/
-│   │       ├── src/index.ts
-│   │       └── .caatinga-bindings.json  # freshness marker
-│   ├── caatinga.ts              # Client wiring (static imports)
-│   └── App.tsx
+├── caatinga.config.ts
+├── caatinga.artifacts.json
+├── contracts/counter/
+├── src/contracts/generated/counter/
+├── src/caatinga.ts
 └── package.json
 ```
 
 ---
 
-## 12. Agent guidance
+## 11. Agent guidance
 
 ### Working on a Caatinga **project** (generated app)
 
 1. Run `caatinga doctor --network testnet --source alice` before changing deploy state.
-2. Order: `build` → `deploy` (or `upgrade` for in-place WASM — auto-builds) → (`generate` after in-place upgrade when ABI changed, or if deploy used `--no-generate`) → `invoke` / browser client.
+2. Order: `build` → `deploy` (or `upgrade` for in-place) → `generate` if needed → `invoke` / browser client.
 3. Parse **`CAATINGA_*` error codes**, never message text.
-4. `--source` = Stellar CLI identity alias only (`alice`), never `G...` / `S...` / seed phrase.
-5. Browser wallet flows: single-invoker until v1.0.
+4. `--source` = Stellar CLI identity alias only.
+5. Browser wallet flows: **single-invoker only**.
 
-Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents drive Caatinga commands from Claude Code or Codex — see [Integration guide](./tutorials/integration-guide.md).
+Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents: [Integration guide](./tutorials/integration-guide.md).
 
 ### Working on the **Caatinga monorepo**
 
-| Doc                                                 | Use when                                                                |
-| --------------------------------------------------- | ----------------------------------------------------------------------- |
-| [AGENTS.md](../AGENTS.md)                           | Repo layout, build/test commands, version alignment, template overrides |
-| [CONTRIBUTING.md](../CONTRIBUTING.md)               | PR expectations, commit style, compatibility contracts                  |
-| [Architecture](./architecture.md)                   | Product stance, Caatinga vs Scaffold Stellar                            |
-| [Errors](./errors.md)                               | Full `CAATINGA_*` catalog with fixes                                    |
-| [CLI](./cli.md)                                     | Authoritative command reference                                         |
-| [Config](./config.md)                               | `caatinga.config.ts` schema details                                     |
-| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy upgrade strategies                                 |
+| Doc                                   | Use when                                      |
+| ------------------------------------- | --------------------------------------------- |
+| [AGENTS.md](../AGENTS.md)             | Repo layout, build/test, version alignment    |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, compatibility contracts      |
+| [Architecture](./architecture.md)     | Product stance                                |
+| [Errors](./errors.md)                 | Full `CAATINGA_*` catalog                     |
+| [CLI](./cli.md)                       | Authoritative command reference               |
+| [Config](./config.md)                 | `caatinga.config.ts` schema                   |
+| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy                 |
 
-Monorepo dev: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
+Monorepo: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 
 ### Public contracts (do not break without migration note)
 
 - `caatinga.artifacts.json` schema
 - `caatinga.config.ts` shape
 - `CaatingaErrorCode` values
-- Documented CLI commands, flags, and package `exports`
+- Published package exports (`@caatinga/cli`, `client`, `core`, `zk`)

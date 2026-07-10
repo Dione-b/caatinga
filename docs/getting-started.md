@@ -1,7 +1,5 @@
 # Getting Started
 
-Caatinga v1.0 is a **stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. Browser wallet `invoke` is **single-invoker**; multi-auth is application-owned (`CAATINGA_MULTI_AUTH_REQUIRED`). See [Public API](./public-api.md).
-
 ## Prerequisites
 
 - Node.js 22+
@@ -24,7 +22,7 @@ See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip
 npm install -g @caatinga/cli
 ```
 
-Use `npx caatinga` instead of a global install if you prefer.
+Use `npx caatinga` instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
 
 From the repository:
 

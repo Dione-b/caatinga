@@ -62,5 +62,4 @@ See [Testing — CI without local secrets](./internal/testing.md).
 ## Related docs
 
 - [Production readiness](./production-readiness.md)
-- [CLI reference](./cli.md)
 - [Errors — source codes](./errors.md)

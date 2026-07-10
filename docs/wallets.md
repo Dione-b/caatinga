@@ -201,6 +201,7 @@ into your own app.
 `@caatinga/client/vite` exports reusable helpers so you do not copy 15+ lines of overrides by hand:
 
 ```ts
+import { defineConfig } from "vite";
 import {
   walletStubViteAliases,
   walletStubOverrides,
@@ -210,17 +211,15 @@ import { fileURLToPath } from "node:url";
 
 const stubsDir = fileURLToPath(new URL("./src/stubs", import.meta.url));
 
-// vite.config.ts
 export default defineConfig({
   resolve: { alias: walletStubViteAliases(stubsDir) },
 });
-
-// package.json → overrides (npm)
-// walletStubOverrides("./src/stubs")
-
-// pnpm-workspace.yaml
-// walletStubPnpmWorkspaceYaml()
 ```
+
+Also apply install overrides:
+
+- npm `package.json`: merge `walletStubOverrides("./src/stubs")` into `overrides`
+- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`
 
 Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `caatinga init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
 
@@ -232,12 +231,19 @@ the module out of the wallet list; additionally alias `@hot-wallet/sdk` to a stu
 so the NEAR chain is never bundled:
 
 ```ts
-// vite.config.ts
-resolve: {
-  alias: {
-    "@hot-wallet/sdk": path.resolve(__dirname, "src/stubs/hot-wallet.ts")
-  }
-}
+import { defineConfig } from "vite";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@hot-wallet/sdk": path.resolve(__dirname, "src/stubs/hot-wallet.ts"),
+    },
+  },
+});
 ```
 
 ### Trezor / HOT npm overrides
