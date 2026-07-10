@@ -21,11 +21,11 @@ official `groth16_verifier` pattern.
 ```bash
 npx caatinga zk init my-zk-dapp
 cd my-zk-dapp && npm install
-npx caatinga zk build
+npx caatinga zk build main
 npx caatinga build verifier
 npx caatinga deploy verifier --network testnet --source alice
-npx caatinga zk prove
-npx caatinga zk invoke --network testnet --source alice
+npx caatinga zk prove main
+npx caatinga zk invoke main --network testnet --source alice
 ```
 
 Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet — ZK loop](./cheatsheet.md#zk-loop).

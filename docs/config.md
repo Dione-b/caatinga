@@ -124,7 +124,7 @@ From the `react-vite-counter` template:
 postDeployRead: [
   {
     contract: "counter",
-    method: "count",
+    method: "get",
     kind: "read",
     args: {},
     expect: { matcher: "reachable" },
@@ -135,7 +135,7 @@ smoke: {
   reads: [
     {
       contract: "counter",
-      method: "count",
+      method: "get",
       expect: { matcher: "reachable" },
     },
   ],

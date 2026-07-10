@@ -262,7 +262,7 @@ Shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga read --expect
 CLI usage:
 
 ```bash
-npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
+npx caatinga read counter.get --network testnet --expect '{"matcher":"reachable"}'
 npx caatinga read token.list --network testnet --expect '{"matcher":"isArray"}' --summary
 ```
 

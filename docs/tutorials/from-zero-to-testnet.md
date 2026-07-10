@@ -47,7 +47,7 @@ npx caatinga deploy counter --network testnet --source alice
 npx caatinga invoke counter.increment --network testnet --source alice
 npx caatinga status --network testnet
 npx caatinga smoke --network testnet --source alice
-npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
+npx caatinga read counter.get --network testnet --expect '{"matcher":"reachable"}'
 ```
 
 `deploy` writes the `contractId` to `caatinga.artifacts.json` and auto-generates TypeScript bindings. Pass `--no-generate` to skip; recover with `npx caatinga generate --network testnet`.

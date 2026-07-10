@@ -54,7 +54,7 @@ npx caatinga build verifier
 npx caatinga zk build main
 npx caatinga deploy verifier --network testnet --source alice
 npx caatinga zk prove main
-npx caatinga zk invoke --source alice
+npx caatinga zk invoke main --network testnet --source alice
 ```
 
 Step by step:
@@ -63,7 +63,7 @@ Step by step:
 2. **`zk build main`** — compile Circom (`-p bls12381`) and run **dev** trusted setup (not for production); artifacts land in `.artifacts/zk/main/`
 3. **`deploy verifier`** — record verifier `contractId` in `caatinga.artifacts.json`
 4. **`zk prove main`** — generate `proof.json` and `public.json` from `circuits/input.json`
-5. **`zk invoke`** — serialize proof data and call `verify_proof` on-chain
+5. **`zk invoke main`** — serialize proof data and call `verify_proof` on-chain (using `--network testnet`)
 
 ## Template vs minimal
 
