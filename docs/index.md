@@ -18,11 +18,11 @@ hero:
 
 features:
   - title: Quick start
-    details: Scaffold with npx, install dependencies, verify with doctor on testnet. Pin an exact version for reproducible installs.
+    details: Install, scaffold, and run the CLI loop. Pin an exact npm version for reproducible installs.
     link: /getting-started
-    linkText: Full guide
+    linkText: Getting started
   - title: Template dApp
-    details: Vite + React scaffold with wallet stubs and bindings placeholder. See the Template project guide.
+    details: Vite + React scaffold with wallet stubs and bindings placeholder.
     link: /tutorials/template-project
   - title: Minimal / CLI-first
     details: Soroban contract and CLI workflow only — add your own UI stack later with @caatinga/client.
@@ -30,12 +30,12 @@ features:
   - title: ZK workflow
     details: Circom + Groth16 verifier on Soroban. Use zk-starter for an end-to-end demo with UI.
     link: /tutorials/zk-project
-  - title: stellar-build integration
-    details: Drive the Caatinga lifecycle from Claude Code or Codex with stellar-build agents. Optional — see the Integration guide.
-    link: /tutorials/integration-guide
-    linkText: Integration guide
+  - title: Command reference
+    details: The whole Caatinga loop on one page — init, build, deploy, generate, status.
+    link: /cheatsheet
+    linkText: Cheatsheet
   - title: LLM / agent primer
-    details: Start at /llms.txt for identity, workflow, boundaries, and doc routing. Full API reference at /llms-full.txt.
+    details: Start at /llms.txt for identity, workflow, boundaries, and doc routing.
     link: https://github.com/Dione-b/caatinga/blob/main/llms.txt
     linkText: llms.txt
 ---
@@ -44,8 +44,10 @@ features:
 Caatinga v1.0 is a **contract milestone** on npm major `3.x`. Pin an exact version for reproducible installs. See [Public API](/public-api) and [Troubleshooting](/troubleshooting).
 :::
 
-**Recommended path for new users:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — scaffold, deploy, and invoke a counter on testnet.
+**Start here:** [Getting started](/getting-started) — install, scaffold, and the CLI-to-browser loop.
+
+**Optional walkthrough:** [From Zero to Testnet](/tutorials/from-zero-to-testnet) — deploy and invoke a counter on testnet after the basics.
 
 **Stuck?** Run `caatinga doctor` and check [Errors](/errors) for `CAATINGA_*` codes.
 
-**Coding agents:** read [`llms.txt`](https://github.com/Dione-b/caatinga/blob/main/llms.txt) first (identity, mental model, non-goals, preferred guidance). Detailed reference: [for-llms](/for-llms) or [`llms-full.txt`](https://github.com/Dione-b/caatinga/blob/main/llms-full.txt).
+**Coding agents:** read [`llms.txt`](https://github.com/Dione-b/caatinga/blob/main/llms.txt) first. Detailed reference: [for-llms](/for-llms) or [`llms-full.txt`](https://github.com/Dione-b/caatinga/blob/main/llms-full.txt).

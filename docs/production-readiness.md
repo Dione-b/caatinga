@@ -1,6 +1,6 @@
 # Production Readiness
 
-Caatinga is **alpha software**. Use this checklist before deploying to mainnet or handing a project to a production team.
+Use this checklist before deploying to mainnet or handing a project to a production team. Caatinga v1.0 is a stable contract on npm `3.x` — pin exact versions in production CI.
 
 ## Pre-flight checklist
 
@@ -21,7 +21,7 @@ Run through each item; `caatinga doctor` covers several automatically.
 | 9   | Stellar CLI and SDK versions pinned in CI           | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md) |
 | 9b  | CI identity exported and rotated safely             | `caatinga identity export` → `CAATINGA_CI_STELLAR_CONFIG_B64` (see [Testing](./internal/testing.md))         |
 | 10  | Upgrade/rollback plan understood                    | [Contract upgrade](./tutorials/contract-upgrade.md)                                                          |
-| 10b | Deploy regression workflow green on testnet         | `caatinga regression` or `.github/workflows/testnet-deploy-regression.yml`                                   |
+| 10b | Deploy regression workflow green on testnet           | `caatinga regression` or `.github/workflows/testnet-deploy-regression.yml`                                   |
 
 ## What Caatinga provides today
 
@@ -33,7 +33,7 @@ Run through each item; `caatinga doctor` covers several automatically.
 - **In-place upgrade:** `caatinga upgrade <contract>` — upload WASM + invoke admin-gated `upgrade()`; preserves `contractId`. See [Contract upgrade](./tutorials/contract-upgrade.md).
 - **Rollback (logical):** `caatinga rollback <contract> --to <contractId>` — restore artifact entry after **redeploy** upgrades (on-chain orphan warning applies). In-place WASM rollback is not supported yet.
 
-## What Caatinga does not provide (alpha)
+## What Caatinga does not provide
 
 - Automatic on-chain rollback or contract deletion.
 - KMS, hardware wallet, or backend signing integration.
@@ -88,12 +88,9 @@ flowchart TD
 
 One `caatinga.artifacts.json` per Caatinga project root. Multiple frontends (web, mobile wrapper, admin panel) should import the same artifacts file and generated bindings — do not fork artifacts per app.
 
-## semver note
-
-Caatinga is pre-1.0. APIs may change between minor versions. Pin exact versions in production CI.
-
 ## Related docs
 
 - [Signing strategy](./signing-strategy.md)
+- [Public API](./public-api.md)
 - [Architecture — moat and boundaries](./architecture.md#competitive-moat)
 - [Case study: counter-web](./case-studies/counter-web.md)

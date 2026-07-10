@@ -85,7 +85,7 @@ prompt phrasing as a starting point; every command is documented in the [CLI ref
 See the [CLI reference](../cli.md) for `status` and `generate`.
 
 **`CAATINGA_MULTI_AUTH_REQUIRED`.** A contract invoke that needs non-invoker signatures
-raises this error. Multi-signer (`signAuthEntry`) orchestration is not supported in
-`@caatinga/client` until v1.0. Refactor the flow to a single-invoker design, or handle the
+raises this error. Multi-signer (`signAuthEntry`) orchestration is application-owned in
+`@caatinga/client`. Refactor the flow to a single-invoker design, or handle the
 extra signatures in application code. See [Errors](../errors.md) and
 [Signing strategy](../signing-strategy.md).

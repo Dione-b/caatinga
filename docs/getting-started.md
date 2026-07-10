@@ -1,52 +1,39 @@
 # Getting Started
 
-Caatinga alpha supports the CLI path first, then optional browser/client integration through `@caatinga/client` (single-invoker wallet signing until v1.0).
-
-Install published packages from npm. Pin an exact version in apps when you need reproducibility.
+Caatinga v1.0 is a **stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. Browser wallet `invoke` is **single-invoker**; multi-auth is application-owned (`CAATINGA_MULTI_AUTH_REQUIRED`). See [Public API](./public-api.md).
 
 ## Prerequisites
 
 - Node.js 22+
-- pnpm 9+ for repository development
-- Rust 1.84.0 or newer with the wasm32v1-none target.
-- Stellar CLI
-- A local Stellar CLI identity for CLI deploy/invoke, for example `alice`
-- Optional: Freighter or another wallet adapter for browser-side `@caatinga/client` calls
+- Rust 1.84.0+ with the `wasm32v1-none` target
+- Stellar CLI 23.0.0+ (27.0.0 recommended)
+- A local Stellar CLI identity for deploy/invoke (e.g. `alice`)
+- Optional: Freighter or Stellar Wallets Kit for browser `@caatinga/client` calls
 
-On a fresh machine, install everything above (except Node.js) in one step with `caatinga setup` — it
-detects what's missing and installs only that, then creates a funded local identity. See [system dependencies for Linux](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) when Stellar CLI must compile from source.
+On a fresh machine, run `caatinga setup` to install missing tools and fund a testnet identity:
 
 ```bash
-npx caatinga setup                 # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
+npx caatinga setup   # Rust + wasm target + Stellar CLI + funded `alice` on testnet
 ```
 
-See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) for flags and behavior. To verify an existing environment instead, run the dependency checks manually:
+See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) for flags. To verify an existing environment: `rustc --version`, `rustup target add wasm32v1-none`, `stellar --version`.
 
-```bash
-rustc --version
-rustup target add wasm32v1-none
-stellar --version
-```
-
-## Install from npm
+## Install
 
 ```bash
 npm install -g @caatinga/cli
 ```
 
-Without a global CLI install, use `npx caatinga` in the commands below.
+Use `npx caatinga` instead of a global install if you prefer.
 
-## From the repository
+From the repository:
 
 ```bash
-pnpm install
-pnpm build
+pnpm install && pnpm build
 pnpm --filter @caatinga/cli dev init my-dapp
 ```
 
 ## Choose your scaffold
-
-Caatinga supports three starting paths: **template** (full dApp), **minimal** (CLI + contract only), and **ZK** (Circom + Groth16 verifier). See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a comparison table and links to step-by-step guides:
 
 | Guide                                               | Command                                       |
 | --------------------------------------------------- | --------------------------------------------- |
@@ -54,59 +41,39 @@ Caatinga supports three starting paths: **template** (full dApp), **minimal** (C
 | [Minimal project](./tutorials/minimal-project.md)   | `npx caatinga init my-contract-app --minimal` |
 | [ZK project](./tutorials/zk-project.md)             | `npx caatinga zk init my-zk-dapp`             |
 
-The default template flow (`react-vite-counter`) is summarized below. Minimal and ZK flows are documented in their dedicated guides.
+See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a comparison table.
 
-## Generated app flow
+## CLI loop
 
-After `caatinga init` (global CLI) or `npx caatinga init`:
+After `init` and `npm install`:
 
 ```bash
-cd my-dapp
-npm install
+npx caatinga doctor --network testnet --source alice
 npx caatinga build counter
 npx caatinga deploy counter --network testnet --source alice
 npx caatinga status --network testnet
+npx caatinga read counter.get --network testnet
 npx caatinga invoke counter.increment --network testnet --source alice
 ```
 
-For read-only calls (getters, pure queries), use `read` instead of `invoke` — it simulates without signing or submitting:
+- **`build`** — compiles WASM only
+- **`deploy`** — writes `contractId` to `caatinga.artifacts.json` and auto-generates bindings (pass `--no-generate` to skip)
+- **`read`** — simulate read-only methods without signing
+- **`invoke`** — state-changing calls from the CLI
 
-```bash
-npx caatinga read counter.get --network testnet
-npx caatinga read counter.count --network testnet --expect '{"matcher":"reachable"}'
-npx caatinga smoke --network testnet --source alice   # checks from caatinga.config.ts smoke.reads
-```
+Use `--source` with a local Stellar CLI identity alias, not a public `G...` address. If bindings generation fails: `npx caatinga generate --network testnet`.
 
-After deploy, `caatinga smoke` runs configured read checks with the same expect DSL as `postDeploy`.
-For CI, use `caatinga regression` (full pipeline) or `caatinga ci run` (doctor + smoke). See
-[Cheatsheet — CI and regression](./cheatsheet.md#ci-and-regression) and
-[Testnet hygiene](./internal/testnet-hygiene.md).
+For CI: `caatinga smoke`, `caatinga regression`, or `caatinga ci run`. See [Cheatsheet](./cheatsheet.md).
 
-Run the CLI steps in order: `build` → `deploy` → `invoke` (or `npm run dev` / `pnpm dev` after
-deploy). `deploy` requires compiled WASM, writes the deployed `contractId` into
-`caatinga.artifacts.json`, and **generates TypeScript bindings automatically** (pass
-`--no-generate` to skip). `status` shows what's deployed and whether bindings are fresh.
+**Optional walkthrough:** [From Zero to Testnet](./tutorials/from-zero-to-testnet.md) — expected `doctor` output and testnet troubleshooting.
 
-`build` only compiles the WASM file. `deploy` is the step that writes the deployed `contractId` into `caatinga.artifacts.json`; browser clients and generated bindings need that contract ID before they can call the contract.
+## Browser client
 
-If bindings generation fails after a deploy (or you skipped it), recover with
-`npx caatinga generate --network testnet`.
-
-Use a local Stellar CLI identity alias for `--source`. Public `G...` addresses, secret keys, and seed phrases are rejected because deploy and invoke need a signer.
-
-Template projects support `pnpm install` as well as npm — see [Templates — pnpm](./templates.md#pnpm-1026--11x).
-
-## Browser client flow
-
-> **Single-invoker only until v1.0:** `@caatinga/client` wallet `invoke` supports one signing invoker. Multi-signer / `signAuthEntry` flows are application code today (`CAATINGA_MULTI_AUTH_REQUIRED`). See [Client — Single-invoker scope](./client.md#single-invoker-scope-until-v10).
-
-After `deploy` (which generates the bindings), install the client packages (match the CLI version when possible):
+After deploy, install client packages (match the CLI version when possible):
 
 ```bash
 npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
 ```
-
-Register the generated bindings with `@caatinga/client`:
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
@@ -125,19 +92,8 @@ const client = createCaatingaClient({
   contracts: { counter: { binding: Counter } },
 });
 
-const before = await client.contract("counter").read<number>("get");
-const increment = await client.contract("counter").invoke<number>("increment");
+await client.contract("counter").read<number>("get");
+await client.contract("counter").invoke<number>("increment");
 ```
 
-For `debugXdr`, `buildXdr()`, the wallet adapter contract, and the full binding shape Caatinga expects, see [Client](./client.md). React apps can skip hand-rolled wallet state with
-`WalletProvider`/`useWallet` from `@caatinga/client/react` — see [Wallets](./wallets.md).
-
-Default local checks:
-
-```bash
-pnpm typecheck
-pnpm build
-pnpm test
-```
-
-See [`client.md`](./client.md) for the client contract and debug behavior. For CLI capability limits, see [Supported today vs not yet](./cli.md#supported-today-vs-not-yet).
+See [Client](./client.md) and [Wallets](./wallets.md). React apps can use `WalletProvider` / `useWallet` from `@caatinga/client/react`.

@@ -1,8 +1,6 @@
 # Template Project
 
-Use `caatinga init` when you want a full Soroban dApp scaffold with frontend, wallet wiring, and TypeScript binding placeholders.
-
-Not sure this is the right path? See [Choosing a project scaffold](./project-scaffolds.md).
+Full Soroban dApp scaffold with Vite + React, wallet wiring, and binding placeholders. Not sure this is the right path? See [Choosing a project scaffold](./project-scaffolds.md).
 
 ## When to use
 
@@ -88,7 +86,6 @@ The template ships npm `overrides` and optional `pnpm-workspace.yaml` blocks (**
 
 ## Next steps
 
-- [From Zero to Testnet](./from-zero-to-testnet.md) — full testnet walkthrough with expected `doctor` output
+- [Getting started](../getting-started.md) — install and CLI loop
 - [Templates](../templates.md) — official template list and manifest schema
-- [Client](../client.md) — `read`, `simulate`, `invoke`, XDR debug
-- [Wallets](../wallets.md) — adapter contract, `WalletProvider`, bundler stubs
+- [Client](../client.md) · [Wallets](../wallets.md)

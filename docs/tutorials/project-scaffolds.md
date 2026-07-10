@@ -4,44 +4,71 @@ Caatinga offers three ways to start a new project. Pick the path that matches ho
 
 Install the CLI and prerequisites first — see [Getting started — Prerequisites](../getting-started.md#prerequisites).
 
-## Quick comparison
+## Which path?
 
-| Path            | Command                            | Frontend           | Soroban contract       | ZK (Circom/Groth16)      | Best for                                |
-| --------------- | ---------------------------------- | ------------------ | ---------------------- | ------------------------ | --------------------------------------- |
-| **Template**    | `caatinga init <dir>`              | Yes (Vite + React) | Yes (template default) | No                       | First dApp, wallet + bindings pre-wired |
-| **Minimal**     | `caatinga init <dir> --minimal`    | No                 | Yes (`app` stub)       | No                       | CLI-first; you pick the UI stack later  |
-| **ZK template** | `caatinga zk init <dir>`           | Yes (`zk-starter`) | Verifier contract      | Yes (multiplier example) | ZK dApp with hybrid CLI + browser flow  |
-| **ZK minimal**  | `caatinga zk init <dir> --minimal` | No                 | Verifier contract      | Yes (identity circuit)   | ZK toolchain only; add UI yourself      |
+- Need a browser UI on day one? → **Template** or **ZK template**
+- CLI + contract only? → **Minimal**
+- Need Groth16 proofs on Soroban? → **ZK template** or **ZK minimal**
 
-Aliases:
+## Paths
+
+### Template
+
+```bash
+caatinga init <dir>
+```
+
+Vite + React, wallet and bindings pre-wired. No ZK.
+
+→ [Template project](./template-project.md)
+
+### Minimal
+
+```bash
+caatinga init <dir> --minimal
+```
+
+CLI + `app` stub only. You pick the UI stack later.
+
+→ [Minimal project](./minimal-project.md)
+
+### ZK template
+
+```bash
+caatinga zk init <dir>
+```
+
+`zk-starter`: Vite UI + verifier contract + multiplier circuit. Hybrid CLI + browser flow.
+
+→ [ZK project](./zk-project.md)
+
+### ZK minimal
+
+```bash
+caatinga zk init <dir> --minimal
+```
+
+Verifier + identity circuit only. No frontend — add UI yourself.
+
+→ [ZK project](./zk-project.md)
+
+## Aliases
 
 - `caatinga init --empty` is the same as `--minimal`.
 - `caatinga zk init` with **no** project name adds ZK files to the **current** directory (see [ZK project](./zk-project.md#add-zk-to-an-existing-project)).
 
-## Decision guide
-
-**Choose a template** when you want a working Vite + React browser dApp with a single-invoker wallet path — wallet modal, placeholder bindings, Vite dev server, and wallet SDK stubs already configured. Official Caatinga templates are **Vite + React only** (`vite-react`). Start with `react-vite-counter`.
-
-**Choose minimal** when you want a Soroban contract and CLI workflow without committing to a frontend stack. You deploy and read from the terminal first, then wire `@caatinga/client` when you are ready (any UI framework).
-
-**Choose ZK** when you need Groth16 proofs verified on Soroban (BLS12-381). Use the `zk-starter` template for an end-to-end multiplier demo with UI, or `zk init --minimal` for circuits + verifier only.
-
 ## Official templates
 
-| Template                       | Command                           | Status                                     |
-| ------------------------------ | --------------------------------- | ------------------------------------------ |
-| `react-vite-counter` (default) | `npx caatinga init my-dapp`       | Stable — recommended for first walkthrough |
-| `zk-starter`                   | `npx caatinga zk init my-zk-dapp` | Stable ZK example with Vite + React shell  |
+- **`react-vite-counter`** (default) — `npx caatinga init my-dapp` — stable; recommended for the first walkthrough
+- **`zk-starter`** — `npx caatinga zk init my-zk-dapp` — stable ZK example with Vite + React shell
 
 See [Templates](../templates.md) for manifest details and package-manager notes.
 
 ## Step-by-step guides
 
-| Guide                                     | What it covers                                        |
-| ----------------------------------------- | ----------------------------------------------------- |
-| [Template project](./template-project.md) | `caatinga init` — full dApp scaffold                  |
-| [Minimal project](./minimal-project.md)   | `caatinga init --minimal` — CLI + contract only       |
-| [ZK project](./zk-project.md)             | `caatinga zk init` — circuits, prove, on-chain verify |
+- [Template project](./template-project.md) — `caatinga init` — full dApp scaffold
+- [Minimal project](./minimal-project.md) — `caatinga init --minimal` — CLI + contract only
+- [ZK project](./zk-project.md) — `caatinga zk init` — circuits, prove, on-chain verify
 
 ## Related docs
 

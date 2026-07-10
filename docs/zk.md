@@ -18,30 +18,7 @@ official `groth16_verifier` pattern.
 
 ## Quick start
 
-For a step-by-step tutorial, see [ZK project](./tutorials/zk-project.md). Command reference and library API remain in this document.
-
-```bash
-# New ZK project with the example multiplier template
-caatinga zk init my-zk-dapp
-
-# New ZK-only project with an empty starter circuit
-caatinga zk init my-zk-dapp --minimal
-
-# Or add ZK files to an existing project
-caatinga zk init
-
-cd my-zk-dapp
-npm install
-
-# Build Soroban verifier + Circom circuit trusted setup
-caatinga build
-caatinga zk build
-
-# Deploy and prove
-caatinga deploy verifier --network testnet --source <identity>
-caatinga zk prove
-caatinga zk invoke --source <identity>
-```
+Step-by-step walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet — ZK loop](./cheatsheet.md#zk-loop).
 
 ## Commands
 
@@ -62,27 +39,11 @@ Artifacts land in `.artifacts/zk/<circuit>/`.
 
 ## Minimal scaffold vs template
 
-Use `caatinga zk init my-zk-dapp` when you want a working multiplier example with an interactive
-Vite + React shell (circuit inputs, wallet verify, placeholder bindings). Use
-`caatinga zk init my-zk-dapp --minimal` when you want a ZK-only starting point: no frontend config,
-no Vite files, and a `template Main()` circuit that simply exposes one output.
-
-Both flows keep the same conventions: `circuits/main.circom`, `circuits/input.json`,
-`contracts.verifier`, and artifacts under `.artifacts/zk/main/`.
+See [ZK project tutorial](./tutorials/zk-project.md#template-vs-minimal) for the comparison table.
 
 ## Browser + CLI hybrid (`zk-starter`)
 
-The default template frontend follows the same wallet-driven pattern as `react-vite-counter`:
-
-1. Set circuit inputs in the UI and download `input.json`
-2. Save it to `circuits/input.json`
-3. Run `caatinga zk prove main` (CLI)
-4. Connect a wallet and simulate `verify_proof` from the browser via `caatingaClient.contract("verifier").read(...)` (`@caatinga/client`)
-
-Serialization for browser verification uses `@caatinga/zk/browser` (`buildVerifyProofBindingArgs`). The
-dev server exposes proof artifacts at `/zk-artifacts/proof.json`, `/zk-artifacts/verification_key.json`,
-and `/zk-artifacts/public.json` after a local prove. Files live under `.artifacts/zk/<circuit>/` on disk
-(gitignored) — not in `public/zk-artifacts/`.
+See [ZK project tutorial](./tutorials/zk-project.md) for the hybrid UI + CLI prove flow.
 
 ## Circuit inputs
 

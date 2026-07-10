@@ -5,12 +5,12 @@ The whole Caatinga loop on one page. Every command runs inside a generated proje
 ## One-step environment setup
 
 ```bash
-caatinga setup                         # install missing prerequisites (Rust, wasm target, Stellar CLI), fund `alice` on testnet
+caatinga setup                         # install missing prerequisites, fund `alice` on testnet
 caatinga setup --source bob            # use a different identity alias
 caatinga setup --skip-rust --skip-stellar  # only create the local identity
 ```
 
-Run on a fresh machine before `init`. Idempotent — already-installed, compatible tools are skipped.
+See [Getting started](./getting-started.md#prerequisites) for details. Idempotent — already-installed tools are skipped.
 
 ## Scaffold commands
 
@@ -28,7 +28,7 @@ See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for when to 
 ## The loop
 
 ```bash
-caatinga init my-dapp && cd my-dapp && npm install   # scaffold
+caatinga init my-dapp && cd my-dapp && npm install   # scaffold — see Getting started
 npx caatinga doctor --network testnet --source alice # verify environment
 npx caatinga build counter                           # compile one contract WASM
 npx caatinga build                                   # compile all configured contracts

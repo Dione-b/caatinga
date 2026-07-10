@@ -2,7 +2,7 @@
 
 The MVP ships official templates. For a step-by-step `caatinga init` walkthrough, see [Template project](./tutorials/template-project.md).
 
-- `react-vite-counter` — single Soroban counter dApp. **Stable** for the alpha flow.
+- `react-vite-counter` — single Soroban counter dApp. **Stable** for the default flow.
 - `zk-starter` — ZK dApp with Circom/Groth16 verifier (via `caatinga zk init`). **Stable** for the ZK walkthrough.
 
 Multi-contract deploy (`dependsOn`, `${contracts.*.contractId}`) is supported in `caatinga.config.ts` — see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md) and [Config](./config.md).
@@ -93,6 +93,6 @@ The official template documents both paths:
 
 The template wires wallet state through `WalletProvider`/`useWallet` from
 `@caatinga/client/react` (persistent session, silent reconnect) — see [Wallets](./wallets.md).
-It does not generate `caatinga generate --interop` output in alpha.
+It does not generate `caatinga generate --interop` output today.
 
 Browser-facing templates should import errors and artifact types from `@caatinga/core/browser` (see `react-vite-counter/src/caatinga.ts`). Keep the full `@caatinga/core` entry for Node-only config (`caatinga.config.ts`, CLI workflows).

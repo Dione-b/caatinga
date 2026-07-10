@@ -1,8 +1,6 @@
 # Wallets
 
-One page for everything wallet-related in Caatinga: the adapter contract, the bundled
-Freighter and Stellar Wallets Kit adapters, the framework-agnostic wallet session, the
-React hooks, and the bundler workarounds Stellar Wallets Kit needs.
+Adapter contract, bundled Freighter and Stellar Wallets Kit adapters, wallet session, React hooks, and bundler workarounds.
 
 ## The adapter contract
 
@@ -29,7 +27,7 @@ Rules every adapter must follow:
 
 ### Stellar Wallets Kit (multi-wallet)
 
-“Multi-wallet” here means **choosing among wallet providers** (Freighter, xBull, etc.) via Stellar Wallets Kit — not Soroban multi-invoker / `signAuthEntry` orchestration. Browser `invoke` is **single-invoker only until v1.0** ([Client scope](./client.md#single-invoker-scope-until-v10)).
+“Multi-wallet” here means **choosing among wallet providers** (Freighter, xBull, etc.) via Stellar Wallets Kit — not Soroban multi-invoker / `signAuthEntry` orchestration. Browser `invoke` is **single-invoker** ([Client scope](./client.md#single-invoker-scope)).
 
 ```bash
 npm install @caatinga/client @creit.tech/stellar-wallets-kit

@@ -1,8 +1,6 @@
 # ZK Project
 
-Use `caatinga zk init` when you need **Groth16** proofs (BLS12-381 curve) verified on Soroban via a verifier contract.
-
-Not sure this is the right path? See [Choosing a project scaffold](./project-scaffolds.md).
+**Groth16** proofs (BLS12-381) verified on Soroban. See [Choosing a project scaffold](./project-scaffolds.md) to compare paths.
 
 ## When to use
 

@@ -1,6 +1,6 @@
 # Signing Strategy
 
-Caatinga does not store private keys or run silent signing. This document describes what signing models are supported today, what is explicitly out of scope for alpha, and recommended patterns for testnet vs mainnet.
+Caatinga does not store private keys or run silent signing. This document describes supported signing models, explicit out-of-scope patterns, and recommended testnet vs mainnet practices.
 
 ## CLI signing (`--source`)
 
@@ -22,11 +22,11 @@ Run `caatinga doctor --source alice` to verify the identity exists and can sign 
 
 Browser flows use a **wallet adapter** — the wallet extension or Stellar Wallets Kit signs transactions:
 
-- **Scope (alpha):** **single-invoker** only. The connected wallet signs as the transaction source.
-- **Not supported (alpha):** delegated AddressV2 / non-invoker `signAuthEntry` orchestration. Contracts requiring multi-auth fail with `CAATINGA_MULTI_AUTH_REQUIRED`.
+- **Scope:** **single-invoker** only. The connected wallet signs as the transaction source.
+- **Not supported:** delegated AddressV2 / non-invoker `signAuthEntry` orchestration. Contracts requiring multi-auth fail with `CAATINGA_MULTI_AUTH_REQUIRED`.
 - **Adapters:** Freighter, Stellar Wallets Kit (xBull, Albedo, Rabet, WalletConnect, etc.). Hardware wallets inside SWK are stubbed for bundle size — not registered in the default adapter.
 
-See [Wallets](./wallets.md) and [Client](./client.md#single-invoker-scope-until-v10).
+See [Wallets](./wallets.md) and [Client — Single-invoker scope](./client.md#single-invoker-scope).
 
 ## CI signing
 
@@ -49,14 +49,14 @@ See [Testing — CI without local secrets](./internal/testing.md).
 | Cost awareness   | Use `caatinga estimate deploy` before large deploys | **Required** — estimate fees; monitor resource limits        |
 | Artifact history | Optional                                            | Use `caatinga migrate artifacts` + upgrade/rollback workflow |
 
-## Explicitly not supported (alpha)
+## Explicitly not supported
 
 | Model                                | Status         | Notes                                                                        |
 | ------------------------------------ | -------------- | ---------------------------------------------------------------------------- |
 | Hardware wallets (Ledger/Trezor)     | Not supported  | SWK stubs only; no native Ledger integration                                 |
-| KMS / cloud signing (AWS KMS, GCP)   | Non-goal alpha | Use Stellar CLI or custom signing outside Caatinga                           |
-| Backend / server-side signing        | Non-goal alpha | Application responsibility                                                   |
-| Multisig / `signAuthEntry` in client | v1.0 candidate |                                                                              |
+| KMS / cloud signing (AWS KMS, GCP)   | Out of scope   | Use Stellar CLI or custom signing outside Caatinga                           |
+| Backend / server-side signing        | Out of scope   | Application responsibility                                                   |
+| Multisig / `signAuthEntry` in client | App-owned      | `CAATINGA_MULTI_AUTH_REQUIRED` — orchestrate in application code             |
 | Caatinga-managed key storage         | Never          | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
 
 ## Related docs

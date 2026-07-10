@@ -58,19 +58,24 @@ export default withMermaid(
             { text: "Template project", link: "/tutorials/template-project" },
             { text: "Minimal project", link: "/tutorials/minimal-project" },
             { text: "ZK project", link: "/tutorials/zk-project" },
-            {
-              text: "From Zero to Testnet",
-              link: "/tutorials/from-zero-to-testnet",
-            },
             { text: "Cheatsheet", link: "/cheatsheet" },
           ],
         },
         {
-          text: "stellar-build",
+          text: "Guides",
+          collapsed: true,
           items: [
             {
-              text: "Integration guide",
+              text: "From Zero to Testnet",
+              link: "/tutorials/from-zero-to-testnet",
+            },
+            {
+              text: "Integration guide (stellar-build)",
               link: "/tutorials/integration-guide",
+            },
+            {
+              text: "Contract upgrade",
+              link: "/tutorials/contract-upgrade",
             },
           ],
         },
@@ -83,6 +88,8 @@ export default withMermaid(
             { text: "Wallets", link: "/wallets" },
             { text: "Templates", link: "/templates" },
             { text: "Errors", link: "/errors" },
+            { text: "Troubleshooting", link: "/troubleshooting" },
+            { text: "Public API", link: "/public-api" },
             { text: "ZK module", link: "/zk" },
             { text: "Soroban types", link: "/soroban-types" },
             { text: "LLM reference (for-llms)", link: "/for-llms" },
@@ -98,10 +105,7 @@ export default withMermaid(
               text: "Production readiness",
               link: "/production-readiness",
             },
-            {
-              text: "Contract upgrade",
-              link: "/tutorials/contract-upgrade",
-            },
+            { text: "Recovery scenarios", link: "/recovery-scenarios" },
             { text: "ADRs", link: "/adr/" },
             {
               text: "stellar-album case study",

@@ -1,8 +1,6 @@
 # Minimal Project
 
-Use `caatinga init --minimal` when you want a Soroban contract and CLI workflow **without** a bundled frontend. You choose the UI stack later — React, Next.js, Svelte, or no browser at all.
-
-Not sure this is the right path? See [Choosing a project scaffold](./project-scaffolds.md).
+Soroban contract and CLI workflow **without** a bundled frontend. See [Choosing a project scaffold](./project-scaffolds.md) to compare paths.
 
 ## When to use
 
