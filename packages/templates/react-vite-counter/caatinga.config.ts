@@ -26,7 +26,7 @@ export default defineConfig({
   postDeployRead: [
     {
       contract: "counter",
-      method: "count",
+      method: "get",
       kind: "read" as const,
       args: {},
       expect: { matcher: "reachable" as const },
@@ -37,7 +37,7 @@ export default defineConfig({
     reads: [
       {
         contract: "counter",
-        method: "count",
+        method: "get",
         expect: { matcher: "reachable" as const },
       },
     ],

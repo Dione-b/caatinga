@@ -175,13 +175,13 @@ describe("CaatingaConfigSchema", () => {
       postDeployRead: [
         {
           contract: "counter",
-          method: "count",
+          method: "get",
           kind: "read",
           expect: { matcher: "reachable" },
         },
       ],
       smoke: {
-        reads: [{ contract: "counter", method: "count", expect: { matcher: "reachable" } }],
+        reads: [{ contract: "counter", method: "get", expect: { matcher: "reachable" } }],
         useFreshSymbol: true,
       },
     });
