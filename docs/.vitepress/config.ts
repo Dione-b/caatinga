@@ -69,6 +69,10 @@ export default withMermaid(
               link: "/tutorials/from-zero-to-testnet",
             },
             {
+              text: "Workshop (60–75 min)",
+              link: "/tutorials/workshop",
+            },
+            {
               text: "Integration guide (stellar-build)",
               link: "/tutorials/integration-guide",
             },

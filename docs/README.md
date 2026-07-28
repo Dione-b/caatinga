@@ -16,6 +16,7 @@ Start at [Getting started](./getting-started.md) if you're new.
 ## Guides
 
 - [From Zero to Testnet](./tutorials/from-zero-to-testnet.md) — optional full walkthrough after getting started
+- [Workshop (60–75 min)](./tutorials/workshop.md) — CLI contract deploy & orchestration (live presentations)
 - [Integration guide (stellar-build)](./tutorials/integration-guide.md) — drive Caatinga from coding agents
 - [Contract upgrade](./tutorials/contract-upgrade.md) — upgrade deployed contracts
 
