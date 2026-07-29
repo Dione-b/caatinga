@@ -1,27 +1,44 @@
-# Hands-On Workshop: Contract Deployment
+# Workshop: Contract Deployment with Caatinga
 
-Practical guide to scaffolding, building, deploying, reading, and upgrading a Soroban contract on Testnet using Caatinga.
+Hands-on path to scaffold, build, deploy, read, and redeploy a Soroban contract on Testnet using Caatinga. Target length: about 60–75 minutes. Uses a **minimal** project (contract + CLI only, no frontend).
+
+Core loop:
+
+**setup → init → doctor → build → deploy → read → status → redeploy**
 
 ---
 
-## 1. Setup & Mental Model
+## What Caatinga is in this workshop
 
-Caatinga orchestrates scaffold, build, deployment, and contract calls, tracking deployed addresses in a Git-versioned `caatinga.artifacts.json`.
+Caatinga does not replace Stellar or Soroban. It orchestrates the usual toolchain (Node, Rust, Stellar CLI) and keeps deployment state in the repo.
 
-### Environment Setup
+Two files define the project:
 
-Ensure Node.js 22+ is installed, then run `setup` to install Rust, WASM target, Stellar CLI, and fund the `alice` identity on Testnet:
+| File                      | Role                                                                 |
+| ------------------------- | -------------------------------------------------------------------- |
+| `caatinga.config.ts`      | Intent: contract names, WASM paths, networks                         |
+| `caatinga.artifacts.json` | Reality: deployed `contractId` per network (commit this to Git)      |
+
+After `deploy`, later commands such as `read` and `status` resolve the contract from artifacts, so you do not paste addresses by hand.
+
+---
+
+## 1. Environment
+
+Need Node.js 22+. On a fresh machine, `setup` installs Rust, the WASM target, Stellar CLI, and funds a Testnet identity named `alice`:
 
 ```bash
 node --version
 npx caatinga setup
 ```
 
+`--source alice` is a **local Stellar CLI identity alias**. Public `G…` addresses and secret `S…` keys are rejected on purpose.
+
 ---
 
-## 2. Scaffold & Health Check
+## 2. Scaffold
 
-Initialize a minimal project (CLI + contract only) and verify environment readiness.
+Create a minimal app: stub contract `app` with read-only `hello` and `version` methods.
 
 ```bash
 npx caatinga init my-contract-app --minimal
@@ -29,40 +46,65 @@ cd my-contract-app
 npm install
 ```
 
-Validate tooling, config, and `alice` identity:
+What matters in the tree:
+
+| Path                      | Purpose                                      |
+| ------------------------- | -------------------------------------------- |
+| `contracts/app/`          | Rust / Soroban source                        |
+| `caatinga.config.ts`      | Declares contract `app` and networks         |
+| `caatinga.artifacts.json` | Empty until the first successful deploy      |
+| `package.json`            | Scripts for `build`, `deploy`, `read:*`      |
+
+Minimal keeps the session on the contract lifecycle. For a Vite + React dApp later, use `caatinga init` without `--minimal` ([Template project](./template-project.md)).
+
+---
+
+## 3. Verify, build, deploy, read
+
+### Doctor
+
+Checks that the machine is ready for Testnet with identity `alice`:
 
 ```bash
 npx caatinga doctor --network testnet --source alice
 ```
 
----
+Expect checks for Node, Stellar CLI, Rust, WASM target, config, and identity. An untested Stellar CLI version warning is usually advisory.
 
-## 3. Build, Deploy & Interact
+### Build
 
-### Build WASM
+Compiles contract `app` to WASM (name matches `caatinga.config.ts`):
 
 ```bash
 npx caatinga build app
 ```
 
-### Deploy to Testnet
+If deploy fails with a missing artifact, run `build` again first.
 
-Upload the contract and record `contractId` in `caatinga.artifacts.json`:
+### Deploy
+
+Uploads WASM to Testnet, creates the instance, and writes `contractId` into `caatinga.artifacts.json`:
 
 ```bash
 npx caatinga deploy app --network testnet --source alice
 ```
 
-### Read On-Chain State
+Open `caatinga.artifacts.json` and confirm `contractId` under testnet / `app`. That file is the shared source of truth for teammates and CI.
 
-Simulate contract read calls (no transaction fee or signature required):
+### Read
+
+Stub methods are read-only. `caatinga read` simulates the call (no fee / no signature on this path):
 
 ```bash
 npx caatinga read app.version --network testnet
 npx caatinga read app.hello --network testnet
 ```
 
-### Check Deployment Status
+State-changing methods use `caatinga invoke` and a signing identity. This stub does not need invoke.
+
+### Status
+
+Quick view of what is deployed on the network:
 
 ```bash
 npx caatinga status --network testnet
@@ -70,14 +112,16 @@ npx caatinga status --network testnet
 
 ---
 
-## 4. Contract Upgrades
+## 4. Upgrades
 
-Understand upgrade strategies for Soroban contracts:
+Two strategies:
 
-- **In-place (`caatinga upgrade`)**: Keeps `contractId`, updates WASM hash (requires contract `upgrade` entrypoint).
-- **Redeploy (`caatinga deploy --upgrade`)**: Deploys a new contract instance; stores former ID under artifact history.
+| Strategy     | Command                     | Effect                                      | `contractId`   |
+| ------------ | --------------------------- | ------------------------------------------- | -------------- |
+| **In-place** | `caatinga upgrade`          | New WASM on the same instance               | Unchanged      |
+| **Redeploy** | `caatinga deploy --upgrade` | New instance; old ID kept in artifact history | New ID       |
 
-### Redeploy Example
+In-place needs a contract entrypoint such as `upgrade` plus admin auth. The minimal stub does **not** implement that, so this workshop demonstrates **redeploy**:
 
 ```bash
 npx caatinga build app
@@ -85,19 +129,24 @@ npx caatinga deploy app --upgrade --network testnet --source alice
 npx caatinga status --network testnet
 ```
 
-Inspect `caatinga.artifacts.json` to verify that the active `contractId` updated and the previous ID was moved to `history`.
+After redeploy, the active `contractId` in artifacts changes; the previous ID moves to history. Clients must follow the new ID — another reason to version artifacts in Git.
+
+Details: [Contract upgrade](./contract-upgrade.md).
 
 ---
 
-## 5. Common Gotchas & Error Codes
+## 5. Error codes to recognize
 
-Automated flows should rely on stable `CAATINGA_*` error codes.
+Caatinga exposes stable `CAATINGA_*` codes for scripts, CI, and agents.
 
-- **`--source` requirement**: Must be a valid Stellar CLI identity alias (e.g., `alice`). Passing a public address (`G...`) or secret key (`S...`) triggers `CAATINGA_SOURCE_IS_PUBLIC_KEY`.
-- **`CAATINGA_ARTIFACT_NOT_FOUND`**: Missing build artifact. Run `caatinga build` first.
-- **`CAATINGA_STELLAR_CLI_NOT_FOUND`**: `stellar` CLI missing from system `PATH`.
+| Situation                            | Code                             | Fix                                              |
+| ------------------------------------ | -------------------------------- | ------------------------------------------------ |
+| Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `caatinga build` first                       |
+| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI or re-run `setup`            |
+| `--source` is a public `G…` address  | `CAATINGA_SOURCE_IS_PUBLIC_KEY`  | Use an identity alias such as `alice`            |
+| `--source` is a secret `S…` key      | `CAATINGA_SOURCE_IS_SECRET_KEY`  | Same: alias only; never paste keys on the CLI    |
 
-### Verify Error Code Handling
+Example of a rejected public `--source`:
 
 ```bash
 npx caatinga read app.version --network testnet --source GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF
@@ -105,10 +154,35 @@ npx caatinga read app.version --network testnet --source GAAAAAAAAAAAAAAAAAAAAAA
 
 ---
 
-## Next Steps
+## Command checklist
 
-- Consult the [Cheatsheet](../cheatsheet.md) for quick command references.
-- Review [CLI Reference](../cli.md) for available flags.
-- Check [Contract Upgrade Guide](./contract-upgrade.md) for in-place migration patterns.
+```bash
+node --version
+npx caatinga setup
 
+npx caatinga init my-contract-app --minimal
+cd my-contract-app
+npm install
 
+npx caatinga doctor --network testnet --source alice
+npx caatinga build app
+npx caatinga deploy app --network testnet --source alice
+npx caatinga read app.version --network testnet
+npx caatinga read app.hello --network testnet
+npx caatinga status --network testnet
+
+npx caatinga build app
+npx caatinga deploy app --upgrade --network testnet --source alice
+npx caatinga status --network testnet
+```
+
+---
+
+## Next steps
+
+- [Cheatsheet](../cheatsheet.md) — command loop on one page
+- [CLI reference](../cli.md) — flags and subcommands
+- [Minimal project](./minimal-project.md) — what `--minimal` generates
+- [From Zero to Testnet](./from-zero-to-testnet.md) — fuller walkthrough
+- [Contract upgrade](./contract-upgrade.md) — in-place vs redeploy
+- [Troubleshooting](../troubleshooting.md) — symptom-first fixes
