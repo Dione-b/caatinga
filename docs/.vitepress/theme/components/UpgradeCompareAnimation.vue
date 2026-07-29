@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import { animate, createTimeline } from "animejs";
+import { createTimeline } from "animejs";
 import { onMounted, onUnmounted, ref } from "vue";
 
 const containerRef = ref<HTMLElement | null>(null);
-const replayKey = ref(0);
 
 let timeline: ReturnType<typeof createTimeline> | null = null;
 
 function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function stopAnimation() {
+  if (timeline) {
+    timeline.pause();
+    timeline.revert();
+    timeline = null;
+  }
 }
 
 function playAnimation() {
   if (!containerRef.value) return;
 
-  timeline?.pause();
+  stopAnimation();
 
   const inPlacePanel = containerRef.value.querySelector<HTMLElement>(".workshop-panel-inplace");
   const redeployPanel = containerRef.value.querySelector<HTMLElement>(".workshop-panel-redeploy");
@@ -113,8 +120,7 @@ function playAnimation() {
 }
 
 function replay() {
-  replayKey.value += 1;
-  requestAnimationFrame(() => playAnimation());
+  playAnimation();
 }
 
 onMounted(() => {
@@ -122,12 +128,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  timeline?.pause();
+  stopAnimation();
 });
 </script>
 
 <template>
-  <div ref="containerRef" :key="replayKey" class="workshop-animation workshop-upgrade">
+  <div ref="containerRef" class="workshop-animation workshop-upgrade">
     <div class="workshop-animation-header">
       <span class="workshop-animation-label">Upgrade strategies</span>
       <button type="button" class="workshop-replay-btn" @click="replay">Replay</button>
@@ -165,3 +171,4 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+

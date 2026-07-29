@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { animate, createTimeline, stagger } from "animejs";
+import { createTimeline, stagger } from "animejs";
 import { onMounted, onUnmounted, ref } from "vue";
 
 const containerRef = ref<HTMLElement | null>(null);
-const replayKey = ref(0);
 
 const steps = [
   { id: "init", label: "init", detail: "Scaffold project" },
@@ -16,13 +15,21 @@ const steps = [
 let timeline: ReturnType<typeof createTimeline> | null = null;
 
 function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function stopAnimation() {
+  if (timeline) {
+    timeline.pause();
+    timeline.revert();
+    timeline = null;
+  }
 }
 
 function playAnimation() {
   if (!containerRef.value) return;
 
-  timeline?.pause();
+  stopAnimation();
 
   const nodes = containerRef.value.querySelectorAll<HTMLElement>(".workshop-step");
   const arrows = containerRef.value.querySelectorAll<HTMLElement>(".workshop-arrow");
@@ -93,8 +100,7 @@ function playAnimation() {
 }
 
 function replay() {
-  replayKey.value += 1;
-  requestAnimationFrame(() => playAnimation());
+  playAnimation();
 }
 
 onMounted(() => {
@@ -102,12 +108,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  timeline?.pause();
+  stopAnimation();
 });
 </script>
 
 <template>
-  <div ref="containerRef" :key="replayKey" class="workshop-animation workshop-workflow">
+  <div ref="containerRef" class="workshop-animation workshop-workflow">
     <div class="workshop-animation-header">
       <span class="workshop-animation-label">Core workflow</span>
       <button type="button" class="workshop-replay-btn" @click="replay">Replay</button>
@@ -129,3 +135,4 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
