@@ -58,6 +58,7 @@ export default withMermaid(
             { text: "Minimal project", link: "/tutorials/minimal-project" },
             { text: "ZK project", link: "/tutorials/zk-project" },
             { text: "Cheatsheet", link: "/cheatsheet" },
+            { text: "FAQ", link: "/faq" },
           ],
         },
         {
