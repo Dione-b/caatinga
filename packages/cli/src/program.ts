@@ -1,3 +1,4 @@
+import path from "node:path";
 import { Command } from "commander";
 import { registerBuildCommand } from "./commands/build.command.js";
 import { registerDeployCommand } from "./commands/deploy.command.js";
@@ -31,12 +32,12 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name("caatinga")
+    .name(path.basename(process.argv[1] ?? "caatinga").replace(/\.(js|ts)$/, ""))
     .description("Developer toolkit for Stellar/Soroban dApps")
     .version(CAATINGA_CLI_VERSION, "-v, --version", "Output the current version")
     .configureHelp({
       formatHelp(cmd, helper) {
-        if (cmd.name() !== "caatinga") {
+        if (cmd.parent !== null) {
           return helper.formatHelp(cmd, helper);
         }
 

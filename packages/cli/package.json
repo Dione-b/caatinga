@@ -25,7 +25,8 @@
   },
   "type": "module",
   "bin": {
-    "caatinga": "./dist/index.js"
+    "caatinga": "./dist/index.js",
+    "ctg": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
