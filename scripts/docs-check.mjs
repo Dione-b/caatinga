@@ -10,6 +10,7 @@ const criticalMarkdownFiles = {
   "docs/internal/release.md": { minNonEmptyLines: 25 },
   "docs/getting-started.md": { minNonEmptyLines: 30 },
   "docs/tutorials/from-zero-to-testnet.md": { minNonEmptyLines: 40 },
+  "docs/tutorials/workshop.md": { minNonEmptyLines: 60 },
   "examples/counter-web/README.md": { minNonEmptyLines: 25 },
 };
 
