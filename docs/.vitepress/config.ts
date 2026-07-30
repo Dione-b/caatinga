@@ -63,7 +63,8 @@ function emptyAppFallback(): Plugin {
       + '<li>Reload the page</li>'
       + '</ol>'
       + '<p>URL must be <code style="color:#ffde00">http://localhost:5173/caatinga/</code> (trailing slash).</p>'
-      + '<p>Alternative: <code style="color:#ffde00">pnpm docs:build && pnpm docs:preview</code></p>'
+      + '<p>If Vite keeps eating RAM in Brave, use the static preview instead:</p>'
+      + '<p><code style="color:#ffde00">pnpm docs:brave</code></p>'
       + '</div>';
   };
   requestAnimationFrame(tick);
@@ -89,7 +90,30 @@ export default withMermaid(
     vite: {
       server: {
         host: "localhost",
-        hmr: { host: "localhost" },
+        // Pin HMR to localhost so Brave Shields + dual-stack (::1 vs 127.0.0.1)
+        // do not thrash reconnects (that loop balloons renderer memory).
+        hmr: {
+          host: "localhost",
+          protocol: "ws",
+          clientPort: 5173,
+        },
+        watch: {
+          // Monorepo noise: do not keep packages/examples in the Vite watcher.
+          ignored: [
+            "**/packages/**",
+            "**/examples/**",
+            "**/packed/**",
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/coverage/**",
+            "**/dist/**",
+            "**/.turbo/**",
+          ],
+        },
+      },
+      optimizeDeps: {
+        // Prebundle once; avoids repeated Mermaid/dayjs transforms on HMR.
+        include: ["mermaid", "dayjs", "debug"],
       },
       plugins: [redirectBaseWithoutSlash(), emptyAppFallback()],
     },
