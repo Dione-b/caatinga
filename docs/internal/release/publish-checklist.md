@@ -51,10 +51,11 @@ done
 npm view @caatinga/cli dist-tags
 ```
 
-After promotion, verify setup is available without `@next`:
+After promotion, verify the published binaries without `@next`:
 
 ```bash
-npx @caatinga/cli setup --help
+npx @caatinga/cli --help
+npx --package=@caatinga/cli ctg --help
 ```
 
 Optional v1 gate (when targeting stable `1.0.0`):

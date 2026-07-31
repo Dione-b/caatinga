@@ -46,11 +46,11 @@ Artifacts store the resulting `contractId`. Read and invoke then resolve that ID
 
 ## Canonical Workflow
 
-This is the **session agenda**: every stage you will run hands-on, including setup and redeploy. The middle of this path (`build` → `deploy` → `read` / `invoke`) is the pipeline above.
+This is the **session agenda**: every stage you will run hands-on, including prerequisites and redeploy. The middle of this path (`build` → `deploy` → `read` / `invoke`) is the pipeline above.
 
 ```mermaid
 flowchart LR
-  setup["setup"] --> init["init"]
+  prereqs["prerequisites"] --> init["init"]
   init --> doctor["doctor"]
   doctor --> build["build"]
   build --> deploy["deploy"]
@@ -60,7 +60,7 @@ flowchart LR
   status --> redeploy["redeploy"]
 ```
 
-* **setup**: Toolchain + funded Testnet identity.
+* **prerequisites**: Install Node, Rust, Stellar CLI, and a funded Testnet identity manually.
 * **init**: Scaffold `react-vite-counter` (contract `counter` + Vite UI).
 * **doctor**: Environment and credentials check.
 * **build**: Rust → WASM (no network).
@@ -654,7 +654,7 @@ Use a registered identity alias, for example `--source alice`.
 | Situation                            | Code                             | Fix                                           |
 | ------------------------------------ | -------------------------------- | --------------------------------------------- |
 | Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `caatinga build` first                    |
-| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI or re-run `setup`         |
+| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI; verify with `caatinga doctor` |
 | `--source` is a public `G…` address  | `CAATINGA_SOURCE_IS_PUBLIC_KEY`  | Use an identity alias such as `alice`         |
 | `--source` is a secret `S…` key      | `CAATINGA_SOURCE_IS_SECRET_KEY`  | Same: alias only; never paste keys on the CLI |
 
