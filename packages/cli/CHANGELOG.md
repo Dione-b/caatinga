@@ -2,9 +2,13 @@
 
 ## 3.9.0
 
+### Breaking Changes
+
+- Remove `caatinga setup`. Use `caatinga doctor` to verify prerequisites, then install Rust (`wasm32v1-none`), Stellar CLI, and a funded identity manually (see [Getting started](https://github.com/Dione-b/caatinga/blob/main/docs/getting-started.md)).
+
 ### Minor Changes
 
-- Expose `ctg` as a short install-time alias for the `caatinga` CLI binary (same entrypoint; help uses the invoked name).
+- Expose `ctg` as a short install-time alias for the `caatinga` CLI binary (same entrypoint; help uses the invoked name when the binary is `ctg`, otherwise `caatinga`).
 
 ### Patch Changes
 

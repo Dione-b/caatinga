@@ -2,6 +2,8 @@
 
 This document is the authoritative tier list for Caatinga v1.0. **Breaking changes to Tier 1 require a major version bump** (after the v1.0 contract freeze, npm major remains `3.x` until an explicit `4.0.0`).
 
+**Exception (3.9.0):** `caatinga setup` was removed from the Tier 1 CLI surface while remaining on the `3.x` line. The break is documented in `@caatinga/cli` CHANGELOG 3.9.0; substitute with `caatinga doctor` plus manual toolchain install. Future Tier 1 removals still target `4.0.0` unless similarly called out.
+
 See also: [Architecture freeze](./architecture-freeze.md), [v1.0.0 Interface Contract](./internal/release/v1.0.0.md), [Errors](./errors.md).
 
 ---
