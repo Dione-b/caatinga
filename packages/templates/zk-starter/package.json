@@ -36,6 +36,7 @@
   "overrides": {
     "uuid": "^14.0.0",
     "ws": "^8.21.0",
+    "axios": "^1.17.1",
     "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
     "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
     "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk",
