@@ -36,7 +36,7 @@ This document defines the acceptance criteria that must be satisfied before Caat
 - [ ] Integration tests pass against Stellar testnet (manual gate)
 - [x] `caatinga doctor` correctly detects missing Stellar CLI, outdated versions, and stale bindings
 - [x] `caatinga smoke` correctly asserts `expect` matchers
-- [x] `caatinga setup` installs all prerequisites on a clean machine
+- [x] `caatinga doctor` correctly detects missing prerequisites on a clean machine
 
 ## Documentation Criteria
 

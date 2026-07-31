@@ -45,6 +45,31 @@ describe("createProgram", () => {
     );
   });
 
+  it("should_expose_ctg_bin_alias_alongside_caatinga", async () => {
+    const packageJson = JSON.parse(
+      await readFile(path.resolve(__dirname, "../package.json"), "utf8")
+    ) as { bin: Record<string, string> };
+
+    expect(packageJson.bin).toEqual({
+      caatinga: "./dist/index.js",
+      ctg: "./dist/index.js",
+    });
+  });
+
+  it("should_use_invoked_binary_name_in_help_when_argv_is_ctg", () => {
+    const originalArgv = process.argv;
+
+    try {
+      process.argv = ["node", "/usr/local/bin/ctg"];
+      const program = createProgram();
+
+      expect(program.name()).toBe("ctg");
+      expect(program.helpInformation()).toContain("ctg [options] [command]");
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
   it("reports the package version", async () => {
     const packageJson = JSON.parse(
       await readFile(path.resolve(__dirname, "../package.json"), "utf8")

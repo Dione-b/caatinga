@@ -12,7 +12,7 @@ Deployment Orchestration + Versioned Artifacts for Soroban.
 
 ```bash
 npm install -g @caatinga/cli
-npx caatinga init my-dapp
+npx caatinga init my-dapp   # or: npx ctg init my-dapp
 ```
 
 > **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. See [CHANGELOG](./packages/cli/CHANGELOG.md) and [Public API](./docs/public-api.md).
@@ -21,13 +21,13 @@ npx caatinga init my-dapp
 
 ```bash
 npm install -g @caatinga/cli
-caatinga setup --source alice --network testnet   # fresh machine: Rust, Stellar CLI, funded identity
+caatinga doctor --network testnet --source alice   # verify prerequisites
 caatinga init my-dapp && cd my-dapp && npm install
 caatinga build counter
 caatinga deploy counter --network testnet --source alice
 ```
 
-`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). Run `caatinga doctor` if setup fails.
+`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). Run `caatinga doctor` to verify prerequisites.
 
 **Docs:** start at [Getting started](./docs/getting-started.md). Optional walkthrough: [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md).
 
@@ -93,7 +93,7 @@ See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
 - **Rust** 1.84.0+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)
 
-Run `caatinga setup` on a fresh machine to install the toolchain automatically. See the [version contract](./docs/stellar-cli-version-contract.md).
+Run `caatinga doctor` to check what is missing. Install prerequisites manually — see [Getting started](./docs/getting-started.md#prerequisites). See the [version contract](./docs/stellar-cli-version-contract.md).
 
 ## Documentation
 
@@ -118,7 +118,7 @@ my-dapp/
 
 | Package            | Role                                                                                            |
 | ------------------ | ----------------------------------------------------------------------------------------------- |
-| `@caatinga/cli`    | `caatinga` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
+| `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
 | `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                |
 | `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                      |
 

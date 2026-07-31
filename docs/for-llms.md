@@ -12,10 +12,10 @@ Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). A
 | ----------------- | ----------------------------------------------------------------------------------------- |
 | npm dist-tag      | `latest` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. |
-| Global install    | `npm install -g @caatinga/cli`                                                            |
-| No global install | `npx caatinga <command>`                                                                  |
+| Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                              |
+| No global install | `npx caatinga <command>` (or `npx ctg`)                                                   |
 | Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.8.0`), not a floating tag                     |
-| Fresh machine     | Node 22+, then `npx caatinga setup`                                                       |
+| Fresh machine     | Node 22+, then check with `npx caatinga doctor`. Install Rust, Stellar CLI manually.       |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only              |
 
 See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-cli-version-contract.md).
@@ -54,7 +54,7 @@ npx caatinga read counter.get --network testnet
 npx caatinga status --network testnet
 ```
 
-Fresh machine: `npx caatinga setup`. Full graph: `npx caatinga deploy --network testnet --source alice`.
+Fresh machine: install Rust + Stellar CLI manually, then `npx caatinga doctor` to verify. Full graph: `npx caatinga deploy --network testnet --source alice`.
 
 | Strategy     | Command                     | `contractId`  |
 | ------------ | --------------------------- | ------------- |
@@ -194,7 +194,7 @@ Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 3. **Full graph deploy auto-runs `wire` + `sync-env`** — pass `--no-wire` / `--no-sync-env` to skip.
 4. **Browser invoke is single-invoker only** — multi-signer throws `CAATINGA_MULTI_AUTH_REQUIRED`.
 5. **ZK on mainnet is blocked by default** — `--allow-dev-ceremony` is not for production.
-6. **Fresh machine** — Node 22+, then `caatinga setup`.
+6. **Fresh machine** — Node 22+, install Rust + Stellar CLI manually, then `caatinga doctor`.
 7. **Errors are public API** — parse `CAATINGA_*` codes, not message text.
 8. **`read()` vs `invoke()`** — `read` = simulate (no sign), `invoke` = sign + submit.
 9. **Wallet adapters must reject on dismissal** — never leave promise pending.

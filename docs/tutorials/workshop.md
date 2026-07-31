@@ -113,7 +113,7 @@ Prepare the machine: Node.js 22+, Rust with the WASM target, Stellar CLI, and a 
 
 ```bash
 node --version
-npx caatinga setup
+npx caatinga doctor --network testnet --source alice
 ```
 
 ### Expected Result
@@ -125,7 +125,7 @@ npx caatinga setup
 
 <details>
 <summary>Speaker Notes</summary>
-The setup command aligns every participant on the same toolchain. It installs the Rust WASM target and Stellar CLI, creates the `alice` keypair, and funds it via Friendbot on Testnet.
+Before the workshop, ensure every participant has installed Rust, the WASM target, and Stellar CLI manually. Doctor verifies everything is in place.
 Stress that `alice` is an identity alias — public and secret keys are rejected on purpose.
 </details>
 
@@ -695,7 +695,7 @@ Copy-paste loop for the session (same agenda as [Canonical Workflow](#canonical-
 
 ```bash
 node --version
-npx caatinga setup
+npx caatinga doctor --network testnet --source alice
 
 npx caatinga init my-dapp
 cd my-dapp

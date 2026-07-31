@@ -23,7 +23,7 @@ Core features define what Caatinga is at its heart. These are fully supported, g
   - Pluggable wallet adapters (Freighter, Stellar Wallets Kit) and React context bindings (`@caatinga/client/react`).
   - Standard transaction pipeline orchestration (simulate → sign → submit → watch).
 - **Automation & Diagnostics:**
-  - Workspace requirements diagnostics (`caatinga doctor` and `caatinga setup`).
+  - Workspace requirements diagnostics (`caatinga doctor`).
   - CLI logs and stable error APIs using `CAATINGA_*` error codes.
 
 ---

@@ -64,18 +64,11 @@ The recommended workflow is:
 
 ### 8. How do I set up a new machine to use Caatinga?
 
-After installing Node.js 22+, simply run:
+After installing Node.js 22+, run `caatinga doctor` to check what is missing, then install prerequisites manually:
 
-```bash
-npx caatinga setup
-```
-
-This command automatically installs:
-
-* Rust
-* The `wasm32v1-none` target
-* Stellar CLI
-* A funded local identity on Testnet
+* Rust via [rustup](https://rustup.rs) + `rustup target add wasm32v1-none`
+* [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0+
+* `stellar keys generate alice --fund --network testnet`
 
 ---
 
@@ -766,8 +759,7 @@ The documentation highlights the following recommendations:
 The workflow suggested by the documentation is:
 
 1. Create the project using `caatinga init`.
-2. Set up the environment using `caatinga setup` (on a new machine).
-3. Verify the environment using `caatinga doctor`.
+2. Verify and set up the environment using `caatinga doctor` (install any missing prerequisites manually).
 4. Build the contracts using `caatinga build`.
 5. Deploy using `caatinga deploy`.
 6. Allow bindings to be generated automatically (or run `caatinga generate` when needed).

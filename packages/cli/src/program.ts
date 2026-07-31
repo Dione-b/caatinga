@@ -18,7 +18,6 @@ import { registerMigrateCommand } from "./commands/migrate.command.js";
 import { registerRollbackCommand } from "./commands/rollback.command.js";
 import { registerEstimateCommand } from "./commands/estimate.command.js";
 import { registerInspectCommand } from "./commands/inspect.command.js";
-import { registerSetupCommand } from "./commands/setup.command.js";
 import { registerWireCommand } from "./commands/wire.command.js";
 import { registerSyncEnvCommand } from "./commands/sync-env.command.js";
 import { registerSmokeCommand } from "./commands/smoke.command.js";
@@ -42,7 +41,7 @@ export function createProgram(): Command {
         }
 
         const categories: Record<string, string[]> = {
-          "Scaffolding & Setup": ["init", "setup", "identity"],
+          "Scaffolding & Setup": ["init", "identity"],
           "Build & Compilation": ["build"],
           "Deployment & Lifecycle": ["deploy", "upgrade", "rollback", "wire"],
           "Query & Execution": ["read", "invoke", "estimate", "dev"],
@@ -117,7 +116,6 @@ export function createProgram(): Command {
   registerRollbackCommand(program);
   registerEstimateCommand(program);
   registerInspectCommand(program);
-  registerSetupCommand(program);
   registerWireCommand(program);
   registerSyncEnvCommand(program);
   registerSmokeCommand(program);
