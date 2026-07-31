@@ -27,8 +27,7 @@ npx caatinga init my-dapp
 **Fix:**
 
 ```bash
-npx caatinga setup
-# or install manually: https://developers.stellar.org/docs/build/smart-contracts/getting-started/setup
+# Install manually: https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli
 ```
 
 ---

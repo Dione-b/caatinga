@@ -27,8 +27,8 @@ npx caatinga init counter-dapp --template react-vite-counter
 cd counter-dapp
 npm install
 
-# 4. Toolchain (skip if already installed)
-npx caatinga setup --source alice --network testnet
+# 4. Verify toolchain (skip if already verified)
+npx caatinga doctor --network testnet --source alice
 
 # 5. Build and deploy
 npx caatinga build counter

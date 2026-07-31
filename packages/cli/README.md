@@ -1,19 +1,20 @@
 # @caatinga/cli
 
-Developer toolkit for Stellar / Soroban dApps — `setup`, `init`, `build`, `deploy`, `wire`, `sync-env`, `generate`, `status`, `smoke`, `regression`, `ci`, and `invoke`.
+Developer toolkit for Stellar / Soroban dApps — `init`, `build`, `deploy`, `wire`, `sync-env`, `generate`, `status`, `smoke`, `regression`, `ci`, and `invoke`.
 
 ## Install
 
 ```bash
 npm install -g @caatinga/cli
 caatinga --help
+ctg --help   # short alias for caatinga
 ```
 
-Inside a generated project, prefer `npx caatinga` so the project-local workflow stays explicit.
+Both `caatinga` and `ctg` resolve to the same CLI binary. Inside a generated project, prefer `npx caatinga` (or `npx ctg`) so the project-local workflow stays explicit.
 
 ## Requirements
 
-Run `caatinga setup` on a fresh machine to install Node, Rust, Stellar CLI, and a funded local identity. Manual requirements:
+Run `caatinga doctor` on a fresh machine to verify prerequisites. Manual requirements:
 
 - Node.js `>=22`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (27.0.0 recommended)
@@ -38,7 +39,6 @@ Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main
 
 | Command                             | What it does                                             |
 | ----------------------------------- | -------------------------------------------------------- |
-| `caatinga setup`                    | Bootstrap Node, Rust, Stellar CLI, and a funded identity |
 | `caatinga init <dir>`               | Create a project from a bundled template                 |
 | `caatinga doctor`                   | Check toolchain, config, artifacts, env drift, bindings  |
 | `caatinga build [contract]`         | Compile contract WASM                                    |

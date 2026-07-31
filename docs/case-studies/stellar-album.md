@@ -21,7 +21,7 @@ From the project root (with Node 22+, Rust, Stellar CLI, and `wasm32v1-none` ins
 
 ```bash
 npm install
-caatinga setup --source deployer --network testnet   # first machine only
+caatinga doctor --source deployer --network testnet   # verify prerequisites
 caatinga build
 caatinga deploy --source deployer --network testnet
 caatinga generate --network testnet

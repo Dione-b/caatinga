@@ -2,15 +2,11 @@
 
 The whole Caatinga loop on one page. Every command runs inside a generated project.
 
-## One-step environment setup
+`ctg` is a short alias for `caatinga` (`ctg build` ≡ `caatinga build`).
 
-```bash
-caatinga setup                         # install missing prerequisites, fund `alice` on testnet
-caatinga setup --source bob            # use a different identity alias
-caatinga setup --skip-rust --skip-stellar  # only create the local identity
-```
+## Prerequisites
 
-See [Getting started](./getting-started.md#prerequisites) for details. Idempotent — already-installed tools are skipped.
+See [Getting started](./getting-started.md#prerequisites) for manual install instructions. Verify with `caatinga doctor`.
 
 ## Scaffold commands
 
@@ -91,7 +87,6 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 
 | Command                             | What it does                                                              |
 | ----------------------------------- | ------------------------------------------------------------------------- |
-| `caatinga setup`                    | Install missing prerequisites (Rust, wasm target, Stellar CLI) + identity |
 | `caatinga init <dir>`               | Scaffold a project from a template                                        |
 | `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity       |
 | `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts        |

@@ -95,7 +95,7 @@ Never recommend:
 ## Core Docs
 
 - [Getting started](docs/getting-started.md): Install, scaffold, CLI-to-browser flow. Start here.
-- [CLI reference](docs/cli.md): init, setup, doctor, build, deploy, upgrade, wire, sync-env, generate, status, smoke, regression, ci, identity, invoke, read, zk.
+- [CLI reference](docs/cli.md): `caatinga` / `ctg` — init, doctor, build, deploy, upgrade, wire, sync-env, generate, status, smoke, regression, ci, identity, invoke, read, zk.
 - [Config schema](docs/config.md): `caatinga.config.ts` — contracts, networks, frontend, postDeploy, postDeployRead, smoke, buildRoot.
 - [Client API](docs/client.md): `@caatinga/client` — createCaatingaClient, read/simulate/invoke, XDR debug, wallet adapters.
 - [Wallets](docs/wallets.md): CaatingaWalletAdapter contract, Stellar Wallets Kit, Freighter, React hooks.

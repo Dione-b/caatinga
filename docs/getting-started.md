@@ -8,21 +8,23 @@
 - A local Stellar CLI identity for deploy/invoke (e.g. `alice`)
 - Optional: Freighter or Stellar Wallets Kit for browser `@caatinga/client` calls
 
-On a fresh machine, run `caatinga setup` to install missing tools and fund a testnet identity:
+On a fresh machine, run `caatinga doctor` to check what is missing, then install prerequisites manually:
 
 ```bash
-npx caatinga setup   # Rust + wasm target + Stellar CLI + funded `alice` on testnet
+npx caatinga doctor --network testnet --source alice
 ```
 
-See [`caatinga setup`](./cli.md#caatinga-setup-source-alice-network-testnet-skip-rust-skip-stellar-skip-identity) for flags. To verify an existing environment: `rustc --version`, `rustup target add wasm32v1-none`, `stellar --version`.
+Manual install: [Rust](https://rustup.rs) + `rustup target add wasm32v1-none`, [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli), and `stellar keys generate alice --fund --network testnet`. To verify: `rustc --version`, `rustup target list --installed`, `stellar --version`.
 
 ## Install
 
 ```bash
 npm install -g @caatinga/cli
+caatinga --help
+ctg --help   # short alias — same binary
 ```
 
-Use `npx caatinga` instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
+Use `npx caatinga` (or `npx ctg`) instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
 
 From the repository:
 

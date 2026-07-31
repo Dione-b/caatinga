@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 3.9.0
+
+### Minor Changes
+
+- Expose `ctg` as a short install-time alias for the `caatinga` CLI binary (same entrypoint; help uses the invoked name).
+
+### Patch Changes
+
+- @caatinga/core@3.9.0
+- @caatinga/zk@3.9.0
+
 ## 3.8.0
 
 ### Minor Changes

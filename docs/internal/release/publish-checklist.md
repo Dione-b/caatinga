@@ -38,7 +38,7 @@ pnpm ci:publish-matrix
 
 - complete every `next` check above
 - verify release owner approval for the `latest` promotion
-- confirm `npm view @caatinga/cli@next version` includes `caatinga setup` (requires 3.4.x)
+- confirm `npm view @caatinga/cli@next version` is published
 
 Promote an already-published version (no republish) by moving the `latest` dist-tag:
 
@@ -51,10 +51,11 @@ done
 npm view @caatinga/cli dist-tags
 ```
 
-After promotion, verify setup is available without `@next`:
+After promotion, verify the published binaries without `@next`:
 
 ```bash
-npx @caatinga/cli setup --help
+npx @caatinga/cli --help
+npx --package=@caatinga/cli ctg --help
 ```
 
 Optional v1 gate (when targeting stable `1.0.0`):

@@ -69,8 +69,8 @@ _Components responsible:_ `@caatinga/client`.
 
 ### 4. Automation (Developer Diagnostics & Safety)
 
-This pillar ensures local workspace reliability, setup automation, regression checking (`caatinga smoke` / `postDeployRead`), and CI/CD-friendly error APIs using stable error codes.
-_Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`, `setup`), `@caatinga/core` (stable errors module).
+This pillar ensures local workspace reliability, environment diagnostics (`caatinga doctor`), regression checking (`caatinga smoke` / `postDeployRead`), and CI/CD-friendly error APIs using stable error codes.
+_Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`), `@caatinga/core` (stable errors module).
 
 ## Validation roadmap (flows)
 

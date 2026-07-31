@@ -14,9 +14,11 @@ Automation and application code may depend on these surfaces without importing p
 
 Supported flow: `init → build → deploy → generate → invoke`
 
+Published binaries: `caatinga` and `ctg` (short alias; same entrypoint).
+
 | Domain                 | Commands                                                        |
 | ---------------------- | --------------------------------------------------------------- |
-| Scaffolding & Setup    | `init`, `setup`, `identity`                                     |
+| Scaffolding & Setup    | `init`, `identity`                                              |
 | Build                  | `build`                                                         |
 | Deployment & Lifecycle | `deploy`, `upgrade`, `rollback`, `wire`                         |
 | Query & Execution      | `read`, `invoke`, `estimate`, `dev`                             |

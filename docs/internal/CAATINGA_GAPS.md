@@ -429,7 +429,7 @@ responsável pelo crash recovery completo.
 | Post-deploy wire (array hooks)         | ✅ `caatinga wire` + auto após deploy       | ✅ Scripts dedicados                        |
 | Frontend env sync                      | ✅ `caatinga sync-env`                      | ⚠️ Manual                                   |
 | Status / diagnostics                   | ✅ `caatinga status` / `doctor` / `inspect` | ⚠️ Manual                                   |
-| Setup automatizado                     | ✅ `caatinga setup`                         | ❌ N/A                                      |
+| Setup automatizado                     | ❌ Removido — usar `caatinga doctor` + instalação manual | ❌ N/A                                      |
 
 ---
 
@@ -445,7 +445,7 @@ responsável pelo crash recovery completo.
 6. **`caatinga status` / `caatinga doctor` / `caatinga inspect`** para diagnóstico
 7. **`caatinga wire`** para pós-deploy (init, set_admin, etc.) — multi-step sequencial com `source` override por hook
 8. **`caatinga sync-env`** para sincronizar contract IDs e WASM hashes com frontend `.env`
-9. **`caatinga setup`** para bootstrap de ambiente (Node, Rust, Stellar CLI, identidade)
+9. **`caatinga doctor`** para verificar ambiente; instalar Node, Rust, Stellar CLI e identidade manualmente
 10. **Client browser (`@caatinga/client`)** para invoke/read com Freighter ou Stellar Wallets Kit
 11. **Verificação pós-deploy** via `expect` em postDeploy hooks
 

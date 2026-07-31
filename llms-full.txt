@@ -11,10 +11,10 @@ Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. 
 | ----------------- | ------------------------------------------------------------------------------------------------------- |
 | npm dist-tag      | `latest` → **3.6.1**; `next` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
-| Global install    | `npm install -g @caatinga/cli`                                                                          |
-| No global install | `npx caatinga <command>`                                                                                |
+| Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                                            |
+| No global install | `npx caatinga <command>` (or `npx ctg`)                                                                 |
 | Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
-| Fresh machine     | Node 22+, then `npx caatinga setup` (Rust, `wasm32v1-none`, Stellar CLI, funded identity)               |
+| Fresh machine     | Node 22+, then `npx caatinga doctor`. Install Rust + Stellar CLI manually.                               |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
 
 ## Capability limits
@@ -54,10 +54,10 @@ npx caatinga read counter.get --network testnet         # read-only, no signing
 npx caatinga status --network testnet                   # deployed? bindings fresh?
 ```
 
-**One-step env setup on a fresh machine:**
+**Verify environment on a fresh machine:**
 
 ```bash
-npx caatinga setup  # installs Rust + wasm32v1-none + Stellar CLI, funds `alice` on testnet
+npx caatinga doctor  # checks Rust, wasm32v1-none, Stellar CLI, identity
 ```
 
 **Multi-contract graph deploy (with postDeploy hooks and frontend env sync):**
@@ -96,7 +96,7 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 
 | Package                                | Role                                                                  | Browser-safe         | Install command                |
 | -------------------------------------- | --------------------------------------------------------------------- | -------------------- | ------------------------------ |
-| `@caatinga/cli`                        | CLI binary (`caatinga` command)                                       | No                   | `npm install -g @caatinga/cli` |
+| `@caatinga/cli`                        | CLI binary (`caatinga` / `ctg`)                                       | No                   | `npm install -g @caatinga/cli` |
 | `@caatinga/core`                       | Config loading, artifact I/O, Stellar CLI orchestration, shell layer  | No (use `./browser`) | — (dep of cli)                 |
 | `@caatinga/core/browser`               | Errors + artifact types only; excludes Node-only modules              | Yes                  | — (dep of client)              |
 | `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes                  | `npm install @caatinga/client` |
@@ -115,7 +115,6 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 
 | Command                  | Purpose                                                          | Flags                                                                       |
 | ------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `caatinga setup`         | Install prerequisites (Rust, wasm target, Stellar CLI, identity) | `--source`, `--network`, `--skip-rust`, `--skip-stellar`, `--skip-identity` |
 | `caatinga init <dir>`    | Scaffold project from template (default: react-vite-counter)     | `-t`, `--minimal`, `--empty`                                                |
 | `caatinga zk init [dir]` | Scaffold ZK project (zk-starter)                                 | `--minimal`                                                                 |
 
@@ -531,7 +530,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 3. **Full graph deploy auto-runs `wire` + `sync-env`** — pass `--no-wire` / `--no-sync-env` to skip.
 4. **Browser invoke is single-invoker only until v1.0** — multi-signer (`signAuthEntry`) is application code and throws `CAATINGA_MULTI_AUTH_REQUIRED`.
 5. **ZK on mainnet is blocked by default** — dev ceremony artifacts require `--allow-dev-ceremony` (not for production).
-6. **Fresh machine** — Install Node 22+, `caatinga setup` does the rest.
+6. **Fresh machine** — Install Node 22+, Rust + Stellar CLI manually, then `caatinga doctor`.
 7. **Errors are public API** — automation must parse `CAATINGA_*` codes, not message text.
 8. **`read()` vs `invoke()`** — `read` = simulate (no sign), `invoke` = sign + submit.
 9. **Wallet adapters must reject on dismissal** — never leave promise pending.

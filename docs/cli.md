@@ -2,6 +2,8 @@
 
 The CLI is intentionally thin. It delegates config, artifacts, command execution, and parser behavior to `@caatinga/core`.
 
+After `npm install -g @caatinga/cli` (or a local install), the package exposes two binaries that share the same entrypoint: **`caatinga`** and **`ctg`**. Docs and examples use `caatinga`; `ctg` is a short alias (`ctg doctor` ≡ `caatinga doctor`). Help text uses whichever name invoked the process.
+
 ## Supported today vs not yet
 
 | Capability                        | Status                                                       |
@@ -16,37 +18,6 @@ The CLI is intentionally thin. It delegates config, artifacts, command execution
 | Production ZK (MPC powers-of-tau) | Out of scope; no Caatinga command for MPC ceremony           |
 
 See [Client — Single-invoker scope](./client.md#single-invoker-scope) and [ZK module](./zk.md#production-guardrails) for details.
-
-## `caatinga setup [--source alice] [--network testnet] [--skip-rust] [--skip-stellar] [--skip-identity]`
-
-One-step bootstrap of every prerequisite for Stellar/Soroban development. Run it **before**
-`caatinga init` on a fresh machine — it detects what is missing and installs only that. Each of the
-five steps is idempotent: anything already present and compatible is reported and skipped.
-
-| Step                  | What it does                                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. Node.js            | Verifies Node meets the minimum (22+). Cannot auto-install Node — aborts with upgrade guidance if too old.                                                                     |
-| 2. Rust toolchain     | Installs Rust via verified `rustup-init` download (HTTPS + SHA256 checksum + host allowlist) when missing, or updates it via `rustup update` when below the minimum.           |
-| 3. WebAssembly target | Adds the `wasm32v1-none` target required to build Soroban contracts.                                                                                                           |
-| 4. Stellar CLI        | Validates the installed CLI against the supported minimum; installs the last-tested version (`cargo install --locked stellar-cli --version <pinned>`) when missing or too old. |
-| 5. Local identity     | Generates the `--source` identity; funds it via friendbot on fundable networks (`testnet`, `futurenet`, `local`, `standalone`).                                                |
-
-```bash
-caatinga setup                               # alice on testnet, install everything missing
-caatinga setup --source bob --network testnet
-caatinga setup --skip-rust --skip-stellar    # only create the local identity
-```
-
-Notes:
-
-- **`caatinga setup` is available on `@caatinga/cli@latest` (3.4.0+).**
-- Stellar CLI is **version-pinned** to the last-tested release.
-- On **Linux**, first install via `cargo install` can take 5–15 minutes — use `cargo binstall stellar-cli` or a [prebuilt binary](https://github.com/stellar/stellar-cli/releases) for speed.
-- On **Windows**, Rust cannot be auto-installed — setup prints manual instructions.
-- On **non-fundable networks** (e.g. mainnet), the identity is created but not funded.
-- After fresh installs, restart the terminal or run `source "$HOME/.cargo/env"`.
-
-`caatinga doctor` is the read-only counterpart: setup _installs_ prerequisites, doctor _checks_ them.
 
 ## `caatinga init <projectName>`
 

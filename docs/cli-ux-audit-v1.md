@@ -14,7 +14,7 @@ Final review checklist before v1.0 contract freeze. Compare live `--help` output
 | Flag            | Commands using it                                         | Consistent? |
 | --------------- | --------------------------------------------------------- | ----------- |
 | `--network`     | deploy, upgrade, generate, invoke, read, doctor, smoke, … | Yes         |
-| `--source`      | deploy, upgrade, invoke, wire, setup                      | Yes         |
+| `--source`      | deploy, upgrade, invoke, wire                             | Yes         |
 | `--force`       | deploy, upgrade                                           | Yes         |
 | `-v, --version` | global                                                    | Yes         |
 
@@ -23,7 +23,6 @@ Final review checklist before v1.0 contract freeze. Compare live `--help` output
 | Command         | Help clear | Examples in docs | Notes                               |
 | --------------- | ---------- | ---------------- | ----------------------------------- |
 | init            | ✓          | ✓                |                                     |
-| setup           | ✓          | ✓                |                                     |
 | build           | ✓          | ✓                |                                     |
 | deploy          | ✓          | ✓                | Transient retry messages documented |
 | upgrade         | ✓          | ✓                |                                     |
