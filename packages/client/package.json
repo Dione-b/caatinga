@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/client",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Browser and Node client for Soroban smart contracts — connects generated bindings, Caatinga artifacts, and wallet adapters",
   "keywords": [
     "stellar",

@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/cli",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Caatinga CLI for building dApps on Stellar/Soroban",
   "keywords": [
     "stellar",

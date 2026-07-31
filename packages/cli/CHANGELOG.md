@@ -1,5 +1,18 @@
 ## Breaking changes policy
 
+## 3.9.1
+
+### Patch Changes
+
+- Standardize docs, next-step tips, help text, and bundled templates on the `ctg` binary name; `caatinga` remains as a legacy alias (same entrypoint).
+- Error hints from `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk` now reference `ctg`.
+- `caatinga.config.ts`, `caatinga.artifacts.json`, and `caatinga.template.json` names are unchanged.
+
+### Patch Changes
+
+- @caatinga/core@3.9.1
+- @caatinga/zk@3.9.1
+
 ## 3.9.0
 
 ### Breaking Changes
@@ -8,7 +21,7 @@
 
 ### Minor Changes
 
-- Expose `ctg` as a short install-time alias for the `caatinga` CLI binary (same entrypoint; help uses the invoked name when the binary is `ctg`, otherwise `caatinga`).
+- Expose `ctg` as a short install-time alias for the `caatinga` CLI binary (same entrypoint; help and next-step tips use the invoked name when the binary is `ctg`, otherwise `caatinga`).
 
 ### Patch Changes
 
