@@ -43,6 +43,7 @@ describe("createProgram", () => {
         "version",
       ])
     );
+    expect(commandNames).not.toContain("setup");
   });
 
   it("should_expose_ctg_bin_alias_alongside_caatinga", async () => {
@@ -65,6 +66,21 @@ describe("createProgram", () => {
 
       expect(program.name()).toBe("ctg");
       expect(program.helpInformation()).toContain("ctg [options] [command]");
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it("should_use_caatinga_name_when_argv_points_at_index_entry", () => {
+    const originalArgv = process.argv;
+
+    try {
+      process.argv = ["node", "/home/x/node_modules/@caatinga/cli/dist/index.js"];
+      const program = createProgram();
+
+      expect(program.name()).toBe("caatinga");
+      expect(program.helpInformation()).toContain("caatinga [options] [command]");
+      expect(program.helpInformation()).not.toContain("index [options] [command]");
     } finally {
       process.argv = originalArgv;
     }

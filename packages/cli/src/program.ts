@@ -27,11 +27,18 @@ import { registerIdentityCommand } from "./commands/identity.command.js";
 import { registerVersionCommand } from "./commands/version.command.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
 
+function resolveCliProgramName(): string {
+  const candidate = path
+    .basename(process.argv[1] ?? "caatinga")
+    .replace(/\.(js|ts|mjs|cjs)$/i, "");
+  return candidate === "ctg" ? "ctg" : "caatinga";
+}
+
 export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name(path.basename(process.argv[1] ?? "caatinga").replace(/\.(js|ts)$/, ""))
+    .name(resolveCliProgramName())
     .description("Developer toolkit for Stellar/Soroban dApps")
     .version(CAATINGA_CLI_VERSION, "-v, --version", "Output the current version")
     .configureHelp({
