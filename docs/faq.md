@@ -30,12 +30,12 @@ It is the ability to automate the entire contract deployment process while respe
 
 They are the deployment metadata stored in the `caatinga.artifacts.json` file, containing information such as:
 
-* Contract ID
-* WASM Hash
-* Deployment date
-* Dependencies
-* Project paths
-* Upgrade history
+- Contract ID
+- WASM Hash
+- Deployment date
+- Dependencies
+- Project paths
+- Upgrade history
 
 This file is versioned along with the source code in Git.
 
@@ -66,9 +66,9 @@ The recommended workflow is:
 
 After installing Node.js 22+, run `caatinga doctor` to check what is missing, then install prerequisites manually:
 
-* Rust via [rustup](https://rustup.rs) + `rustup target add wasm32v1-none`
-* [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0+
-* `stellar keys generate alice --fund --network testnet`
+- Rust via [rustup](https://rustup.rs) + `rustup target add wasm32v1-none`
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0+
+- `stellar keys generate alice --fund --network testnet`
 
 ---
 
@@ -76,8 +76,8 @@ After installing Node.js 22+, run `caatinga doctor` to check what is missing, th
 
 Currently, there are two:
 
-* **react-vite-counter** (default template)
-* **zk-starter** (template for Zero Knowledge projects)
+- **react-vite-counter** (default template)
+- **zk-starter** (template for Zero Knowledge projects)
 
 The only officially supported frontend is **Vite + React**.
 
@@ -119,13 +119,13 @@ npx caatinga build counter
 
 The deployment automatically performs several steps:
 
-* deploys the contract;
-* registers the contract in `caatinga.artifacts.json`;
-* generates TypeScript bindings (by default);
-* when run without specifying a contract, it also runs:
+- deploys the contract;
+- registers the contract in `caatinga.artifacts.json`;
+- generates TypeScript bindings (by default);
+- when run without specifying a contract, it also runs:
 
-  * `wire`;
-  * `sync-env`.
+  - `wire`;
+  - `sync-env`.
 
 Thus, a single command can set up the entire application after deployment.
 
@@ -149,11 +149,11 @@ caatinga deploy
 
 Caatinga:
 
-* resolves dependencies (`dependsOn`);
-* determines the correct order of deployment;
-* executes `postDeploy` hooks;
-* synchronizes frontend environment variables;
-* automatically generates bindings.
+- resolves dependencies (`dependsOn`);
+- determines the correct order of deployment;
+- executes `postDeploy` hooks;
+- synchronizes frontend environment variables;
+- automatically generates bindings.
 
 This is the recommended mode for applications with multiple contracts.
 
@@ -165,9 +165,9 @@ Use `upgrade` when the contract already implements an administrative function `u
 
 In this mode:
 
-* the `contractId` remains the same;
-* only the WASM bytecode is replaced;
-* the upgrade history is recorded in the artifacts.
+- the `contractId` remains the same;
+- only the WASM bytecode is replaced;
+- the upgrade history is recorded in the artifacts.
 
 ---
 
@@ -175,16 +175,16 @@ In this mode:
 
 `caatinga upgrade`
 
-* preserves the same `contractId`;
-* uploads the new WASM bytecode;
-* calls the contract's `upgrade` method.
+- preserves the same `contractId`;
+- uploads the new WASM bytecode;
+- calls the contract's `upgrade` method.
 
 `caatinga deploy --upgrade`
 
-* creates a new instance of the contract;
-* generates a new `contractId`;
-* registers the previous contract in the history;
-* automatically implies `--force`.
+- creates a new instance of the contract;
+- generates a new `contractId`;
+- registers the previous contract in the history;
+- automatically implies `--force`.
 
 The former is an "in-place" upgrade. The latter is a redeploy.
 
@@ -208,14 +208,14 @@ It is Caatinga's diagnostic tool.
 
 It checks:
 
-* Node installation;
-* Stellar CLI;
-* Rust;
-* project configuration;
-* artifacts;
-* bindings;
-* Stellar identity;
-* network connectivity.
+- Node installation;
+- Stellar CLI;
+- Rust;
+- project configuration;
+- artifacts;
+- bindings;
+- Stellar identity;
+- network connectivity.
 
 It is the recommended command to run before making any changes to the deployment state.
 
@@ -227,10 +227,10 @@ It is the recommended command to run before making any changes to the deployment
 
 The information displayed includes:
 
-* deployed contracts;
-* bindings freshness state;
-* the network being used;
-* support for JSON output (`--json`).
+- deployed contracts;
+- bindings freshness state;
+- the network being used;
+- support for JSON output (`--json`).
 
 With `--strict`, the command returns exit code `1` if there are stale or missing bindings.
 
@@ -240,9 +240,9 @@ With `--strict`, the command returns exit code `1` if there are stale or missing
 
 `invoke`
 
-* signs the transaction;
-* sends it to the blockchain;
-* modifies the contract's state.
+- signs the transaction;
+- sends it to the blockchain;
+- modifies the contract's state.
 
 Example:
 
@@ -252,10 +252,10 @@ caatinga invoke counter.increment --source alice
 
 `read`
 
-* only simulates execution;
-* is not signed;
-* does not send a transaction;
-* does not modify the state.
+- only simulates execution;
+- is not signed;
+- does not send a transaction;
+- does not modify the state.
 
 Example:
 
@@ -271,13 +271,13 @@ Always use `read` for queries, and `invoke` only when it is necessary to modify 
 
 It is the main configuration file of the project. In it, you define:
 
-* project name;
-* contracts;
-* networks;
-* frontend;
-* deployment hooks;
-* smoke tests;
-* Zero Knowledge configurations.
+- project name;
+- contracts;
+- networks;
+- frontend;
+- deployment hooks;
+- smoke tests;
+- Zero Knowledge configurations.
 
 The entire CLI uses this file as the single source of truth.
 
@@ -287,11 +287,11 @@ The entire CLI uses this file as the single source of truth.
 
 Each contract is registered under the `contracts` section, containing information such as:
 
-* source code directory (`path`);
-* path to the compiled WASM bytecode (`wasm`);
-* dependencies;
-* deployment arguments;
-* compilation options.
+- source code directory (`path`);
+- path to the compiled WASM bytecode (`wasm`);
+- dependencies;
+- deployment arguments;
+- compilation options.
 
 Example:
 
@@ -313,16 +313,16 @@ contracts: {
 Example:
 
 ```ts
-dependsOn: ["token"]
+dependsOn: ["token"];
 ```
 
 In this case, the `token` contract will be deployed before the current contract.
 
 Additionally, Caatinga automatically validates:
 
-* that the contract exists;
-* that there are no circular dependencies;
-* that all references are valid.
+- that the contract exists;
+- that there are no circular dependencies;
+- that all references are valid.
 
 ---
 
@@ -334,7 +334,7 @@ Example:
 
 ```ts
 deployArgs: {
-  tokenContractId: "${contracts.token.contractId}"
+  tokenContractId: "${contracts.token.contractId}";
 }
 ```
 
@@ -368,9 +368,9 @@ The deployment fails with a specific error code.
 
 Some examples include:
 
-* `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
-* `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`
-* `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND`
+- `CAATINGA_DEPLOY_ARG_PLACEHOLDER_UNRESOLVED`
+- `CAATINGA_DEPLOY_ARG_PLACEHOLDER_INVALID`
+- `CAATINGA_CONTRACT_DEPENDENCY_ARTIFACT_NOT_FOUND`
 
 This prevents inconsistent deployments.
 
@@ -382,10 +382,10 @@ It is a list of calls executed automatically after deployment.
 
 These hooks are typically used to:
 
-* initialize contracts;
-* configure administrators;
-* register permissions;
-* perform mandatory procedures right after deployment.
+- initialize contracts;
+- configure administrators;
+- register permissions;
+- perform mandatory procedures right after deployment.
 
 Example:
 
@@ -393,9 +393,9 @@ Example:
 postDeploy: [
   {
     contract: "counter",
-    method: "initialize"
-  }
-]
+    method: "initialize",
+  },
+];
 ```
 
 ---
@@ -404,14 +404,14 @@ postDeploy: [
 
 `postDeploy`
 
-* executes signed calls (`invoke`);
-* modifies the contract's state.
+- executes signed calls (`invoke`);
+- modifies the contract's state.
 
 `postDeployRead`
 
-* executes only simulations (`read`);
-* does not modify the state;
-* is typically used for automatic post-deployment validation.
+- executes only simulations (`read`);
+- does not modify the state;
+- is typically used for automatic post-deployment validation.
 
 ---
 
@@ -421,11 +421,11 @@ postDeploy: [
 
 Information that can be exported includes:
 
-* Contract ID;
-* WASM Hash;
-* RPC URL;
-* Network Passphrase;
-* Deployment date.
+- Contract ID;
+- WASM Hash;
+- RPC URL;
+- Network Passphrase;
+- Deployment date.
 
 This eliminates the need to manually update environment variables after each deployment.
 
@@ -439,11 +439,11 @@ It performs read calls (`read`) and validates the results using an Expect DSL.
 
 These tests can verify, for example:
 
-* if the contract responds;
-* if a return value is an array;
-* if a value is equal to what is expected;
-* if a regular expression matches the result;
-* if the returned JSON matches the expected structure exactly.
+- if the contract responds;
+- if a return value is an array;
+- if a value is equal to what is expected;
+- if a regular expression matches the result;
+- if the returned JSON matches the expected structure exactly.
 
 The corresponding command is:
 
@@ -467,11 +467,11 @@ It is the function responsible for creating an instance of the application clien
 
 It accepts:
 
-* network configuration;
-* `caatinga.artifacts.json`;
-* a wallet adapter;
-* generated bindings;
-* options like wallet timeout.
+- network configuration;
+- `caatinga.artifacts.json`;
+- a wallet adapter;
+- generated bindings;
+- options like wallet timeout.
 
 Once created, this instance allows access to any configured contract.
 
@@ -481,10 +481,10 @@ Once created, this instance allows access to any configured contract.
 
 Because the artifacts store the metadata of the deployed contracts, including:
 
-* Contract ID;
-* WASM Hash;
-* Network;
-* Deployment history.
+- Contract ID;
+- WASM Hash;
+- Network;
+- Deployment history.
 
 Thus, the frontend typically does not need to specify the Contract ID manually.
 
@@ -494,10 +494,10 @@ Thus, the frontend typically does not need to specify the Contract ID manually.
 
 Each contract supports four main operations:
 
-* `read()`
-* `simulate()`
-* `invoke()`
-* `buildXdr()`
+- `read()`
+- `simulate()`
+- `invoke()`
+- `buildXdr()`
 
 Each serves a different interaction scenario with the contract.
 
@@ -507,21 +507,21 @@ Each serves a different interaction scenario with the contract.
 
 **`read()`**
 
-* is not signed;
-* does not send a transaction;
-* returns only the processed value.
+- is not signed;
+- does not send a transaction;
+- returns only the processed value.
 
 **`simulate()`**
 
-* is not signed;
-* does not send a transaction;
-* returns complete simulation metadata.
+- is not signed;
+- does not send a transaction;
+- returns complete simulation metadata.
 
 **`invoke()`**
 
-* signs the transaction;
-* sends it to the blockchain;
-* returns execution details, the transaction hash, and optionally, debugging data.
+- signs the transaction;
+- sends it to the blockchain;
+- returns execution details, the transaction hash, and optionally, debugging data.
 
 ---
 
@@ -531,9 +531,9 @@ Each serves a different interaction scenario with the contract.
 
 This feature is useful when:
 
-* another application will perform the signing;
-* you want to inspect the transaction details;
-* the broadcast will happen later.
+- another application will perform the signing;
+- you want to inspect the transaction details;
+- the broadcast will happen later.
 
 ---
 
@@ -543,8 +543,8 @@ Caatinga uses a simple interface named `CaatingaWalletAdapter`.
 
 It requires only two methods:
 
-* `getPublicKey()`
-* `signTransaction()`
+- `getPublicKey()`
+- `signTransaction()`
 
 Any wallet that implements this interface can be used by the client.
 
@@ -554,8 +554,8 @@ Any wallet that implements this interface can be used by the client.
 
 The documentation defines two important rules:
 
-* when a signature is canceled, the wallet must reject the Promise, never leave it pending;
-* a timeout is not automatically enforced by Caatinga. If desired, it should be configured via `walletTimeout`.
+- when a signature is canceled, the wallet must reject the Promise, never leave it pending;
+- a timeout is not automatically enforced by Caatinga. If desired, it should be configured via `walletTimeout`.
 
 ---
 
@@ -565,11 +565,11 @@ The documentation defines two important rules:
 
 It offers features such as:
 
-* connecting;
-* disconnecting;
-* restoring persisted sessions;
-* observing state changes;
-* retaining the connection across page reloads.
+- connecting;
+- disconnecting;
+- restoring persisted sessions;
+- observing state changes;
+- retaining the connection across page reloads.
 
 This allows reusing the same logic in React as well as other frontend frameworks.
 
@@ -581,14 +581,14 @@ It is the official registry of the contracts deployed by the project.
 
 For each network, it stores information such as:
 
-* Contract ID;
-* WASM Hash;
-* deployment date;
-* paths to source code and WASM bytecode;
-* resolved dependencies;
-* resolved deployment arguments;
-* upgrade strategy;
-* version history.
+- Contract ID;
+- WASM Hash;
+- deployment date;
+- paths to source code and WASM bytecode;
+- resolved dependencies;
+- resolved deployment arguments;
+- upgrade strategy;
+- version history.
 
 This file is versioned in Git and serves as the primary source of truth regarding the state of deployed contracts. Even if the project stops using Caatinga, the file remains useful as a historical record of deployments.
 
@@ -606,13 +606,13 @@ The documentation recommends that scripts and tools **always inspect the error c
 
 Some of the key errors are:
 
-| Code | Meaning |
-| --- | --- |
-| `CAATINGA_CONFIG_NOT_FOUND` | `caatinga.config.ts` file not found |
-| `CAATINGA_INVALID_CONFIG` | Invalid configuration |
+| Code                          | Meaning                                      |
+| ----------------------------- | -------------------------------------------- |
+| `CAATINGA_CONFIG_NOT_FOUND`   | `caatinga.config.ts` file not found          |
+| `CAATINGA_INVALID_CONFIG`     | Invalid configuration                        |
 | `CAATINGA_CONTRACT_NOT_FOUND` | Contract does not exist in the configuration |
-| `CAATINGA_NETWORK_NOT_FOUND` | Specified network does not exist |
-| `CAATINGA_ARTIFACT_NOT_FOUND` | Artifact does not exist |
+| `CAATINGA_NETWORK_NOT_FOUND`  | Specified network does not exist             |
+| `CAATINGA_ARTIFACT_NOT_FOUND` | Artifact does not exist                      |
 
 These errors typically halt any CLI operation.
 
@@ -628,15 +628,15 @@ alice
 
 It must never receive:
 
-* a public key (`G...`);
-* a secret key (`S...`);
-* a seed phrase.
+- a public key (`G...`);
+- a secret key (`S...`);
+- a seed phrase.
 
 If this happens, Caatinga returns specific errors such as:
 
-* `CAATINGA_SOURCE_IS_PUBLIC_KEY`
-* `CAATINGA_SOURCE_IS_SECRET_KEY`
-* `CAATINGA_SOURCE_IS_SEED_PHRASE`
+- `CAATINGA_SOURCE_IS_PUBLIC_KEY`
+- `CAATINGA_SOURCE_IS_SECRET_KEY`
+- `CAATINGA_SOURCE_IS_SEED_PHRASE`
 
 This validation prevents security issues and standardizes integration with the Stellar CLI.
 
@@ -646,9 +646,9 @@ This validation prevents security issues and standardizes integration with the S
 
 Before any command is executed, the configuration loader checks:
 
-* whether all contracts referenced in `dependsOn` exist;
-* whether there are any dependency cycles;
-* whether placeholders like `${contracts.*.contractId}` have their corresponding dependency declared.
+- whether all contracts referenced in `dependsOn` exist;
+- whether there are any dependency cycles;
+- whether placeholders like `${contracts.*.contractId}` have their corresponding dependency declared.
 
 If any of these validations fail, configuration loading is aborted immediately.
 
@@ -660,11 +660,11 @@ Caatinga monitors whether the TypeScript bindings correspond to the currently de
 
 There are four possible states:
 
-| State | Meaning |
-| --- | --- |
-| `fresh` | Binding is up to date |
-| `stale` | Contract changed after the binding was generated |
-| `missing` | Binding does not exist |
+| State     | Meaning                                                          |
+| --------- | ---------------------------------------------------------------- |
+| `fresh`   | Binding is up to date                                            |
+| `stale`   | Contract changed after the binding was generated                 |
+| `missing` | Binding does not exist                                           |
 | `unknown` | Binding was created before the tracking mechanism was introduced |
 
 This information is stored in the file:
@@ -705,10 +705,10 @@ Caatinga has built-in support for Circom circuits using Groth16.
 
 The primary commands are:
 
-* `caatinga zk init`
-* `caatinga zk build`
-* `caatinga zk prove`
-* `caatinga zk invoke`
+- `caatinga zk init`
+- `caatinga zk build`
+- `caatinga zk prove`
+- `caatinga zk invoke`
 
 There is also a dedicated package:
 
@@ -726,10 +726,10 @@ Yes.
 
 The documentation lists some important limitations:
 
-* `zk build` uses only a development ceremony (single-party);
-* Mainnet deployment is blocked by default when using artifacts from the development ceremony;
-* `--embed-vk` is experimental;
-* production setups with MPC ceremonies are out of scope for the project.
+- `zk build` uses only a development ceremony (single-party);
+- Mainnet deployment is blocked by default when using artifacts from the development ceremony;
+- `--embed-vk` is experimental;
+- production setups with MPC ceremonies are out of scope for the project.
 
 To bypass the Mainnet protection (not recommended for production), you must use:
 
@@ -743,14 +743,14 @@ To bypass the Mainnet protection (not recommended for production), you must use:
 
 The documentation highlights the following recommendations:
 
-* run `caatinga doctor` before changing the deployment state;
-* follow the `build → deploy → generate → invoke` workflow;
-* use Stellar CLI identity aliases in `--source`;
-* always inspect `CAATINGA_*` error codes;
-* version `caatinga.artifacts.json` in Git;
-* use `read()` for queries and `invoke()` only for state modifications;
-* regenerate bindings whenever the contract interface changes;
-* pin exact package versions in CI/CD environments to guarantee reproducible builds.
+- run `caatinga doctor` before changing the deployment state;
+- follow the `build → deploy → generate → invoke` workflow;
+- use Stellar CLI identity aliases in `--source`;
+- always inspect `CAATINGA_*` error codes;
+- version `caatinga.artifacts.json` in Git;
+- use `read()` for queries and `invoke()` only for state modifications;
+- regenerate bindings whenever the contract interface changes;
+- pin exact package versions in CI/CD environments to guarantee reproducible builds.
 
 ---
 
@@ -760,19 +760,20 @@ The workflow suggested by the documentation is:
 
 1. Create the project using `caatinga init`.
 2. Verify and set up the environment using `caatinga doctor` (install any missing prerequisites manually).
-4. Build the contracts using `caatinga build`.
-5. Deploy using `caatinga deploy`.
-6. Allow bindings to be generated automatically (or run `caatinga generate` when needed).
-7. Execute `wire` hooks and synchronize the frontend (`sync-env`) in full-graph deployments.
-8. Validate the deployment with `caatinga smoke` or `caatinga regression`.
-9. Interact with contracts using:
+3. Build the contracts using `caatinga build`.
+4. Deploy using `caatinga deploy`.
+5. Allow bindings to be generated automatically (or run `caatinga generate` when needed).
+6. Execute `wire` hooks and synchronize the frontend (`sync-env`) in full-graph deployments.
+7. Validate the deployment with `caatinga smoke` or `caatinga regression`.
+8. Interact with contracts using:
 
-   * `read` for queries;
-   * `invoke` for operations that alter state;
-   * `@caatinga/client` for frontend integration.
-10. During contract updates:
+   - `read` for queries;
+   - `invoke` for operations that alter state;
+   - `@caatinga/client` for frontend integration.
 
-    * use `caatinga upgrade` when the contract supports in-place upgrades;
-    * use `caatinga deploy --upgrade` when a new contract instance needs to be created.
+9. During contract updates:
+
+   - use `caatinga upgrade` when the contract supports in-place upgrades;
+   - use `caatinga deploy --upgrade` when a new contract instance needs to be created.
 
 This workflow covers the entire lifecycle of a Soroban application using Caatinga, from project creation to maintenance, upgrades, and frontend integration.

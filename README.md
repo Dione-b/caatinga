@@ -116,11 +116,11 @@ my-dapp/
 
 ## Packages
 
-| Package            | Role                                                                                            |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Package            | Role                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
 | `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
-| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                |
-| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                      |
+| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                        |
+| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                              |
 
 Full export map: [Packages](./docs/packages.md). Public errors use stable `CAATINGA_*` codes — see [Errors](./docs/errors.md).
 

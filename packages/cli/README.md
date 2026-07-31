@@ -37,22 +37,22 @@ Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main
 
 ## Commands
 
-| Command                             | What it does                                             |
-| ----------------------------------- | -------------------------------------------------------- |
-| `caatinga init <dir>`               | Create a project from a bundled template                 |
-| `caatinga doctor`                   | Check toolchain, config, artifacts, env drift, bindings  |
-| `caatinga build [contract]`         | Compile contract WASM                                    |
-| `caatinga deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings  |
-| `caatinga wire`                     | Run configured `postDeploy` + `postDeployRead` hooks     |
-| `caatinga sync-env`                 | Write frontend env vars from artifacts                   |
-| `caatinga generate [contract]`      | (Re)generate TypeScript bindings                         |
-| `caatinga status`                   | Show deployed contracts and binding freshness            |
-| `caatinga smoke`                    | Run configured read-only smoke checks                    |
-| `caatinga regression`               | test → build → deploy --if-changed → generate → smoke    |
-| `caatinga ci run`                   | `doctor` then `smoke` (CI helper)                        |
-| `caatinga identity export\|import`  | Export/import Stellar CLI config for CI secrets          |
-| `caatinga invoke <contract.method>` | Call a state-changing contract method                    |
-| `caatinga read <contract.method>`   | Simulate a read-only contract method                     |
+| Command                             | What it does                                            |
+| ----------------------------------- | ------------------------------------------------------- |
+| `caatinga init <dir>`               | Create a project from a bundled template                |
+| `caatinga doctor`                   | Check toolchain, config, artifacts, env drift, bindings |
+| `caatinga build [contract]`         | Compile contract WASM                                   |
+| `caatinga deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings |
+| `caatinga wire`                     | Run configured `postDeploy` + `postDeployRead` hooks    |
+| `caatinga sync-env`                 | Write frontend env vars from artifacts                  |
+| `caatinga generate [contract]`      | (Re)generate TypeScript bindings                        |
+| `caatinga status`                   | Show deployed contracts and binding freshness           |
+| `caatinga smoke`                    | Run configured read-only smoke checks                   |
+| `caatinga regression`               | test → build → deploy --if-changed → generate → smoke   |
+| `caatinga ci run`                   | `doctor` then `smoke` (CI helper)                       |
+| `caatinga identity export\|import`  | Export/import Stellar CLI config for CI secrets         |
+| `caatinga invoke <contract.method>` | Call a state-changing contract method                   |
+| `caatinga read <contract.method>`   | Simulate a read-only contract method                    |
 
 Notable flags: `--if-changed`, `--strict-network`, `--strict` / `--strict-env` / `--strict-bindings` (doctor), `status --strict`, `read --expect`.
 

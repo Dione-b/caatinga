@@ -51,13 +51,13 @@ See [Testing — CI without local secrets](./internal/testing.md).
 
 ## Explicitly not supported
 
-| Model                                | Status         | Notes                                                                        |
-| ------------------------------------ | -------------- | ---------------------------------------------------------------------------- |
-| Hardware wallets (Ledger/Trezor)     | Not supported  | SWK stubs only; no native Ledger integration                                 |
-| KMS / cloud signing (AWS KMS, GCP)   | Out of scope   | Use Stellar CLI or custom signing outside Caatinga                           |
-| Backend / server-side signing        | Out of scope   | Application responsibility                                                   |
-| Multisig / `signAuthEntry` in client | App-owned      | `CAATINGA_MULTI_AUTH_REQUIRED` — orchestrate in application code             |
-| Caatinga-managed key storage         | Never          | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
+| Model                                | Status        | Notes                                                                        |
+| ------------------------------------ | ------------- | ---------------------------------------------------------------------------- |
+| Hardware wallets (Ledger/Trezor)     | Not supported | SWK stubs only; no native Ledger integration                                 |
+| KMS / cloud signing (AWS KMS, GCP)   | Out of scope  | Use Stellar CLI or custom signing outside Caatinga                           |
+| Backend / server-side signing        | Out of scope  | Application responsibility                                                   |
+| Multisig / `signAuthEntry` in client | App-owned     | `CAATINGA_MULTI_AUTH_REQUIRED` — orchestrate in application code             |
+| Caatinga-managed key storage         | Never         | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
 
 ## Related docs
 

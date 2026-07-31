@@ -37,11 +37,11 @@ pnpm --filter @caatinga/cli dev init my-dapp
 
 **New to Caatinga?** Start with the Template path — it scaffolds a complete dApp with Vite + React, wallet wiring, and a sample `counter` contract ready to build and deploy.
 
-| Guide                                               | Command                                       | Best for                                          |
-| --------------------------------------------------- | --------------------------------------------- | ------------------------------------------------- |
-| [Template project](./tutorials/template-project.md) ⭐ | `npx caatinga init my-dapp`                | First Caatinga dApp — browser UI included         |
-| [Minimal project](./tutorials/minimal-project.md)   | `npx caatinga init my-contract-app --minimal` | Contract + CLI only; choose your UI stack later   |
-| [ZK project](./tutorials/zk-project.md)             | `npx caatinga zk init my-zk-dapp`             | Groth16 proofs on Soroban                         |
+| Guide                                                  | Command                                       | Best for                                        |
+| ------------------------------------------------------ | --------------------------------------------- | ----------------------------------------------- |
+| [Template project](./tutorials/template-project.md) ⭐ | `npx caatinga init my-dapp`                   | First Caatinga dApp — browser UI included       |
+| [Minimal project](./tutorials/minimal-project.md)      | `npx caatinga init my-contract-app --minimal` | Contract + CLI only; choose your UI stack later |
+| [ZK project](./tutorials/zk-project.md)                | `npx caatinga zk init my-zk-dapp`             | Groth16 proofs on Soroban                       |
 
 See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a full comparison.
 

@@ -85,23 +85,23 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 
 ## Commands
 
-| Command                             | What it does                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------- |
-| `caatinga init <dir>`               | Scaffold a project from a template                                        |
-| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity       |
-| `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts        |
-| `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings            |
-| `caatinga upgrade <contract>`       | In-place WASM upgrade on existing `contractId` (upload + invoke)          |
-| `caatinga wire`                     | Run configured `postDeploy` hooks against deployed contracts              |
-| `caatinga sync-env`                 | Write configured frontend env vars from deploy artifacts                  |
-| `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs               |
-| `caatinga status`                   | Table of deployed contracts + binding freshness per network               |
-| `caatinga smoke`                    | Run configured read-only smoke checks with expect DSL                     |
-| `caatinga regression`               | Full pipeline: test → build → deploy --if-changed → generate → smoke      |
-| `caatinga ci run`                   | CI helper: `doctor` then `smoke`                                          |
-| `caatinga identity export\|import`  | Export/import Stellar CLI config as base64 tarball                        |
-| `caatinga invoke <contract.method>` | Call a contract method from the CLI                                       |
-| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                         |
+| Command                             | What it does                                                         |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `caatinga init <dir>`               | Scaffold a project from a template                                   |
+| `caatinga doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity  |
+| `caatinga build [contract]`         | Compile contract WASM; omit name to build all configured contracts   |
+| `caatinga deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings       |
+| `caatinga upgrade <contract>`       | In-place WASM upgrade on existing `contractId` (upload + invoke)     |
+| `caatinga wire`                     | Run configured `postDeploy` hooks against deployed contracts         |
+| `caatinga sync-env`                 | Write configured frontend env vars from deploy artifacts             |
+| `caatinga generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs          |
+| `caatinga status`                   | Table of deployed contracts + binding freshness per network          |
+| `caatinga smoke`                    | Run configured read-only smoke checks with expect DSL                |
+| `caatinga regression`               | Full pipeline: test → build → deploy --if-changed → generate → smoke |
+| `caatinga ci run`                   | CI helper: `doctor` then `smoke`                                     |
+| `caatinga identity export\|import`  | Export/import Stellar CLI config as base64 tarball                   |
+| `caatinga invoke <contract.method>` | Call a contract method from the CLI                                  |
+| `caatinga read <contract.method>`   | Simulate a read-only contract method (no signing)                    |
 
 ## Flags
 

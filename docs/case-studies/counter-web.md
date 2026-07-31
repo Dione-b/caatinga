@@ -25,11 +25,11 @@ Without Caatinga, each step (deploy ID tracking, binding generation, wallet wiri
 
 ## Setup timeline (approximate)
 
-| Step                          | Time           | Notes                                                                                   |
-| ----------------------------- | -------------- | --------------------------------------------------------------------------------------- |
-| `caatinga init` from template | ~5 min         | `react-vite-counter` scaffold                                                           |
-| `build` + `deploy` on testnet | ~10 min        | Includes Stellar CLI identity funding                                                   |
-| `npm run dev`                 | ~2 min         | WalletConnect needs `.env`                                                              |
+| Step                          | Time           | Notes                                                                                                                                                        |
+| ----------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `caatinga init` from template | ~5 min         | `react-vite-counter` scaffold                                                                                                                                |
+| `build` + `deploy` on testnet | ~10 min        | Includes Stellar CLI identity funding                                                                                                                        |
+| `npm run dev`                 | ~2 min         | WalletConnect needs `.env`                                                                                                                                   |
 | **Total to first invoke**     | **~1–2 hours** | Assumes Stellar CLI + Rust already installed; first-time toolchain setup adds 1–2 hours (install Rust + Stellar CLI manually, verify with `caatinga doctor`) |
 
 ## What worked

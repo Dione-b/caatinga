@@ -8,15 +8,15 @@ Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). A
 
 ## Install & release
 
-| Item              | Value                                                                                     |
-| ----------------- | ----------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| Item              | Value                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| npm dist-tag      | `latest` → **3.9.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. |
-| Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                              |
-| No global install | `npx caatinga <command>` (or `npx ctg`)                                                   |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.8.0`), not a floating tag                     |
-| Fresh machine     | Node 22+, then check with `npx caatinga doctor`. Install Rust, Stellar CLI manually.       |
-| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only              |
+| Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                                 |
+| No global install | `npx caatinga <command>` (or `npx ctg`)                                                      |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.0`), not a floating tag                        |
+| Fresh machine     | Node 22+, then check with `npx caatinga doctor`. Install Rust, Stellar CLI manually.         |
+| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                 |
 
 See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-cli-version-contract.md).
 
@@ -67,16 +67,16 @@ Default `react-vite-counter` has no `upgrade()` — use `deploy --upgrade` for t
 
 ## 2. Package Reference
 
-| Package                                | Role                                                                  | Browser-safe |
-| -------------------------------------- | --------------------------------------------------------------------- | ------------ |
-| `@caatinga/cli`                        | CLI binary                                                            | No           |
-| `@caatinga/core`                       | Config, artifacts, Stellar CLI orchestration                          | No (`./browser` yes) |
-| `@caatinga/client`                     | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes          |
-| `@caatinga/client/react`               | `WalletProvider` + `useWallet`                                        | Yes          |
-| `@caatinga/client/vite`                | SWK bundler stubs                                                     | Yes          |
-| `@caatinga/client/freighter`           | Freighter adapter                                                     | Yes          |
-| `@caatinga/client/stellar-wallets-kit` | Multi-wallet adapter                                                  | Yes          |
-| `@caatinga/zk` / `@caatinga/zk/browser`| ZK helpers                                                            | browser subpath |
+| Package                                 | Role                                                                  | Browser-safe         |
+| --------------------------------------- | --------------------------------------------------------------------- | -------------------- |
+| `@caatinga/cli`                         | CLI binary                                                            | No                   |
+| `@caatinga/core`                        | Config, artifacts, Stellar CLI orchestration                          | No (`./browser` yes) |
+| `@caatinga/client`                      | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes                  |
+| `@caatinga/client/react`                | `WalletProvider` + `useWallet`                                        | Yes                  |
+| `@caatinga/client/vite`                 | SWK bundler stubs                                                     | Yes                  |
+| `@caatinga/client/freighter`            | Freighter adapter                                                     | Yes                  |
+| `@caatinga/client/stellar-wallets-kit`  | Multi-wallet adapter                                                  | Yes                  |
+| `@caatinga/zk` / `@caatinga/zk/browser` | ZK helpers                                                            | browser subpath      |
 
 ---
 
@@ -171,17 +171,17 @@ Wallet adapters must **reject on user dismissal**. React: `WalletProvider` / `us
 
 Automation must key on `CAATINGA_*` codes, never message text. Full catalog: [Errors](./errors.md).
 
-| Code                               | Trigger                                      |
-| ---------------------------------- | -------------------------------------------- |
-| `CAATINGA_CONFIG_NOT_FOUND`        | Missing `caatinga.config.ts`                 |
-| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` not on PATH                        |
-| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts / contract record          |
-| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` passed as `--source`                  |
-| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`                  |
-| `CAATINGA_PLACEHOLDER_BINDING`     | Scaffold bindings still in use               |
-| `CAATINGA_MULTI_AUTH_REQUIRED`     | Multi-signer needed (app-owned)              |
-| `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` | Dev ceremony on mainnet without allow flag   |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)        |
+| Code                               | Trigger                                    |
+| ---------------------------------- | ------------------------------------------ |
+| `CAATINGA_CONFIG_NOT_FOUND`        | Missing `caatinga.config.ts`               |
+| `CAATINGA_STELLAR_CLI_NOT_FOUND`   | `stellar` not on PATH                      |
+| `CAATINGA_ARTIFACT_NOT_FOUND`      | Missing artifacts / contract record        |
+| `CAATINGA_SOURCE_IS_PUBLIC_KEY`    | `G...` passed as `--source`                |
+| `CAATINGA_SOURCE_IS_SECRET_KEY`    | `S...` passed as `--source`                |
+| `CAATINGA_PLACEHOLDER_BINDING`     | Scaffold bindings still in use             |
+| `CAATINGA_MULTI_AUTH_REQUIRED`     | Multi-signer needed (app-owned)            |
+| `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` | Dev ceremony on mainnet without allow flag |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Stellar CLI below hard floor (23.0.0)      |
 
 Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 
@@ -211,10 +211,10 @@ Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 
 ## 8. Templates
 
-| Template                       | Command                  | Description                                    |
-| ------------------------------ | ------------------------ | ---------------------------------------------- |
-| `react-vite-counter` (default) | `caatinga init <dir>`    | Vite + React + counter + wallet stubs          |
-| `zk-starter`                   | `caatinga zk init <dir>` | Circom multiplier + Groth16 verifier           |
+| Template                       | Command                  | Description                           |
+| ------------------------------ | ------------------------ | ------------------------------------- |
+| `react-vite-counter` (default) | `caatinga init <dir>`    | Vite + React + counter + wallet stubs |
+| `zk-starter`                   | `caatinga zk init <dir>` | Circom multiplier + Groth16 verifier  |
 
 ```bash
 caatinga init <dir> --minimal     # CLI-only
@@ -264,15 +264,15 @@ Optional [stellar-build](https://github.com/kaankacar/stellar-build) agents: [In
 
 ### Working on the **Caatinga monorepo**
 
-| Doc                                   | Use when                                      |
-| ------------------------------------- | --------------------------------------------- |
-| [AGENTS.md](../AGENTS.md)             | Repo layout, build/test, version alignment    |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR expectations, compatibility contracts      |
-| [Architecture](./architecture.md)     | Product stance                                |
-| [Errors](./errors.md)                 | Full `CAATINGA_*` catalog                     |
-| [CLI](./cli.md)                       | Authoritative command reference               |
-| [Config](./config.md)                 | `caatinga.config.ts` schema                   |
-| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy                 |
+| Doc                                                 | Use when                                   |
+| --------------------------------------------------- | ------------------------------------------ |
+| [AGENTS.md](../AGENTS.md)                           | Repo layout, build/test, version alignment |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)               | PR expectations, compatibility contracts   |
+| [Architecture](./architecture.md)                   | Product stance                             |
+| [Errors](./errors.md)                               | Full `CAATINGA_*` catalog                  |
+| [CLI](./cli.md)                                     | Authoritative command reference            |
+| [Config](./config.md)                               | `caatinga.config.ts` schema                |
+| [Contract upgrade](./tutorials/contract-upgrade.md) | In-place vs redeploy                       |
 
 Monorepo: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm test`, `pnpm dev <cli-args>`.
 

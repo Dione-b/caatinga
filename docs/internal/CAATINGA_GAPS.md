@@ -402,33 +402,33 @@ responsável pelo crash recovery completo.
 
 ## 3. Resumo das Capacidades
 
-| Capacidade                             | Caatinga                                    | Radox Manual                                |
-| -------------------------------------- | ------------------------------------------- | ------------------------------------------- |
-| Build WASM (features default)          | ✅ `caatinga build`                         | ✅ `cargo build` + `stellar contract build` |
-| Build WASM (features por rede)         | ✅ `buildFeatures` por contrato             | ✅ `--features testnet/mainnet`             |
-| Deploy singleton                       | ✅ `caatinga deploy`                        | ✅ Script `deploy-yield-distributor.mjs`    |
-| Deploy per-offer (salt determinístico) | ❌ Gap 2                                    | ✅ `SorobanSaleService.buildDeployXdr()`    |
-| Deploy retry + recovery                | ✅ Retry backoff + contractId recovery      | ✅ `contractExistsOnChain()`                |
-| WASM hash em `status --json`           | ✅ `caatinga status --json`                 | ⚠️ Manual                                   |
-| WASM hash → env var                    | ✅ `sync-env` com `.wasmHash`               | ✅ Deploy script imprime `WASM_HASH=`       |
-| Deploy com Docker secret               | ❌ Gap 4                                    | ✅ `/run/secrets/operations_key`            |
-| Admin transfer multi-step              | ✅ `source` override por hook               | ✅ Script dedicado                          |
-| Multi-batch distribution               | ❌ Gap 6                                    | ✅ `submitBatches()` + Redis                |
-| Per-offer deploy via API               | ❌ Gap 7                                    | ✅ `POST /api/admin/offers/{id}/deploy-*`   |
-| Network feature gates (build)          | ✅ `buildFeatures` por contrato             | ✅ Cargo features                           |
-| Precomputação de contractId            | ❌ Gap 9                                    | ✅ `precomputeContractId()`                 |
-| Geração de TS bindings                 | ✅ `caatinga generate`                      | ❌ Manual/inexistente                       |
-| Client browser (invoke/read/simulate)  | ✅ `@caatinga/client`                       | ✅ `@stellar/stellar-sdk` direto            |
-| Wallet provider React                  | ✅ `@caatinga/client/react`                 | ✅ Provider customizado                     |
-| Stellar Wallets Kit adapter            | ✅ Modal + WalletConnect                    | ❌ Apenas Freighter                         |
-| Passkey/WebAuthn signing               | ❌ Gap 11                                   | ✅ `passkeyWallet.service.js`               |
-| Multi-sig (Freighter/Ledger)           | ❌ Gap 12                                   | ✅ `multiSigTransaction.service.js`         |
-| Verify pós-deploy (simulate)           | ✅ `expect` em postDeploy                   | ✅ Simulate + asserts customizados          |
-| Upload WASM sem deploy                 | ❌ Gap 14                                   | ✅ Separado                                 |
-| Crash recovery (básico)                | ⚠️ Parcial (Gap 15)                         | ✅ `contractExistsOnChain()`                |
-| Post-deploy wire (array hooks)         | ✅ `caatinga wire` + auto após deploy       | ✅ Scripts dedicados                        |
-| Frontend env sync                      | ✅ `caatinga sync-env`                      | ⚠️ Manual                                   |
-| Status / diagnostics                   | ✅ `caatinga status` / `doctor` / `inspect` | ⚠️ Manual                                   |
+| Capacidade                             | Caatinga                                                 | Radox Manual                                |
+| -------------------------------------- | -------------------------------------------------------- | ------------------------------------------- |
+| Build WASM (features default)          | ✅ `caatinga build`                                      | ✅ `cargo build` + `stellar contract build` |
+| Build WASM (features por rede)         | ✅ `buildFeatures` por contrato                          | ✅ `--features testnet/mainnet`             |
+| Deploy singleton                       | ✅ `caatinga deploy`                                     | ✅ Script `deploy-yield-distributor.mjs`    |
+| Deploy per-offer (salt determinístico) | ❌ Gap 2                                                 | ✅ `SorobanSaleService.buildDeployXdr()`    |
+| Deploy retry + recovery                | ✅ Retry backoff + contractId recovery                   | ✅ `contractExistsOnChain()`                |
+| WASM hash em `status --json`           | ✅ `caatinga status --json`                              | ⚠️ Manual                                   |
+| WASM hash → env var                    | ✅ `sync-env` com `.wasmHash`                            | ✅ Deploy script imprime `WASM_HASH=`       |
+| Deploy com Docker secret               | ❌ Gap 4                                                 | ✅ `/run/secrets/operations_key`            |
+| Admin transfer multi-step              | ✅ `source` override por hook                            | ✅ Script dedicado                          |
+| Multi-batch distribution               | ❌ Gap 6                                                 | ✅ `submitBatches()` + Redis                |
+| Per-offer deploy via API               | ❌ Gap 7                                                 | ✅ `POST /api/admin/offers/{id}/deploy-*`   |
+| Network feature gates (build)          | ✅ `buildFeatures` por contrato                          | ✅ Cargo features                           |
+| Precomputação de contractId            | ❌ Gap 9                                                 | ✅ `precomputeContractId()`                 |
+| Geração de TS bindings                 | ✅ `caatinga generate`                                   | ❌ Manual/inexistente                       |
+| Client browser (invoke/read/simulate)  | ✅ `@caatinga/client`                                    | ✅ `@stellar/stellar-sdk` direto            |
+| Wallet provider React                  | ✅ `@caatinga/client/react`                              | ✅ Provider customizado                     |
+| Stellar Wallets Kit adapter            | ✅ Modal + WalletConnect                                 | ❌ Apenas Freighter                         |
+| Passkey/WebAuthn signing               | ❌ Gap 11                                                | ✅ `passkeyWallet.service.js`               |
+| Multi-sig (Freighter/Ledger)           | ❌ Gap 12                                                | ✅ `multiSigTransaction.service.js`         |
+| Verify pós-deploy (simulate)           | ✅ `expect` em postDeploy                                | ✅ Simulate + asserts customizados          |
+| Upload WASM sem deploy                 | ❌ Gap 14                                                | ✅ Separado                                 |
+| Crash recovery (básico)                | ⚠️ Parcial (Gap 15)                                      | ✅ `contractExistsOnChain()`                |
+| Post-deploy wire (array hooks)         | ✅ `caatinga wire` + auto após deploy                    | ✅ Scripts dedicados                        |
+| Frontend env sync                      | ✅ `caatinga sync-env`                                   | ⚠️ Manual                                   |
+| Status / diagnostics                   | ✅ `caatinga status` / `doctor` / `inspect`              | ⚠️ Manual                                   |
 | Setup automatizado                     | ❌ Removido — usar `caatinga doctor` + instalação manual | ❌ N/A                                      |
 
 ---

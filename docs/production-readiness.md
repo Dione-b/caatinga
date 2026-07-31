@@ -21,7 +21,7 @@ Run through each item; `caatinga doctor` covers several automatically.
 | 9   | Stellar CLI and SDK versions pinned in CI           | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md) |
 | 9b  | CI identity exported and rotated safely             | `caatinga identity export` → `CAATINGA_CI_STELLAR_CONFIG_B64` (see [Testing](./internal/testing.md))         |
 | 10  | Upgrade/rollback plan understood                    | [Contract upgrade](./tutorials/contract-upgrade.md)                                                          |
-| 10b | Deploy regression workflow green on testnet           | `caatinga regression` or `.github/workflows/testnet-deploy-regression.yml`                                   |
+| 10b | Deploy regression workflow green on testnet         | `caatinga regression` or `.github/workflows/testnet-deploy-regression.yml`                                   |
 
 ## What Caatinga provides today
 

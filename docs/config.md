@@ -286,8 +286,8 @@ contracts: {
 
 3. **CLI flag derivation** (`toSnakeCaseFlag` / `formatConstructorCliArgs`): resolved
    args are passed to `stellar contract deploy` after a `--` separator. Each key is
-   converted camelCase → snake_case (insert `_` before each uppercase letter, strip a
-   leading `_`, lowercase). For example `tokenContractId` becomes `--token_contract_id`.
+   converted camelCase → snake*case (insert `*`before each uppercase letter, strip a
+leading`\_`, lowercase). For example `tokenContractId`becomes`--token_contract_id`.
 
 End-to-end: with `deployArgs: { tokenContractId: "${contracts.token.contractId}" }`,
 `token` deploys first, its `contractId` is recorded in `caatinga.artifacts.json`, and the

@@ -40,11 +40,11 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 ## Stellar CLI absent or wrong version
 
-| Code                               | Recovery                                                                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Code                               | Recovery                                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `CAATINGA_STELLAR_CLI_NOT_FOUND`   | Install from [Stellar setup guide](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Install Stellar CLI ≥ 23.0.0 (27.0.0 recommended)                                                                          |
-| `CAATINGA_RUST_TARGET_NOT_FOUND`   | `rustup target add wasm32v1-none`                                                                                          |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Install Stellar CLI ≥ 23.0.0 (27.0.0 recommended)                                                             |
+| `CAATINGA_RUST_TARGET_NOT_FOUND`   | `rustup target add wasm32v1-none`                                                                             |
 
 **Preflight:** `caatinga doctor`
 
