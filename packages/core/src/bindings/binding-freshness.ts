@@ -77,7 +77,7 @@ export async function evaluateBindingFreshness(
       status: "unknown",
       outputDir,
       marker: null,
-      reason: "bindings exist but have no provenance marker — rerun caatinga generate to record it"
+      reason: "bindings exist but have no provenance marker — rerun ctg generate to record it"
     };
   }
 

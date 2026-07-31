@@ -15,12 +15,12 @@ export function ContractNotDeployed() {
         automatically.
       </p>
       <pre className="counter-error" role="note">
-        {`npx caatinga build    counter
-npx caatinga deploy   counter --network testnet --source <identity>
+        {`npx ctg build    counter
+npx ctg deploy   counter --network testnet --source <identity>
 npm run dev
 
 # If bindings generation failed after deploy:
-npx caatinga generate counter --network testnet`}
+npx ctg generate counter --network testnet`}
       </pre>
     </section>
   );

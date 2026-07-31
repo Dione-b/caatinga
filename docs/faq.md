@@ -64,7 +64,7 @@ The recommended workflow is:
 
 ### 8. How do I set up a new machine to use Caatinga?
 
-After installing Node.js 22+, run `caatinga doctor` to check what is missing, then install prerequisites manually:
+After installing Node.js 22+, run `ctg doctor` to check what is missing, then install prerequisites manually:
 
 - Rust via [rustup](https://rustup.rs) + `rustup target add wasm32v1-none`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0+
@@ -91,31 +91,31 @@ Although the packages use versions from the **3.x** series, the project remains 
 
 ## Part 2 — CLI and Workflow (11–20)
 
-### 11. What does the `caatinga init` command do?
+### 11. What does the `ctg init` command do?
 
-The `caatinga init` command creates a new Caatinga project from a template. By default, it uses the `react-vite-counter` template, but it also supports minimal templates (`--minimal`) or an empty project (`--empty`).
+The `ctg init` command creates a new Caatinga project from a template. By default, it uses the `react-vite-counter` template, but it also supports minimal templates (`--minimal`) or an empty project (`--empty`).
 
 Example:
 
 ```bash
-npx caatinga init my-project
+npx ctg init my-project
 ```
 
 ---
 
-### 12. What is the purpose of the `caatinga build` command?
+### 12. What is the purpose of the `ctg build` command?
 
 The `build` command compiles one or more Soroban contracts using `stellar contract build`. If no contract is specified, all configured contracts will be compiled.
 
 Example:
 
 ```bash
-npx caatinga build counter
+npx ctg build counter
 ```
 
 ---
 
-### 13. What happens during a `caatinga deploy`?
+### 13. What happens during a `ctg deploy`?
 
 The deployment automatically performs several steps:
 
@@ -136,7 +136,7 @@ Thus, a single command can set up the entire application after deployment.
 When you run:
 
 ```bash
-caatinga deploy counter
+ctg deploy counter
 ```
 
 only that specific contract is deployed.
@@ -144,7 +144,7 @@ only that specific contract is deployed.
 When you run:
 
 ```bash
-caatinga deploy
+ctg deploy
 ```
 
 Caatinga:
@@ -159,7 +159,7 @@ This is the recommended mode for applications with multiple contracts.
 
 ---
 
-### 15. When should I use `caatinga upgrade`?
+### 15. When should I use `ctg upgrade`?
 
 Use `upgrade` when the contract already implements an administrative function `upgrade(new_wasm_hash)`.
 
@@ -173,13 +173,13 @@ In this mode:
 
 ### 16. What is the difference between `upgrade` and `deploy --upgrade`?
 
-`caatinga upgrade`
+`ctg upgrade`
 
 - preserves the same `contractId`;
 - uploads the new WASM bytecode;
 - calls the contract's `upgrade` method.
 
-`caatinga deploy --upgrade`
+`ctg deploy --upgrade`
 
 - creates a new instance of the contract;
 - generates a new `contractId`;
@@ -190,7 +190,7 @@ The former is an "in-place" upgrade. The latter is a redeploy.
 
 ---
 
-### 17. What does the `caatinga generate` command do?
+### 17. What does the `ctg generate` command do?
 
 It generates (or regenerates) TypeScript bindings from the contract's interface using:
 
@@ -202,7 +202,7 @@ These bindings are used by `@caatinga/client` for typed calls to the contracts.
 
 ---
 
-### 18. What is the purpose of the `caatinga doctor` command?
+### 18. What is the purpose of the `ctg doctor` command?
 
 It is Caatinga's diagnostic tool.
 
@@ -221,7 +221,7 @@ It is the recommended command to run before making any changes to the deployment
 
 ---
 
-### 19. What does the `caatinga status` command show?
+### 19. What does the `ctg status` command show?
 
 `status` provides an overview of the deployed contracts for a given network.
 
@@ -247,7 +247,7 @@ With `--strict`, the command returns exit code `1` if there are stale or missing
 Example:
 
 ```bash
-caatinga invoke counter.increment --source alice
+ctg invoke counter.increment --source alice
 ```
 
 `read`
@@ -260,7 +260,7 @@ caatinga invoke counter.increment --source alice
 Example:
 
 ```bash
-caatinga read counter.get
+ctg read counter.get
 ```
 
 Always use `read` for queries, and `invoke` only when it is necessary to modify the contract's state.
@@ -448,10 +448,10 @@ These tests can verify, for example:
 The corresponding command is:
 
 ```bash
-npx caatinga smoke
+npx ctg smoke
 ```
 
-It is also part of the `caatinga regression` workflow, allowing automatic validation of a deployment before it is considered complete.
+It is also part of the `ctg regression` workflow, allowing automatic validation of a deployment before it is considered complete.
 
 ## Part 4 — Client API and Artifacts (31–40)
 
@@ -682,13 +682,13 @@ The solution depends on the state:
 **stale**
 
 ```bash
-caatinga generate <contract> --network testnet
+ctg generate <contract> --network testnet
 ```
 
 **missing**
 
 ```bash
-caatinga generate
+ctg generate
 ```
 
 **unknown**
@@ -705,10 +705,10 @@ Caatinga has built-in support for Circom circuits using Groth16.
 
 The primary commands are:
 
-- `caatinga zk init`
-- `caatinga zk build`
-- `caatinga zk prove`
-- `caatinga zk invoke`
+- `ctg zk init`
+- `ctg zk build`
+- `ctg zk prove`
+- `ctg zk invoke`
 
 There is also a dedicated package:
 
@@ -743,7 +743,7 @@ To bypass the Mainnet protection (not recommended for production), you must use:
 
 The documentation highlights the following recommendations:
 
-- run `caatinga doctor` before changing the deployment state;
+- run `ctg doctor` before changing the deployment state;
 - follow the `build → deploy → generate → invoke` workflow;
 - use Stellar CLI identity aliases in `--source`;
 - always inspect `CAATINGA_*` error codes;
@@ -758,13 +758,13 @@ The documentation highlights the following recommendations:
 
 The workflow suggested by the documentation is:
 
-1. Create the project using `caatinga init`.
-2. Verify and set up the environment using `caatinga doctor` (install any missing prerequisites manually).
-3. Build the contracts using `caatinga build`.
-4. Deploy using `caatinga deploy`.
-5. Allow bindings to be generated automatically (or run `caatinga generate` when needed).
+1. Create the project using `ctg init`.
+2. Verify and set up the environment using `ctg doctor` (install any missing prerequisites manually).
+3. Build the contracts using `ctg build`.
+4. Deploy using `ctg deploy`.
+5. Allow bindings to be generated automatically (or run `ctg generate` when needed).
 6. Execute `wire` hooks and synchronize the frontend (`sync-env`) in full-graph deployments.
-7. Validate the deployment with `caatinga smoke` or `caatinga regression`.
+7. Validate the deployment with `ctg smoke` or `ctg regression`.
 8. Interact with contracts using:
 
    - `read` for queries;
@@ -773,7 +773,7 @@ The workflow suggested by the documentation is:
 
 9. During contract updates:
 
-   - use `caatinga upgrade` when the contract supports in-place upgrades;
-   - use `caatinga deploy --upgrade` when a new contract instance needs to be created.
+   - use `ctg upgrade` when the contract supports in-place upgrades;
+   - use `ctg deploy --upgrade` when a new contract instance needs to be created.
 
 This workflow covers the entire lifecycle of a Soroban application using Caatinga, from project creation to maintenance, upgrades, and frontend integration.

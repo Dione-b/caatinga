@@ -16,7 +16,7 @@ Stellar Wallets Kit (SWK) 2.x depends on Reown AppKit (WalletConnect), which pul
 
 ## `ws` vulnerability chain (most common report)
 
-This is the usual cause when users report "14 vulnerabilities" on a fresh `caatinga init` + `npm install`. It is **not** Trezor:
+This is the usual cause when users report "14 vulnerabilities" on a fresh `ctg init` + `npm install`. It is **not** Trezor:
 
 ```
 @caatinga/client

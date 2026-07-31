@@ -81,7 +81,7 @@ describe("doctor command", () => {
         {
           name: "app",
           ok: false,
-          fix: "Run: caatinga deploy app --network testnet --source <identity>",
+          fix: "Run: npx caatinga deploy app --network testnet --source <identity>",
         },
       ],
     });
@@ -109,7 +109,7 @@ describe("doctor command", () => {
   it("should_not_run_deploy_coverage_when_diagnostics_fail", async () => {
     runAllDiagnosticsMock.mockResolvedValue({
       diagnostics: [
-        { ok: false, label: "caatinga.config.ts not found", fix: "Run caatinga init." },
+        { ok: false, label: "caatinga.config.ts not found", fix: "Run npx caatinga init." },
       ],
       config: undefined,
     });

@@ -13,7 +13,7 @@ async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(`${ARTIFACTS_BASE}/${path}`);
   if (!response.ok) {
     throw new ZkArtifactsError(
-      `Missing ${path}. Run \`npx caatinga zk build main\` and \`npx caatinga zk prove main\` after saving circuits/input.json.`
+      `Missing ${path}. Run \`npx ctg zk build main\` and \`npx ctg zk prove main\` after saving circuits/input.json.`
     );
   }
 

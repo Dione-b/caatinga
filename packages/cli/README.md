@@ -6,15 +6,14 @@ Developer toolkit for Stellar / Soroban dApps — `init`, `build`, `deploy`, `wi
 
 ```bash
 npm install -g @caatinga/cli
-caatinga --help
-ctg --help   # short alias for caatinga
+ctg --help   # standard command; caatinga is a legacy alias
 ```
 
-Both `caatinga` and `ctg` resolve to the same CLI binary. Inside a generated project, prefer `npx caatinga` (or `npx ctg`) so the project-local workflow stays explicit.
+Both `ctg` and `caatinga` resolve to the same CLI binary. Inside a generated project, prefer `npx ctg` (or `npx caatinga`) so the project-local workflow stays explicit.
 
 ## Requirements
 
-Run `caatinga doctor` on a fresh machine to verify prerequisites. Manual requirements:
+Run `ctg doctor` on a fresh machine to verify prerequisites. Manual requirements:
 
 - Node.js `>=22`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (27.0.0 recommended)
@@ -24,35 +23,35 @@ Run `caatinga doctor` on a fresh machine to verify prerequisites. Manual require
 ## Quick start
 
 ```bash
-caatinga init my-dapp
+ctg init my-dapp
 cd my-dapp && npm install
 
-npx caatinga build counter
-npx caatinga deploy counter --network testnet --source alice
-npx caatinga smoke --network testnet --source alice
-npx caatinga status --network testnet
+npx ctg build counter
+npx ctg deploy counter --network testnet --source alice
+npx ctg smoke --network testnet --source alice
+npx ctg status --network testnet
 ```
 
 Full onboarding: [Getting started](https://github.com/Dione-b/caatinga/blob/main/docs/getting-started.md).
 
 ## Commands
 
-| Command                             | What it does                                            |
-| ----------------------------------- | ------------------------------------------------------- |
-| `caatinga init <dir>`               | Create a project from a bundled template                |
-| `caatinga doctor`                   | Check toolchain, config, artifacts, env drift, bindings |
-| `caatinga build [contract]`         | Compile contract WASM                                   |
-| `caatinga deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings |
-| `caatinga wire`                     | Run configured `postDeploy` + `postDeployRead` hooks    |
-| `caatinga sync-env`                 | Write frontend env vars from artifacts                  |
-| `caatinga generate [contract]`      | (Re)generate TypeScript bindings                        |
-| `caatinga status`                   | Show deployed contracts and binding freshness           |
-| `caatinga smoke`                    | Run configured read-only smoke checks                   |
-| `caatinga regression`               | test → build → deploy --if-changed → generate → smoke   |
-| `caatinga ci run`                   | `doctor` then `smoke` (CI helper)                       |
-| `caatinga identity export\|import`  | Export/import Stellar CLI config for CI secrets         |
-| `caatinga invoke <contract.method>` | Call a state-changing contract method                   |
-| `caatinga read <contract.method>`   | Simulate a read-only contract method                    |
+| Command                        | What it does                                            |
+| ------------------------------ | ------------------------------------------------------- |
+| `ctg init <dir>`               | Create a project from a bundled template                |
+| `ctg doctor`                   | Check toolchain, config, artifacts, env drift, bindings |
+| `ctg build [contract]`         | Compile contract WASM                                   |
+| `ctg deploy [contract]`        | Deploy, record IDs in artifacts, auto-generate bindings |
+| `ctg wire`                     | Run configured `postDeploy` + `postDeployRead` hooks    |
+| `ctg sync-env`                 | Write frontend env vars from artifacts                  |
+| `ctg generate [contract]`      | (Re)generate TypeScript bindings                        |
+| `ctg status`                   | Show deployed contracts and binding freshness           |
+| `ctg smoke`                    | Run configured read-only smoke checks                   |
+| `ctg regression`               | test → build → deploy --if-changed → generate → smoke   |
+| `ctg ci run`                   | `doctor` then `smoke` (CI helper)                       |
+| `ctg identity export\|import`  | Export/import Stellar CLI config for CI secrets         |
+| `ctg invoke <contract.method>` | Call a state-changing contract method                   |
+| `ctg read <contract.method>`   | Simulate a read-only contract method                    |
 
 Notable flags: `--if-changed`, `--strict-network`, `--strict` / `--strict-env` / `--strict-bindings` (doctor), `status --strict`, `read --expect`.
 

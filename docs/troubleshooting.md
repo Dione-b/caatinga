@@ -15,7 +15,7 @@ Symptom-first guide for the most common Caatinga failures. For the complete erro
 ```bash
 cd /path/to/your/project
 # or scaffold:
-npx caatinga init my-dapp
+npx ctg init my-dapp
 ```
 
 ---
@@ -40,7 +40,7 @@ npx caatinga init my-dapp
 
 ```bash
 stellar --version
-caatinga doctor
+ctg doctor
 ```
 
 ---
@@ -52,10 +52,10 @@ caatinga doctor
 **Fix:**
 
 ```bash
-caatinga deploy <contract> --network testnet --source alice
+ctg deploy <contract> --network testnet --source alice
 ```
 
-`caatinga build` alone does not create deployment records.
+`ctg build` alone does not create deployment records.
 
 ---
 
@@ -63,12 +63,12 @@ caatinga deploy <contract> --network testnet --source alice
 
 **Symptom:** Browser shows binding error before wallet opens.
 
-**Cause:** `caatinga generate` was not run after deploy.
+**Cause:** `ctg generate` was not run after deploy.
 
 **Fix:**
 
 ```bash
-caatinga generate counter --network testnet
+ctg generate counter --network testnet
 npm run dev   # restart dev server
 ```
 
@@ -106,7 +106,7 @@ curl -s -o /dev/null -w "%{http_code}" https://soroban-testnet.stellar.org
 
 ```bash
 stellar keys address alice
-caatinga doctor --network testnet
+ctg doctor --network testnet
 ```
 
 ---
@@ -120,10 +120,10 @@ caatinga doctor --network testnet
 **Fix:**
 
 ```bash
-caatinga deploy token --network testnet --source alice
-caatinga deploy vault --network testnet --source alice
+ctg deploy token --network testnet --source alice
+ctg deploy vault --network testnet --source alice
 # or full graph:
-caatinga deploy --network testnet --source alice
+ctg deploy --network testnet --source alice
 ```
 
 ---
@@ -144,7 +144,7 @@ caatinga deploy --network testnet --source alice
 
 ```bash
 stellar keys generate alice --fund --network testnet
-caatinga deploy counter --network testnet --source alice
+ctg deploy counter --network testnet --source alice
 ```
 
 Never pass `G...` addresses or secret keys as `--source`.
@@ -159,20 +159,20 @@ Never pass `G...` addresses or secret keys as `--source`.
 
 ```bash
 rustup target add wasm32v1-none
-caatinga build counter
+ctg build counter
 ```
 
 ---
 
 ## 13. `CAATINGA_BINDINGS_FAILED`
 
-**Symptom:** `caatinga generate` fails.
+**Symptom:** `ctg generate` fails.
 
 **Fix:** Deploy first, then generate:
 
 ```bash
-caatinga deploy counter --network testnet --source alice
-caatinga generate counter --network testnet
+ctg deploy counter --network testnet --source alice
+ctg generate counter --network testnet
 ```
 
 ---
@@ -192,7 +192,7 @@ caatinga generate counter --network testnet
 **Fix:** Deploy missing contracts:
 
 ```bash
-caatinga doctor --network testnet
+ctg doctor --network testnet
 # follow printed deploy commands
 ```
 
@@ -200,7 +200,7 @@ caatinga doctor --network testnet
 
 ## Still stuck?
 
-1. `caatinga doctor --network testnet`
+1. `ctg doctor --network testnet`
 2. Note the `CAATINGA_*` code (not the message text)
 3. Search [errors.md](./errors.md) for the code
 4. File an issue with config, command, and code

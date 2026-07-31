@@ -1,4 +1,3 @@
-import path from "node:path";
 import { Command } from "commander";
 import { registerBuildCommand } from "./commands/build.command.js";
 import { registerDeployCommand } from "./commands/deploy.command.js";
@@ -25,12 +24,8 @@ import { registerRegressionCommand } from "./commands/regression.command.js";
 import { registerCiCommand } from "./commands/ci.command.js";
 import { registerIdentityCommand } from "./commands/identity.command.js";
 import { registerVersionCommand } from "./commands/version.command.js";
+import { resolveCliProgramName } from "./utils/cli-name.js";
 import { CAATINGA_CLI_VERSION } from "./version.js";
-
-function resolveCliProgramName(): string {
-  const candidate = path.basename(process.argv[1] ?? "caatinga").replace(/\.(js|ts|mjs|cjs)$/i, "");
-  return candidate === "ctg" ? "ctg" : "caatinga";
-}
 
 export function createProgram(): Command {
   const program = new Command();

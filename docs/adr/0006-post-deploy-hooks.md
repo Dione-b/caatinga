@@ -25,10 +25,10 @@ Caatinga already supports topological deploy and `${contracts.<name>.contractId}
 1. Add **`${source.address}`** as a second artifact-safe placeholder, resolved via
    `stellar keys address <source>` at deploy and wire time. Still no `${env.*}` or shell
    interpolation.
-2. Add optional **`postDeploy`** hooks in `caatinga.config.ts`, executed by `caatinga wire`
-   and automatically after a full `caatinga deploy` (unless `--no-wire`).
+2. Add optional **`postDeploy`** hooks in `caatinga.config.ts`, executed by `ctg wire`
+   and automatically after a full `ctg deploy` (unless `--no-wire`).
 3. Add optional **`frontend.envFile`** + **`frontend.env`** mapping, written by
-   `caatinga sync-env` and automatically after a full deploy (unless `--no-sync-env`).
+   `ctg sync-env` and automatically after a full deploy (unless `--no-sync-env`).
 4. Add optional **`buildRoot`** for Cargo workspaces: one `stellar contract build` from the
    workspace root instead of per-crate builds.
 
@@ -39,8 +39,8 @@ Caatinga already supports topological deploy and `${contracts.<name>.contractId}
   [architecture.md](../architecture.md), without a plugin loader yet.
 - Frontends that do not use `@caatinga/client` can still consume Caatinga deploy state via
   generated `.env.local` files.
-- `caatinga wire` failures after deploy do not roll back artifacts; recovery is explicit
-  (`caatinga wire`, or `caatinga deploy --force` when redeploy is also desired).
+- `ctg wire` failures after deploy do not roll back artifacts; recovery is explicit
+  (`ctg wire`, or `ctg deploy --force` when redeploy is also desired).
 
 ## Related
 

@@ -32,7 +32,7 @@ export async function generateBindingsGraph(options: {
       throw new CaatingaError(
         `No deployed contracts found on "${network.name}".`,
         CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        "Run caatinga deploy before generating bindings, or pass a contract name."
+        "Run ctg deploy before generating bindings, or pass a contract name."
       );
     }
   }

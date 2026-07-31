@@ -25,8 +25,8 @@ This document defines the acceptance criteria that must be satisfied before Caat
 
 - [x] All commands and their flags are documented in `docs/cli.md`
 - [x] Exit codes `0` (success) and `1` (failure) are consistent across all commands
-- [x] `caatinga --help` shows all commands grouped by category
-- [x] `caatinga version` outputs `@caatinga/cli@<version>` and the runtime Node.js version
+- [x] `ctg --help` shows all commands grouped by category
+- [x] `ctg version` outputs `@caatinga/cli@<version>` and the runtime Node.js version
 
 ## Reliability Criteria
 
@@ -34,9 +34,9 @@ This document defines the acceptance criteria that must be satisfied before Caat
 - [x] TypeScript compiles without errors (`pnpm typecheck`)
 - [x] Build is reproducible (`pnpm build`)
 - [ ] Integration tests pass against Stellar testnet (manual gate)
-- [x] `caatinga doctor` correctly detects missing Stellar CLI, outdated versions, and stale bindings
-- [x] `caatinga smoke` correctly asserts `expect` matchers
-- [x] `caatinga doctor` correctly detects missing prerequisites on a clean machine
+- [x] `ctg doctor` correctly detects missing Stellar CLI, outdated versions, and stale bindings
+- [x] `ctg smoke` correctly asserts `expect` matchers
+- [x] `ctg doctor` correctly detects missing prerequisites on a clean machine
 
 ## Documentation Criteria
 

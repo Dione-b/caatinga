@@ -6,7 +6,7 @@ This document details the execution phases of the Caatinga orchestrator pipeline
 
 ## 1. Orchestrator Lifecycle Phases
 
-Caatinga operates as a deterministic, phase-based pipeline. When a developer runs `caatinga deploy` or similar orchestration commands, the execution proceeds sequentially through five distinct phases:
+Caatinga operates as a deterministic, phase-based pipeline. When a developer runs `ctg deploy` or similar orchestration commands, the execution proceeds sequentially through five distinct phases:
 
 ```mermaid
 graph TD
@@ -43,7 +43,7 @@ graph TD
 
 ## 2. Post-Deploy Hooks Specification
 
-Hooks are declared globally in `caatinga.config.ts` and run during the `caatinga wire` command (or automatically at the end of `caatinga deploy`).
+Hooks are declared globally in `caatinga.config.ts` and run during the `ctg wire` command (or automatically at the end of `ctg deploy`).
 
 ### Hook Types
 

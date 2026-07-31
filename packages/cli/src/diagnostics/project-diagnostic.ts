@@ -6,6 +6,7 @@ import {
   readArtifacts,
   resolveNetwork,
 } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 import type { Diagnostic } from "./types.js";
 
 export async function configDiagnostic(): Promise<Diagnostic | undefined> {
@@ -60,7 +61,7 @@ export async function artifactsDiagnostic(): Promise<Diagnostic> {
     return {
       ok: false,
       label: "caatinga.artifacts.json not found or invalid",
-      fix: "Run caatinga init, or restore a valid caatinga.artifacts.json file.",
+      fix: `Run ${npxCli("init")}, or restore a valid caatinga.artifacts.json file.`,
     };
   }
 }

@@ -115,7 +115,7 @@ export async function invokeVerifier(
     throw new ZkError(
       `No deployed artifact found for "${options.verifierContract}" on "${options.network}".`,
       "ZK_INVOKE_FAILED",
-      "Run caatinga deploy before invoking the verifier."
+      "Run ctg deploy before invoking the verifier."
     );
   }
 

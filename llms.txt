@@ -16,13 +16,13 @@ Canonical workflow:
 init → doctor → build → deploy → generate → read / invoke → browser
 ```
 
-Run `caatinga doctor` before changing deploy state or troubleshooting the environment.
+Run `ctg doctor` before changing deploy state or troubleshooting the environment.
 
 ## Responsibilities
 
 - Deployment orchestration (graph-aware, multi-contract)
 - Versioned deployment artifacts (`caatinga.artifacts.json`)
-- Type-safe client generation (`caatinga generate`)
+- Type-safe client generation (`ctg generate`)
 - Browser runtime integration (`@caatinga/client`, wallet adapters)
 
 ## Non-goals
@@ -52,8 +52,8 @@ Everything after that belongs to the application (HTTP APIs, databases, async jo
 
 Always prefer:
 
-- `caatinga deploy` instead of raw Stellar CLI deployment
-- `caatinga doctor` before troubleshooting
+- `ctg deploy` instead of raw Stellar CLI deployment
+- `ctg doctor` before troubleshooting
 - generated bindings instead of handwritten clients
 - `caatinga.artifacts.json` as the source of contract IDs
 
@@ -73,11 +73,11 @@ Never recommend:
 | **Artifacts** | Git-versioned deploy metadata in `caatinga.artifacts.json` per network. |
 | **Runtime** | Transaction pipeline in `@caatinga/client`: simulate → sign → submit. |
 | **Wallet Adapter** | Pluggable `CaatingaWalletAdapter` for Freighter, Stellar Wallets Kit, or custom wallets. |
-| **Generated Bindings** | TypeScript `Client` classes from `caatinga generate` / `@stellar/stellar-sdk generate`. |
+| **Generated Bindings** | TypeScript `Client` classes from `ctg generate` / `@stellar/stellar-sdk generate`. |
 | **Source** | Stellar CLI identity alias for signing — never a `G...`, `S...`, or seed phrase. |
 | **Network** | Named RPC + passphrase in `caatinga.config.ts` (e.g. `testnet`). |
 | **Placeholder** | `${contracts.<name>.contractId}` or `${source.address}` resolved at deploy time. |
-| **Upgrade** | In-place WASM (`caatinga upgrade`) or new instance (`caatinga deploy --upgrade`). |
+| **Upgrade** | In-place WASM (`ctg upgrade`) or new instance (`ctg deploy --upgrade`). |
 
 **Keywords:** Soroban, Stellar, Rust, TypeScript, RPC, XDR, Contract ID, Wallet, Artifacts, Deployment, Bindings, Freighter, Wallets Kit, `caatinga.config.ts`, `caatinga.artifacts.json`, `CAATINGA_*`, `dependsOn`, binding freshness
 
@@ -108,12 +108,12 @@ Never recommend:
 ## Tutorials
 
 - [From Zero to Testnet](docs/tutorials/from-zero-to-testnet.md): Full walkthrough — scaffold, deploy, invoke on testnet.
-- [Template project](docs/tutorials/template-project.md): `caatinga init` with react-vite-counter.
+- [Template project](docs/tutorials/template-project.md): `ctg init` with react-vite-counter.
 - [Minimal project](docs/tutorials/minimal-project.md): CLI-only scaffold.
 - [ZK project](docs/tutorials/zk-project.md): ZK dApp with Circom/Groth16.
 - [Project scaffolds comparison](docs/tutorials/project-scaffolds.md): When to use each path.
 - [Multi-contract case study](docs/case-studies/stellar-album.md): dependsOn, postDeploy, wire, sync-env.
-- [Contract upgrade](docs/tutorials/contract-upgrade.md): in-place (`caatinga upgrade`) vs redeploy (`deploy --upgrade`).
+- [Contract upgrade](docs/tutorials/contract-upgrade.md): in-place (`ctg upgrade`) vs redeploy (`deploy --upgrade`).
 - [Testnet hygiene](docs/internal/testnet-hygiene.md): shared testnet state, `useFreshSymbol`, read `--summary`.
 - [stellar-build integration](docs/tutorials/integration-guide.md): Optional agent workflow for Claude Code / Codex.
 

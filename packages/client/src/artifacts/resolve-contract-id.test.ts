@@ -80,10 +80,8 @@ describe("resolveContractId", () => {
     try {
       resolveContractId({ artifacts: emptyArtifacts, network: "testnet", contract: "counter" });
     } catch (error) {
-      expect((error as CaatingaError).hint).toContain("caatinga doctor --network testnet");
-      expect((error as CaatingaError).hint).toContain(
-        "caatinga build does not register a contract ID"
-      );
+      expect((error as CaatingaError).hint).toContain("ctg doctor --network testnet");
+      expect((error as CaatingaError).hint).toContain("ctg build does not register a contract ID");
     }
   });
 
@@ -92,11 +90,9 @@ describe("resolveContractId", () => {
       resolveContractId({ artifacts, network: "mainnet", contract: "counter" });
     } catch (error) {
       expect((error as CaatingaError).hint).toContain(
-        "caatinga deploy counter --network mainnet --source <identity>"
+        "ctg deploy counter --network mainnet --source <identity>"
       );
-      expect((error as CaatingaError).hint).toContain(
-        "caatinga build does not register a contract ID"
-      );
+      expect((error as CaatingaError).hint).toContain("ctg build does not register a contract ID");
     }
   });
 

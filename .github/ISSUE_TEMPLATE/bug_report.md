@@ -37,7 +37,7 @@ labels: bug
 | Node.js (`node -v`)               |                                                      |
 | pnpm (`pnpm -v`)                  |                                                      |
 | Stellar CLI (`stellar --version`) |                                                      |
-| Caatinga (`caatinga --version`)   |                                                      |
+| Caatinga (`ctg --version`)        |                                                      |
 
 ## Additional Context
 

@@ -56,14 +56,14 @@ export async function buildWorkspace(options: BuildWorkspaceOptions) {
   if (hasBuildFeatures) {
     console.warn(
       "Warning: buildFeatures is set on one or more contracts but is ignored in workspace builds (buildRoot). " +
-        "Use individual contract builds (caatinga build <contract>) to apply buildFeatures."
+        "Use individual contract builds (ctg build <contract>) to apply buildFeatures."
     );
   }
 
   const buildPath = path.resolve(cwd, buildRoot);
 
-  await checkBinary("rustc", "Install Rust before running caatinga build.");
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga build.");
+  await checkBinary("rustc", "Install Rust before running ctg build.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg build.");
 
   let result;
   try {

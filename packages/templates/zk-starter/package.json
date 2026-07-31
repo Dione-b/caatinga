@@ -8,12 +8,12 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "cargo test --manifest-path contracts/verifier/Cargo.toml",
-    "caatinga:build": "npx caatinga build verifier",
-    "caatinga:deploy": "npx caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
-    "caatinga:generate": "npx caatinga generate verifier --network testnet",
-    "caatinga:zk:build": "npx caatinga zk build main",
-    "caatinga:zk:prove": "npx caatinga zk prove main",
-    "caatinga:zk:setup": "npx caatinga zk build main && npx caatinga zk prove main"
+    "caatinga:build": "npx ctg build verifier",
+    "caatinga:deploy": "npx ctg deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
+    "caatinga:generate": "npx ctg generate verifier --network testnet",
+    "caatinga:zk:build": "npx ctg zk build main",
+    "caatinga:zk:prove": "npx ctg zk prove main",
+    "caatinga:zk:setup": "npx ctg zk build main && npx ctg zk prove main"
   },
   "dependencies": {
     "@caatinga/client": "^3.9.0",

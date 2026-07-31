@@ -58,15 +58,15 @@ describe("createZkProject", () => {
 
     const packageJson = JSON.parse(await readFile(path.join(targetDir, "package.json"), "utf8"));
     expect(packageJson.scripts.deploy).toBe(
-      "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}"
+      "ctg deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}"
     );
-    expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
+    expect(packageJson.scripts.doctor).toBe("ctg doctor --network testnet");
     expect(packageJson.scripts.test).toBe(
       "cargo test --manifest-path contracts/verifier/Cargo.toml"
     );
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
-    expect(readme).toContain("npx caatinga deploy verifier --network testnet --source <identity>");
+    expect(readme).toContain("npx ctg deploy verifier --network testnet --source <identity>");
   });
 
   it("fails instead of overwriting existing project files by default", async () => {

@@ -31,9 +31,9 @@ This is the **data pipeline** behind Caatinga — what happens to source, binari
 
 ```mermaid
 flowchart TD
-  source["Source Code"] --> build["caatinga build"]
+  source["Source Code"] --> build["ctg build"]
   build --> wasm["WASM"]
-  wasm --> deploy["caatinga deploy"]
+  wasm --> deploy["ctg deploy"]
   deploy --> artifacts["caatinga.artifacts.json"]
   artifacts --> invoke["read / invoke"]
 ```
@@ -115,7 +115,7 @@ Prepare the machine: Node.js 22+, Rust with the WASM target, Stellar CLI, and a 
 
 ```bash
 node --version
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 ### Expected Result
@@ -159,7 +159,7 @@ see [Minimal project](./minimal-project.md).
 ### Command
 
 ```bash
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -230,7 +230,7 @@ Run diagnostics so config, binaries, network connectivity, and credentials are r
 ### Command
 
 ```bash
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 ### Expected Result
@@ -268,7 +268,7 @@ Compile the Rust contract into a WebAssembly (`.wasm`) artifact. Nothing is depl
 ### Command
 
 ```bash
-npx caatinga build counter
+npx ctg build counter
 ```
 
 ### Expected Result
@@ -304,7 +304,7 @@ Upload the WASM to Stellar Testnet, instantiate the contract, and record the `co
 ### Command
 
 ```bash
-npx caatinga deploy counter --network testnet --source alice
+npx ctg deploy counter --network testnet --source alice
 ```
 
 ### Expected Result
@@ -386,7 +386,7 @@ Simulate a read-only call to `counter.get`. This path does not submit a ledger t
 ### Command
 
 ```bash
-npx caatinga read counter.get --network testnet
+npx ctg read counter.get --network testnet
 ```
 
 ### Expected Result
@@ -432,8 +432,8 @@ Submit a state-changing call to `counter.increment`. Unlike `read`, this path si
 ### Command
 
 ```bash
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga read counter.get --network testnet
+npx ctg invoke counter.increment --network testnet --source alice
+npx ctg read counter.get --network testnet
 ```
 
 ### Expected Result
@@ -480,7 +480,7 @@ Compare local artifacts with what the network reports for the deployed contract.
 ### Command
 
 ```bash
-npx caatinga status --network testnet
+npx ctg status --network testnet
 ```
 
 ### Expected Result
@@ -511,18 +511,18 @@ Verify you have:
 
 Two upgrade strategies exist. This workshop demonstrates **redeploy** because the counter template does not implement an in-place `upgrade` entrypoint.
 
-| Strategy     | Command                     | Effect                                        | `contractId` |
-| ------------ | --------------------------- | --------------------------------------------- | ------------ |
-| **In-place** | `caatinga upgrade`          | New WASM on the same instance                 | Unchanged    |
-| **Redeploy** | `caatinga deploy --upgrade` | New instance; old ID kept in artifact history | New ID       |
+| Strategy     | Command                | Effect                                        | `contractId` |
+| ------------ | ---------------------- | --------------------------------------------- | ------------ |
+| **In-place** | `ctg upgrade`          | New WASM on the same instance                 | Unchanged    |
+| **Redeploy** | `ctg deploy --upgrade` | New instance; old ID kept in artifact history | New ID       |
 
 Details: [Contract upgrade](./contract-upgrade.md).
 
 ### Command
 
 ```bash
-npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
 ```
 
 ### Expected Result
@@ -626,7 +626,7 @@ Intentionally trigger a common failure so you recognize the stable `CAATINGA_*` 
 ### Command
 
 ```bash
-npx caatinga deploy counter --network testnet --source GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF
+npx ctg deploy counter --network testnet --source GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF
 ```
 
 ### Expected Result
@@ -656,18 +656,18 @@ Use a registered identity alias, for example `--source alice`.
 
 ### Codes worth recognizing
 
-| Situation                            | Code                             | Fix                                                |
-| ------------------------------------ | -------------------------------- | -------------------------------------------------- |
-| Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `caatinga build` first                         |
-| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI; verify with `caatinga doctor` |
-| `--source` is a public `G…` address  | `CAATINGA_SOURCE_IS_PUBLIC_KEY`  | Use an identity alias such as `alice`              |
-| `--source` is a secret `S…` key      | `CAATINGA_SOURCE_IS_SECRET_KEY`  | Same: alias only; never paste keys on the CLI      |
+| Situation                            | Code                             | Fix                                           |
+| ------------------------------------ | -------------------------------- | --------------------------------------------- |
+| Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `ctg build` first                         |
+| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI; verify with `ctg doctor` |
+| `--source` is a public `G…` address  | `CAATINGA_SOURCE_IS_PUBLIC_KEY`  | Use an identity alias such as `alice`         |
+| `--source` is a secret `S…` key      | `CAATINGA_SOURCE_IS_SECRET_KEY`  | Same: alias only; never paste keys on the CLI |
 
 ---
 
 ## Key Takeaways
 
-- Always run `caatinga doctor` first.
+- Always run `ctg doctor` first.
 - Never edit `caatinga.artifacts.json` manually — commit the file Caatinga writes.
 - Never copy contract IDs by hand; resolve them from artifacts.
 - Use Stellar CLI identity aliases (`alice`, `bob`) — never raw `G…` / `S…` keys.
@@ -700,23 +700,23 @@ Copy-paste loop for the session (same agenda as [Canonical Workflow](#canonical-
 
 ```bash
 node --version
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 
-npx caatinga doctor --network testnet --source alice
-npx caatinga build counter
-npx caatinga deploy counter --network testnet --source alice
-npx caatinga read counter.get --network testnet
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga read counter.get --network testnet
-npx caatinga status --network testnet
+npx ctg doctor --network testnet --source alice
+npx ctg build counter
+npx ctg deploy counter --network testnet --source alice
+npx ctg read counter.get --network testnet
+npx ctg invoke counter.increment --network testnet --source alice
+npx ctg read counter.get --network testnet
+npx ctg status --network testnet
 
-npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice
-npx caatinga status --network testnet
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
+npx ctg status --network testnet
 ```
 
 Optional UI after deploy:

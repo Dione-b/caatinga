@@ -36,7 +36,7 @@ export async function syncFrontendEnv(
     throw new CaatingaError(
       "Frontend env sync is not configured.",
       CaatingaErrorCode.INVALID_CONFIG,
-      "Add frontend.envFile and frontend.env to caatinga.config.ts before running caatinga sync-env."
+      "Add frontend.envFile and frontend.env to caatinga.config.ts before running ctg sync-env."
     );
   }
 
@@ -48,7 +48,7 @@ export async function syncFrontendEnv(
     throw new CaatingaError(
       `No deployment artifacts found for network "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy before caatinga sync-env."
+      "Run ctg deploy before ctg sync-env."
     );
   }
 
@@ -76,7 +76,7 @@ export async function syncFrontendEnv(
         throw new CaatingaError(
           `No deployed artifact found for "${lookupKey}" on "${network.name}".`,
           CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-          `Deploy ${lookupKey} before running caatinga sync-env.`
+          `Deploy ${lookupKey} before running ctg sync-env.`
         );
       }
 
@@ -117,7 +117,7 @@ export async function computeFrontendEnvEntries(
     throw new CaatingaError(
       `No deployment artifacts found for network "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy before comparing env values."
+      "Run ctg deploy before comparing env values."
     );
   }
 

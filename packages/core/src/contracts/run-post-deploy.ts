@@ -127,7 +127,7 @@ export async function runPostDeployHooks(
   const artifacts = await readArtifacts(cwd);
   const results: PostDeployHookResult[] = [];
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga wire.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg wire.");
 
   for (const hook of hooks) {
     if (!options.config.contracts[hook.contract]) {
@@ -143,7 +143,7 @@ export async function runPostDeployHooks(
       throw new CaatingaError(
         `No deployed artifact found for "${hook.contract}" on "${network.name}".`,
         CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        "Run caatinga deploy before caatinga wire."
+        "Run ctg deploy before ctg wire."
       );
     }
 

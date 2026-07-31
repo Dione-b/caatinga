@@ -56,7 +56,7 @@ export async function estimateDeployCost(
   const network = resolveNetwork(options.config, options.networkName);
   const source = assertSafeSourceAccount(options.source);
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga estimate.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg estimate.");
 
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
     sourcePath: contract.sourcePath,

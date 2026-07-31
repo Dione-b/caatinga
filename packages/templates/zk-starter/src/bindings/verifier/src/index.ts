@@ -1,13 +1,13 @@
 // Placeholder bindings. This file exists so the template type-checks before you
-// run `caatinga generate`. It does NOT talk to the chain — every method throws a
-// clear, actionable error. `caatinga generate verifier` overwrites this file with
+// run `ctg generate`. It does NOT talk to the chain — every method throws a
+// clear, actionable error. `ctg generate verifier` overwrites this file with
 // real @stellar/stellar-sdk generate bindings.
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 
 export const __caatingaPlaceholder = true;
 
 const GENERATE_HINT =
-  "Run `npx caatinga generate verifier --network testnet`, then restart the dev server.";
+  "Run `npx ctg generate verifier --network testnet`, then restart the dev server.";
 
 function placeholderBinding(method: string): never {
   throw new CaatingaError(

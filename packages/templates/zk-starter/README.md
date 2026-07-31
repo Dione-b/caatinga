@@ -3,8 +3,8 @@
 Editable ZK scaffold for Caatinga — not a black-box dependency. You own the circuit,
 verifier contract, and trusted-setup artifacts in this project.
 
-This template is the multiplier example used by default in `caatinga zk init`. It is not required
-for custom circuits; use `caatinga zk init --minimal` when you want a ZK-only project with a blank
+This template is the multiplier example used by default in `ctg zk init`. It is not required
+for custom circuits; use `ctg zk init --minimal` when you want a ZK-only project with a blank
 starter circuit and no frontend config.
 
 ## Requirements
@@ -34,7 +34,7 @@ The template ships a Vite + React dApp modeled after `react-vite-counter`:
 - run `npm run caatinga:zk:prove` (CLI prove)
 - connect a wallet and click **Verify proof on-chain** (`caatingaClient` + generated verifier bindings)
 
-Placeholder verifier bindings live under `src/bindings/verifier/` until `caatinga generate verifier`
+Placeholder verifier bindings live under `src/bindings/verifier/` until `ctg generate verifier`
 overwrites them after deploy.
 
 Proof artifacts are written to `.artifacts/zk/main/` (gitignored). The Vite dev server exposes them at
@@ -65,7 +65,7 @@ Hybrid flow after changing inputs in the browser:
 
 ## Trusted setup
 
-The default `caatinga zk build` flow runs a **local, single-party** trusted setup suitable
+The default `ctg zk build` flow runs a **local, single-party** trusted setup suitable
 for development only. Do not use those keys in production — run a proper MPC ceremony instead.
 
 **Mainnet guardrail:** Caatinga blocks `zk build` when `defaultNetwork` is `mainnet`, and blocks

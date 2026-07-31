@@ -6,7 +6,7 @@ Accepted 2026-05-11.
 
 ## Context
 
-Official and community templates need a **declared contract** against `@caatinga/core` / CLI versions. Without a manifest, `caatinga init` relies on implicit directory layout and human documentation, which drifts and breaks semver intent.
+Official and community templates need a **declared contract** against `@caatinga/core` / CLI versions. Without a manifest, `ctg init` relies on implicit directory layout and human documentation, which drifts and breaks semver intent.
 
 ## Decision
 
@@ -16,7 +16,7 @@ Each template must include **`caatinga.template.json`**, including:
 - **`caatinga.compatibleCore`** (or equivalent) range for supported `@caatinga/core` versions.
 - Declared paths: contracts root, `caatinga.config.ts`, `caatinga.artifacts.json`, frontend kind (`vite-react`, etc.).
 
-`caatinga init` validates compatibility before copy and fails with:
+`ctg init` validates compatibility before copy and fails with:
 
 - `CAATINGA_TEMPLATE_MANIFEST_NOT_FOUND` when the manifest is missing.
 - `CAATINGA_INVALID_TEMPLATE_MANIFEST` when the manifest JSON/schema is invalid.

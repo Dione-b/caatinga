@@ -10,6 +10,7 @@ import {
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { npxCli } from "../utils/cli-name.js";
 
 async function printFreshnessPreState(
   config: Awaited<ReturnType<typeof loadConfig>>,
@@ -64,7 +65,7 @@ export function registerGenerateCommand(program: Command): void {
               throw new CaatingaError(
                 `No deployment artifacts for network "${network.name}".`,
                 CaatingaErrorCode.NETWORK_ARTIFACTS_MISSING,
-                `Run caatinga deploy --network ${network.name} before generate.`
+                `Run ${npxCli(`deploy --network ${network.name}`)} before generate.`
               );
             }
           }

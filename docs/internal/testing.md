@@ -21,15 +21,15 @@ The default GitHub Actions workflow runs typecheck, docs check, build, and tests
 
 Workflow: `.github/workflows/testnet-deploy-regression.yml` — triggers: weekly schedule (Monday), `workflow_dispatch`.
 
-Typical steps: `caatinga deploy --if-changed` → `caatinga generate --strict-network` → `caatinga doctor --strict-bindings` → `caatinga smoke`.
+Typical steps: `ctg deploy --if-changed` → `ctg generate --strict-network` → `ctg doctor --strict-bindings` → `ctg smoke`.
 
 Local equivalent:
 
 ```bash
-npx caatinga regression --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS"
+npx ctg regression --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS"
 ```
 
-Use `caatinga ci run --strict` in CI after restoring identity secrets when you only need doctor + smoke (no full regression).
+Use `ctg ci run --strict` in CI after restoring identity secrets when you only need doctor + smoke (no full regression).
 
 ## Live testnet smoke (release gate)
 
@@ -51,7 +51,7 @@ CI uploads the following artifacts: `smoke-ci-out/*-smoke.log`, `*-caatinga-vers
 
 Live testnet smoke uses `CAATINGA_CI_IDENTITY_ALIAS` and `CAATINGA_CI_STELLAR_CONFIG_B64`. Caatinga receives only the identity alias through `--source`; secret material is restored into the Stellar CLI config directory and deleted after the job.
 
-> Prefer the config blob plus alias; **never pass raw secrets to `caatinga --source`**.
+> Prefer the config blob plus alias; **never pass raw secrets to `ctg --source`**.
 
 ### Stellar CLI config blob format
 
@@ -60,7 +60,7 @@ With Stellar CLI `27.0.0`, the safest secret format is a base64-encoded tar arch
 To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
 
 ```bash
-caatinga identity export > stellar-ci-config.b64
+ctg identity export > stellar-ci-config.b64
 # or manually:
 mkdir -p ci-stellar-config/.config
 cp -R ~/.config/stellar ci-stellar-config/.config/stellar
@@ -69,7 +69,7 @@ tar -C ci-stellar-config -czf stellar-ci-config.tgz .config
 base64 -w0 stellar-ci-config.tgz
 ```
 
-Restore in CI with `caatinga identity import stellar-ci-config.b64` after decoding is not needed — the import command reads the base64 text file directly.
+Restore in CI with `ctg identity import stellar-ci-config.b64` after decoding is not needed — the import command reads the base64 text file directly.
 
 Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
 

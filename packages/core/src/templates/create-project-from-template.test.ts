@@ -283,7 +283,7 @@ describe("createProjectFromTemplate", () => {
     );
 
     // Pre-populate the target as an existing project whose node_modules holds a
-    // broken symlink, reproducing the `caatinga zk init --force` crash.
+    // broken symlink, reproducing the `ctg zk init --force` crash.
     await mkdir(path.join(targetDir, "node_modules", "@hot-wallet"), { recursive: true });
     await symlink(
       path.join(tmpDir, "does-not-exist"),
@@ -453,7 +453,7 @@ describe("createProjectFromTemplate", () => {
     expect(packageJson.dependencies?.react).toBeDefined();
     expect(packageJson.dependencies?.["@caatinga/zk"]).toBeDefined();
     expect(packageJson.scripts?.dev).toBe("vite");
-    expect(packageJson.scripts?.["caatinga:zk:setup"]).toContain("caatinga zk build main");
+    expect(packageJson.scripts?.["caatinga:zk:setup"]).toContain("ctg zk build main");
     expect(viteConfig).toContain("@vitejs/plugin-react");
     expect(viteConfig).toContain("/zk-artifacts");
   });

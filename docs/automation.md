@@ -4,7 +4,7 @@ This document describes the three automation commands that form the Caatinga CI 
 
 ---
 
-## 1. `caatinga doctor` (Sprint 26)
+## 1. `ctg doctor` (Sprint 26)
 
 The `doctor` command runs a comprehensive set of local diagnostics against the current project. It checks:
 
@@ -35,7 +35,7 @@ The `doctor` command runs a comprehensive set of local diagnostics against the c
 
 ---
 
-## 2. `caatinga smoke` (Sprint 27)
+## 2. `ctg smoke` (Sprint 27)
 
 The `smoke` command runs the read-only smoke checks defined under each contract's `smokeReads` in `caatinga.config.ts`. It simulates each read call against the target network and asserts the `expect` matchers.
 
@@ -63,7 +63,7 @@ contracts: {
 
 ---
 
-## 3. `caatinga ci run` (Sprint 28)
+## 3. `ctg ci run` (Sprint 28)
 
 The `ci run` command orchestrates the full CI recipe: `doctor` → `smoke`. It is designed for use in GitHub Actions and other CI environments.
 
@@ -90,5 +90,5 @@ ci run
 
 ```yaml
 - name: Caatinga CI
-  run: npx caatinga ci run --network testnet --source ${{ secrets.CAATINGA_SOURCE }}
+  run: npx ctg ci run --network testnet --source ${{ secrets.CAATINGA_SOURCE }}
 ```

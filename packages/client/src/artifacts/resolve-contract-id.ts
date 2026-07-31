@@ -30,13 +30,13 @@ function formatMissingContractArtifactHint(
   network: string,
   contract: string
 ): string {
-  const deployCommand = `caatinga deploy ${contract} --network ${network} --source <identity>`;
-  const buildNote = "caatinga build does not register a contract ID.";
+  const deployCommand = `ctg deploy ${contract} --network ${network} --source <identity>`;
+  const buildNote = "ctg build does not register a contract ID.";
 
   if (Object.keys(artifacts.networks).length === 0) {
     return [
       "caatinga.artifacts.json has no network scaffold.",
-      `Run caatinga doctor --network ${network} to inspect deploy readiness, then run: ${deployCommand}.`,
+      `Run ctg doctor --network ${network} to inspect deploy readiness, then run: ${deployCommand}.`,
       buildNote,
       "Or pass contractId in the client registration.",
     ].join(" ");

@@ -293,7 +293,7 @@ const hasBuildFeatures = Object.values(options.config.contracts).some(
 if (hasBuildFeatures) {
   console.warn(
     "Warning: buildFeatures is set on one or more contracts but is ignored in workspace builds (buildRoot). " +
-      "Use individual contract builds (caatinga build <contract>) to apply buildFeatures."
+      "Use individual contract builds (ctg build <contract>) to apply buildFeatures."
   );
 }
 ```
@@ -451,7 +451,7 @@ for (const [sourceKey, envKey] of Object.entries(frontend.env)) {
       throw new CaatingaError(
         `No deployed artifact found for "${lookupKey}" on "${network.name}".`,
         CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        `Deploy ${lookupKey} before running caatinga sync-env.`
+        `Deploy ${lookupKey} before running ctg sync-env.`
       );
     }
 

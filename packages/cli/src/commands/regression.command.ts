@@ -18,7 +18,7 @@ export function registerRegressionCommand(program: Command): void {
     .requiredOption("-s, --source <source>", "Stellar CLI identity alias for deploy and smoke")
     .option("-n, --network <network>", "Configured network name")
     .option("--skip-test", "Skip pnpm test before build")
-    .option("--skip-build", "Skip caatinga build")
+    .option("--skip-build", "Skip ctg build")
     .option("--skip-deploy", "Skip deploy step")
     .option("--skip-generate", "Skip bindings generation")
     .option("--skip-smoke", "Skip smoke reads")

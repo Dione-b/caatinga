@@ -6,7 +6,7 @@ Caatinga generates TypeScript bindings via `npx @stellar/stellar-sdk generate`. 
 
 - Minimum: `16.0.1` (Protocol 27, ESM-first bindings aligned with Caatinga templates).
 
-Versions below the floor fail with `CAATINGA_UNSUPPORTED_SDK_VERSION` when checked at generate time or in `caatinga doctor`.
+Versions below the floor fail with `CAATINGA_UNSUPPORTED_SDK_VERSION` when checked at generate time or in `ctg doctor`.
 
 ## Advisory Last-Tested Version
 
@@ -17,7 +17,7 @@ Versions newer than the last-tested emit a non-fatal advisory. Binding output sh
 ### Runtime behavior
 
 - Below `16.0.1`: fail with `CAATINGA_UNSUPPORTED_SDK_VERSION`.
-- Above `16.0.1`: stderr advisory + `caatinga doctor` warning; command continues.
+- Above `16.0.1`: stderr advisory + `ctg doctor` warning; command continues.
 - At `16.0.1`: silent.
 
 ## Compatibility mechanism

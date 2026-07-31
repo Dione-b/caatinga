@@ -32,7 +32,7 @@ export async function readArtifacts(cwd = process.cwd()): Promise<CaatingaArtifa
       throw new CaatingaError(
         "caatinga.artifacts.json was not found.",
         CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        "Run caatinga init, or create the artifacts file before deploying or generating bindings."
+        "Run ctg init, or create the artifacts file before deploying or generating bindings."
       );
     }
 

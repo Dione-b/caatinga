@@ -22,7 +22,7 @@ Soroban dApps need to know **which contract IDs** correspond to which logical na
 - **Positive:** Reproducible deploys, simple offline inspection, no Caatinga account or cloud dependency for core flows.
 - **Positive:** Aligns with security stance: no exfiltration of deploy metadata by default.
 - **Negative:** Teams must share artifacts/config via git or their own secret management—by design.
-- **Neutral:** When environments land, expect **`caatinga migrate`** (or equivalent) and a bumped `caatinga.artifacts.json` schema version.
+- **Neutral:** When environments land, expect **`ctg migrate`** (or equivalent) and a bumped `caatinga.artifacts.json` schema version.
 
 ## Related
 

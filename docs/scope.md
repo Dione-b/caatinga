@@ -9,7 +9,7 @@ This document establishes the official feature categorization and scope limits f
 Core features define what Caatinga is at its heart. These are fully supported, guaranteed to remain stable, and represent the primary value proposition:
 
 - **Deployment Orchestration (Local Engine):**
-  - Project scaffolding (`caatinga init`).
+  - Project scaffolding (`ctg init`).
   - Rust contract compilation driver (shelling out to Stellar CLI).
   - Graph-aware deployments with topological sorting based on dependencies (`dependsOn`).
   - In-configuration placeholder resolution (e.g. `${contracts.token.contractId}`).
@@ -23,7 +23,7 @@ Core features define what Caatinga is at its heart. These are fully supported, g
   - Pluggable wallet adapters (Freighter, Stellar Wallets Kit) and React context bindings (`@caatinga/client/react`).
   - Standard transaction pipeline orchestration (simulate → sign → submit → watch).
 - **Automation & Diagnostics:**
-  - Workspace requirements diagnostics (`caatinga doctor`).
+  - Workspace requirements diagnostics (`ctg doctor`).
   - CLI logs and stable error APIs using `CAATINGA_*` error codes.
 
 ---
@@ -33,13 +33,13 @@ Core features define what Caatinga is at its heart. These are fully supported, g
 Nice to Have features are quality-of-life enhancements or platform operations that improve stability and visibility, but do not alter the main execution pipeline:
 
 - **Artifact History & Schema Migration:**
-  - Tracking artifact histories and providing migrations between format versions (`caatinga migrate artifacts`).
+  - Tracking artifact histories and providing migrations between format versions (`ctg migrate artifacts`).
 - **Cost Advisory:**
-  - Simulating deployment transactions to advise on resource consumption and fees (`caatinga estimate deploy`).
+  - Simulating deployment transactions to advise on resource consumption and fees (`ctg estimate deploy`).
 - **State Inspection:**
-  - Comparing local artifact states with deployed on-chain contract states (`caatinga inspect`).
+  - Comparing local artifact states with deployed on-chain contract states (`ctg inspect`).
 - **Logical Rollbacks:**
-  - Restore contract state reference locally or update the deployed configuration references dynamically (`caatinga rollback`).
+  - Restore contract state reference locally or update the deployed configuration references dynamically (`ctg rollback`).
 
 ---
 

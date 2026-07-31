@@ -221,7 +221,7 @@ Also apply install overrides:
 - npm `package.json`: merge `walletStubOverrides("./src/stubs")` into `overrides`
 - pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`
 
-Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `caatinga init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
+Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `ctg init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
 
 ### HOT Wallet stub
 

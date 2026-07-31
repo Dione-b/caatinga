@@ -42,8 +42,8 @@ export async function buildContract(options: BuildContractOptions) {
   const cwd = options.cwd ?? process.cwd();
   const contract = resolveContract(options.config, options.contractName, cwd);
 
-  await checkBinary("rustc", "Install Rust before running caatinga build.");
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga build.");
+  await checkBinary("rustc", "Install Rust before running ctg build.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg build.");
 
   let result;
   try {

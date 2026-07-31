@@ -24,7 +24,7 @@ function wasmNotFoundError(
 ): CaatingaError {
   const migratedPath = options?.migratedPath;
   const cargoTargetDir = process.env.CARGO_TARGET_DIR;
-  const hintParts = ["Run caatinga build before deploy or generate."];
+  const hintParts = ["Run ctg build before deploy or generate."];
 
   if (migratedPath !== undefined) {
     hintParts.push(
@@ -196,6 +196,6 @@ export async function isWasmOlderThanSources(input: {
 export function formatStaleWasmWarning(contractName: string): string {
   return (
     `WASM for "${contractName}" may be stale: contract sources under src/ are newer than the WASM file. ` +
-    "Run `caatinga build` before deploy."
+    "Run `ctg build` before deploy."
   );
 }

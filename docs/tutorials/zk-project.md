@@ -16,19 +16,19 @@ Beyond the usual [Getting started prerequisites](../getting-started.md#prerequis
 
 - **Protocol 25+** on the target network
 - **Verifier contract:** `soroban-sdk = "25.1.0"`, Rust **1.89.0**
-- **Circom 2 + snarkjs** — installed on first `caatinga zk build` into `~/.caatinga/zk-tools`
+- **Circom 2 + snarkjs** — installed on first `ctg zk build` into `~/.caatinga/zk-tools`
 
 See [ZK module — Requirements](../zk.md#requirements) for details.
 
 ## Three ways to scaffold
 
-| Mode                    | Command                                     | Result                                                             |
-| ----------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
-| Full template           | `npx caatinga zk init my-zk-dapp`           | `zk-starter`: multiplier circuit + Vite UI + verifier              |
-| ZK minimal              | `npx caatinga zk init my-zk-dapp --minimal` | Identity circuit + verifier, no frontend                           |
-| Add to existing project | `cd my-app && npx caatinga zk init`         | Copies `circuits/` + `contracts/verifier`, merges `zk` into config |
+| Mode                    | Command                                | Result                                                             |
+| ----------------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| Full template           | `npx ctg zk init my-zk-dapp`           | `zk-starter`: multiplier circuit + Vite UI + verifier              |
+| ZK minimal              | `npx ctg zk init my-zk-dapp --minimal` | Identity circuit + verifier, no frontend                           |
+| Add to existing project | `cd my-app && npx ctg zk init`         | Copies `circuits/` + `contracts/verifier`, merges `zk` into config |
 
-Re-run `caatinga zk init` in an existing directory with `--force` to overwrite conflicting scaffold files.
+Re-run `ctg zk init` in an existing directory with `--force` to overwrite conflicting scaffold files.
 
 ### Add ZK to an existing project
 
@@ -36,25 +36,25 @@ From a directory that already has `caatinga.config.ts`:
 
 ```bash
 cd my-contract-app
-npx caatinga zk init
+npx ctg zk init
 ```
 
 Without `--minimal`, Caatinga copies circuit and verifier files from `zk-starter` and merges `verifier` + `zk` blocks into your config. With `--minimal`, it scaffolds a minimal identity circuit and verifier instead.
 
 ## Dev/testnet workflow
 
-> `caatinga zk build` runs a **single-party development ceremony**. Use **testnet** for this walkthrough; mainnet deploy/invoke with dev artifacts is blocked by default.
+> `ctg zk build` runs a **single-party development ceremony**. Use **testnet** for this walkthrough; mainnet deploy/invoke with dev artifacts is blocked by default.
 
 ```bash
-npx caatinga zk init my-zk-dapp
+npx ctg zk init my-zk-dapp
 cd my-zk-dapp
 npm install
 
-npx caatinga build verifier
-npx caatinga zk build main
-npx caatinga deploy verifier --network testnet --source alice
-npx caatinga zk prove main
-npx caatinga zk invoke main --network testnet --source alice
+npx ctg build verifier
+npx ctg zk build main
+npx ctg deploy verifier --network testnet --source alice
+npx ctg zk prove main
+npx ctg zk invoke main --network testnet --source alice
 ```
 
 Step by step:
@@ -77,7 +77,7 @@ The `zk-starter` UI follows a hybrid pattern:
 
 1. Set circuit inputs in the browser and download `input.json`
 2. Save to `circuits/input.json`
-3. Run `caatinga zk prove main` in the terminal
+3. Run `ctg zk prove main` in the terminal
 4. Connect a wallet and simulate `verify_proof` via `caatingaClient.contract("verifier").read(...)`
 
 Browser serialization uses `@caatinga/zk/browser` (`buildVerifyProofBindingArgs`).
@@ -88,7 +88,7 @@ Browser serialization uses `@caatinga/zk/browser` (`buildVerifyProofBindingArgs`
 
 For the multiplier scaffold, use `a` and `b` but not `c`. Snarkjs derives public signals during proving and writes them to `.artifacts/zk/main/public.json`.
 
-Including a public output in `input.json` causes `caatinga zk prove` to fail (for example `Too many values for input signal c`).
+Including a public output in `input.json` causes `ctg zk prove` to fail (for example `Too many values for input signal c`).
 
 ## Next steps
 

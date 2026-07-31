@@ -44,4 +44,4 @@ Caatinga does not rewrite Stellar CLI binding output. Add validation at your app
 | `Vec<T>`                   | `Array<T>`                                         |
 | `Map<K,V>`                 | `Map` or plain object (depends on binding version) |
 
-When in doubt, inspect the generated method signature under `frontend.bindingsOutput` after `caatinga generate`.
+When in doubt, inspect the generated method signature under `frontend.bindingsOutput` after `ctg generate`.

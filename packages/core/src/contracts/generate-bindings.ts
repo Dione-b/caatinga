@@ -45,7 +45,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     throw new CaatingaError(
       "Frontend bindings are not configured.",
       CaatingaErrorCode.INVALID_CONFIG,
-      "Add a frontend.bindingsOutput entry to caatinga.config.ts before running caatinga generate."
+      "Add a frontend.bindingsOutput entry to caatinga.config.ts before running ctg generate."
     );
   }
 
@@ -57,7 +57,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     throw new CaatingaError(
       `No deployed artifact found for "${options.contractName}" on "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy for this contract and network before generating bindings."
+      "Run ctg deploy for this contract and network before generating bindings."
     );
   }
 

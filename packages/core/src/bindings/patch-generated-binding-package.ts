@@ -125,7 +125,7 @@ export async function patchGeneratedBindingPackage(outputDir: string): Promise<v
     throw new CaatingaError(
       "Generated binding package is missing src/index.ts.",
       CaatingaErrorCode.BINDINGS_FAILED,
-      "Re-run caatinga generate or check @stellar/stellar-sdk generate output."
+      "Re-run ctg generate or check @stellar/stellar-sdk generate output."
     );
   }
 
@@ -136,7 +136,7 @@ export async function patchGeneratedBindingPackage(outputDir: string): Promise<v
     throw new CaatingaError(
       "Generated binding package is missing package.json.",
       CaatingaErrorCode.BINDINGS_FAILED,
-      "Re-run caatinga generate or check @stellar/stellar-sdk generate output."
+      "Re-run ctg generate or check @stellar/stellar-sdk generate output."
     );
   }
 
@@ -147,7 +147,7 @@ export async function patchGeneratedBindingPackage(outputDir: string): Promise<v
     throw new CaatingaError(
       "Generated binding package.json is not valid JSON.",
       CaatingaErrorCode.BINDINGS_FAILED,
-      "Re-run caatinga generate or check @stellar/stellar-sdk generate output."
+      "Re-run ctg generate or check @stellar/stellar-sdk generate output."
     );
   }
 

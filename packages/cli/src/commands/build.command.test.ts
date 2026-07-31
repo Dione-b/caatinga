@@ -84,7 +84,7 @@ describe("build command", () => {
         {
           name: "counter",
           ok: false,
-          fix: "Run: caatinga deploy counter --network testnet --source <identity>",
+          fix: "Run: npx caatinga deploy counter --network testnet --source <identity>",
         },
       ],
     });
@@ -101,7 +101,7 @@ describe("build command", () => {
       expect(evaluateDeployCoverage).toHaveBeenCalledWith({ networkName: "testnet" });
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(warnings).toContain(
-        "Next: caatinga deploy counter --network testnet --source <identity>"
+        "Next: npx caatinga deploy counter --network testnet --source <identity>"
       );
       expect(warnings).toContain("build alone is not enough");
     } finally {
@@ -139,7 +139,7 @@ describe("build command", () => {
 
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(warnings).toContain(
-        "Next: caatinga deploy counter --network testnet --source <identity>"
+        "Next: npx caatinga deploy counter --network testnet --source <identity>"
       );
       expect(warnings).toContain("build alone is not enough");
     } finally {
@@ -160,7 +160,7 @@ describe("build command", () => {
         {
           name: "counter",
           ok: false,
-          fix: "Run: caatinga deploy counter --network testnet --source <identity>",
+          fix: "Run: npx caatinga deploy counter --network testnet --source <identity>",
         },
       ],
     });
@@ -172,7 +172,7 @@ describe("build command", () => {
 
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(warnings).toContain(
-        "Next: caatinga deploy counter --network testnet --source <identity>"
+        "Next: npx caatinga deploy counter --network testnet --source <identity>"
       );
       expect(warnings).not.toContain("frontend needs contractId");
     } finally {

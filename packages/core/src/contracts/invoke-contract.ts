@@ -35,11 +35,11 @@ export async function invokeContract(options: InvokeContractOptions) {
     throw new CaatingaError(
       `No deployed artifact found for "${target.contractName}" on "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy for this contract and network before invoking it."
+      "Run ctg deploy for this contract and network before invoking it."
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga invoke.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg invoke.");
 
   const methodArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
@@ -96,7 +96,7 @@ export async function invokeContract(options: InvokeContractOptions) {
           "  stellar --version",
           "Then retry with a funded identity, for example:",
           "  stellar keys generate alice --fund --network testnet",
-          "  npx caatinga invoke counter.increment --network testnet --source alice",
+          "  npx ctg invoke counter.increment --network testnet --source alice",
         ].join("\n"),
         error
       );

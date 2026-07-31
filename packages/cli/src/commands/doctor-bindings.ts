@@ -5,6 +5,7 @@ import {
   resolveNetwork,
   type BindingFreshnessStatus,
 } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 
 export type BindingCoverageLine = {
   name: string;
@@ -35,7 +36,7 @@ export async function evaluateBindingCoverage(options: {
     reason: entry.reason,
     ...(entry.status === "fresh"
       ? {}
-      : { fix: `Run: caatinga generate ${entry.contractName} --network ${network.name}` }),
+      : { fix: `Run: ${npxCli(`generate ${entry.contractName} --network ${network.name}`)}` }),
   }));
 
   return { lines, allFresh: lines.every((line) => line.status === "fresh") };

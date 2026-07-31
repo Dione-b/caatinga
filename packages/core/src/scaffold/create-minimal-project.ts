@@ -57,14 +57,12 @@ function packageJsonSource(projectName: string): string {
       private: true,
       type: "module",
       scripts: {
-        build: "caatinga build app",
-        deploy: "caatinga deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        doctor: "caatinga doctor --network testnet",
+        build: "ctg build app",
+        deploy: "ctg deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "ctg doctor --network testnet",
         test: "cargo test --manifest-path contracts/app/Cargo.toml",
-        "read:hello":
-          "caatinga read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        "read:version":
-          "caatinga read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        "read:hello": "ctg read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        "read:version": "ctg read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}",
       },
       devDependencies: {
         "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
@@ -86,11 +84,11 @@ Minimal Caatinga project with a Soroban contract stub (no frontend template).
 \`\`\`bash
 npm install
 npm test
-npx caatinga doctor
-npx caatinga build app
-npx caatinga deploy app --network testnet --source <identity>
-npx caatinga read app.version --network testnet
-npx caatinga read app.hello --network testnet
+npx ctg doctor
+npx ctg build app
+npx ctg deploy app --network testnet --source <identity>
+npx ctg read app.version --network testnet
+npx ctg read app.hello --network testnet
 \`\`\`
 
 ## Tests
@@ -108,7 +106,7 @@ cargo test --manifest-path contracts/app/Cargo.toml
 - \`hello()\` — read-only; returns Soroban Symbol \`hello\`
 - \`version()\` — read-only; returns \`1\`
 
-Use \`caatinga read\` for read-only methods. Use \`caatinga invoke\` only after you add state-changing methods to the contract.
+Use \`ctg read\` for read-only methods. Use \`ctg invoke\` only after you add state-changing methods to the contract.
 
 Soroban \`Symbol\` parameters are generated as TypeScript \`string\` values with host-specific restrictions — see the Caatinga docs on [Soroban types](https://github.com/caatinga/caatinga/blob/main/docs/soroban-types.md).
 

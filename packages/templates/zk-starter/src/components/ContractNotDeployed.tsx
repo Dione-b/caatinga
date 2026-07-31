@@ -14,10 +14,10 @@ export function ContractNotDeployed() {
         bindings automatically.
       </p>
       <pre className="counter-error" role="note">
-        {`npx caatinga build verifier
-npx caatinga zk build main
-npx caatinga deploy verifier --network testnet --source <identity>
-npx caatinga generate verifier --network testnet
+        {`npx ctg build verifier
+npx ctg zk build main
+npx ctg deploy verifier --network testnet --source <identity>
+npx ctg generate verifier --network testnet
 npm run dev`}
       </pre>
     </section>

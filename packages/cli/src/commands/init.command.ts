@@ -1,6 +1,7 @@
 import path from "node:path";
 import { Command } from "commander";
 import { createMinimalProject, createProjectFromTemplate } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { resolveTemplateDir } from "../utils/template-path.js";
@@ -18,7 +19,7 @@ export function registerInitCommand(program: Command): void {
     .argument("<projectName>", "Project directory to create")
     .option(
       "-t, --template <template>",
-      "Template name (react-vite-counter; ZK projects use caatinga zk init with zk-starter)",
+      "Template name (react-vite-counter; ZK projects use ctg zk init with zk-starter)",
       "react-vite-counter"
     )
     .option("--minimal", "Scaffold a minimal CLI + Soroban contract project (no frontend template)")
@@ -45,10 +46,10 @@ export function registerInitCommand(program: Command): void {
           logger.info("Next steps:");
           logger.info(`  cd ${projectDirectory}`);
           logger.info("  npm install");
-          logger.info("  npx caatinga build app");
-          logger.info("  npx caatinga deploy app --network testnet --source <identity>");
-          logger.info("  npx caatinga read app.version --network testnet --source <identity>");
-          logger.info("  npx caatinga read app.hello --network testnet --source <identity>");
+          logger.info(`  ${npxCli("build app")}`);
+          logger.info(`  ${npxCli("deploy app --network testnet --source <identity>")}`);
+          logger.info(`  ${npxCli("read app.version --network testnet --source <identity>")}`);
+          logger.info(`  ${npxCli("read app.hello --network testnet --source <identity>")}`);
           return;
         }
 
@@ -71,13 +72,13 @@ export function registerInitCommand(program: Command): void {
         logger.info(`  cd ${projectDirectory}`);
         logger.info("  npm install");
         if (defaultContract) {
-          logger.info(`  npx caatinga build    ${defaultContract}`);
+          logger.info(`  ${npxCli(`build    ${defaultContract}`)}`);
           logger.info(
-            `  npx caatinga deploy   ${defaultContract} --network testnet --source <identity>`
+            `  ${npxCli(`deploy   ${defaultContract} --network testnet --source <identity>`)}`
           );
         } else {
-          logger.info("  npx caatinga build");
-          logger.info("  npx caatinga deploy   --network testnet --source <identity>");
+          logger.info(`  ${npxCli("build")}`);
+          logger.info(`  ${npxCli("deploy   --network testnet --source <identity>")}`);
         }
         logger.info("  npm run dev");
         logger.info("");
@@ -85,7 +86,7 @@ export function registerInitCommand(program: Command): void {
           "Note: deploy generates TypeScript bindings automatically (--no-generate to skip) —"
         );
         logger.info("the dApp reads the contract ID from caatinga.artifacts.json.");
-        logger.info("If generation fails, recover with: npx caatinga generate --network testnet");
+        logger.info(`If generation fails, recover with: ${npxCli("generate --network testnet")}`);
       })
     );
 }

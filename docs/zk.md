@@ -14,36 +14,36 @@ official `groth16_verifier` pattern.
 
 - **Protocol 25+** on the target network (testnet/mainnet must be at Protocol 25 before deploy).
 - **Verifier contract:** `soroban-sdk = "25.1.0"`, Rust `1.89.0`.
-- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `caatinga zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau).
+- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau).
 
 ## Quick start
 
 ```bash
-npx caatinga zk init my-zk-dapp
+npx ctg zk init my-zk-dapp
 cd my-zk-dapp && npm install
-npx caatinga zk build main
-npx caatinga build verifier
-npx caatinga deploy verifier --network testnet --source alice
-npx caatinga zk prove main
-npx caatinga zk invoke main --network testnet --source alice
+npx ctg zk build main
+npx ctg build verifier
+npx ctg deploy verifier --network testnet --source alice
+npx ctg zk prove main
+npx ctg zk invoke main --network testnet --source alice
 ```
 
 Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet — ZK loop](./cheatsheet.md#zk-loop).
 
 ## Commands
 
-| Command                                        | Purpose                                                                  |
-| ---------------------------------------------- | ------------------------------------------------------------------------ |
-| `caatinga zk init [project]`                   | Scaffold `zk-starter` (multiplier circuit + verifier).                   |
-| `caatinga zk init [project] --minimal`         | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
-| `caatinga zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`.             |
-| `caatinga zk init [project] --force`           | Overwrite existing scaffold files.                                       |
-| `caatinga zk build [circuit]`                  | Compile Circom (`-p bls12381`) and run dev trusted setup.                |
-| `caatinga zk build [circuit] --embed-vk`       | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).  |
-| `caatinga zk prove [circuit]`                  | Generate `proof.json` and `public.json` from `input.json`.               |
-| `caatinga zk prove [circuit] --debug`          | Emit intermediate `witness.wtns` for debugging.                          |
-| `caatinga zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK).  |
-| `caatinga zk invoke [circuit] --embed-vk`      | **Blocked** — experimental; use dynamic VK flow today.                   |
+| Command                                   | Purpose                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `ctg zk init [project]`                   | Scaffold `zk-starter` (multiplier circuit + verifier).                   |
+| `ctg zk init [project] --minimal`         | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
+| `ctg zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`.             |
+| `ctg zk init [project] --force`           | Overwrite existing scaffold files.                                       |
+| `ctg zk build [circuit]`                  | Compile Circom (`-p bls12381`) and run dev trusted setup.                |
+| `ctg zk build [circuit] --embed-vk`       | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).  |
+| `ctg zk prove [circuit]`                  | Generate `proof.json` and `public.json` from `input.json`.               |
+| `ctg zk prove [circuit] --debug`          | Emit intermediate `witness.wtns` for debugging.                          |
+| `ctg zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK).  |
+| `ctg zk invoke [circuit] --embed-vk`      | **Blocked** — experimental; use dynamic VK flow today.                   |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
 
@@ -61,18 +61,18 @@ See [ZK project tutorial](./tutorials/zk-project.md) for the hybrid UI + CLI pro
 for the multiplier scaffold, use `a` and `b` but not `c`. Snarkjs derives public signals during
 proving and writes them to `.artifacts/zk/<circuit>/public.json`.
 
-If you include a public output in `input.json`, `caatinga zk prove` fails with a witness error
+If you include a public output in `input.json`, `ctg zk prove` fails with a witness error
 (for example `Too many values for input signal c`).
 
 ## Build artifacts
 
-After `caatinga zk build`, Circom emits WASM under:
+After `ctg zk build`, Circom emits WASM under:
 
 ```text
 .artifacts/zk/<circuit>/main_js/main.wasm
 ```
 
-The CLI resolves this path automatically during `caatinga zk prove`; you do not configure it
+The CLI resolves this path automatically during `ctg zk prove`; you do not configure it
 in `caatinga.config.ts`.
 
 ## Library API (`@caatinga/zk`)
@@ -145,26 +145,26 @@ Embedded VK is opt-in and visible in your repo — never a hidden dependency.
 
 ### Experimental: `--embed-vk` (not end-to-end)
 
-`caatinga zk build --embed-vk` writes `contracts/verifier/src/vk.rs` with real BLS12-381
+`ctg zk build --embed-vk` writes `contracts/verifier/src/vk.rs` with real BLS12-381
 coordinates from `verification_key.json`. Re-run the same command after circuit changes to
 regenerate the file.
 
-The default `zk-starter` verifier scaffold still expects a dynamic VK argument. **`caatinga zk invoke --embed-vk` is blocked** until an embedded-VK entrypoint exists in the contract.
+The default `zk-starter` verifier scaffold still expects a dynamic VK argument. **`ctg zk invoke --embed-vk` is blocked** until an embedded-VK entrypoint exists in the contract.
 Use the default dynamic VK flow for end-to-end verification today.
 
 ## Production guardrails
 
-`caatinga zk build` always records a **single-party development ceremony**
+`ctg zk build` always records a **single-party development ceremony**
 (`.artifacts/zk/<circuit>/ceremony.json`). Suitable for local testing only — production
 requires an external MPC powers-of-tau ceremony and audited circuit artifacts.
 
 Caatinga **blocks mainnet** operations that would use those artifacts:
 
-| Command                      | Guardrail                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------ |
-| `caatinga zk build`          | Fails when `defaultNetwork` is `mainnet` (ceremony is always dev single-party) |
-| `caatinga deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits       |
-| `caatinga zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                           |
+| Command                 | Guardrail                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `ctg zk build`          | Fails when `defaultNetwork` is `mainnet` (ceremony is always dev single-party) |
+| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits       |
+| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                           |
 
 Pass `--allow-dev-ceremony` only for conscious testing — not for production deployments.
 The CLI surfaces `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` when a guardrail trips.

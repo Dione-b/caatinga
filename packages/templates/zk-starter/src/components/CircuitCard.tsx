@@ -111,8 +111,8 @@ export function CircuitCard() {
       </div>
 
       <p>
-        Set private inputs, download <code>input.json</code>, run{" "}
-        <code>npx caatinga zk prove main</code>, then verify the proof on-chain with your wallet.
+        Set private inputs, download <code>input.json</code>, run <code>npx ctg zk prove main</code>
+        , then verify the proof on-chain with your wallet.
       </p>
 
       <div className="zk-form">
@@ -163,7 +163,7 @@ Then refresh artifacts and verify again.`}
       ) : verified === false ? (
         <p className="counter-error" role="status">
           Proof verification failed on-chain. Check that circuits/input.json matches the downloaded
-          values and re-run <code>npx caatinga zk prove main</code>.
+          values and re-run <code>npx ctg zk prove main</code>.
         </p>
       ) : null}
 

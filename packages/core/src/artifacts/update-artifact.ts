@@ -103,7 +103,7 @@ export function restoreArtifactFromHistory(input: {
     throw new CaatingaError(
       `Rollback target "${input.contractId}" was not found in artifact history for "${input.contractName}".`,
       CaatingaErrorCode.ROLLBACK_TARGET_NOT_FOUND,
-      "Use caatinga inspect to list prior contract IDs, or redeploy manually."
+      "Use ctg inspect to list prior contract IDs, or redeploy manually."
     );
   }
 
