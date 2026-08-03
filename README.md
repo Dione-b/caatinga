@@ -110,15 +110,15 @@ my-dapp/
 ├── caatinga.config.ts        # contracts, WASM paths, networks
 ├── caatinga.artifacts.json   # deployed contract IDs per network
 ├── contracts/                # Rust Soroban contracts
-│   └── generated/            # TS bindings (auto-generated on deploy)
 └── src/                      # frontend/client from the selected template
+    └── contracts/generated/  # TS bindings (auto-generated on deploy)
 ```
 
 ## Packages
 
 | Package            | Role                                                                                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------- |
-| `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, wire, smoke, regression, ci, generate, status, doctor |
+| `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, upgrade, dev, doctor, generate, invoke, read, status, migrate, rollback, estimate, inspect, wire, sync-env, smoke, regression, ci, identity, zk, version |
 | `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                        |
 | `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                              |
 
