@@ -99,6 +99,127 @@ async function ensureBufferPolyfill(outputDir: string): Promise<void> {
   await writeFile(entryPath, `${POLYFILLS_IMPORT_LINE}\n${entry}`, "utf8");
 }
 
+// @stellar/stellar-sdk generate emits error enums as a value only
+// (`export const Name = { 1: { message: "..." } }`), never as a type. Any
+// binding that uses `Result<T, Name>` then fails with TS2749 ("'Name' refers
+// to a value, but is being used as a type here") because Result's error
+// param requires `{ message: string }`. Declaration merging a matching
+// `interface` fixes this without touching the generated runtime value.
+const ERROR_ENUM_CONST_PATTERN = /export const (\w+) = \{[\s\S]*?\n\}/g;
+
+async function ensureErrorEnumInterfaces(outputDir: string): Promise<void> {
+  const typesPath = path.join(outputDir, "src", "types.ts");
+
+  let content: string;
+  try {
+    content = await readFile(typesPath, "utf8");
+  } catch {
+    return;
+  }
+
+  let patched = content;
+  let insertedLength = 0;
+
+  for (const match of content.matchAll(ERROR_ENUM_CONST_PATTERN)) {
+    const [block, name] = match;
+    if (content.includes(`export interface ${name} {`)) {
+      continue;
+    }
+
+    const insertAt = (match.index ?? 0) + block.length + insertedLength;
+    const interfaceDecl = `\n\nexport interface ${name} {\n  message: string;\n}`;
+    patched = `${patched.slice(0, insertAt)}${interfaceDecl}${patched.slice(insertAt)}`;
+    insertedLength += interfaceDecl.length;
+  }
+
+  if (patched !== content) {
+    await writeFile(typesPath, patched, "utf8");
+  }
+}
+
+// @stellar/stellar-sdk generate only adds `Address` to types.ts's import from
+// '@stellar/stellar-sdk' when some field type needs it — but that field can
+// end up unused in the final output for some contracts, leaving a dangling
+// import that trips no-unused-vars. Only strip it when "Address" truly
+// doesn't appear anywhere else in the file, so a real usage is never removed.
+const STELLAR_SDK_IMPORT_PATTERN = /^import \{([^}]*)\} from '@stellar\/stellar-sdk';$/m;
+
+async function pruneUnusedAddressImport(outputDir: string): Promise<void> {
+  const typesPath = path.join(outputDir, "src", "types.ts");
+
+  let content: string;
+  try {
+    content = await readFile(typesPath, "utf8");
+  } catch {
+    return;
+  }
+
+  const match = content.match(STELLAR_SDK_IMPORT_PATTERN);
+  if (!match) {
+    return;
+  }
+
+  const [importLine, importList] = match;
+  const names = importList.split(",").map((entry) => entry.trim()).filter(Boolean);
+  if (!names.includes("Address")) {
+    return;
+  }
+
+  const importStart = match.index ?? 0;
+  const withoutImportLine = content.slice(0, importStart) + content.slice(importStart + importLine.length);
+  if (withoutImportLine.includes("Address")) {
+    return;
+  }
+
+  const remaining = names.filter((entry) => entry !== "Address");
+  const replacement =
+    remaining.length > 0 ? `import {${remaining.join(", ")}} from '@stellar/stellar-sdk';` : "";
+
+  const patched =
+    replacement.length > 0
+      ? `${content.slice(0, importStart)}${replacement}${content.slice(importStart + importLine.length)}`
+      : `${content.slice(0, importStart)}${content.slice(importStart + importLine.length)}`.replace(
+          /\n\n\n/,
+          "\n\n"
+        );
+
+  await writeFile(typesPath, patched, "utf8");
+}
+
+// @stellar/stellar-sdk generate always emits `Client` as both an interface
+// (typed method signatures) and a class extending ContractClient (which
+// dispatches those methods through a Proxy at runtime) — intentional
+// declaration merging that eslint's no-unsafe-declaration-merging flags as if
+// it were a mistake. Silence it at the two fixed spots instead of asking every
+// consuming project to disable the rule project-wide.
+const CLIENT_DECLARATION_MERGING_TARGETS = ["export interface Client {", "export class Client extends ContractClient {"];
+const ESLINT_DISABLE_DECLARATION_MERGING =
+  "// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional: Client is both the typed interface and the ContractClient subclass that dispatches its methods via Proxy.";
+
+async function ensureClientDeclarationMergingComments(outputDir: string): Promise<void> {
+  const clientPath = path.join(outputDir, "src", "client.ts");
+
+  let content: string;
+  try {
+    content = await readFile(clientPath, "utf8");
+  } catch {
+    return;
+  }
+
+  let patched = content;
+  for (const target of CLIENT_DECLARATION_MERGING_TARGETS) {
+    const marker = `${ESLINT_DISABLE_DECLARATION_MERGING}\n${target}`;
+    if (!patched.includes(target) || patched.includes(marker)) {
+      continue;
+    }
+    patched = patched.replace(target, marker);
+  }
+
+  if (patched !== content) {
+    await writeFile(clientPath, patched, "utf8");
+  }
+}
+
 async function ensureRootBindingIndex(outputDir: string): Promise<void> {
   const rootIndexPath = path.join(outputDir, "index.ts");
 
@@ -166,4 +287,7 @@ export async function patchGeneratedBindingPackage(outputDir: string): Promise<v
 
   await ensureBufferPolyfill(outputDir);
   await ensureRootBindingIndex(outputDir);
+  await ensureErrorEnumInterfaces(outputDir);
+  await pruneUnusedAddressImport(outputDir);
+  await ensureClientDeclarationMergingComments(outputDir);
 }
