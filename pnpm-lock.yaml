@@ -102,7 +102,7 @@ importers:
   packages/cli:
     dependencies:
       '@caatinga/core':
-        specifier: ^3.9.0
+        specifier: ^3.9.1
         version: link:../core
       '@caatinga/zk':
         specifier: ^3.9.0
@@ -133,7 +133,7 @@ importers:
   packages/client:
     dependencies:
       '@caatinga/core':
-        specifier: ^3.9.0
+        specifier: ^3.9.1
         version: link:../core
       '@stellar/freighter-api':
         specifier: ^4.0.0
