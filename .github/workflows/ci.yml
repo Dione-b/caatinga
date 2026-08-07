@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stellar-version: ["23.0.0", "25.2.0", "27.0.0"]
+        stellar-version: ["23.3.0", "25.2.0", "27.0.0"]
 
     steps:
       - name: Checkout
@@ -73,7 +73,9 @@ jobs:
           cache: pnpm
 
       - name: Install Stellar CLI ${{ matrix.stellar-version }}
-        uses: stellar/stellar-cli@${{ matrix.stellar-version }}
+        uses: stellar/stellar-cli@v27.0.0
+        with:
+          version: ${{ matrix.stellar-version }}
 
       - name: Verify Stellar CLI version
         run: stellar --version
