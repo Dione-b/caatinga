@@ -1,5 +1,15 @@
 ## Breaking changes policy
 
+## 3.9.1
+
+### Patch Changes
+
+- Error hints now reference the `ctg` binary name (`caatinga` remains a legacy alias).
+
+### Patch Changes
+
+- @caatinga/core@3.9.1
+
 ## 3.9.0
 
 ### Patch Changes

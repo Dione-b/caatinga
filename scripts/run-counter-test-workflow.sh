@@ -78,22 +78,22 @@ grep -i deprecated /tmp/counter-test-install.log || echo "NO_DEPRECATED_WARNINGS
 
 echo ""
 echo "=== STEP 8: contract flow ==="
-echo "--- npx caatinga build counter ---"
-npx caatinga build counter
+echo "--- npx ctg build counter ---"
+npx ctg build counter
 BUILD_COUNTER_EXIT=$?
 echo "build counter exit code: $BUILD_COUNTER_EXIT"
 
 echo ""
-echo "--- npx caatinga deploy counter --network testnet --source alice ---"
-npx caatinga deploy counter --network testnet --source alice
+echo "--- npx ctg deploy counter --network testnet --source alice ---"
+npx ctg deploy counter --network testnet --source alice
 DEPLOY_EXIT=$?
 echo "deploy exit code: $DEPLOY_EXIT"
 
 GENERATE_EXIT=skipped
 if [ "$DEPLOY_EXIT" -eq 0 ]; then
   echo ""
-  echo "--- npx caatinga generate counter --network testnet ---"
-  npx caatinga generate counter --network testnet
+  echo "--- npx ctg generate counter --network testnet ---"
+  npx ctg generate counter --network testnet
   GENERATE_EXIT=$?
   echo "generate exit code: $GENERATE_EXIT"
   if [ "$GENERATE_EXIT" -eq 0 ]; then

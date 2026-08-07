@@ -81,7 +81,7 @@ describe("zk invoke command", () => {
       networkName: "testnet",
       artifactsDir: ".artifacts/zk/main",
       allowDevCeremony: false,
-      operation: "caatinga zk invoke main",
+      operation: "ctg zk invoke main",
     });
 
     expect(invokeVerifierMock).toHaveBeenCalledWith({

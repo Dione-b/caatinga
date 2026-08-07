@@ -6,25 +6,25 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 ## Interrupted deploy
 
-| Symptom                          | What happened                                                                      | Recovery                                                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Deploy stopped mid-graph         | Earlier contracts in `dependsOn` order may already be in `caatinga.artifacts.json` | Re-run `caatinga deploy --network <network> --source <identity>` — already-deployed contracts are skipped unless `--force` |
-| CLI killed during artifact write | Atomic write (`write temp → rename`) prevents truncated JSON                       | If file is corrupt, restore from Git or run `caatinga migrate artifacts` after fixing JSON                                 |
-| Transient testnet error          | Retry logs appear: `Deploy hit a transient testnet error`                          | Wait for automatic retries or re-run deploy                                                                                |
+| Symptom                          | What happened                                                                      | Recovery                                                                                                              |
+| -------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Deploy stopped mid-graph         | Earlier contracts in `dependsOn` order may already be in `caatinga.artifacts.json` | Re-run `ctg deploy --network <network> --source <identity>` — already-deployed contracts are skipped unless `--force` |
+| CLI killed during artifact write | Atomic write (`write temp → rename`) prevents truncated JSON                       | If file is corrupt, restore from Git or run `ctg migrate artifacts` after fixing JSON                                 |
+| Transient testnet error          | Retry logs appear: `Deploy hit a transient testnet error`                          | Wait for automatic retries or re-run deploy                                                                           |
 
-**Doctor:** `caatinga doctor --network testnet` lists partial deploy coverage (`CAATINGA_DOCTOR_PARTIAL_DEPLOY` advisory).
+**Doctor:** `ctg doctor --network testnet` lists partial deploy coverage (`CAATINGA_DOCTOR_PARTIAL_DEPLOY` advisory).
 
 ---
 
 ## Invalid artifacts
 
-| Code                          | Recovery command                                                                                     |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `CAATINGA_ARTIFACT_NOT_FOUND` | `caatinga init` or copy `caatinga.artifacts.json` from a teammate                                    |
-| `CAATINGA_ARTIFACT_INVALID`   | Fix JSON manually, or delete and redeploy: `caatinga deploy --network <network> --source <identity>` |
-| Unsupported schema version    | Upgrade CLI: `npm install -g @caatinga/cli@latest`                                                   |
+| Code                          | Recovery command                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `CAATINGA_ARTIFACT_NOT_FOUND` | `ctg init` or copy `caatinga.artifacts.json` from a teammate                                    |
+| `CAATINGA_ARTIFACT_INVALID`   | Fix JSON manually, or delete and redeploy: `ctg deploy --network <network> --source <identity>` |
+| Unsupported schema version    | Upgrade CLI: `npm install -g @caatinga/cli@latest`                                              |
 
-**Migration:** `caatinga migrate artifacts` upgrades schema v1 → v2 on disk.
+**Migration:** `ctg migrate artifacts` upgrades schema v1 → v2 on disk.
 
 ---
 
@@ -40,23 +40,23 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 ## Stellar CLI absent or wrong version
 
-| Code                               | Recovery                                                                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Code                               | Recovery                                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `CAATINGA_STELLAR_CLI_NOT_FOUND`   | Install from [Stellar setup guide](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) |
-| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Install Stellar CLI ≥ 23.0.0 (27.0.0 recommended)                                                                          |
-| `CAATINGA_RUST_TARGET_NOT_FOUND`   | `rustup target add wasm32v1-none`                                                                                          |
+| `CAATINGA_UNSUPPORTED_CLI_VERSION` | Install Stellar CLI ≥ 23.0.0 (27.0.0 recommended)                                                             |
+| `CAATINGA_RUST_TARGET_NOT_FOUND`   | `rustup target add wasm32v1-none`                                                                             |
 
-**Preflight:** `caatinga doctor`
+**Preflight:** `ctg doctor`
 
 ---
 
 ## Outdated bindings
 
-| Code                                | Recovery                                                                   |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| `CAATINGA_PLACEHOLDER_BINDING`      | `caatinga generate <contract> --network <network>` then restart dev server |
-| `CAATINGA_BINDING_CLIENT_NOT_FOUND` | Same as above                                                              |
-| `CAATINGA_BINDING_METHOD_NOT_FOUND` | Regenerate bindings after contract interface change                        |
+| Code                                | Recovery                                                              |
+| ----------------------------------- | --------------------------------------------------------------------- |
+| `CAATINGA_PLACEHOLDER_BINDING`      | `ctg generate <contract> --network <network>` then restart dev server |
+| `CAATINGA_BINDING_CLIENT_NOT_FOUND` | Same as above                                                         |
+| `CAATINGA_BINDING_METHOD_NOT_FOUND` | Regenerate bindings after contract interface change                   |
 
 **Doctor** reports binding freshness per contract.
 
@@ -67,9 +67,9 @@ Actionable recovery paths for common failure modes. For the full error reference
 When `token` deployed but `vault` failed:
 
 ```bash
-caatinga deploy vault --network testnet --source alice
+ctg deploy vault --network testnet --source alice
 # or deploy full graph:
-caatinga deploy --network testnet --source alice
+ctg deploy --network testnet --source alice
 ```
 
 Placeholders like `${contracts.token.contractId}` resolve from artifacts on retry.

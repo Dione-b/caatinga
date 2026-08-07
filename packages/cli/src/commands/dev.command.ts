@@ -8,9 +8,7 @@ export function registerDevCommand(program: Command): void {
     .description("Reserved — not available in pre-v1")
     .action(() =>
       runCliAction(async () => {
-        logger.error(
-          "caatinga dev is not available yet. Use: caatinga build, deploy, generate, invoke."
-        );
+        logger.error("ctg dev is not available yet. Use: ctg build, deploy, generate, invoke.");
         process.exitCode = 1;
       })
     );

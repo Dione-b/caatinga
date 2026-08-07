@@ -11,6 +11,7 @@ import {
   loadConfig,
   resolveNetwork,
 } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import {
@@ -34,7 +35,7 @@ export function registerDeployCommand(program: Command): void {
       "Skip deploy when local WASM hash matches artifacts (redeploy when changed)"
     )
     .option("--upgrade", "Redeploy with upgrade history (alias for --force with upgrade reason)")
-    .option("--dry-run", "Estimate deploy cost without submitting (runs caatinga estimate deploy)")
+    .option("--dry-run", "Estimate deploy cost without submitting (runs ctg estimate deploy)")
     .option("--no-deps", "Do not deploy missing dependencies for a selected contract")
     .option("--no-stale-check", "Do not warn when WASM may be older than contract sources")
     .option("--verify-deps", "Verify dependency contract IDs exist on-chain before deploy")
@@ -179,7 +180,7 @@ export function registerDeployCommand(program: Command): void {
               logger.info("");
               logger.info("Recover with:");
               logger.info(
-                `  npx caatinga wire --network ${result.network.name} --source ${options.source}`
+                `  ${npxCli(`wire --network ${result.network.name} --source ${options.source}`)}`
               );
             }
           }
@@ -203,7 +204,7 @@ export function registerDeployCommand(program: Command): void {
               logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
               logger.info("");
               logger.info("Recover with:");
-              logger.info(`  npx caatinga sync-env --network ${result.network.name}`);
+              logger.info(`  ${npxCli(`sync-env --network ${result.network.name}`)}`);
             }
           }
 
@@ -217,7 +218,7 @@ export function registerDeployCommand(program: Command): void {
             logger.info("Next:");
             for (const contract of result.deployedContracts) {
               logger.info(
-                `  npx caatinga generate ${contract.name} --network ${result.network.name}`
+                `  ${npxCli(`generate ${contract.name} --network ${result.network.name}`)}`
               );
             }
             logger.info("  npm run dev");
@@ -257,7 +258,7 @@ export function registerDeployCommand(program: Command): void {
             }
             logger.info("");
             logger.info("Recover with:");
-            logger.info(`  npx caatinga generate --network ${result.network.name}`);
+            logger.info(`  ${npxCli(`generate --network ${result.network.name}`)}`);
           }
         })
     );

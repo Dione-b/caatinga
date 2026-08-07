@@ -51,7 +51,7 @@ export function registerZkInvokeCommand(program: Command): void {
             networkName,
             artifactsDir: zkArtifactsDir(name),
             allowDevCeremony: Boolean(options.allowDevCeremony),
-            operation: `caatinga zk invoke ${name}`,
+            operation: `ctg zk invoke ${name}`,
           });
 
           const result = await invokeVerifier({

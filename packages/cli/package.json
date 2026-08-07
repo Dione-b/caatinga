@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/cli",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Caatinga CLI for building dApps on Stellar/Soroban",
   "keywords": [
     "stellar",
@@ -52,7 +52,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caatinga/core": "^3.9.0",
+    "@caatinga/core": "^3.9.1",
     "@caatinga/zk": "^3.9.0",
     "chalk": "^5.4.1",
     "commander": "^12.1.0",

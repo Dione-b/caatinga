@@ -25,7 +25,7 @@ export function buildReadCallHint(target: InvokeTarget, networkName: string): st
   return [
     `"${target.contractName}.${target.method}" is a read-only contract method.`,
     "Simulate without signing instead:",
-    `  npx caatinga read ${target.contractName}.${target.method} --network ${networkName}`,
+    `  npx ctg read ${target.contractName}.${target.method} --network ${networkName}`,
     "  (--source is optional; Caatinga resolves CAATINGA_SOURCE or defaults to alice)",
     "In browser code, use:",
     `  client.contract("${target.contractName}").read("${target.method}")`,

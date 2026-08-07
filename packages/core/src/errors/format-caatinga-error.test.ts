@@ -44,7 +44,7 @@ describe("formatCaatingaError", () => {
     const error = new CaatingaError(
       "Placeholder bindings are still in use.",
       CaatingaErrorCode.PLACEHOLDER_BINDING,
-      "Run caatinga generate."
+      "Run ctg generate."
     );
 
     expect(formatCaatingaError(error)).not.toContain("Details:");

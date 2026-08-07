@@ -1,4 +1,5 @@
 import { evaluateEnvDrift, type EnvDriftReport } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 
 export type EnvSyncDiagnosticLine = {
   envKey: string;
@@ -19,7 +20,7 @@ export async function evaluateEnvSyncDiagnostics(options: {
     envKey: drift.envKey,
     envValue: drift.envValue,
     expectedValue: drift.expectedValue,
-    fix: `Run: npx caatinga sync-env --network ${report.network}`,
+    fix: `Run: ${npxCli(`sync-env --network ${report.network}`)}`,
   }));
 
   return { report, lines };

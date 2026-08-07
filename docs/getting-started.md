@@ -8,10 +8,10 @@
 - A local Stellar CLI identity for deploy/invoke (e.g. `alice`)
 - Optional: Freighter or Stellar Wallets Kit for browser `@caatinga/client` calls
 
-On a fresh machine, run `caatinga doctor` to check what is missing, then install prerequisites manually:
+On a fresh machine, run `ctg doctor` to check what is missing, then install prerequisites manually:
 
 ```bash
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 Manual install: [Rust](https://rustup.rs) + `rustup target add wasm32v1-none`, [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli), and `stellar keys generate alice --fund --network testnet`. To verify: `rustc --version`, `rustup target list --installed`, `stellar --version`.
@@ -20,11 +20,11 @@ Manual install: [Rust](https://rustup.rs) + `rustup target add wasm32v1-none`, [
 
 ```bash
 npm install -g @caatinga/cli
-caatinga --help
-ctg --help   # short alias — same binary
+ctg --help
+ctg --help   # standard command; caatinga is a legacy alias
 ```
 
-Use `npx caatinga` (or `npx ctg`) instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
+Use `npx ctg` (or `npx caatinga`) instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
 
 From the repository:
 
@@ -37,22 +37,22 @@ pnpm --filter @caatinga/cli dev init my-dapp
 
 **New to Caatinga?** Start with the Template path — it scaffolds a complete dApp with Vite + React, wallet wiring, and a sample `counter` contract ready to build and deploy.
 
-| Guide                                               | Command                                       | Best for                                          |
-| --------------------------------------------------- | --------------------------------------------- | ------------------------------------------------- |
-| [Template project](./tutorials/template-project.md) ⭐ | `npx caatinga init my-dapp`                | First Caatinga dApp — browser UI included         |
-| [Minimal project](./tutorials/minimal-project.md)   | `npx caatinga init my-contract-app --minimal` | Contract + CLI only; choose your UI stack later   |
-| [ZK project](./tutorials/zk-project.md)             | `npx caatinga zk init my-zk-dapp`             | Groth16 proofs on Soroban                         |
+| Guide                                                  | Command                                  | Best for                                        |
+| ------------------------------------------------------ | ---------------------------------------- | ----------------------------------------------- |
+| [Template project](./tutorials/template-project.md) ⭐ | `npx ctg init my-dapp`                   | First Caatinga dApp — browser UI included       |
+| [Minimal project](./tutorials/minimal-project.md)      | `npx ctg init my-contract-app --minimal` | Contract + CLI only; choose your UI stack later |
+| [ZK project](./tutorials/zk-project.md)                | `npx ctg zk init my-zk-dapp`             | Groth16 proofs on Soroban                       |
 
 See [Choosing a project scaffold](./tutorials/project-scaffolds.md) for a full comparison.
 
 ## CLI loop
 
-This section follows the **Template scaffold** (`npx caatinga init my-dapp`), which generates a `counter` contract by default. If you used `--minimal`, your contract is named `app` — replace `counter` with `app` in the commands below.
+This section follows the **Template scaffold** (`npx ctg init my-dapp`), which generates a `counter` contract by default. If you used `--minimal`, your contract is named `app` — replace `counter` with `app` in the commands below.
 
 ### 1. Scaffold and install
 
 ```bash
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -60,27 +60,27 @@ npm install
 ### 2. Verify the environment
 
 ```bash
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 ### 3. Build, deploy, and interact
 
 ```bash
 # Compile the counter contract to WASM
-npx caatinga build counter
+npx ctg build counter
 
 # Deploy to testnet — writes contractId to caatinga.artifacts.json
 # and auto-generates TypeScript bindings (pass --no-generate to skip)
-npx caatinga deploy counter --network testnet --source alice
+npx ctg deploy counter --network testnet --source alice
 
 # Check what is deployed and whether bindings are fresh
-npx caatinga status --network testnet
+npx ctg status --network testnet
 
 # Read a value without signing (simulation)
-npx caatinga read counter.get --network testnet
+npx ctg read counter.get --network testnet
 
 # Call a state-changing method (requires signing)
-npx caatinga invoke counter.increment --network testnet --source alice
+npx ctg invoke counter.increment --network testnet --source alice
 ```
 
 **Command summary:**
@@ -90,9 +90,9 @@ npx caatinga invoke counter.increment --network testnet --source alice
 - **`read`** — simulate read-only methods without signing
 - **`invoke`** — state-changing calls from the CLI
 
-Use `--source` with a local Stellar CLI identity alias, not a public `G...` address. If bindings generation fails: `npx caatinga generate --network testnet`.
+Use `--source` with a local Stellar CLI identity alias, not a public `G...` address. If bindings generation fails: `npx ctg generate --network testnet`.
 
-For CI: `caatinga smoke`, `caatinga regression`, or `caatinga ci run`. See [Cheatsheet](./cheatsheet.md).
+For CI: `ctg smoke`, `ctg regression`, or `ctg ci run`. See [Cheatsheet](./cheatsheet.md).
 
 **Optional walkthrough:** [From Zero to Testnet](./tutorials/from-zero-to-testnet.md) — expected `doctor` output and testnet troubleshooting.
 

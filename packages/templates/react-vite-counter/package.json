@@ -8,13 +8,13 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "cargo test --manifest-path contracts/counter/Cargo.toml",
-    "caatinga:build": "npx caatinga build counter",
-    "caatinga:deploy": "npx caatinga deploy counter --network testnet --source ${CAATINGA_SOURCE:-alice}",
-    "caatinga:generate": "npx caatinga generate counter --network testnet"
+    "caatinga:build": "npx ctg build counter",
+    "caatinga:deploy": "npx ctg deploy counter --network testnet --source ${CAATINGA_SOURCE:-alice}",
+    "caatinga:generate": "npx ctg generate counter --network testnet"
   },
   "dependencies": {
-    "@caatinga/client": "^3.9.0",
-    "@caatinga/core": "^3.9.0",
+    "@caatinga/client": "^3.9.1",
+    "@caatinga/core": "^3.9.1",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "@stellar/stellar-sdk": "^16.0.1",
     "buffer": "^6.0.3",
@@ -24,7 +24,7 @@
     "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@caatinga/cli": "^3.9.0",
+    "@caatinga/cli": "^3.9.1",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"
@@ -32,6 +32,7 @@
   "overrides": {
     "uuid": "^14.0.0",
     "ws": "^8.21.0",
+    "axios": "^1.17.1",
     "@trezor/connect-web": "file:./src/stubs/empty-wallet-dep",
     "@trezor/connect-plugin-stellar": "file:./src/stubs/empty-wallet-dep",
     "@hot-wallet/sdk": "file:./src/stubs/hot-wallet-sdk",

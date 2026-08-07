@@ -5,7 +5,7 @@
 Caatinga is a pnpm workspace managed by Turbo. Main packages live under `packages/`:
 `core` contains config, templates, shell orchestration, networks, and errors; `client`
 contains browser/Node contract-client helpers and wallet adapters; `cli` contains the
-`caatinga` command and handlers. Reusable templates live in `packages/templates/`.
+`ctg` command (legacy alias `caatinga`) and handlers. Reusable templates live in `packages/templates/`.
 Docs and ADRs live in `docs/`. Consumer and packaging checks live in `scripts/`, with
 sample apps under `examples/`.
 

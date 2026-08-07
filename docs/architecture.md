@@ -6,7 +6,7 @@ This document is the **canonical product and architecture stance** for Caatinga.
 
 **Deployment Orchestration + Versioned Artifacts for Soroban: local, graph-aware deployment orchestration and portable, Git-versioned artifacts for TypeScript teams.**
 
-That does not mean hiding Stellar reality. Users keep a **stable Caatinga surface** (`caatinga build`, `caatinga deploy`, `caatinga generate`, `caatinga invoke`, `@caatinga/client`). Changes in flags, stdout, paths, transaction/XDR workflow, and subprocess composition are absorbed behind small adapters, not scattered across user scripts.
+That does not mean hiding Stellar reality. Users keep a **stable Caatinga surface** (`ctg build`, `ctg deploy`, `ctg generate`, `ctg invoke`, `@caatinga/client`). Changes in flags, stdout, paths, transaction/XDR workflow, and subprocess composition are absorbed behind small adapters, not scattered across user scripts.
 
 ## What Caatinga is (and is not)
 
@@ -69,14 +69,14 @@ _Components responsible:_ `@caatinga/client`.
 
 ### 4. Automation (Developer Diagnostics & Safety)
 
-This pillar ensures local workspace reliability, environment diagnostics (`caatinga doctor`), regression checking (`caatinga smoke` / `postDeployRead`), and CI/CD-friendly error APIs using stable error codes.
+This pillar ensures local workspace reliability, environment diagnostics (`ctg doctor`), regression checking (`ctg smoke` / `postDeployRead`), and CI/CD-friendly error APIs using stable error codes.
 _Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`), `@caatinga/core` (stable errors module).
 
 ## Validation roadmap (flows)
 
 1. **Supported v1 flow:** `init → build → deploy → generate → invoke` plus `@caatinga/client` for browser-side binding/artifact/wallet interop.
 2. **Shipped:** **multi-contract deploy with dependencies** (e.g. deploy token, then a dependent contract such as vault that injects the token's `contractId`, then generate bindings for both, then invoke across that dependency). See [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md).
-3. **Shipped:** upgrade / redeploy with **artifacts history** — `caatinga deploy --upgrade` (new instance) and `caatinga upgrade` (in-place WASM replacement). See [Contract upgrade](./tutorials/contract-upgrade.md).
+3. **Shipped:** upgrade / redeploy with **artifacts history** — `ctg deploy --upgrade` (new instance) and `ctg upgrade` (in-place WASM replacement). See [Contract upgrade](./tutorials/contract-upgrade.md).
 
 ### Supported v1 flow diagram
 
@@ -84,18 +84,18 @@ _Components responsible:_ `@caatinga/cli` (commands `doctor`, `smoke`), `@caatin
 flowchart LR
   cfg["caatinga.config.ts<br/>(contracts, networks)"]
   src["contracts/&lt;name&gt;/src/<br/>Rust Soroban source"]
-  init["caatinga init<br/>(template + manifest check)"]
+  init["ctg init<br/>(template + manifest check)"]
 
-  build["caatinga build<br/>(stellar contract build)"]
+  build["ctg build<br/>(stellar contract build)"]
   wasm["target/wasm32v1-none/release/&lt;name&gt;.wasm"]
 
-  deploy["caatinga deploy<br/>(stellar contract deploy)"]
+  deploy["ctg deploy<br/>(stellar contract deploy)"]
   artifacts["caatinga.artifacts.json<br/>networks[network].contracts[name].contractId"]
 
-  generate["caatinga generate<br/>(npx @stellar/stellar-sdk generate)"]
+  generate["ctg generate<br/>(npx @stellar/stellar-sdk generate)"]
   bindings["contracts/generated/&lt;name&gt;.ts<br/>(Client, methods)"]
 
-  invoke["caatinga invoke<br/>(stellar contract invoke)"]
+  invoke["ctg invoke<br/>(stellar contract invoke)"]
 
   client["@caatinga/client<br/>(createCaatingaClient)"]
   browser["Browser app<br/>wallet.signTransaction()"]
@@ -126,11 +126,11 @@ Each box is either a file you commit, a CLI command you run, or a runtime compon
 - **`@caatinga/core` (Orchestration Engine):** load `caatinga.config.ts`, validate schemas, resolve networks/contracts, read/write `caatinga.artifacts.json`, run Stellar CLI and related tools via a **single shell layer** (`run-command.ts`). **All `execa` usage stays here.**
 - **`@caatinga/client` (Integration SDK):** browser contract client, Freighter adapter, SWK adapter, React context, and the transaction execution pipeline. **No Node-only dependencies, no shell orchestration, no file-system access.** It must remain bundling-safe (Vite, Webpack, Turbopack).
 - **`@caatinga/zk` (ZK Cryptographic Engine):** ZK proof serialization, Circom Groth16 workflow helpers, and browser binding args for on-chain verification.
-- **`packages/templates` (Project Scaffolds):** official template starter layouts consumed by `caatinga init`.
+- **`packages/templates` (Project Scaffolds):** official template starter layouts consumed by `ctg init`.
 
 For detailed package dependency boundaries and compliance rules, see [Package Boundaries & Isolation Rules](./packages.md#package-boundaries-isolation-rules).
 
-Deferred unless explicitly rescoped: CLI XDR commands, `caatinga generate --interop`, full plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
+Deferred unless explicitly rescoped: CLI XDR commands, `ctg generate --interop`, full plugin system, RWA-only templates, visual dashboard, custom test runner as **required** core dependencies.
 
 ### Dependency Map
 
@@ -199,14 +199,14 @@ Local project state is authoritative:
 - `caatinga.artifacts.json`
 
 Each generated binding package carries a `.caatinga-bindings.json` marker recording the source
-`contractId`, `wasmHash`, and network. `caatinga status`, `doctor`, and `generate` compare the
+`contractId`, `wasmHash`, and network. `ctg status`, `doctor`, and `generate` compare the
 marker against `caatinga.artifacts.json` to flag stale bindings after a redeploy. The marker is a
 sidecar, not part of the artifacts schema: deleting a bindings directory simply resets its state
 to `missing`.
 
 No central cache or remote artifact registry is assumed in the core MVP. Optional remote services may exist later but must not be **hard dependencies** of core.
 
-## `caatinga dev`
+## `ctg dev`
 
 **MVP direction:** opinionated proxy around **Vite + Caatinga validation** (not a plugin or template store). Official templates are Vite + React only (`vite-react`). Future adapters (`next`, `astro`, custom) are conceivable only after the core workflow and multi-contract story prove value. See [CLI — Supported today vs not yet](./cli.md#supported-today-vs-not-yet).
 
@@ -214,8 +214,8 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 
 - **Templates:** start as **opinionated snapshots** (`react-vite-counter`, etc.). Parameterized generators (`--tailwind`, wallet flavor, i18n) come later—they expand the test matrix quickly.
 - **Template contract:** every template includes a **`caatinga.template.json` manifest** (name, version, `compatibleCore`, paths) so templates and core semver are validated at `init`—see [ADR 0003](./adr/0003-template-manifest-compatibility.md).
-- **Post-deploy hooks:** `postDeploy`, `postDeployRead`, and `smoke` are first-class config surfaces for wiring, read verification, and CI smoke — see [ADR 0006](./adr/0006-post-deploy-hooks.md) and [Config — postDeploy](./config.md). Expect DSL matchers (`reachable`, `isArray`, etc.) apply to hooks, `caatinga read --expect`, and `caatinga smoke`.
-- **Verification layer:** `caatinga smoke`, `caatinga regression`, and `caatinga ci run` compose deploy/generate with read checks. `@caatinga/core` exports `verifyExpect`, `evaluateEnvDrift`, and `runSmokeReads` for custom tooling.
+- **Post-deploy hooks:** `postDeploy`, `postDeployRead`, and `smoke` are first-class config surfaces for wiring, read verification, and CI smoke — see [ADR 0006](./adr/0006-post-deploy-hooks.md) and [Config — postDeploy](./config.md). Expect DSL matchers (`reachable`, `isArray`, etc.) apply to hooks, `ctg read --expect`, and `ctg smoke`.
+- **Verification layer:** `ctg smoke`, `ctg regression`, and `ctg ci run` compose deploy/generate with read checks. `@caatinga/core` exports `verifyExpect`, `evaluateEnvDrift`, and `runSmokeReads` for custom tooling.
 - **Plugins:** still deferred for broader extension points (for example CI presets or indexer hooks). Keep hooks declarative and data-only until a concrete use case requires executable plugin code.
 
 ## Ecosystem: official vs community templates
@@ -223,7 +223,7 @@ No central cache or remote artifact registry is assumed in the core MVP. Optiona
 - **Official:** live in the Caatinga repo, reviewed, CI-tested, semver-matrices documented.
 - **Community:** installable via Git URL or npm-style packages, **never implicitly trusted**—treat as untrusted code; warn users; avoid auto-running post-install scripts from external templates in MVP-class flows.
 
-**Distribution:** MVP+1 favors **Git + URL** (e.g. `caatinga init my-app --template github:org/repo`). A dedicated template registry is explicitly later—moderation, security, and availability cost.
+**Distribution:** MVP+1 favors **Git + URL** (e.g. `ctg init my-app --template github:org/repo`). A dedicated template registry is explicitly later—moderation, security, and availability cost.
 
 Suggested naming: `@caatinga/template-*` for official; `@scope/caatinga-template-*` for community.
 
@@ -231,11 +231,11 @@ Suggested naming: `@caatinga/template-*` for official; `@scope/caatinga-template
 
 **Today:** artifacts keyed by **network** (same logical contract may differ per network—correct).
 
-**Future (MVP+1):** **environment** (e.g. `staging` vs `production`) can share a network but differ in deployed `contractId`s. Expect either a new artifacts shape version or an explicit `environments` model—design TBD with migration (`caatinga migrate`) when introduced.
+**Future (MVP+1):** **environment** (e.g. `staging` vs `production`) can share a network but differ in deployed `contractId`s. Expect either a new artifacts shape version or an explicit `environments` model—design TBD with migration (`ctg migrate`) when introduced.
 
 ## Multi-contract
 
-Deploy order is supported in core for declared dependencies (DAG / topological sort), with artifact-safe constructor arg injection through `${contracts.<name>.contractId}` — see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md). The next layer is runtime wiring: `${source.address}`, `postDeploy`, `caatinga wire`, frontend env sync, and workspace builds are covered by [ADR 0006](./adr/0006-post-deploy-hooks.md).
+Deploy order is supported in core for declared dependencies (DAG / topological sort), with artifact-safe constructor arg injection through `${contracts.<name>.contractId}` — see [ADR 0005](./adr/0005-multi-contract-dependency-deploy.md). The next layer is runtime wiring: `${source.address}`, `postDeploy`, `ctg wire`, frontend env sync, and workspace builds are covered by [ADR 0006](./adr/0006-post-deploy-hooks.md).
 
 ## CI and secrets
 
@@ -247,7 +247,7 @@ Caatinga does **not** manage long-lived private keys. CI provides identities (`-
 
 ## DX beyond CLI
 
-Prefer **`caatinga doctor`** (bins, config/artifact sanity, network/source checks, optional staleness hints later) before investing in VS Code/LSP.
+Prefer **`ctg doctor`** (bins, config/artifact sanity, network/source checks, optional staleness hints later) before investing in VS Code/LSP.
 
 ## Errors as public API
 
@@ -266,7 +266,7 @@ The runtime compatibility check (`evaluateStellarCliCompatibility`) intentionall
 
 ## Versioning and migrations
 
-Semver applies to monorepo packages **and** to serialized formats (`caatinga.artifacts.json` already has a `version` field). Breaking format or command behavior should eventually ship with **`caatinga migrate`**—not required on day one, but fields and ADRs should assume migrations will exist.
+Semver applies to monorepo packages **and** to serialized formats (`caatinga.artifacts.json` already has a `version` field). Breaking format or command behavior should eventually ship with **`ctg migrate`**—not required on day one, but fields and ADRs should assume migrations will exist.
 
 ## Performance responsibilities
 

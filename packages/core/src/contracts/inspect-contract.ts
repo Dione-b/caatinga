@@ -48,11 +48,11 @@ export async function inspectContract(
     throw new CaatingaError(
       `No deployed artifact found for "${contract.name}" on "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy before inspect."
+      "Run ctg deploy before inspect."
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga inspect.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg inspect.");
 
   let reachable = false;
   let detail: string | undefined;

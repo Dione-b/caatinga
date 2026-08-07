@@ -1,6 +1,6 @@
 # @caatinga/zk
 
-Circom Groth16 proof serialization and verification bridge for Soroban. Used by `caatinga zk-*` commands and the `zk-starter` template.
+Circom Groth16 proof serialization and verification bridge for Soroban. Used by `ctg zk-*` commands and the `zk-starter` template.
 
 ## Install
 
@@ -11,13 +11,13 @@ npm install @caatinga/zk
 ## CLI workflow
 
 ```bash
-caatinga zk init      # scaffold verifier contract + circuit
-caatinga zk build     # compile Circom, run dev trusted setup
-caatinga zk prove     # generate proof.json + public.json
-caatinga zk invoke --source alice
+ctg zk init      # scaffold verifier contract + circuit
+ctg zk build     # compile Circom, run dev trusted setup
+ctg zk prove     # generate proof.json + public.json
+ctg zk invoke --source alice
 ```
 
-`caatinga zk build` runs a single-party development ceremony suitable for testnet/dev only. Production requires an external MPC ceremony.
+`ctg zk build` runs a single-party development ceremony suitable for testnet/dev only. Production requires an external MPC ceremony.
 
 ## Documentation
 

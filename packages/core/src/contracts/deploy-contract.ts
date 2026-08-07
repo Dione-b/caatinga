@@ -59,7 +59,7 @@ export async function deployContract(options: DeployContractOptions) {
   const network = resolveNetwork(options.config, options.networkName);
   const source = assertSafeSourceAccount(options.source);
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga deploy.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg deploy.");
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
     sourcePath: contract.sourcePath,
   });

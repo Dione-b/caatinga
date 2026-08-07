@@ -36,7 +36,7 @@ export async function assertZkBuildNetworkAllowed(options: {
   }
 
   throw new ZkError(
-    "`caatinga zk build` is blocked when defaultNetwork is mainnet: it always runs a single-party development ceremony.",
+    "`ctg zk build` is blocked when defaultNetwork is mainnet: it always runs a single-party development ceremony.",
     "ZK_DEV_CEREMONY_BLOCKED",
     "Set defaultNetwork to testnet, or pass --allow-dev-ceremony only for conscious testing."
   );
@@ -55,7 +55,7 @@ export async function assertZkVerifierDeployAllowed(options: {
         networkName: options.networkName,
         artifactsDir: zkArtifactsDir(circuitName),
         allowDevCeremony: options.allowDevCeremony,
-        operation: `caatinga deploy ${contractName}`,
+        operation: `ctg deploy ${contractName}`,
       });
     }
   }
@@ -67,7 +67,7 @@ export function assertEmbedVkInvokeBlocked(embedVk: boolean): void {
   }
 
   throw new CaatingaError(
-    "`caatinga zk invoke --embed-vk` is not supported yet.",
+    "`ctg zk invoke --embed-vk` is not supported yet.",
     CaatingaErrorCode.INVALID_CONFIG,
     "`--embed-vk` is experimental. Use the dynamic VK flow (`verification_key.json` + default `verify_proof`) for end-to-end verification today."
   );

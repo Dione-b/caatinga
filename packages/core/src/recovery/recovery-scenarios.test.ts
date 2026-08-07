@@ -28,7 +28,7 @@ describe("recovery scenarios", () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-recovery-"));
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
       code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      hint: expect.stringContaining("caatinga init"),
+      hint: expect.stringContaining("ctg init"),
     });
   });
 

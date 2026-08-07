@@ -12,8 +12,8 @@ graph, post-deploy wiring, and frontend env sync).
 | 7 contracts, shared workspace WASMs      | `buildRoot: "."`                          |
 | Constructor args use deployer address    | `${source.address}`                       |
 | Cross-contract deploy order              | `dependsOn` + `${contracts.*.contractId}` |
-| Four `set_minter` / `set_burner` invokes | `postDeploy` + `caatinga wire`            |
-| Vite frontend with `VITE_*` env vars     | `frontend.env` + `caatinga sync-env`      |
+| Four `set_minter` / `set_burner` invokes | `postDeploy` + `ctg wire`                 |
+| Vite frontend with `VITE_*` env vars     | `frontend.env` + `ctg sync-env`           |
 
 ## Typical workflow
 
@@ -21,14 +21,14 @@ From the project root (with Node 22+, Rust, Stellar CLI, and `wasm32v1-none` ins
 
 ```bash
 npm install
-caatinga doctor --source deployer --network testnet   # verify prerequisites
-caatinga build
-caatinga deploy --source deployer --network testnet
-caatinga generate --network testnet
+ctg doctor --source deployer --network testnet   # verify prerequisites
+ctg build
+ctg deploy --source deployer --network testnet
+ctg generate --network testnet
 cd frontend && npm install && npm run dev
 ```
 
-A full `caatinga deploy` (no contract argument) already runs configured `postDeploy` hooks and
+A full `ctg deploy` (no contract argument) already runs configured `postDeploy` hooks and
 writes `frontend.envFile` when configured, unless `--no-wire` or `--no-sync-env` is passed.
 
 `caatinga.config.ts` holds deploy args and wiring hooks that previously lived in `bootstrap.sh`.
@@ -38,13 +38,13 @@ generated view for the custom React frontend (Stellar Wallets Kit + hand-rolled 
 ## Granular commands
 
 ```bash
-caatinga build
-caatinga deploy --source deployer --network testnet
-caatinga wire --source deployer --network testnet
-caatinga generate --network testnet
-caatinga sync-env --network testnet
-caatinga status --network testnet
-caatinga doctor --network testnet --source deployer
+ctg build
+ctg deploy --source deployer --network testnet
+ctg wire --source deployer --network testnet
+ctg generate --network testnet
+ctg sync-env --network testnet
+ctg status --network testnet
+ctg doctor --network testnet --source deployer
 ```
 
 ## Frontend integration note

@@ -1,6 +1,8 @@
 # Workshop: Contract Deployment with Caatinga
 
-Hands-on path to scaffold, build, deploy, read, invoke, and redeploy the **counter** contract from the default `react-vite-counter` template on Testnet. Target length: about 60–75 minutes. The scaffold includes a Vite + React UI; this session focuses on the CLI deployment lifecycle (UI is optional at the end).
+Hands-on path to scaffold, build, deploy, read, invoke, and redeploy the **counter** contract from the
+default `react-vite-counter` template on Testnet. Target length: about 60–75 minutes. The scaffold includes
+a Vite + React UI; this session focuses on the CLI deployment lifecycle (UI is optional at the end).
 
 ---
 
@@ -8,10 +10,10 @@ Hands-on path to scaffold, build, deploy, read, invoke, and redeploy the **count
 
 Deploying Soroban smart contracts typically involves orchestrating multiple separate tools, creating several friction points for developers:
 
-* **Tool fragmentation**: Working with Soroban requires coordinating Node.js scripts, Rust compilers, and the Stellar CLI manually.
-* **Shared state complexity**: Deployment state is hard to share across teams, often leading to out-of-sync environments.
-* **Manual copy-pasting**: Developers frequently copy contract IDs by hand into frontend configurations and environment files, which is error-prone.
-* **No shared source of truth**: CI/CD pipelines and teammates lack a unified, version-controlled record of deployed addresses.
+- **Tool fragmentation**: Working with Soroban requires coordinating Node.js scripts, Rust compilers, and the Stellar CLI manually.
+- **Shared state complexity**: Deployment state is hard to share across teams, often leading to out-of-sync environments.
+- **Manual copy-pasting**: Developers frequently copy contract IDs by hand into frontend configurations and environment files, which is error-prone.
+- **No shared source of truth**: CI/CD pipelines and teammates lack a unified, version-controlled record of deployed addresses.
 
 **Caatinga** solves these problems. It orchestrates the official Stellar workflow while keeping your deployment state versioned in Git as a single source of truth.
 
@@ -29,9 +31,9 @@ This is the **data pipeline** behind Caatinga — what happens to source, binari
 
 ```mermaid
 flowchart TD
-  source["Source Code"] --> build["caatinga build"]
+  source["Source Code"] --> build["ctg build"]
   build --> wasm["WASM"]
-  wasm --> deploy["caatinga deploy"]
+  wasm --> deploy["ctg deploy"]
   deploy --> artifacts["caatinga.artifacts.json"]
   artifacts --> invoke["read / invoke"]
 ```
@@ -60,15 +62,15 @@ flowchart LR
   status --> redeploy["redeploy"]
 ```
 
-* **prerequisites**: Install Node, Rust, Stellar CLI, and a funded Testnet identity manually.
-* **init**: Scaffold `react-vite-counter` (contract `counter` + Vite UI).
-* **doctor**: Environment and credentials check.
-* **build**: Rust → WASM (no network).
-* **deploy**: Upload, instantiate, record `contractId`.
-* **read**: Read-only simulation of `counter.get` (no fee / no signature).
-* **invoke**: State-changing call to `counter.increment` (signs + fees).
-* **status**: Compare artifacts with the network.
-* **redeploy**: New instance; prior ID kept in history.
+- **prerequisites**: Install Node, Rust, Stellar CLI, and a funded Testnet identity manually.
+- **init**: Scaffold `react-vite-counter` (contract `counter` + Vite UI).
+- **doctor**: Environment and credentials check.
+- **build**: Rust → WASM (no network).
+- **deploy**: Upload, instantiate, record `contractId`.
+- **read**: Read-only simulation of `counter.get` (no fee / no signature).
+- **invoke**: State-changing call to `counter.increment` (signs + fees).
+- **status**: Compare artifacts with the network.
+- **redeploy**: New instance; prior ID kept in history.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -83,9 +85,9 @@ Contrast with the previous diagram: that one is “what files change”; this on
 
 Every Caatinga project is defined by two files:
 
-| File                      | Meaning                          |
-| ------------------------- | -------------------------------- |
-| `caatinga.config.ts`      | Desired deployment configuration |
+| File                      | Meaning                                    |
+| ------------------------- | ------------------------------------------ |
+| `caatinga.config.ts`      | Desired deployment configuration           |
 | `caatinga.artifacts.json` | Actual deployed state (commit this to Git) |
 
 > **Remember**
@@ -113,15 +115,15 @@ Prepare the machine: Node.js 22+, Rust with the WASM target, Stellar CLI, and a 
 
 ```bash
 node --version
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 ### Expected Result
 
-* Node.js 22 or newer available.
-* Rust and its WASM target installed.
-* Stellar CLI installed.
-* A Testnet identity named `alice` created and funded.
+- Node.js 22 or newer available.
+- Rust and its WASM target installed.
+- Stellar CLI installed.
+- A Testnet identity named `alice` created and funded.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -131,17 +133,17 @@ Stress that `alice` is an identity alias — public and secret keys are rejected
 
 ### What changed?
 
-* System binaries (Rust, Stellar CLI) are available on your `PATH`.
-* Stellar CLI has a local identity alias named `alice` with a funded test balance.
+- System binaries (Rust, Stellar CLI) are available on your `PATH`.
+- Stellar CLI has a local identity alias named `alice` with a funded test balance.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Node.js 22+ (`node --version`)
-* [ ] Rust compiler installed (`rustc --version`)
-* [ ] Stellar CLI installed (`stellar --version`)
-* [ ] Testnet identity `alice` created and funded
+- [ ] Node.js 22+ (`node --version`)
+- [ ] Rust compiler installed (`rustc --version`)
+- [ ] Stellar CLI installed (`stellar --version`)
+- [ ] Testnet identity `alice` created and funded
 
 ---
 
@@ -149,12 +151,15 @@ Verify you have:
 
 ### Purpose
 
-Scaffold the default **react-vite-counter** template: Soroban `counter` contract (`get` / `increment`), Caatinga config, artifacts file, and a Vite + React frontend. This workshop stays on the CLI deploy loop; the UI is there when you want it later ([Template project](./template-project.md)). For CLI-only scaffolds, see [Minimal project](./minimal-project.md).
+Scaffold the default **react-vite-counter** template: Soroban `counter` contract (`get` / `increment`),
+Caatinga config, artifacts file, and a Vite + React frontend. This workshop stays on the CLI deploy loop;
+the UI is there when you want it later ([Template project](./template-project.md)). For CLI-only scaffolds,
+see [Minimal project](./minimal-project.md).
 
 ### Command
 
 ```bash
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -179,13 +184,13 @@ Tell the room they can ignore the frontend until after the CLI loop.
 
 ### What changed?
 
-* Local workspace scaffolded from `react-vite-counter`.
-* Configuration initialized with deployment intent for `counter`.
-* Artifacts file created with empty contract slots for `testnet`.
+- Local workspace scaffolded from `react-vite-counter`.
+- Configuration initialized with deployment intent for `counter`.
+- Artifacts file created with empty contract slots for `testnet`.
 
 #### Before scaffold
 
-* Directory `my-dapp` does not exist.
+- Directory `my-dapp` does not exist.
 
 #### After scaffold
 
@@ -208,11 +213,11 @@ Tell the room they can ignore the frontend until after the CLI loop.
 
 Verify you have:
 
-* [ ] Directory `my-dapp` created
-* [ ] `contracts/counter/` present
-* [ ] `caatinga.config.ts` present
-* [ ] `caatinga.artifacts.json` present with empty `networks.testnet.contracts`
-* [ ] Node dependencies installed (`npm install` completed)
+- [ ] Directory `my-dapp` created
+- [ ] `contracts/counter/` present
+- [ ] `caatinga.config.ts` present
+- [ ] `caatinga.artifacts.json` present with empty `networks.testnet.contracts`
+- [ ] Node dependencies installed (`npm install` completed)
 
 ---
 
@@ -225,15 +230,15 @@ Run diagnostics so config, binaries, network connectivity, and credentials are r
 ### Command
 
 ```bash
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 ### Expected Result
 
-* Checks pass for Node.js, Stellar CLI, Rust, and WASM.
-* `caatinga.config.ts` loads successfully.
-* Identity `alice` resolves with a positive balance.
-* An untested Stellar CLI version warning (if any) is usually advisory.
+- Checks pass for Node.js, Stellar CLI, Rust, and WASM.
+- `caatinga.config.ts` loads successfully.
+- Identity `alice` resolves with a positive balance.
+- An untested Stellar CLI version warning (if any) is usually advisory.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -243,14 +248,14 @@ It checks machine tools and Stellar-specific state, including whether `alice` ha
 
 ### What changed?
 
-* No files changed.
-* Environment diagnostics completed.
+- No files changed.
+- Environment diagnostics completed.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Doctor reports ready / all critical checks green
+- [ ] Doctor reports ready / all critical checks green
 
 ---
 
@@ -263,13 +268,13 @@ Compile the Rust contract into a WebAssembly (`.wasm`) artifact. Nothing is depl
 ### Command
 
 ```bash
-npx caatinga build counter
+npx ctg build counter
 ```
 
 ### Expected Result
 
-* Compilation finishes successfully.
-* WASM written under the path in config (for example `contracts/counter/target/wasm32v1-none/release/counter.wasm`).
+- Compilation finishes successfully.
+- WASM written under the path in config (for example `contracts/counter/target/wasm32v1-none/release/counter.wasm`).
 
 <details>
 <summary>Speaker Notes</summary>
@@ -279,14 +284,14 @@ The next step uploads that file and records the resulting contract ID.
 
 ### What changed?
 
-* Rust source became a WASM binary.
-* No network changes.
+- Rust source became a WASM binary.
+- No network changes.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Generated WASM file in the build / target directory
+- [ ] Generated WASM file in the build / target directory
 
 ---
 
@@ -299,15 +304,15 @@ Upload the WASM to Stellar Testnet, instantiate the contract, and record the `co
 ### Command
 
 ```bash
-npx caatinga deploy counter --network testnet --source alice
+npx ctg deploy counter --network testnet --source alice
 ```
 
 ### Expected Result
 
-* WASM uploaded (WASM hash registered).
-* Contract instance created.
-* `caatinga.artifacts.json` updated under `networks.testnet.contracts.counter`.
-* TypeScript bindings generated for the frontend (under `src/contracts/generated/`).
+- WASM uploaded (WASM hash registered).
+- Contract instance created.
+- `caatinga.artifacts.json` updated under `networks.testnet.contracts.counter`.
+- TypeScript bindings generated for the frontend (under `src/contracts/generated/`).
 
 <details>
 <summary>Speaker Notes</summary>
@@ -317,9 +322,9 @@ Caatinga then writes the ID into artifacts. That is the moment intent becomes re
 
 ### What changed?
 
-* WASM uploaded to Testnet.
-* Contract instance created on-chain.
-* Artifacts updated with deployment details.
+- WASM uploaded to Testnet.
+- Contract instance created on-chain.
+- Artifacts updated with deployment details.
 
 #### Before deploy
 
@@ -358,8 +363,8 @@ Artifacts still have empty `networks.testnet.contracts` (same shape as after sca
 
 Verify you have:
 
-* [ ] Deployed contract instance on Stellar Testnet
-* [ ] `networks.testnet.contracts.counter.contractId` present in `caatinga.artifacts.json`
+- [ ] Deployed contract instance on Stellar Testnet
+- [ ] `networks.testnet.contracts.counter.contractId` present in `caatinga.artifacts.json`
 
 ### Interactive questions
 
@@ -381,13 +386,13 @@ Simulate a read-only call to `counter.get`. This path does not submit a ledger t
 ### Command
 
 ```bash
-npx caatinga read counter.get --network testnet
+npx ctg read counter.get --network testnet
 ```
 
 ### Expected Result
 
-* Simulated output printed in the terminal (typically `0` before any increment).
-* Contract methods resolve using the ID stored in artifacts.
+- Simulated output printed in the terminal (typically `0` before any increment).
+- Contract methods resolve using the ID stored in artifacts.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -397,15 +402,15 @@ Next we will `invoke` `increment`, which changes state, signs with `--source`, a
 
 ### What changed?
 
-* Read-only simulation executed.
-* No transaction signed or broadcast.
-* No fees paid.
+- Read-only simulation executed.
+- No transaction signed or broadcast.
+- No fees paid.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Successful `counter.get` output in the terminal
+- [ ] Successful `counter.get` output in the terminal
 
 ### Interactive questions
 
@@ -427,14 +432,14 @@ Submit a state-changing call to `counter.increment`. Unlike `read`, this path si
 ### Command
 
 ```bash
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga read counter.get --network testnet
+npx ctg invoke counter.increment --network testnet --source alice
+npx ctg read counter.get --network testnet
 ```
 
 ### Expected Result
 
-* `increment` returns the new count (for example `1`).
-* A follow-up `get` shows the updated value.
+- `increment` returns the new count (for example `1`).
+- A follow-up `get` shows the updated value.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -444,16 +449,16 @@ Both resolve `contractId` from artifacts — still no hand-copied addresses.
 
 ### What changed?
 
-* Transaction signed with identity `alice` and submitted.
-* Counter storage updated on Testnet.
-* Fees paid for the invoke.
+- Transaction signed with identity `alice` and submitted.
+- Counter storage updated on Testnet.
+- Fees paid for the invoke.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Successful `counter.increment` in the terminal
-* [ ] `counter.get` reflects the new value
+- [ ] Successful `counter.increment` in the terminal
+- [ ] `counter.get` reflects the new value
 
 ### Interactive questions
 
@@ -475,12 +480,12 @@ Compare local artifacts with what the network reports for the deployed contract.
 ### Command
 
 ```bash
-npx caatinga status --network testnet
+npx ctg status --network testnet
 ```
 
 ### Expected Result
 
-* Contract `counter` shown as deployed on `testnet` with the active ID from local artifacts.
+- Contract `counter` shown as deployed on `testnet` with the active ID from local artifacts.
 
 <details>
 <summary>Speaker Notes</summary>
@@ -489,14 +494,14 @@ Status confirms the locally recorded contract ID exists on-chain and surfaces th
 
 ### What changed?
 
-* No files changed.
-* Network status query completed.
+- No files changed.
+- Network status query completed.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-* [ ] Local artifacts and network status agree for `counter`
+- [ ] Local artifacts and network status agree for `counter`
 
 ---
 
@@ -506,26 +511,26 @@ Verify you have:
 
 Two upgrade strategies exist. This workshop demonstrates **redeploy** because the counter template does not implement an in-place `upgrade` entrypoint.
 
-| Strategy     | Command                     | Effect                                         | `contractId` |
-| ------------ | --------------------------- | ---------------------------------------------- | ------------ |
-| **In-place** | `caatinga upgrade`          | New WASM on the same instance                  | Unchanged    |
-| **Redeploy** | `caatinga deploy --upgrade` | New instance; old ID kept in artifact history  | New ID       |
+| Strategy     | Command                | Effect                                        | `contractId` |
+| ------------ | ---------------------- | --------------------------------------------- | ------------ |
+| **In-place** | `ctg upgrade`          | New WASM on the same instance                 | Unchanged    |
+| **Redeploy** | `ctg deploy --upgrade` | New instance; old ID kept in artifact history | New ID       |
 
 Details: [Contract upgrade](./contract-upgrade.md).
 
 ### Command
 
 ```bash
-npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
 ```
 
 ### Expected Result
 
-* A new contract instance is created.
-* Active `contractId` in artifacts is updated.
-* Previous ID moves into the `history` array.
-* Note: the new instance starts with a fresh counter (state does not move with redeploy).
+- A new contract instance is created.
+- Active `contractId` in artifacts is updated.
+- Previous ID moves into the `history` array.
+- Note: the new instance starts with a fresh counter (state does not move with redeploy).
 
 <details>
 <summary>Speaker Notes</summary>
@@ -537,8 +542,8 @@ Mention that on-chain counter state resets because this is a new instance.
 
 ### What changed?
 
-* New contract instance on-chain.
-* Active ID updated; previous ID archived under `history`.
+- New contract instance on-chain.
+- Active ID updated; previous ID archived under `history`.
 
 #### Before redeploy
 
@@ -598,8 +603,8 @@ Mention that on-chain counter state resets because this is a new instance.
 
 Verify you have:
 
-* [ ] Redeploy completed
-* [ ] Previous `contractId` present under `networks.testnet.contracts.counter.history`
+- [ ] Redeploy completed
+- [ ] Previous `contractId` present under `networks.testnet.contracts.counter.history`
 
 ### Interactive questions
 
@@ -621,7 +626,7 @@ Intentionally trigger a common failure so you recognize the stable `CAATINGA_*` 
 ### Command
 
 ```bash
-npx caatinga deploy counter --network testnet --source GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF
+npx ctg deploy counter --network testnet --source GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF
 ```
 
 ### Expected Result
@@ -638,8 +643,8 @@ Always use a Stellar CLI identity alias such as `alice`.
 
 ### What changed?
 
-* CLI aborted before submitting any transaction.
-* Error code `CAATINGA_SOURCE_IS_PUBLIC_KEY` was raised.
+- CLI aborted before submitting any transaction.
+- Error code `CAATINGA_SOURCE_IS_PUBLIC_KEY` was raised.
 
 ### Why the error occurs
 
@@ -653,8 +658,8 @@ Use a registered identity alias, for example `--source alice`.
 
 | Situation                            | Code                             | Fix                                           |
 | ------------------------------------ | -------------------------------- | --------------------------------------------- |
-| Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `caatinga build` first                    |
-| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI; verify with `caatinga doctor` |
+| Build artifact missing before deploy | `CAATINGA_ARTIFACT_NOT_FOUND`    | Run `ctg build` first                         |
+| `stellar` missing from `PATH`        | `CAATINGA_STELLAR_CLI_NOT_FOUND` | Install Stellar CLI; verify with `ctg doctor` |
 | `--source` is a public `G…` address  | `CAATINGA_SOURCE_IS_PUBLIC_KEY`  | Use an identity alias such as `alice`         |
 | `--source` is a secret `S…` key      | `CAATINGA_SOURCE_IS_SECRET_KEY`  | Same: alias only; never paste keys on the CLI |
 
@@ -662,11 +667,11 @@ Use a registered identity alias, for example `--source alice`.
 
 ## Key Takeaways
 
-* Always run `caatinga doctor` first.
-* Never edit `caatinga.artifacts.json` manually — commit the file Caatinga writes.
-* Never copy contract IDs by hand; resolve them from artifacts.
-* Use Stellar CLI identity aliases (`alice`, `bob`) — never raw `G…` / `S…` keys.
-* Config is intent; artifacts are reality (see [Two Things to Remember](#two-things-to-remember)).
+- Always run `ctg doctor` first.
+- Never edit `caatinga.artifacts.json` manually — commit the file Caatinga writes.
+- Never copy contract IDs by hand; resolve them from artifacts.
+- Use Stellar CLI identity aliases (`alice`, `bob`) — never raw `G…` / `S…` keys.
+- Config is intent; artifacts are reality (see [Two Things to Remember](#two-things-to-remember)).
 
 <details>
 <summary>Speaker Notes</summary>
@@ -695,23 +700,23 @@ Copy-paste loop for the session (same agenda as [Canonical Workflow](#canonical-
 
 ```bash
 node --version
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 
-npx caatinga doctor --network testnet --source alice
-npx caatinga build counter
-npx caatinga deploy counter --network testnet --source alice
-npx caatinga read counter.get --network testnet
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga read counter.get --network testnet
-npx caatinga status --network testnet
+npx ctg doctor --network testnet --source alice
+npx ctg build counter
+npx ctg deploy counter --network testnet --source alice
+npx ctg read counter.get --network testnet
+npx ctg invoke counter.increment --network testnet --source alice
+npx ctg read counter.get --network testnet
+npx ctg status --network testnet
 
-npx caatinga build counter
-npx caatinga deploy counter --upgrade --network testnet --source alice
-npx caatinga status --network testnet
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
+npx ctg status --network testnet
 ```
 
 Optional UI after deploy:
@@ -724,10 +729,10 @@ npm run dev
 
 ## Next Steps
 
-* [Cheatsheet](../cheatsheet.md) — command loop on one page
-* [CLI reference](../cli.md) — flags and subcommands
-* [Template project](./template-project.md) — what `react-vite-counter` generates
-* [Minimal project](./minimal-project.md) — CLI-only `--minimal` scaffold
-* [From Zero to Testnet](./from-zero-to-testnet.md) — fuller walkthrough
-* [Contract upgrade](./contract-upgrade.md) — in-place vs redeploy
-* [Troubleshooting](../troubleshooting.md) — symptom-first fixes
+- [Cheatsheet](../cheatsheet.md) — command loop on one page
+- [CLI reference](../cli.md) — flags and subcommands
+- [Template project](./template-project.md) — what `react-vite-counter` generates
+- [Minimal project](./minimal-project.md) — CLI-only `--minimal` scaffold
+- [From Zero to Testnet](./from-zero-to-testnet.md) — fuller walkthrough
+- [Contract upgrade](./contract-upgrade.md) — in-place vs redeploy
+- [Troubleshooting](../troubleshooting.md) — symptom-first fixes

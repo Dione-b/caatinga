@@ -13,7 +13,7 @@ For CLI-only projects without a bundled UI, use [Minimal project](./minimal-proj
 ## Scaffold
 
 ```bash
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -21,12 +21,12 @@ npm install
 Pick a different bundled template:
 
 ```bash
-npx caatinga zk init my-zk-dapp
+npx ctg zk init my-zk-dapp
 ```
 
 `pnpm install` also works. The `react-vite-counter` template ships `pnpm-workspace.yaml` for pnpm 10.26+/11.x — see [Templates — pnpm](../templates.md#pnpm-1026--11x).
 
-Without a global CLI install, use `npx caatinga init my-dapp`.
+Without a global CLI install, use `npx ctg init my-dapp`.
 
 ## What gets generated
 
@@ -50,14 +50,14 @@ Follow [Getting started — CLI loop](../getting-started.md#cli-loop), then star
 npm run dev
 ```
 
-`deploy` auto-generates bindings. Use `caatinga read` for getters and `invoke` for mutations. The Vite app needs a deployed `contractId` for on-chain calls.
+`deploy` auto-generates bindings. Use `ctg read` for getters and `invoke` for mutations. The Vite app needs a deployed `contractId` for on-chain calls.
 
 ## Recovery and common issues
 
 **Placeholder bindings still in use** (`CAATINGA_PLACEHOLDER_BINDING`):
 
 ```bash
-npx caatinga generate counter --network testnet
+npx ctg generate counter --network testnet
 ```
 
 Restart the dev server after bindings change.

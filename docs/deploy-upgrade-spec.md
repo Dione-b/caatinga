@@ -14,7 +14,7 @@ This document details the specifications, behaviors, and transition rules for co
   - Deploys the binary on-chain via the Stellar CLI.
   - Registers the new `contractId` and `wasmHash` inside `caatinga.artifacts.json`.
   - Resolves initialization arguments (`resolvedDeployArgs`).
-- **Triggers:** `caatinga deploy <contractName>` (when no prior deployment exists on the target network).
+- **Triggers:** `ctg deploy <contractName>` (when no prior deployment exists on the target network).
 
 ### Upgrade (In-place)
 
@@ -24,7 +24,7 @@ This document details the specifications, behaviors, and transition rules for co
   - Invokes the contract's defined upgrade method (e.g., `upgrade`) with the new WASM hash using administrator authorization.
   - Pushes the previous `contractId` and `wasmHash` version to the contract's `history` block in the artifacts file.
   - Updates the active `wasmHash` and compilation metadata under the current contract entry.
-- **Triggers:** `caatinga upgrade <contractName> --method <upgradeMethodName>`
+- **Triggers:** `ctg upgrade <contractName> --method <upgradeMethodName>`
 
 ### Redeploy
 
@@ -33,7 +33,7 @@ This document details the specifications, behaviors, and transition rules for co
   - Instantiates a fresh copy of the contract on the network.
   - Pushes the previous contract instance representation (`contractId`, `wasmHash`, `deployedAt`, etc.) to the contract's `history` block in the artifacts file.
   - Replaces the active `contractId` and configurations with the newly deployed instance.
-- **Triggers:** `caatinga deploy <contractName> --force` (or `--upgrade` to mark as upgrade type).
+- **Triggers:** `ctg deploy <contractName> --force` (or `--upgrade` to mark as upgrade type).
 
 ### Rollback
 
@@ -43,7 +43,7 @@ This document details the specifications, behaviors, and transition rules for co
   - Restores the matching contract state (contract ID, WASM hash, metadata) to the active contract entry.
   - Appends the superseded active instance to the `history` with reason `"rollback"`.
   - _Note:_ Rollback updates the local artifacts state registry. On-chain state restoration (e.g., re-running an on-chain upgrade to the old WASM hash) is an application concern.
-- **Triggers:** `caatinga rollback <contractName> --target <previousContractId>`
+- **Triggers:** `ctg rollback <contractName> --target <previousContractId>`
 
 ---
 

@@ -9,6 +9,7 @@ import {
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { npxCli } from "../utils/cli-name.js";
 import { evaluateDeployCoverage } from "./doctor-deploy-coverage.js";
 
 export function registerBuildCommand(program: Command): void {
@@ -64,7 +65,7 @@ async function warnIfDefaultNetworkNeedsDeploy(config: CaatingaConfig): Promise<
     }
 
     missingDeployCommands = Object.keys(config.contracts).map(
-      (name) => `caatinga deploy ${name} --network ${config.defaultNetwork} --source <identity>`
+      (name) => `${npxCli(`deploy ${name} --network ${config.defaultNetwork} --source <identity>`)}`
     );
   }
 

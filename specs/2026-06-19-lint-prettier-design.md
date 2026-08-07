@@ -101,7 +101,7 @@ Cobertura inicial:
 Exclusões:
 
 - diretórios de build e dependências;
-- arquivos gerados por `caatinga generate`;
+- arquivos gerados por `ctg generate`;
 - `pnpm-lock.yaml`.
 
 ## Rollout

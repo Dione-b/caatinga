@@ -20,7 +20,7 @@ The hard floor is the only hard failure on the version axis. Versions below it m
 - Above the last-tested version (`> 27.0.0`): emit a stderr advisory and continue. The advisory is non-fatal; the command exits 0 and the version gate does not block the requested operation.
 - Within the supported range (`23.0.0`–`27.0.0`): silent, no warnings.
 
-The advisory surfaces as a `Diagnostic.warnings` entry in `caatinga doctor` and as a stderr line in every Caatinga command that shells out to Stellar CLI.
+The advisory surfaces as a `Diagnostic.warnings` entry in `ctg doctor` and as a stderr line in every Caatinga command that shells out to Stellar CLI.
 
 ### Warning shape
 

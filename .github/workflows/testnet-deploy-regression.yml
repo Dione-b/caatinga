@@ -61,10 +61,10 @@ jobs:
           cp -R packages/templates/react-vite-counter "$WORKDIR"
           cd "$WORKDIR"
           pnpm install --ignore-workspace
-          pnpm exec caatinga build counter
-          pnpm exec caatinga deploy counter --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS" --if-changed
-          pnpm exec caatinga generate counter --network testnet --strict-network
-          pnpm exec caatinga doctor --network testnet --strict-bindings
+          pnpm exec ctg build counter
+          pnpm exec ctg deploy counter --network testnet --source "$CAATINGA_CI_IDENTITY_ALIAS" --if-changed
+          pnpm exec ctg generate counter --network testnet --strict-network
+          pnpm exec ctg doctor --network testnet --strict-bindings
 
       - name: Remove Stellar CLI config
         if: always()

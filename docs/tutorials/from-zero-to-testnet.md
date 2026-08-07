@@ -7,7 +7,7 @@ Optional walkthrough: deploy and invoke a Soroban counter on Stellar testnet.
 ## Create the project
 
 ```bash
-caatinga init my-dapp
+ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -17,7 +17,7 @@ npm install
 ## Verify the environment
 
 ```bash
-npx caatinga doctor --network testnet --source alice
+npx ctg doctor --network testnet --source alice
 ```
 
 Expected shape:
@@ -42,20 +42,20 @@ A `STELLAR_CLI_UNTESTED_VERSION` warning is advisory and does not block deploys.
 ## Build, deploy, invoke
 
 ```bash
-npx caatinga build counter
-npx caatinga deploy counter --network testnet --source alice
-npx caatinga invoke counter.increment --network testnet --source alice
-npx caatinga status --network testnet
-npx caatinga smoke --network testnet --source alice
-npx caatinga read counter.get --network testnet --expect '{"matcher":"reachable"}'
+npx ctg build counter
+npx ctg deploy counter --network testnet --source alice
+npx ctg invoke counter.increment --network testnet --source alice
+npx ctg status --network testnet
+npx ctg smoke --network testnet --source alice
+npx ctg read counter.get --network testnet --expect '{"matcher":"reachable"}'
 ```
 
-`deploy` writes the `contractId` to `caatinga.artifacts.json` and auto-generates TypeScript bindings. Pass `--no-generate` to skip; recover with `npx caatinga generate --network testnet`.
+`deploy` writes the `contractId` to `caatinga.artifacts.json` and auto-generates TypeScript bindings. Pass `--no-generate` to skip; recover with `npx ctg generate --network testnet`.
 
 To redeploy when an artifact already exists:
 
 ```bash
-npx caatinga deploy counter --network testnet --source alice --force
+npx ctg deploy counter --network testnet --source alice --force
 ```
 
 ## Browser client
@@ -68,7 +68,7 @@ For install warnings, audit findings, and `CAATINGA_*` errors on this walkthroug
 
 Common quick fixes:
 
-- `CAATINGA_ARTIFACT_NOT_FOUND` — run `npx caatinga build counter` before deploy
+- `CAATINGA_ARTIFACT_NOT_FOUND` — run `npx ctg build counter` before deploy
 - `CAATINGA_STELLAR_CLI_NOT_FOUND` — install Stellar CLI; ensure `stellar` is on `PATH`
 - `CAATINGA_RUST_TARGET_NOT_FOUND` — `rustup target add wasm32v1-none`
 - `CAATINGA_UNSAFE_SOURCE_ACCOUNT` — use a local identity such as `alice`, not a public `G...` address

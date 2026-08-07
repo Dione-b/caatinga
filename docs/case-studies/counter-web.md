@@ -25,34 +25,34 @@ Without Caatinga, each step (deploy ID tracking, binding generation, wallet wiri
 
 ## Setup timeline (approximate)
 
-| Step                          | Time           | Notes                                                                                   |
-| ----------------------------- | -------------- | --------------------------------------------------------------------------------------- |
-| `caatinga init` from template | ~5 min         | `react-vite-counter` scaffold                                                           |
-| `build` + `deploy` on testnet | ~10 min        | Includes Stellar CLI identity funding                                                   |
-| `npm run dev`                 | ~2 min         | WalletConnect needs `.env`                                                              |
-| **Total to first invoke**     | **~1–2 hours** | Assumes Stellar CLI + Rust already installed; first-time toolchain setup adds 1–2 hours (install Rust + Stellar CLI manually, verify with `caatinga doctor`) |
+| Step                          | Time           | Notes                                                                                                                                                   |
+| ----------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctg init` from template      | ~5 min         | `react-vite-counter` scaffold                                                                                                                           |
+| `build` + `deploy` on testnet | ~10 min        | Includes Stellar CLI identity funding                                                                                                                   |
+| `npm run dev`                 | ~2 min         | WalletConnect needs `.env`                                                                                                                              |
+| **Total to first invoke**     | **~1–2 hours** | Assumes Stellar CLI + Rust already installed; first-time toolchain setup adds 1–2 hours (install Rust + Stellar CLI manually, verify with `ctg doctor`) |
 
 ## What worked
 
-- `caatinga deploy` wrote `caatinga.artifacts.json` and regenerated bindings in one step.
+- `ctg deploy` wrote `caatinga.artifacts.json` and regenerated bindings in one step.
 - `@caatinga/client/react` eliminated hand-rolled wallet context.
-- `caatinga status` confirmed deploy + binding freshness before `npm run dev`.
+- `ctg status` confirmed deploy + binding freshness before `npm run dev`.
 - `CAATINGA_*` errors surfaced missing artifacts clearly in the browser UI.
 
 ## What broke or required workarounds
 
 - **WalletConnect:** requires `VITE_WALLETCONNECT_PROJECT_ID` in `.env` — not auto-generated.
-- **Checked-in stub binding:** the monorepo example ships a stand-in `counter.ts` for CI; real projects must use `caatinga generate` output.
+- **Checked-in stub binding:** the monorepo example ships a stand-in `counter.ts` for CI; real projects must use `ctg generate` output.
 - **Single-invoker only:** contracts needing delegated auth are out of scope for this example.
 - **No mainnet:** example targets testnet only.
 
 ## Commands used
 
 ```bash
-caatinga build counter
-caatinga deploy counter --network testnet --source alice
-caatinga status --network testnet
-caatinga doctor --network testnet --source alice
+ctg build counter
+ctg deploy counter --network testnet --source alice
+ctg status --network testnet
+ctg doctor --network testnet --source alice
 ```
 
 ## Metrics (not yet collected)
@@ -60,7 +60,7 @@ caatinga doctor --network testnet --source alice
 Future case studies should capture:
 
 - Proof size / prove time (ZK projects)
-- Deploy fee actual vs `caatinga estimate deploy`
+- Deploy fee actual vs `ctg estimate deploy`
 - Number of contracts and `dependsOn` depth
 - CI pipeline duration
 

@@ -1,5 +1,12 @@
 ## Breaking changes policy
 
+## 3.9.1
+
+### Patch Changes
+
+- CLI error hints now reference the `ctg` binary name (`caatinga` remains a legacy alias).
+- Scaffolded project scripts and READMEs now invoke `ctg`.
+
 ## 3.9.0
 
 ## 3.8.0

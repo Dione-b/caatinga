@@ -30,7 +30,7 @@ vault: {
 
 ```mermaid
 sequenceDiagram
-  participant CLI as caatinga deploy
+  participant CLI as ctg deploy
   participant Core as deployContractGraph
   participant Artifacts as caatinga.artifacts.json
   participant Chain as Stellar testnet
@@ -48,8 +48,8 @@ sequenceDiagram
 After changing token WASM:
 
 ```bash
-caatinga build token
-caatinga upgrade token --network testnet --source alice
+ctg build token
+ctg upgrade token --network testnet --source alice
 ```
 
 Vault artifact still references the same token `contractId` unless vault logic changes.
@@ -57,13 +57,13 @@ Vault artifact still references the same token `contractId` unless vault logic c
 ## Validation
 
 ```bash
-caatinga wire --network testnet --source alice
-caatinga smoke --network testnet
-caatinga doctor --network testnet
+ctg wire --network testnet --source alice
+ctg smoke --network testnet
+ctg doctor --network testnet
 ```
 
 ## Lessons
 
 - Placeholders only resolve from artifacts — deploy token first or use full-graph deploy.
-- Partial deploy recovery: re-run `caatinga deploy`; deployed contracts are skipped.
+- Partial deploy recovery: re-run `ctg deploy`; deployed contracts are skipped.
 - See [recovery-scenarios.md](../recovery-scenarios.md) for failure modes.

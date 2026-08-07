@@ -7,6 +7,7 @@ import {
   toCaatingaError,
   upgradeContractInPlace,
 } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -30,7 +31,7 @@ export function registerUpgradeCommand(program: Command): void {
       "--expected-hash <hash>",
       "Fail before upload when local WASM hash does not match this value"
     )
-    .option("--no-build", "Skip caatinga build before upload")
+    .option("--no-build", "Skip ctg build before upload")
     .option("--generate", "Regenerate TypeScript bindings after upgrade")
     .option("--sync-env", "Sync frontend env file after upgrade")
     .action(
@@ -92,7 +93,7 @@ export function registerUpgradeCommand(program: Command): void {
               logger.warn(`  ${caatingaError.message} (${caatingaError.code})`);
               logger.info("");
               logger.info("Recover with:");
-              logger.info(`  npx caatinga sync-env --network ${networkName}`);
+              logger.info(`  ${npxCli(`sync-env --network ${networkName}`)}`);
             }
           }
 
@@ -122,7 +123,7 @@ export function registerUpgradeCommand(program: Command): void {
               logger.info("");
               logger.info("Recover with:");
               logger.info(
-                `  npx caatinga generate ${result.contractName} --network ${networkName}`
+                `  ${npxCli(`generate ${result.contractName} --network ${networkName}`)}`
               );
             }
           }

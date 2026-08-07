@@ -79,7 +79,7 @@ export function evaluateStellarCliCompatibility(
       warnings.push({
         code: "STELLAR_CLI_MISSING_FEATURE",
         message: `Stellar CLI ${input.version} did not advertise the required feature "${feature}".`,
-        remediation: "Upgrade Stellar CLI or run `caatinga doctor` for diagnostics.",
+        remediation: "Upgrade Stellar CLI or run `ctg doctor` for diagnostics.",
       });
     }
   }

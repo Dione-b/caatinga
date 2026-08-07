@@ -35,11 +35,11 @@ export async function readContract(options: ReadContractOptions) {
     throw new CaatingaError(
       `No deployed artifact found for "${target.contractName}" on "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy for this contract and network before reading it."
+      "Run ctg deploy for this contract and network before reading it."
     );
   }
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga read.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg read.");
 
   const source = resolveCliSource(options.source);
   let cliArgs = await resolveCliMethodArgs(options.args ?? [], {

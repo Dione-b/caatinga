@@ -34,7 +34,7 @@ Included:
 Not included:
 
 - CLI XDR commands
-- `caatinga generate --interop`
+- `ctg generate --interop`
 - custom SCVal serialization
 - multisig orchestration
 - backend signing

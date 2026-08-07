@@ -69,19 +69,19 @@ This is optional guidance, not a required edit. Adjust it to fit how your team w
 Each stellar-build persona maps naturally onto a phase of the Caatinga lifecycle. Use the
 prompt phrasing as a starting point; every command is documented in the [CLI reference](../cli.md).
 
-| Persona            | Skill             | Caatinga commands                    | Example prompt                                                        |
-| ------------------ | ----------------- | ------------------------------------ | --------------------------------------------------------------------- |
-| Tyler — architect  | `tyler-architect` | `caatinga zk init`, `caatinga build` | "Tyler, design the contract structure and validate the dependencies." |
-| Elliot — developer | `elliot-dev`      | `caatinga build`, `caatinga invoke`  | "Elliot, implement the increment logic and run the invoke."           |
-| Nicole — product   | `nicole-pm`       | `caatinga deploy --network testnet`  | "Nicole, validate the business rules and publish to testnet."         |
-| Justin — analyst   | `justin-analyst`  | `caatinga doctor`, `caatinga status` | "Justin, check the toolchain state and the binding freshness."        |
-| Bri — tech writer  | `bri-tech-writer` | `caatinga inspect`                   | "Bri, inspect on-chain reachability and document the methods."        |
+| Persona            | Skill             | Caatinga commands              | Example prompt                                                        |
+| ------------------ | ----------------- | ------------------------------ | --------------------------------------------------------------------- |
+| Tyler — architect  | `tyler-architect` | `ctg zk init`, `ctg build`     | "Tyler, design the contract structure and validate the dependencies." |
+| Elliot — developer | `elliot-dev`      | `ctg build`, `ctg invoke`      | "Elliot, implement the increment logic and run the invoke."           |
+| Nicole — product   | `nicole-pm`       | `ctg deploy --network testnet` | "Nicole, validate the business rules and publish to testnet."         |
+| Justin — analyst   | `justin-analyst`  | `ctg doctor`, `ctg status`     | "Justin, check the toolchain state and the binding freshness."        |
+| Bri — tech writer  | `bri-tech-writer` | `ctg inspect`                  | "Bri, inspect on-chain reachability and document the methods."        |
 
 ## Edge cases
 
-**Stale bindings.** When `caatinga status` reports a contract's bindings as `stale` (its
+**Stale bindings.** When `ctg status` reports a contract's bindings as `stale` (its
 `contractId` or `wasmHash` changed since the last generate), ask the agent to run
-`caatinga generate`. This refreshes the `.caatinga-bindings.json` marker without a redeploy.
+`ctg generate`. This refreshes the `.caatinga-bindings.json` marker without a redeploy.
 See the [CLI reference](../cli.md) for `status` and `generate`.
 
 **`CAATINGA_MULTI_AUTH_REQUIRED`.** A contract invoke that needs non-invoker signatures

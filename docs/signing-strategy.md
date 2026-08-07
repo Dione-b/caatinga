@@ -12,11 +12,11 @@ All state-changing CLI commands (`deploy`, `upgrade`, `invoke`, `zk invoke`) req
 
 ```bash
 stellar keys generate alice --fund --network testnet
-caatinga deploy counter --network testnet --source alice
-caatinga upgrade counter --network testnet --source alice   # admin-gated in-place WASM upgrade
+ctg deploy counter --network testnet --source alice
+ctg upgrade counter --network testnet --source alice   # admin-gated in-place WASM upgrade
 ```
 
-Run `caatinga doctor --source alice` to verify the identity exists and can sign on the selected network.
+Run `ctg doctor --source alice` to verify the identity exists and can sign on the selected network.
 
 ## Browser signing (`@caatinga/client`)
 
@@ -34,30 +34,30 @@ Caatinga does not manage CI secrets. Recommended pattern:
 
 1. Generate a dedicated deployer identity on the runner or inject a secret-backed alias.
 2. Fund the identity on testnet (or use a platform secret for mainnet).
-3. Pass `--source ci-deployer` (or your alias) to `caatinga deploy` / `invoke`.
+3. Pass `--source ci-deployer` (or your alias) to `ctg deploy` / `invoke`.
 4. Commit updated `caatinga.artifacts.json` from the pipeline or store as a build artifact.
 
 See [Testing — CI without local secrets](./internal/testing.md).
 
 ## Testnet vs mainnet
 
-| Concern          | Testnet                                             | Mainnet                                                      |
-| ---------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| Identity         | `stellar keys generate --fund`                      | Pre-funded account; never commit seeds                       |
-| Source alias     | Dev alias (`alice`) acceptable                      | Dedicated deployer alias per environment                     |
-| ZK dev ceremony  | Allowed on testnet with warnings                    | Blocked by default (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)      |
-| Cost awareness   | Use `caatinga estimate deploy` before large deploys | **Required** — estimate fees; monitor resource limits        |
-| Artifact history | Optional                                            | Use `caatinga migrate artifacts` + upgrade/rollback workflow |
+| Concern          | Testnet                                        | Mainnet                                                 |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------------- |
+| Identity         | `stellar keys generate --fund`                 | Pre-funded account; never commit seeds                  |
+| Source alias     | Dev alias (`alice`) acceptable                 | Dedicated deployer alias per environment                |
+| ZK dev ceremony  | Allowed on testnet with warnings               | Blocked by default (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`) |
+| Cost awareness   | Use `ctg estimate deploy` before large deploys | **Required** — estimate fees; monitor resource limits   |
+| Artifact history | Optional                                       | Use `ctg migrate artifacts` + upgrade/rollback workflow |
 
 ## Explicitly not supported
 
-| Model                                | Status         | Notes                                                                        |
-| ------------------------------------ | -------------- | ---------------------------------------------------------------------------- |
-| Hardware wallets (Ledger/Trezor)     | Not supported  | SWK stubs only; no native Ledger integration                                 |
-| KMS / cloud signing (AWS KMS, GCP)   | Out of scope   | Use Stellar CLI or custom signing outside Caatinga                           |
-| Backend / server-side signing        | Out of scope   | Application responsibility                                                   |
-| Multisig / `signAuthEntry` in client | App-owned      | `CAATINGA_MULTI_AUTH_REQUIRED` — orchestrate in application code             |
-| Caatinga-managed key storage         | Never          | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
+| Model                                | Status        | Notes                                                                        |
+| ------------------------------------ | ------------- | ---------------------------------------------------------------------------- |
+| Hardware wallets (Ledger/Trezor)     | Not supported | SWK stubs only; no native Ledger integration                                 |
+| KMS / cloud signing (AWS KMS, GCP)   | Out of scope  | Use Stellar CLI or custom signing outside Caatinga                           |
+| Backend / server-side signing        | Out of scope  | Application responsibility                                                   |
+| Multisig / `signAuthEntry` in client | App-owned     | `CAATINGA_MULTI_AUTH_REQUIRED` — orchestrate in application code             |
+| Caatinga-managed key storage         | Never         | By design — see [ADR 0002](./adr/0002-local-artifacts-as-source-of-truth.md) |
 
 ## Related docs
 

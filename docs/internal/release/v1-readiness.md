@@ -4,7 +4,7 @@
 
 - package metadata valid
 - package READMEs complete
-- Stellar CLI contract documented: Caatinga hard-fails on Stellar CLI versions below 23.0.0 (`CAATINGA_UNSUPPORTED_CLI_VERSION`; 22.x cannot sign `stellar contract invoke`). Versions newer than the last-tested 25.2.0 are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning; no override flag is required.
+- Stellar CLI contract documented: Caatinga hard-fails on Stellar CLI versions below 23.0.0 (`CAATINGA_UNSUPPORTED_CLI_VERSION`; 22.x cannot sign `stellar contract invoke`). Versions newer than the last-tested 25.2.0 are accepted with a non-fatal stderr advisory and a `ctg doctor` warning; no override flag is required.
 - `pnpm typecheck`
 - `pnpm build`
 - `pnpm test`

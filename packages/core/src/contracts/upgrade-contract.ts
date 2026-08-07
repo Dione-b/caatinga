@@ -72,7 +72,7 @@ export async function upgradeContractInPlace(
   const upgradeMethod = options.upgradeMethod ?? DEFAULT_UPGRADE_METHOD;
   const wasmArg = options.wasmArg ?? DEFAULT_WASM_ARG;
 
-  await checkBinary("stellar", "Install Stellar CLI before running caatinga upgrade.");
+  await checkBinary("stellar", "Install Stellar CLI before running ctg upgrade.");
 
   const artifactsBefore = await readArtifacts(cwd);
   const existing = artifactsBefore.networks[network.name]?.contracts[contract.name];
@@ -81,7 +81,7 @@ export async function upgradeContractInPlace(
     throw new CaatingaError(
       `No deployed artifact found for "${contract.name}" on "${network.name}".`,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-      "Run caatinga deploy before caatinga upgrade."
+      "Run ctg deploy before ctg upgrade."
     );
   }
 
@@ -150,7 +150,7 @@ export async function upgradeContractInPlace(
           throw new CaatingaError(
             error.message,
             error.code,
-            `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use caatinga deploy --upgrade for redeploy.`,
+            `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use ctg deploy --upgrade for redeploy.`,
             error
           );
         }

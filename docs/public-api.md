@@ -2,6 +2,8 @@
 
 This document is the authoritative tier list for Caatinga v1.0. **Breaking changes to Tier 1 require a major version bump** (after the v1.0 contract freeze, npm major remains `3.x` until an explicit `4.0.0`).
 
+**Exception (3.9.0):** `ctg setup` was removed from the Tier 1 CLI surface while remaining on the `3.x` line. The break is documented in `@caatinga/cli` CHANGELOG 3.9.0; substitute with `ctg doctor` plus manual toolchain install. Future Tier 1 removals still target `4.0.0` unless similarly called out.
+
 See also: [Architecture freeze](./architecture-freeze.md), [v1.0.0 Interface Contract](./internal/release/v1.0.0.md), [Errors](./errors.md).
 
 ---
@@ -14,7 +16,7 @@ Automation and application code may depend on these surfaces without importing p
 
 Supported flow: `init → build → deploy → generate → invoke`
 
-Published binaries: `caatinga` and `ctg` (short alias; same entrypoint).
+Published binaries: `ctg` and `caatinga` (legacy alias; same entrypoint).
 
 | Domain                 | Commands                                                        |
 | ---------------------- | --------------------------------------------------------------- |
@@ -27,7 +29,7 @@ Published binaries: `caatinga` and `ctg` (short alias; same entrypoint).
 
 All commands, flags, exit codes (`0` / `1`), and `CAATINGA_*` error codes are documented in [cli.md](./cli.md) and [errors.md](./errors.md).
 
-ZK commands (`caatinga zk init`, `zk build`, `zk prove`, `zk invoke`) are **experimental** — see [scope.md](./scope.md).
+ZK commands (`ctg zk init`, `zk build`, `zk prove`, `zk invoke`) are **experimental** — see [scope.md](./scope.md).
 
 ### Runtime client (`@caatinga/client`)
 

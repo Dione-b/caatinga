@@ -2,31 +2,31 @@
 
 The CLI is intentionally thin. It delegates config, artifacts, command execution, and parser behavior to `@caatinga/core`.
 
-After `npm install -g @caatinga/cli` (or a local install), the package exposes two binaries that share the same entrypoint: **`caatinga`** and **`ctg`**. Docs and examples use `caatinga`; `ctg` is a short alias (`ctg doctor` ≡ `caatinga doctor`). Help text uses whichever name invoked the process.
+After `npm install -g @caatinga/cli` (or a local install), the package exposes two binaries that share the same entrypoint: **`ctg`** and **`caatinga`**. Docs and examples use `ctg`; `caatinga` is a legacy alias (`ctg doctor` ≡ `caatinga doctor`). Help text uses whichever name invoked the process.
 
 ## Supported today vs not yet
 
 | Capability                        | Status                                                       |
 | --------------------------------- | ------------------------------------------------------------ |
 | Official frontend templates       | Vite + React only (`vite-react`)                             |
-| `caatinga upgrade`                | In-place WASM upgrade (upload + invoke `upgrade`)            |
-| `caatinga deploy --upgrade`       | Redeploy with new `contractId` + artifact history            |
-| `caatinga zk build`               | Single-party **dev** ceremony; blocked on mainnet by default |
-| `caatinga zk invoke --embed-vk`   | **Not supported** (experimental / end-to-end incomplete)     |
+| `ctg upgrade`                     | In-place WASM upgrade (upload + invoke `upgrade`)            |
+| `ctg deploy --upgrade`            | Redeploy with new `contractId` + artifact history            |
+| `ctg zk build`                    | Single-party **dev** ceremony; blocked on mainnet by default |
+| `ctg zk invoke --embed-vk`        | **Not supported** (experimental / end-to-end incomplete)     |
 | Browser `invoke` via wallet       | **Single-invoker**; multi-auth is app-owned                  |
 | Multi-signer / `signAuthEntry`    | Application code; `CAATINGA_MULTI_AUTH_REQUIRED`             |
 | Production ZK (MPC powers-of-tau) | Out of scope; no Caatinga command for MPC ceremony           |
 
 See [Client — Single-invoker scope](./client.md#single-invoker-scope) and [ZK module](./zk.md#production-guardrails) for details.
 
-## `caatinga init <projectName>`
+## `ctg init <projectName>`
 
 Creates a project from a bundled template and writes `caatinga.artifacts.json`.
 
 `-t, --template <name>` selects the template (default: `react-vite-counter`). Official browser templates:
 
 - `react-vite-counter` — single Soroban counter dApp (default)
-- `zk-starter` — ZK dApp with Circom/Groth16 verifier (use `caatinga zk init <projectName>`)
+- `zk-starter` — ZK dApp with Circom/Groth16 verifier (use `ctg zk init <projectName>`)
 
 `init` validates `caatinga.template.json` before copying files and prints the selected template name and version.
 
@@ -35,18 +35,18 @@ For a step-by-step guide, see [Template project](./tutorials/template-project.md
 Use `--minimal` (or `--empty`) to scaffold a CLI-only project with a Soroban contract stub — no React/Vite template, no wallet stubs:
 
 ```bash
-caatinga init my-contract-app --minimal
+ctg init my-contract-app --minimal
 ```
 
-## `caatinga build [contract]`
+## `ctg build [contract]`
 
 Builds one configured contract with `stellar contract build`. Omit `contract` to build **every**
-contract listed in `caatinga.config.ts` (same batch semantics as `caatinga deploy` without a name).
+contract listed in `caatinga.config.ts` (same batch semantics as `ctg deploy` without a name).
 When `buildRoot` is configured and `contract` is omitted, Caatinga runs a single
 `stellar contract build` from that Cargo workspace root and then resolves each configured WASM.
 Pass a contract name to keep the per-contract build behavior.
 
-## `caatinga doctor`
+## `ctg doctor`
 
 Flags: `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings`
 
@@ -66,13 +66,13 @@ With `--network`:
 Strict flags:
 
 - `--strict` enables both `--strict-env` and `--strict-bindings`
-- `--strict-env` fails when `frontend.envFile` drifts from artifacts (fix with `caatinga sync-env`)
+- `--strict-env` fails when `frontend.envFile` drifts from artifacts (fix with `ctg sync-env`)
 - `--strict-bindings` fails when bindings are not `fresh`
 - WASM drift and postDeploy alias advisories are **always advisory**
 
 Use `--all-networks` for a per-network deploy/bindings matrix. Doctor may also print a version matrix including `soroban-sdk` from each contract's `Cargo.toml`.
 
-## `caatinga deploy`
+## `ctg deploy`
 
 Flags: `--source` (required), `--network`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony`
 
@@ -89,14 +89,14 @@ Behavior:
 
 After a successful deploy:
 
-- **Auto-generates TypeScript bindings** (skip with `--no-generate`). Generation failure does not fail deploy — recovery: `npx caatinga generate --network <network>`
-- Full graph deploy also runs `postDeploy` wiring (`caatinga wire`) and `sync-env` when configured (skip with `--no-wire` / `--no-sync-env`)
+- **Auto-generates TypeScript bindings** (skip with `--no-generate`). Generation failure does not fail deploy — recovery: `npx ctg generate --network <network>`
+- Full graph deploy also runs `postDeploy` wiring (`ctg wire`) and `sync-env` when configured (skip with `--no-wire` / `--no-sync-env`)
 
 Use `deploy --upgrade` (alias for `--force` with upgrade history reason) when you want a **new
 contract instance** and artifact history keyed by prior `contractId`. For admin-gated in-place WASM
-replacement on the **existing** `contractId`, use `caatinga upgrade` instead.
+replacement on the **existing** `contractId`, use `ctg upgrade` instead.
 
-## `caatinga upgrade <contract> --source <identity> [--network testnet] [--if-changed] [--expected-hash <hash>] [--no-build] [--generate] [--sync-env]`
+## `ctg upgrade <contract> --source <identity> [--network testnet] [--if-changed] [--expected-hash <hash>] [--no-build] [--generate] [--sync-env]`
 
 Upgrades a deployed contract **in-place**: build (unless `--no-build`), `stellar contract upload`,
 then `stellar contract invoke … upgrade --new_wasm_hash <hash>` on the artifact's current
@@ -109,11 +109,11 @@ Use `--if-changed` to skip when the local WASM hash already matches the artifact
 full deploy, upgrade does not run these automatically).
 
 Requires a contract that exposes an admin-gated `upgrade(new_wasm_hash)` entrypoint. If invoke
-fails, the CLI hints to use `caatinga deploy --upgrade` for redeploy-style upgrades. Upload
+fails, the CLI hints to use `ctg deploy --upgrade` for redeploy-style upgrades. Upload
 failures exit with `CAATINGA_UPLOAD_FAILED`; missing hash in CLI output uses
 `CAATINGA_WASM_HASH_NOT_FOUND`.
 
-## `caatinga wire [--network testnet] --source <identity>`
+## `ctg wire [--network testnet] --source <identity>`
 
 Runs every `postDeploy` and `postDeployRead` hook from `caatinga.config.ts` in order. Each hook
 calls a deployed contract method with resolved placeholders (`${contracts.*.contractId}`,
@@ -129,13 +129,13 @@ on testnet after a partial failure.
 Transient failures (TxBadSeq, timeouts, connection resets) are retried automatically with
 exponential backoff (2s/5s default) before failing with `CAATINGA_INVOKE_FAILED`.
 
-## `caatinga sync-env [--network testnet]`
+## `ctg sync-env [--network testnet]`
 
 Writes `frontend.envFile` from `caatinga.artifacts.json` using the `frontend.env` mapping in
 config. Contract keys map to deployed contract IDs; `rpcUrl` and `networkPassphrase` map to the
 selected network config. Quoted values are emitted when the network passphrase contains spaces.
 
-## `caatinga generate [contract] [--network testnet] [--strict-network]`
+## `ctg generate [contract] [--network testnet] [--strict-network]`
 
 Generates TypeScript bindings from the deployed contract ID via `npx @stellar/stellar-sdk generate` (Stellar CLI is not required). The contract name is
 optional: omit it to generate bindings for every contract already deployed on the
@@ -153,7 +153,7 @@ After generation, Caatinga patches each binding package's `package.json` so bund
 
 Pass `--strict-network` to fail when the selected network has no block in `caatinga.artifacts.json`.
 
-## `caatinga status [--network <name>] [--json] [--strict]`
+## `ctg status [--network <name>] [--json] [--strict]`
 
 Shows, per network, every configured contract with its deployed contract ID, WASM hash,
 dependencies, and binding freshness in a table. Contracts not yet deployed on the network are
@@ -161,45 +161,45 @@ listed with `✗` so you can see what's left. Without `--network` it reports eve
 in `caatinga.artifacts.json` (falling back to `defaultNetwork` for empty projects).
 
 For every deployed contract whose bindings are not fresh, status prints the exact
-`caatinga generate` command that fixes it. `--json` prints the full machine-readable structure
+`ctg generate` command that fixes it. `--json` prints the full machine-readable structure
 on stdout for scripts and CI.
 
 `--strict` exits with code `1` when any **deployed** contract has bindings other than `fresh`.
-Canonical CI check after `caatinga deploy --no-generate`: run `caatinga status --strict` and expect failure until `caatinga generate` runs.
+Canonical CI check after `ctg deploy --no-generate`: run `ctg status --strict` and expect failure until `ctg generate` runs.
 
-## `caatinga smoke [--network testnet] [--source alice]`
+## `ctg smoke [--network testnet] [--source alice]`
 
 Runs read-only smoke checks from `smoke.reads` or `postDeployRead` in config, using the same expect DSL as `postDeploy` (string equality or `{ matcher: "isArray" }`, etc.). Default expect is `{ matcher: "reachable" }` when omitted.
 
 When `smoke.useFreshSymbol` is `true`, each read gets an ephemeral `symbol` arg for testnet writes that should not pollute shared state.
 
-## `caatinga regression --source <identity> [--network testnet] [--skip-test] [--skip-build] [--skip-deploy] [--skip-generate] [--skip-smoke]`
+## `ctg regression --source <identity> [--network testnet] [--skip-test] [--skip-build] [--skip-deploy] [--skip-generate] [--skip-smoke]`
 
-Orchestrates the recommended pipeline: `pnpm test` → `caatinga build` → `caatinga deploy --if-changed` → `caatinga generate` → `caatinga smoke`.
+Orchestrates the recommended pipeline: `pnpm test` → `ctg build` → `ctg deploy --if-changed` → `ctg generate` → `ctg smoke`.
 
-## `caatinga ci run [--network testnet] [--source alice] [--strict] [--skip-smoke]`
+## `ctg ci run [--network testnet] [--source alice] [--strict] [--skip-smoke]`
 
-CI helper: runs `caatinga doctor` then `caatinga smoke`. Intended for GitHub Actions after
+CI helper: runs `ctg doctor` then `ctg smoke`. Intended for GitHub Actions after
 restoring Stellar CLI identity secrets. `--strict` is forwarded to `doctor` only (enables
 `--strict-env` and `--strict-bindings`); it does not run `status --strict`.
 
-## `caatinga identity export [--path ~/.config/stellar]`
+## `ctg identity export [--path ~/.config/stellar]`
 
 Exports the Stellar CLI config directory as a base64 tarball on stdout (for
 `CAATINGA_CI_STELLAR_CONFIG_B64`). Prefer this over hand-rolled tar commands — see
 [Testing — Stellar CLI config blob](./internal/testing.md#stellar-cli-config-blob-format).
 
-## `caatinga identity import <archive-file> [--path ~/.config/stellar]`
+## `ctg identity import <archive-file> [--path ~/.config/stellar]`
 
-Imports a base64-encoded tarball file produced by `caatinga identity export` (not a raw binary path).
+Imports a base64-encoded tarball file produced by `ctg identity export` (not a raw binary path).
 
-## `caatinga invoke <contract.method> --source <identity> [--network testnet] [args...]`
+## `ctg invoke <contract.method> --source <identity> [--network testnet] [args...]`
 
 Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI. CLI identity aliases in named args (for example `--owner alice`) are resolved to `G...` addresses before invoke.
 
-If Stellar CLI reports that the target is a read-only method, Caatinga suggests `caatinga read` (or `client.read()` / `client.simulate()` in browser code) instead of `force: true`.
+If Stellar CLI reports that the target is a read-only method, Caatinga suggests `ctg read` (or `client.read()` / `client.simulate()` in browser code) instead of `force: true`.
 
-## `caatinga read <contract.method> [--network testnet] [--source alice] [--expect <dsl>] [--quiet] [--summary] [args...]`
+## `ctg read <contract.method> [--network testnet] [--source alice] [--expect <dsl>] [--quiet] [--summary] [args...]`
 
 Simulates a read-only contract method with `stellar contract invoke --send=no`. `--source` is optional; Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice` for the simulation account.
 
@@ -215,7 +215,7 @@ payloads (see [Testnet hygiene](./internal/testnet-hygiene.md)).
 
 ## Expect DSL
 
-Shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga read --expect`, and `caatinga smoke`.
+Shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `ctg read --expect`, and `ctg smoke`.
 
 | Form                                            | Example                                | Meaning                                         |
 | ----------------------------------------------- | -------------------------------------- | ----------------------------------------------- |
@@ -233,23 +233,23 @@ Shared by `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga read --expect
 CLI usage:
 
 ```bash
-npx caatinga read counter.get --network testnet --expect '{"matcher":"reachable"}'
-npx caatinga read token.list --network testnet --expect '{"matcher":"isArray"}' --summary
+npx ctg read counter.get --network testnet --expect '{"matcher":"reachable"}'
+npx ctg read token.list --network testnet --expect '{"matcher":"isArray"}' --summary
 ```
 
 Full schema and config examples: [Config — postDeploy and smoke](./config.md#postdeploy-hooks-and-smoke).
 
 ## ZK commands
 
-Circom Groth16 workflow (`caatinga zk init`, `build`, `prove`, `invoke`). Full reference:
+Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full reference:
 [ZK module](./zk.md).
 
-| Command                                            | Purpose                                                                  |
-| -------------------------------------------------- | ------------------------------------------------------------------------ |
-| `caatinga zk build [circuit] [--embed-vk]`         | Compile Circom and run **dev** trusted setup (`--embed-vk` experimental) |
-| `caatinga zk prove [circuit]`                      | Generate `proof.json` and `public.json`                                  |
-| `caatinga zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK)                                |
-| `caatinga zk invoke [circuit] --network <name>`    | Target a configured network (not only `defaultNetwork`)                  |
+| Command                                       | Purpose                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| `ctg zk build [circuit] [--embed-vk]`         | Compile Circom and run **dev** trusted setup (`--embed-vk` experimental) |
+| `ctg zk prove [circuit]`                      | Generate `proof.json` and `public.json`                                  |
+| `ctg zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK)                                |
+| `ctg zk invoke [circuit] --network <name>`    | Target a configured network (not only `defaultNetwork`)                  |
 
 Shared ZK flags:
 
@@ -260,9 +260,9 @@ When verification returns `false`, the CLI exits with `CAATINGA_ZK_VERIFICATION_
 
 ## Stellar CLI compatibility
 
-Caatinga rejects Stellar CLI versions below `23.0.0` because 22.x cannot sign `stellar contract invoke`. Versions newer than the last-tested `27.0.0` are accepted with a non-fatal stderr advisory and a `caatinga doctor` warning. See [Stellar CLI Version Contract](./stellar-cli-version-contract.md).
+Caatinga rejects Stellar CLI versions below `23.0.0` because 22.x cannot sign `stellar contract invoke`. Versions newer than the last-tested `27.0.0` are accepted with a non-fatal stderr advisory and a `ctg doctor` warning. See [Stellar CLI Version Contract](./stellar-cli-version-contract.md).
 
-`caatinga doctor` reports advisory warnings as a `(N warnings)` suffix on the relevant
+`ctg doctor` reports advisory warnings as a `(N warnings)` suffix on the relevant
 diagnostic line plus a `code: message` bullet for each one. Common codes are
 `STELLAR_CLI_UNTESTED_VERSION` (newer than the last-tested boundary) and
 `STELLAR_CLI_MISSING_FEATURE` (a required feature was not advertised by the installed
@@ -271,8 +271,8 @@ CLI).
 ## Current limits
 
 - `--source` must be a local Stellar CLI identity alias that can sign transactions. Public `G...` addresses, secret keys, and seed phrases are rejected.
-- `caatinga dev` is reserved and hidden. Use your frontend dev server (for example Vite) alongside `caatinga build`, `deploy`, `generate`, and `invoke`.
-- CLI XDR commands and `caatinga generate --interop` are not implemented yet.
+- `ctg dev` is reserved and hidden. Use your frontend dev server (for example Vite) alongside `ctg build`, `deploy`, `generate`, and `invoke`.
+- CLI XDR commands and `ctg generate --interop` are not implemented yet.
 
 ## Error codes
 

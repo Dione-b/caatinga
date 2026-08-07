@@ -251,7 +251,7 @@ describe("invokeContract", () => {
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVOKE_FAILED,
-      hint: expect.stringMatching(/caatinga read counter\.get/),
+      hint: expect.stringMatching(/ctg read counter\.get/),
     });
   });
 

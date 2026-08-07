@@ -15,7 +15,7 @@ Install the CLI and prerequisites first — see [Getting started — Prerequisit
 ### Template
 
 ```bash
-caatinga init <dir>
+ctg init <dir>
 ```
 
 Vite + React, wallet and bindings pre-wired. No ZK.
@@ -25,7 +25,7 @@ Vite + React, wallet and bindings pre-wired. No ZK.
 ### Minimal
 
 ```bash
-caatinga init <dir> --minimal
+ctg init <dir> --minimal
 ```
 
 CLI + `app` stub only. You pick the UI stack later.
@@ -35,7 +35,7 @@ CLI + `app` stub only. You pick the UI stack later.
 ### ZK template
 
 ```bash
-caatinga zk init <dir>
+ctg zk init <dir>
 ```
 
 `zk-starter`: Vite UI + verifier contract + multiplier circuit. Hybrid CLI + browser flow.
@@ -45,7 +45,7 @@ caatinga zk init <dir>
 ### ZK minimal
 
 ```bash
-caatinga zk init <dir> --minimal
+ctg zk init <dir> --minimal
 ```
 
 Verifier + identity circuit only. No frontend — add UI yourself.
@@ -54,13 +54,13 @@ Verifier + identity circuit only. No frontend — add UI yourself.
 
 ## Aliases
 
-- `caatinga init --empty` is the same as `--minimal`.
-- `caatinga zk init` with **no** project name adds ZK files to the **current** directory (see [ZK project](./zk-project.md#add-zk-to-an-existing-project)).
+- `ctg init --empty` is the same as `--minimal`.
+- `ctg zk init` with **no** project name adds ZK files to the **current** directory (see [ZK project](./zk-project.md#add-zk-to-an-existing-project)).
 
 ## Official templates
 
-- **`react-vite-counter`** (default) — `npx caatinga init my-dapp` — stable; recommended for the first walkthrough
-- **`zk-starter`** — `npx caatinga zk init my-zk-dapp` — stable ZK example with Vite + React shell
+- **`react-vite-counter`** (default) — `npx ctg init my-dapp` — stable; recommended for the first walkthrough
+- **`zk-starter`** — `npx ctg zk init my-zk-dapp` — stable ZK example with Vite + React shell
 
 See [Templates](../templates.md) for manifest details and package-manager notes.
 

@@ -23,7 +23,7 @@ npm init -y
 npm install /path/to/caatinga/packed/caatinga-core-3.8.0.tgz \
   /path/to/caatinga/packed/caatinga-client-3.8.0.tgz \
   /path/to/caatinga/packed/caatinga-cli-3.8.0.tgz
-npx caatinga init my-dapp --template react-vite-counter
+npx ctg init my-dapp --template react-vite-counter
 ```
 
 See [examples/dogfood-simple/README.md](../examples/dogfood-simple/README.md) for the full timed walkthrough.

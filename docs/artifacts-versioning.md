@@ -21,7 +21,7 @@ To avoid lock-in and support teams upgrading their CLI, Caatinga implements the 
 ### Backward Compatibility (Old files in New CLI)
 
 - **Automatic Migration:** When reading old artifacts files (e.g. version 1), the Orchestration Engine automatically migrates the shape to the current version in memory using `migrateArtifactsToV2`.
-- **Automatic Writeback:** Running `caatinga deploy` or `caatinga upgrade` on an old schema version automatically writes the updated, migrated format to disk, upgrading the project's artifacts file.
+- **Automatic Writeback:** Running `ctg deploy` or `ctg upgrade` on an old schema version automatically writes the updated, migrated format to disk, upgrading the project's artifacts file.
 
 ### Forward Compatibility (New files in Old CLI)
 

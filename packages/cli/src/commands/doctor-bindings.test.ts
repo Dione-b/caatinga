@@ -74,12 +74,12 @@ describe("evaluateBindingCoverage", () => {
     expect(coverage.lines[0]).toMatchObject({
       name: "counter",
       status: "stale",
-      fix: "Run: caatinga generate counter --network testnet",
+      fix: "Run: npx caatinga generate counter --network testnet",
     });
     expect(coverage.lines[1]).toMatchObject({
       name: "token",
       status: "missing",
-      fix: "Run: caatinga generate token --network testnet",
+      fix: "Run: npx caatinga generate token --network testnet",
     });
   });
 

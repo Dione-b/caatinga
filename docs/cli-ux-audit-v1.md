@@ -4,8 +4,8 @@ Final review checklist before v1.0 contract freeze. Compare live `--help` output
 
 ## Global
 
-- [x] `caatinga --help` groups commands by domain
-- [x] `caatinga version` prints `@caatinga/cli@<version>` and Node.js version
+- [x] `ctg --help` groups commands by domain
+- [x] `ctg version` prints `@caatinga/cli@<version>` and Node.js version
 - [x] Exit codes: `0` success, `1` failure (all commands)
 - [x] Errors use `[CAATINGA_*]` prefix via `formatCaatingaError`
 

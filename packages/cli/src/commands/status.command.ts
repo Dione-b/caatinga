@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { collectProjectStatus, loadConfig, type ContractStatusEntry } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { renderTable } from "../utils/table.js";
@@ -64,7 +65,7 @@ export function registerStatusCommand(program: Command): void {
               logger.warn(
                 `Bindings ${entry.bindings.status} for ${entry.name}` +
                   `${entry.bindings.reason ? ` (${entry.bindings.reason})` : ""}` +
-                  ` — run: npx caatinga generate ${entry.name} --network ${network.network}`
+                  ` — run: ${npxCli(`generate ${entry.name} --network ${network.network}`)}`
               );
             }
           }

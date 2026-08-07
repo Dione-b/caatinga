@@ -187,7 +187,7 @@ export function registerZkInitCommand(program: Command): void {
           config = await loadConfig({ cwd });
         } catch {
           throw new Error(
-            "No caatinga.config.ts found in the current directory. Run `caatinga zk init <projectName>` to create a new project."
+            "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
           );
         }
 

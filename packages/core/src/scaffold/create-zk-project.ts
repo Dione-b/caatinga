@@ -68,11 +68,11 @@ function packageJsonSource(projectName: string): string {
       private: true,
       type: "module",
       scripts: {
-        "zk:build": "caatinga zk build main",
-        "zk:prove": "caatinga zk prove main",
-        build: "caatinga build verifier",
-        deploy: "caatinga deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        doctor: "caatinga doctor --network testnet",
+        "zk:build": "ctg zk build main",
+        "zk:prove": "ctg zk prove main",
+        build: "ctg build verifier",
+        deploy: "ctg deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "ctg doctor --network testnet",
         test: "cargo test --manifest-path contracts/verifier/Cargo.toml",
       },
       devDependencies: {
@@ -95,10 +95,10 @@ Minimal Caatinga ZK project.
 \`\`\`bash
 npm install
 npm test
-npx caatinga zk build main
-npx caatinga build verifier
-npx caatinga deploy verifier --network testnet --source <identity>
-npx caatinga zk prove main
+npx ctg zk build main
+npx ctg build verifier
+npx ctg deploy verifier --network testnet --source <identity>
+npx ctg zk prove main
 \`\`\`
 
 ## Tests

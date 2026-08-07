@@ -40,7 +40,7 @@ describe("dev-ceremony", () => {
         networkName: "mainnet",
         artifactsDir: tmpRoot,
         allowDevCeremony: false,
-        operation: "caatinga zk invoke",
+        operation: "ctg zk invoke",
       })
     ).rejects.toMatchObject({ code: "ZK_DEV_CEREMONY_BLOCKED" });
   });
@@ -54,7 +54,7 @@ describe("dev-ceremony", () => {
         networkName: "mainnet",
         artifactsDir: tmpRoot,
         allowDevCeremony: true,
-        operation: "caatinga zk invoke",
+        operation: "ctg zk invoke",
       })
     ).resolves.toBeUndefined();
   });
@@ -68,7 +68,7 @@ describe("dev-ceremony", () => {
         networkName: "testnet",
         artifactsDir: tmpRoot,
         allowDevCeremony: false,
-        operation: "caatinga zk invoke",
+        operation: "ctg zk invoke",
       })
     ).resolves.toBeUndefined();
   });

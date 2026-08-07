@@ -8,9 +8,9 @@ Start at [Getting started](./getting-started.md) if you're new.
 
 - [Getting started](./getting-started.md) — install, scaffold, CLI-to-browser flow
 - [Choosing a project scaffold](./tutorials/project-scaffolds.md) — template vs minimal vs ZK
-- [Template project](./tutorials/template-project.md) — `caatinga init` walkthrough
-- [Minimal project](./tutorials/minimal-project.md) — `caatinga init --minimal` CLI-only
-- [ZK project](./tutorials/zk-project.md) — `caatinga zk init` walkthrough
+- [Template project](./tutorials/template-project.md) — `ctg init` walkthrough
+- [Minimal project](./tutorials/minimal-project.md) — `ctg init --minimal` CLI-only
+- [ZK project](./tutorials/zk-project.md) — `ctg zk init` walkthrough
 - [Cheatsheet](./cheatsheet.md) — command loop and flags on one page
 
 ## Guides

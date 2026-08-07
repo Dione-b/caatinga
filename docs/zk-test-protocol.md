@@ -12,14 +12,14 @@ Run **3–5 independent agent sessions** with:
 
 ## Record per session
 
-| Field                | Example                                |
-| -------------------- | -------------------------------------- |
-| Agent ID             | agent-1                                |
-| Start time           | 2026-07-06T14:00Z                      |
-| Stuck at step        | `caatinga deploy` — missing `--source` |
-| First error code     | `CAATINGA_SOURCE_ACCOUNT_REQUIRED`     |
-| Time to first deploy | 42 min                                 |
-| Questions asked      | "What is alice?"                       |
+| Field                | Example                            |
+| -------------------- | ---------------------------------- |
+| Agent ID             | agent-1                            |
+| Start time           | 2026-07-06T14:00Z                  |
+| Stuck at step        | `ctg deploy` — missing `--source`  |
+| First error code     | `CAATINGA_SOURCE_ACCOUNT_REQUIRED` |
+| Time to first deploy | 42 min                             |
+| Questions asked      | "What is alice?"                   |
 
 ## Consolidation
 

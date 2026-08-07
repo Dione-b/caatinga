@@ -1,4 +1,5 @@
 import { loadConfig, readArtifacts, resolveNetwork } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 
 export type DeployCoverageLine = {
   name: string;
@@ -25,7 +26,7 @@ export async function evaluateDeployCoverage(options: {
       lines.push({
         name,
         ok: false,
-        fix: `Run: caatinga deploy ${name} --network ${network.name} --source <identity>`,
+        fix: `Run: ${npxCli(`deploy ${name} --network ${network.name} --source <identity>`)}`,
       });
     }
   }

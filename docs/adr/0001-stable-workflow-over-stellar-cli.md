@@ -6,7 +6,7 @@ Accepted 2026-05-11.
 
 ## Context
 
-Caatinga orchestrates the official Stellar CLI and Soroban toolchain. Those tools change flags, output shapes, and defaults across versions. Users adopting Caatinga expect **repeatable commands** (`caatinga build`, `caatinga deploy`, `caatinga generate`, `caatinga invoke`) without rewriting local scripts on every upstream release.
+Caatinga orchestrates the official Stellar CLI and Soroban toolchain. Those tools change flags, output shapes, and defaults across versions. Users adopting Caatinga expect **repeatable commands** (`ctg build`, `ctg deploy`, `ctg generate`, `ctg invoke`) without rewriting local scripts on every upstream release.
 
 If parsing and subprocess details leak into the CLI or userland, the project becomes hard to maintain and breaks the “meta-framework” positioning.
 

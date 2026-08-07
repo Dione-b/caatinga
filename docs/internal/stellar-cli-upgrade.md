@@ -5,7 +5,7 @@
 1. Install the new Stellar CLI locally.
 2. Capture `stellar --version` and update parser fixtures for build, deploy, bindings, and invoke output.
 3. Run `pnpm test`.
-4. Bump `STELLAR_CLI_LAST_TESTED_VERSION` in `packages/core/src/stellar-cli/compat.ts` and refresh the relevant `caatinga doctor` strings.
+4. Bump `STELLAR_CLI_LAST_TESTED_VERSION` in `packages/core/src/stellar-cli/compat.ts` and refresh the relevant `ctg doctor` strings.
 5. Document the new advisory boundary in the CLI README and the version contract doc.
 
 ## CI Rule

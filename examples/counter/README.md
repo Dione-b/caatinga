@@ -3,7 +3,7 @@
 This directory is a placeholder. Generate the counter example from the bundled template:
 
 ```bash
-caatinga init counter --template react-vite-counter
+ctg init counter --template react-vite-counter
 cd counter && npm install
 ```
 

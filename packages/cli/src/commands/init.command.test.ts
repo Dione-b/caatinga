@@ -65,6 +65,27 @@ describe("init command", () => {
     }
   });
 
+  it("should_use_ctg_in_next_steps_when_invoked_as_ctg", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const originalArgv = process.argv;
+
+    try {
+      process.argv = ["node", "/usr/local/bin/ctg", "init", "my-dapp"];
+      await createInitProgram().parseAsync(["node", "ctg", "init", "my-dapp"]);
+
+      const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(output).toContain("npx ctg build    counter");
+      expect(output).toContain("npx ctg deploy   counter --network testnet --source <identity>");
+      expect(output).toContain(
+        "If generation fails, recover with: npx ctg generate --network testnet"
+      );
+      expect(output).not.toContain("npx caatinga build");
+    } finally {
+      process.argv = originalArgv;
+      logSpy.mockRestore();
+    }
+  });
+
   it("falls back to bare commands and still prints the note when no default contract", async () => {
     createProjectMock.mockResolvedValue({
       targetDir: "/abs/my-dapp",

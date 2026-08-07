@@ -14,10 +14,10 @@ For a ready-made Vite + React dApp, use [Template project](./template-project.md
 ## Scaffold
 
 ```bash
-npx caatinga init my-contract-app --minimal
+npx ctg init my-contract-app --minimal
 cd my-contract-app
 npm install
-npx caatinga doctor
+npx ctg doctor
 ```
 
 `--empty` is an alias for `--minimal`.
@@ -36,10 +36,10 @@ npx caatinga doctor
 ## CLI workflow
 
 ```bash
-npx caatinga build app
-npx caatinga deploy app --network testnet --source alice
-npx caatinga read app.version --network testnet
-npx caatinga read app.hello --network testnet
+npx ctg build app
+npx ctg deploy app --network testnet --source alice
+npx ctg read app.version --network testnet
+npx ctg read app.hello --network testnet
 ```
 
 Or use the npm scripts:
@@ -60,9 +60,9 @@ The stub contract ships **read-only** methods:
 - `hello()` — returns Soroban Symbol `hello`
 - `version()` — returns `1`
 
-Use `caatinga read` (or `client.read()` in the browser) for these methods. Use `caatinga invoke` only after you add state-changing methods to `contracts/app/src/lib.rs`.
+Use `ctg read` (or `client.read()` in the browser) for these methods. Use `ctg invoke` only after you add state-changing methods to `contracts/app/src/lib.rs`.
 
-For `caatinga read`, `--source` is optional on the CLI: Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice`.
+For `ctg read`, `--source` is optional on the CLI: Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice`.
 
 Soroban `Symbol` parameters are generated as TypeScript `string` values with host-specific restrictions — see [Soroban types](../soroban-types.md).
 
@@ -79,10 +79,10 @@ Soroban `Symbol` parameters are generated as TypeScript `string` values with hos
    }
    ```
 
-2. **Bindings** — `npx caatinga deploy app` generates bindings automatically, or recover with:
+2. **Bindings** — `npx ctg deploy app` generates bindings automatically, or recover with:
 
    ```bash
-   npx caatinga generate app --network testnet
+   npx ctg generate app --network testnet
    ```
 
 3. **Packages** — install `@caatinga/client`, `@caatinga/core`, and a wallet adapter (`@creit.tech/stellar-wallets-kit` or custom). See [Client](../client.md) and [Wallets](../wallets.md).
@@ -98,4 +98,4 @@ The `react-vite-counter` template is a full reference implementation, not a requ
 ## Next steps
 
 - [Client](../client.md) — browser interop with generated bindings
-- [ZK project](./zk-project.md) — add Groth16 with `caatinga zk init`
+- [ZK project](./zk-project.md) — add Groth16 with `ctg zk init`

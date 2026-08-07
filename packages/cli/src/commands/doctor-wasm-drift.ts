@@ -1,4 +1,5 @@
 import { evaluateWasmDrift } from "@caatinga/core";
+import { npxCli } from "../utils/cli-name.js";
 
 export type WasmDriftLine = {
   contract: string;
@@ -18,6 +19,6 @@ export async function evaluateWasmDriftDiagnostics(options: {
       contract: entry.contract,
       localWasmHash: entry.localWasmHash,
       artifactWasmHash: entry.artifactWasmHash,
-      fix: `Run: npx caatinga deploy ${entry.contract} --if-changed --source <identity>`,
+      fix: `Run: ${npxCli(`deploy ${entry.contract} --if-changed --source <identity>`)}`,
     }));
 }

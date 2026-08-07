@@ -45,7 +45,7 @@ as versões de dependências dos templates com a versão atual do monorepo (`^3.
 | `packages/core/src/scaffold/create-minimal-project.ts` | Adicionado script `test` no `packageJsonSource()` e seção "Tests" no `readmeSource()` |
 | `packages/core/src/scaffold/create-zk-project.ts`      | Adicionado script `test` no `packageJsonSource()` e seção "Tests" no `readmeSource()` |
 
-Projetos gerados via `caatinga init` ou `caatinga zk init` agora incluem automaticamente
+Projetos gerados via `ctg init` ou `ctg zk init` agora incluem automaticamente
 o script `test` e documentação de teste no README.
 
 ### 3. Testes

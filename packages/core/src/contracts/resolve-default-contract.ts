@@ -10,6 +10,6 @@ export function resolveDefaultContractName(config: CaatingaConfig): string {
   throw new CaatingaError(
     "Pass a contract name to build.",
     CaatingaErrorCode.CONTRACT_NOT_FOUND,
-    `Configured contracts: ${names.join(", ")}. Example: caatinga build ${names[0]}`
+    `Configured contracts: ${names.join(", ")}. Example: ctg build ${names[0]}`
   );
 }

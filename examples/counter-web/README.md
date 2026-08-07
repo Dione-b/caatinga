@@ -25,14 +25,14 @@ You need a funded Stellar CLI identity and a deployed counter contract on testne
 From a Caatinga project with a counter contract configured:
 
 ```bash
-caatinga build counter
-caatinga deploy counter --network testnet --source alice
-caatinga generate counter --network testnet
+ctg build counter
+ctg deploy counter --network testnet --source alice
+ctg generate counter --network testnet
 ```
 
 Copy the generated binding and `caatinga.artifacts.json` into this example, or point the app at your project artifacts.
 
-The checked-in `src/contracts/generated/counter.ts` is a small stand-in so the example compiles in this repository. In a real app, replace it with bindings from `caatinga generate`.
+The checked-in `src/contracts/generated/counter.ts` is a small stand-in so the example compiles in this repository. In a real app, replace it with bindings from `ctg generate`.
 
 ## Run app
 

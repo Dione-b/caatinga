@@ -40,14 +40,14 @@ describe("createMinimalProject", () => {
     expect(packageJson.devDependencies["@caatinga/core"]).toBeDefined();
     expect(packageJson.dependencies).toBeUndefined();
     expect(packageJson.scripts.invoke).toBeUndefined();
-    expect(packageJson.scripts["read:hello"]).toContain("caatinga read app.hello");
-    expect(packageJson.scripts["read:version"]).toContain("caatinga read app.version");
-    expect(packageJson.scripts.doctor).toBe("caatinga doctor --network testnet");
+    expect(packageJson.scripts["read:hello"]).toContain("ctg read app.hello");
+    expect(packageJson.scripts["read:version"]).toContain("ctg read app.version");
+    expect(packageJson.scripts.doctor).toBe("ctg doctor --network testnet");
     expect(packageJson.scripts.test).toBe("cargo test --manifest-path contracts/app/Cargo.toml");
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
-    expect(readme).toContain("caatinga read app.hello");
-    expect(readme).not.toContain("caatinga invoke app.hello");
+    expect(readme).toContain("ctg read app.hello");
+    expect(readme).not.toContain("ctg invoke app.hello");
 
     const contract = await readFile(
       path.join(targetDir, "contracts", "app", "src", "lib.rs"),

@@ -59,7 +59,7 @@ Root config:
 | ---------------- | ------------------------ | -------- | -------------- | ------------------------------------------------------------------------------ |
 | `framework`      | `"vite-react"`           | no       | `"vite-react"` | Official templates are Vite + React only; no Next.js or Astro adapter yet.     |
 | `bindingsOutput` | string (min 1)           | yes      | —              | path for generated bindings                                                    |
-| `envFile`        | string (min 1)           | no       | —              | frontend env file written by `caatinga sync-env`                               |
+| `envFile`        | string (min 1)           | no       | —              | frontend env file written by `ctg sync-env`                                    |
 | `env`            | `Record<string, string>` | no       | —              | maps config contract keys (or `rpcUrl` / `networkPassphrase`) to env var names |
 
 `postDeploy` (optional root field):
@@ -87,7 +87,7 @@ Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLe
 
 | Field            | Type    | Notes                                             |
 | ---------------- | ------- | ------------------------------------------------- |
-| `smoke.reads`    | array   | read checks for `caatinga smoke`                  |
+| `smoke.reads`    | array   | read checks for `ctg smoke`                       |
 | `useFreshSymbol` | boolean | inject ephemeral `symbol` arg (UUID) on each read |
 
 Each `smoke.reads` / `postDeployRead` entry uses the same fields as `postDeploy` (`contract`, `method`, `args`, `source`, `expect`, optional `kind`).
@@ -144,7 +144,7 @@ smoke: {
 
 ### Address alias resolution in hook args
 
-Method args in `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga invoke`, and `caatinga read` may use:
+Method args in `postDeploy`, `postDeployRead`, `smoke.reads`, `ctg invoke`, and `ctg read` may use:
 
 - `${source.address}` — resolved from the hook `--source` or CLI `--source`
 - `${contracts.<name>.contractId}` — resolved from artifacts
@@ -152,12 +152,12 @@ Method args in `postDeploy`, `postDeployRead`, `smoke.reads`, `caatinga invoke`,
 
 Prefer `${source.address}` over raw aliases in config. Doctor prints advisory warnings for alias-like hook args. Unresolved aliases throw `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`.
 
-Run hooks with `caatinga wire`, read checks with `caatinga smoke`, or the full `caatinga regression` pipeline — see [CLI](./cli.md).
+Run hooks with `ctg wire`, read checks with `ctg smoke`, or the full `ctg regression` pipeline — see [CLI](./cli.md).
 
 ## Artifacts
 
 Artifacts are network-scoped so `counter` can have different contract IDs on testnet and mainnet.
-Schema **v2** is current; v1 files are still readable. Run `caatinga migrate artifacts` to bump the
+Schema **v2** is current; v1 files are still readable. Run `ctg migrate artifacts` to bump the
 file version without redeploying.
 
 **Multi-frontend:** one `caatinga.artifacts.json` per Caatinga project root. Multiple apps (web,
@@ -223,7 +223,7 @@ After a deploy, each contract is recorded under
 | `wasmPath`           | string (min 1)                                | yes      | —       |                                          |
 | `dependencies`       | `string[]`                                    | no       | `[]`    | resolved dependency contract names       |
 | `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | deploy args after placeholder resolution |
-| `upgradeStrategy`    | `"in-place"` \| `"redeploy"`                  | no       | —       | set by `caatinga upgrade` or redeploy    |
+| `upgradeStrategy`    | `"in-place"` \| `"redeploy"`                  | no       | —       | set by `ctg upgrade` or redeploy         |
 | `history`            | `ContractArtifactHistoryEntry[]`              | no       | —       | prior IDs / WASM hashes (schema v2)      |
 
 `ContractArtifactHistoryEntry` fields (optional on each history row):
@@ -237,7 +237,7 @@ After a deploy, each contract is recorded under
 | `reason`       | `"upgrade"` \| `"rollback"` \| `"force-redeploy"` | why it was superseded                                    |
 | `upgradeType`  | `"in-place"` \| `"new-contract"`                  | in-place = same ID, new WASM; new-contract = redeploy    |
 
-See [Contract upgrade](./tutorials/contract-upgrade.md) for when to use `caatinga upgrade` vs `deploy --upgrade`.
+See [Contract upgrade](./tutorials/contract-upgrade.md) for when to use `ctg upgrade` vs `deploy --upgrade`.
 
 ### Multi-contract dependencies
 
@@ -286,8 +286,8 @@ contracts: {
 
 3. **CLI flag derivation** (`toSnakeCaseFlag` / `formatConstructorCliArgs`): resolved
    args are passed to `stellar contract deploy` after a `--` separator. Each key is
-   converted camelCase → snake_case (insert `_` before each uppercase letter, strip a
-   leading `_`, lowercase). For example `tokenContractId` becomes `--token_contract_id`.
+   converted camelCase → snake*case (insert `*`before each uppercase letter, strip a
+leading`\_`, lowercase). For example `tokenContractId`becomes`--token_contract_id`.
 
 End-to-end: with `deployArgs: { tokenContractId: "${contracts.token.contractId}" }`,
 `token` deploys first, its `contractId` is recorded in `caatinga.artifacts.json`, and the
