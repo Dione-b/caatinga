@@ -3,6 +3,21 @@
 "@caatinga/core": patch
 ---
 
+**Security fix — action required if you have ever run `ctg identity export` or `ctg identity import`.**
+
+Earlier versions wrote a tarball of your Stellar config (including secret keys) to
+`os.tmpdir()` and never deleted it. Upgrading stops new archives being left behind, but it
+cannot remove the ones already there. Check every machine and CI image where those commands
+ran:
+
+```bash
+ls -la /tmp/caatinga-stellar-*.tar.gz
+```
+
+Delete anything it lists — those files contain key material and were created world-readable
+under a typical umask. Rotate the affected keys if the machine is shared or the files may
+have been collected by CI artifact upload or backups.
+
 Fix one secret-handling flaw and three data-integrity bugs:
 
 - `ctg identity export`/`import` no longer leave a tarball of `~/.config/stellar` behind in `os.tmpdir()`. The archive used a predictable `Date.now()` name and default permissions and was never deleted, so exported key material stayed readable by other users of the machine or CI runner. It is now written inside a `0700` `mkdtemp` directory under a random name and removed in a `finally` block, so it never outlives the command even when it fails.
