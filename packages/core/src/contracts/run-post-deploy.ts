@@ -3,7 +3,7 @@ import type { CaatingaConfig, PostDeployHook } from "../config/config.schema.js"
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
-import { isTransientCommandFailure } from "../shell/is-transient-command-failure.js";
+import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { formatNamedCliArgs } from "./format-cli-args.js";
@@ -46,11 +46,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function isTransientHookFailure(error: unknown): boolean {
-  if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.INVOKE_FAILED) {
-    return false;
-  }
-
-  return isTransientCommandFailure(`${error.message}\n${error.hint ?? ""}`);
+  return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
 }
 
 function collectHooks(config: CaatingaConfig): PostDeployHook[] {
