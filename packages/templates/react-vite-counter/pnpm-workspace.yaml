@@ -2,6 +2,12 @@
 # scripts by default; vite depends on esbuild's, so allow it.
 # Install-time overrides block unused wallet SDK branches; vite.config.ts aliases
 # provide a second layer so yarn/bun bundles stay clean too.
+#
+# `packages` must be present even though this is a single-package project: pnpm 9 treats
+# any directory holding this file as a workspace root and aborts with "packages field
+# missing or empty" on install and exec. An empty list keeps pnpm 10+/11 behaviour
+# unchanged while staying valid for pnpm 9.
+packages: []
 allowBuilds:
   esbuild: true
 

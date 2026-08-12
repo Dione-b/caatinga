@@ -54,4 +54,30 @@ describe("official template manifests", () => {
       expect(() => assertOfficialTemplateManifest(manifest)).not.toThrow();
     }
   });
+
+  it("should_declare_a_packages_field_in_every_template_pnpm_workspace_file", async () => {
+    // pnpm 9 treats any directory holding pnpm-workspace.yaml as a workspace root and
+    // aborts install *and* exec with "packages field missing or empty". Both templates
+    // shipped a settings-only file, which broke `pnpm install` in scaffolded projects and
+    // kept testnet-deploy-regression red for three weeks. See #124.
+    const templateNames = await listOfficialTemplateNames();
+    expect(templateNames.length).toBeGreaterThan(0);
+
+    let checked = 0;
+    for (const templateName of templateNames) {
+      const workspacePath = path.join(officialTemplatesDir, templateName, "pnpm-workspace.yaml");
+      const raw = await readFile(workspacePath, "utf8").catch(() => null);
+      if (raw === null) {
+        continue;
+      }
+
+      checked += 1;
+      expect(raw, `${templateName}/pnpm-workspace.yaml has no packages field`).toMatch(
+        /^packages:/m
+      );
+    }
+
+    // Guards the guard: if the files are ever renamed, this test must not silently pass.
+    expect(checked).toBeGreaterThan(0);
+  });
 });
