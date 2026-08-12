@@ -2,6 +2,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type { Command } from "commander";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createProgram } from "./program.js";
 import chalk from "chalk";
@@ -148,6 +149,73 @@ describe("createProgram", () => {
     expect(helpInformation).toContain("Status & Diagnostics:");
     expect(helpInformation).toContain("Zero-Knowledge (ZK) Proofs:");
     expect(helpInformation).toContain("Automation & CI:");
+  });
+
+  describe("subcommand help", () => {
+    const collectCommandPaths = (command: Command, prefix: string[] = []): string[][] =>
+      command.commands.flatMap((subCommand) => {
+        const commandPath = [...prefix, subCommand.name()];
+        return [commandPath, ...collectCommandPaths(subCommand, commandPath)];
+      });
+
+    const commandPaths = collectCommandPaths(createProgram());
+
+    it("registers subcommands to exercise help for", () => {
+      expect(commandPaths.length).toBeGreaterThan(20);
+      expect(commandPaths).toEqual(expect.arrayContaining([["init"], ["read"], ["zk", "init"]]));
+    });
+
+    it.each(commandPaths.map((commandPath) => [commandPath.join(" "), commandPath]))(
+      "renders help for '%s' without recursing",
+      (label, commandPath) => {
+        const program = createProgram();
+        const command = commandPath.reduce<Command>((parent, name) => {
+          const match = parent.commands.find((candidate) => candidate.name() === name);
+          expect(match, `missing command: ${label}`).toBeDefined();
+          return match as Command;
+        }, program);
+
+        const helpInformation = command.helpInformation();
+
+        expect(helpInformation).toContain("Usage:");
+        expect(helpInformation).toContain(commandPath[commandPath.length - 1]);
+        expect(helpInformation).not.toContain("Commands (by domain):");
+      }
+    );
+
+    // `dev` is a hidden pre-v1 stub that opts out of `--help` via `helpOption(false)`.
+    const helpFlagPaths = commandPaths.filter((commandPath) => commandPath[0] !== "dev");
+
+    it.each(helpFlagPaths.map((commandPath) => [commandPath.join(" "), commandPath]))(
+      "'%s --help' exits cleanly instead of throwing CAATINGA_UNEXPECTED_ERROR",
+      async (_label, commandPath) => {
+        const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+        // `exitOverride` is per-command, so opt every subcommand out of process.exit.
+        const exitOverrideDeep = (command: Command): Command => {
+          command.exitOverride();
+          command.commands.forEach(exitOverrideDeep);
+          return command;
+        };
+
+        try {
+          await expect(
+            exitOverrideDeep(createProgram()).parseAsync([
+              "node",
+              "caatinga",
+              ...commandPath,
+              "--help",
+            ])
+          ).rejects.toMatchObject({ code: "commander.helpDisplayed" });
+
+          const output = writeSpy.mock.calls.map(([chunk]) => String(chunk)).join("");
+          expect(output).toContain("Usage:");
+          expect(output).not.toContain("Maximum call stack size exceeded");
+        } finally {
+          writeSpy.mockRestore();
+        }
+      }
+    );
   });
 
   it("prints CLI version via version command", async () => {
