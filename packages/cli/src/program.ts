@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Help } from "commander";
 import { registerBuildCommand } from "./commands/build.command.js";
 import { registerDeployCommand } from "./commands/deploy.command.js";
 import { registerUpgradeCommand } from "./commands/upgrade.command.js";
@@ -37,7 +37,10 @@ export function createProgram(): Command {
     .configureHelp({
       formatHelp(cmd, helper) {
         if (cmd.parent !== null) {
-          return helper.formatHelp(cmd, helper);
+          // `configureHelp` replaces `formatHelp` on the helper itself, so calling
+          // `helper.formatHelp` here would re-enter this override and blow the stack.
+          // Reach for Commander's built-in formatter instead.
+          return Help.prototype.formatHelp.call(helper, cmd, helper);
         }
 
         const categories: Record<string, string[]> = {
