@@ -48,6 +48,8 @@ describe("createMinimalProject", () => {
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");
     expect(readme).toContain("ctg read app.hello");
     expect(readme).not.toContain("ctg invoke app.hello");
+    // #104: the scaffold never mentioned that generate needs frontend.bindingsOutput.
+    expect(readme).toContain("bindingsOutput");
 
     const contract = await readFile(
       path.join(targetDir, "contracts", "app", "src", "lib.rs"),

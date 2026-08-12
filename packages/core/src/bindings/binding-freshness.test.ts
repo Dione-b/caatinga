@@ -184,7 +184,10 @@ describe("evaluateBindingFreshness", () => {
       status: "unknown",
       outputDir: "",
       marker: null,
-      reason: "frontend bindings are not configured"
+      reason: "frontend bindings are not configured",
+      // Lets callers point at the config fix rather than suggesting `generate`, which
+      // cannot run in this state (#104).
+      frontendUnconfigured: true
     });
   });
 

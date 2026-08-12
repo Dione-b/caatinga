@@ -1,5 +1,11 @@
 # pnpm-only file (npm / yarn / bun ignore it). pnpm 10.26+/11.x block lifecycle
 # scripts by default; vite depends on esbuild's, so allow it.
+#
+# `packages` must be present even though this is a single-package project: pnpm 9 treats
+# any directory holding this file as a workspace root and aborts with "packages field
+# missing or empty" on install and exec. An empty list keeps pnpm 10+/11 behaviour
+# unchanged while staying valid for pnpm 9.
+packages: []
 allowBuilds:
   esbuild: true
 

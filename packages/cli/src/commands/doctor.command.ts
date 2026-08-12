@@ -55,7 +55,12 @@ function printBindingCoverageLine(line: BindingCoverageLine): void {
   }
 
   logger.info(`✗ ${line.name} — bindings ${line.status}${line.reason ? ` (${line.reason})` : ""}`);
-  if (line.fix) logger.info(`  ${line.fix}`);
+  // The fix can be a multi-line config snippet, so indent every line, not just the first.
+  if (line.fix) {
+    for (const fixLine of line.fix.split("\n")) {
+      logger.info(fixLine ? `  ${fixLine}` : "");
+    }
+  }
 }
 
 /** Advisory only: stale bindings never flip doctor to blocked unless --strict-bindings. */

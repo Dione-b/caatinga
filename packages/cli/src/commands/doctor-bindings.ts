@@ -1,5 +1,6 @@
 import {
   evaluateBindingsFreshness,
+  frontendBindingsConfigHint,
   loadConfig,
   readArtifacts,
   resolveNetwork,
@@ -13,6 +14,22 @@ export type BindingCoverageLine = {
   reason?: string;
   fix?: string;
 };
+
+/**
+ * Suggesting `generate` when no frontend is configured sends the user to a command that
+ * fails with CAATINGA_INVALID_CONFIG; point at the config fix instead.
+ */
+function bindingFix(
+  frontendUnconfigured: boolean,
+  contractName: string,
+  networkName: string
+): { fix?: string } {
+  if (frontendUnconfigured) {
+    return { fix: frontendBindingsConfigHint() };
+  }
+
+  return { fix: `Run: ${npxCli(`generate ${contractName} --network ${networkName}`)}` };
+}
 
 export async function evaluateBindingCoverage(options: {
   networkName: string;
@@ -36,7 +53,7 @@ export async function evaluateBindingCoverage(options: {
     reason: entry.reason,
     ...(entry.status === "fresh"
       ? {}
-      : { fix: `Run: ${npxCli(`generate ${entry.contractName} --network ${network.name}`)}` }),
+      : bindingFix(entry.frontendUnconfigured === true, entry.contractName, network.name)),
   }));
 
   return { lines, allFresh: lines.every((line) => line.status === "fresh") };

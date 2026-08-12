@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
+import { frontendBindingsConfigSnippet } from "../frontend/bindings-config-hint.js";
 import { CAATINGA_CORE_VERSION } from "../version.js";
 
 export type CreateMinimalProjectOptions = {
@@ -107,6 +108,17 @@ cargo test --manifest-path contracts/app/Cargo.toml
 - \`version()\` — read-only; returns \`1\`
 
 Use \`ctg read\` for read-only methods. Use \`ctg invoke\` only after you add state-changing methods to the contract.
+
+## TypeScript bindings (optional)
+
+This scaffold has no frontend, so \`ctg generate\` is not configured. To generate a typed
+client for the contract, add a \`frontend\` section to \`caatinga.config.ts\`:
+
+\`\`\`ts
+${frontendBindingsConfigSnippet()}
+\`\`\`
+
+Then run \`npx ctg generate app --network testnet\`.
 
 Soroban \`Symbol\` parameters are generated as TypeScript \`string\` values with host-specific restrictions — see the Caatinga docs on [Soroban types](https://github.com/caatinga/caatinga/blob/main/docs/soroban-types.md).
 

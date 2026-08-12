@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { frontendBindingsConfigSnippet } from "../frontend/bindings-config-hint.js";
 
 const runCommand = vi.hoisted(() => vi.fn());
 
@@ -237,6 +238,8 @@ describe("generateBindings", () => {
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.INVALID_CONFIG,
       message: "Frontend bindings are not configured.",
+      // Naming the field was not enough (#104) — the hint must show the shape to paste.
+      hint: expect.stringContaining(frontendBindingsConfigSnippet()),
     });
   });
 
