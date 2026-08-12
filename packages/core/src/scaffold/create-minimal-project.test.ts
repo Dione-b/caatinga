@@ -61,6 +61,27 @@ describe("createMinimalProject", () => {
     expect(Object.keys(artifacts.networks)).toEqual(["testnet"]);
   });
 
+  it("ships a Cargo.lock so cargo test resolves the same dependency graph over time", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-minimal-project-"));
+    const targetDir = path.join(tmpDir, "my-app");
+
+    await createMinimalProject({ projectName: "my-app", targetDir });
+
+    const lockPath = path.join(targetDir, "contracts", "app", "Cargo.lock");
+    await expect(access(lockPath)).resolves.toBeUndefined();
+
+    const lock = await readFile(lockPath, "utf8");
+
+    // soroban-env-host 22.1.3 accepts ed25519-dalek 3.x, but only compiles against 2.x.
+    // Resolving both versions breaks `cargo test` in a freshly scaffolded project.
+    const dalekVersions = [...lock.matchAll(/name = "ed25519-dalek"\nversion = "([^"]+)"/g)].map(
+      (match) => match[1]
+    );
+    expect(dalekVersions).toEqual(["2.2.0"]);
+
+    expect(lock).toContain('name = "soroban-sdk"');
+  });
+
   it("fails instead of overwriting existing project files by default", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-minimal-project-"));
     const targetDir = path.join(tmpDir, "my-app");
