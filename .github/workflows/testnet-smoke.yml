@@ -35,8 +35,30 @@ jobs:
         with:
           targets: wasm32v1-none
 
+      # Same CDN 503 flake that broke ci.yml — see issue #119.
+      - name: Restore Stellar CLI from cache
+        id: stellar-cli-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/stellar
+          key: stellar-cli-27.0.0-${{ runner.os }}-${{ runner.arch }}
+
       - name: Install Stellar CLI
+        if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
         uses: stellar/stellar-cli@v27.0.0
+
+      # The install action puts ~/.local/bin on PATH itself; on a cache hit it is
+      # skipped, so add the directory here too.
+      - name: Add Stellar CLI to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Also guards the cache: a restored binary of the wrong version fails here
+      # rather than silently smoke-testing against something else.
+      - name: Verify Stellar CLI version
+        run: |
+          version="$(stellar --version)"
+          echo "$version"
+          [[ "$version" == *"27.0.0"* ]]
 
       - name: Restore Stellar CLI config
         env:
