@@ -124,7 +124,7 @@ export function registerDeployCommand(program: Command): void {
             verifyDeps: options.verifyDeps === true,
             onTransientDeployRetry: ({ attempt, maxAttempts, delayMs }) => {
               logger.warn(
-                `Deploy hit a transient testnet error (attempt ${attempt}/${maxAttempts}). Retrying in ${Math.round(delayMs / 1000)}s...`
+                `Deploy hit a transient RPC error (attempt ${attempt}/${maxAttempts}). Retrying in ${Math.round(delayMs / 1000)}s...`
               );
             },
           });
