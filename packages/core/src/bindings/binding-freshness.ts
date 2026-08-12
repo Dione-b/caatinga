@@ -12,6 +12,12 @@ export type BindingFreshness = {
   outputDir: string;
   marker: BindingMarker | null;
   reason?: string;
+  /**
+   * The project has no `frontend.bindingsOutput`, so `ctg generate` cannot run at all.
+   * Callers should point at the config fix instead of suggesting `generate`, which would
+   * fail with CAATINGA_INVALID_CONFIG.
+   */
+  frontendUnconfigured?: boolean;
 };
 
 export type EvaluateBindingFreshnessOptions = {
@@ -41,7 +47,8 @@ export async function evaluateBindingFreshness(
       status: "unknown",
       outputDir: "",
       marker: null,
-      reason: "frontend bindings are not configured"
+      reason: "frontend bindings are not configured",
+      frontendUnconfigured: true
     };
   }
 

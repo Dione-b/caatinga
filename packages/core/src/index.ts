@@ -157,6 +157,11 @@ export {
   type EnvDriftReport,
 } from "./frontend/evaluate-env-drift.js";
 export {
+  DEFAULT_BINDINGS_OUTPUT,
+  frontendBindingsConfigHint,
+  frontendBindingsConfigSnippet,
+} from "./frontend/bindings-config-hint.js";
+export {
   verifyExpect,
   assertExpect,
   parseExpectSpec,
