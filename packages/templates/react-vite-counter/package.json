@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@caatinga/cli": "^3.9.1",
+    "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.7.2"
