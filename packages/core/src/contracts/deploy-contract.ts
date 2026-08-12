@@ -1,4 +1,5 @@
 import path from "node:path";
+import { withArtifactsLock } from "../artifacts/artifacts-lock.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
@@ -233,28 +234,31 @@ export async function deployContract(options: DeployContractOptions) {
     cwd,
   });
 
-  const nextArtifacts = updateArtifact(
-    artifactsBefore,
-    network.name,
-    contract.name,
-    {
-      contractId,
-      wasmHash,
-      deployedAt: new Date().toISOString(),
-      sourcePath: contract.config.path,
-      wasmPath: contract.config.wasm,
-      dependencies,
-      resolvedDeployArgs,
-      metadata,
-    },
-    {
-      dependencyGraph,
-      supersedeReason,
-      upgradeType: supersedeReason ? "new-contract" : undefined,
-      upgradeStrategy: supersedeReason ? "redeploy" : undefined,
-    }
-  );
-  const artifactsPath = await writeArtifacts(nextArtifacts, cwd);
+  const artifactsPath = await withArtifactsLock(cwd, async () => {
+    const latestArtifacts = await readArtifacts(cwd);
+    const nextArtifacts = updateArtifact(
+      latestArtifacts,
+      network.name,
+      contract.name,
+      {
+        contractId,
+        wasmHash,
+        deployedAt: new Date().toISOString(),
+        sourcePath: contract.config.path,
+        wasmPath: contract.config.wasm,
+        dependencies,
+        resolvedDeployArgs,
+        metadata,
+      },
+      {
+        dependencyGraph,
+        supersedeReason,
+        upgradeType: supersedeReason ? "new-contract" : undefined,
+        upgradeStrategy: supersedeReason ? "redeploy" : undefined,
+      }
+    );
+    return writeArtifacts(nextArtifacts, cwd);
+  });
 
   return {
     contract: contractWithWasm,

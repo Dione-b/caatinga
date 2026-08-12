@@ -15,7 +15,7 @@ vi.mock("../shell/run-command.js", () => ({
 
 import { runPostDeployHooks } from "./run-post-deploy.js";
 
-const CONTRACT_ID = `C${"1".repeat(55)}`;
+const CONTRACT_ID = `C${"5".repeat(55)}`;
 
 const config: CaatingaConfig = {
   project: "app",

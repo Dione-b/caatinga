@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
@@ -24,6 +24,60 @@ function formatEnvValue(value: string): string {
     return `"${value.replaceAll('"', '\\"')}"`;
   }
   return value;
+}
+
+const ENV_ASSIGNMENT_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
+
+async function readExistingEnv(envFile: string): Promise<string | undefined> {
+  try {
+    return await readFile(envFile, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Rewrites only the keys Caatinga manages, leaving every other line (unrelated
+ * variables, comments, blank lines) byte-identical. Overwriting the whole file
+ * would silently destroy user-owned secrets living in the same .env.
+ */
+function mergeEnvContents(
+  existing: string | undefined,
+  entries: Array<{ key: string; value: string }>
+): string {
+  const managed = new Map(
+    entries.map(({ key, value }) => [key, `${key}=${formatEnvValue(value)}`])
+  );
+
+  if (existing === undefined) {
+    return `${[...managed.values()].join("\n")}\n`;
+  }
+
+  const written = new Set<string>();
+  const hadTrailingNewline = existing.endsWith("\n");
+  const lines = (hadTrailingNewline ? existing.slice(0, -1) : existing).split("\n");
+
+  const merged = lines.map((line) => {
+    const key = line.match(ENV_ASSIGNMENT_PATTERN)?.[1];
+    if (key === undefined || !managed.has(key) || written.has(key)) {
+      return line;
+    }
+    written.add(key);
+    return managed.get(key) as string;
+  });
+
+  const appended = entries
+    .filter(({ key }) => !written.has(key))
+    .map(({ key }) => managed.get(key) as string);
+
+  if (appended.length > 0 && merged.length > 0 && merged[merged.length - 1]?.trim() !== "") {
+    merged.push("");
+  }
+
+  return `${[...merged, ...appended].join("\n")}\n`;
 }
 
 export async function syncFrontendEnv(
@@ -89,7 +143,7 @@ export async function syncFrontendEnv(
   const envFile = path.resolve(cwd, frontend.envFile);
   await mkdir(path.dirname(envFile), { recursive: true });
 
-  const body = `${entries.map(({ key, value }) => `${key}=${formatEnvValue(value)}`).join("\n")}\n`;
+  const body = mergeEnvContents(await readExistingEnv(envFile), entries);
   await writeFile(envFile, body, "utf8");
 
   return { envFile, entries };

@@ -1,4 +1,4 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -176,6 +176,63 @@ describe("syncFrontendEnv", () => {
     await expect(syncFrontendEnv({ config: badConfig, cwd })).rejects.toMatchObject({
       code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
     });
+  });
+
+  it("preserves unrelated variables and comments already in the env file", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-sync-env-"));
+    tempDirs.push(cwd);
+
+    await writeArtifacts(
+      {
+        project: "stellar-album",
+        version: 1,
+        networks: {
+          testnet: {
+            contracts: {
+              coin: {
+                contractId: "CNEWCONTRACTID",
+                wasmHash: "hash",
+                deployedAt: "2026-06-25T00:00:00.000Z",
+                sourcePath: "./contracts/coin",
+                wasmPath: "./target/wasm32v1-none/release/coin.wasm",
+                dependencies: [],
+                resolvedDeployArgs: {},
+              },
+            },
+            dependencyGraph: { coin: [] },
+          },
+        },
+      },
+      cwd
+    );
+
+    const envFile = path.join(cwd, "frontend", ".env.local");
+    await mkdir(path.dirname(envFile), { recursive: true });
+    await writeFile(
+      envFile,
+      [
+        "# local overrides",
+        "STRIPE_SECRET_KEY=sk_test_do_not_lose_me",
+        "VITE_COIN=COLDCONTRACTID",
+        "",
+        "VITE_FEATURE_FLAG=true",
+        "",
+      ].join("\n"),
+      "utf8"
+    );
+
+    await syncFrontendEnv({ config, cwd });
+    const contents = await readFile(envFile, "utf8");
+
+    expect(contents).toContain("# local overrides");
+    expect(contents).toContain("STRIPE_SECRET_KEY=sk_test_do_not_lose_me");
+    expect(contents).toContain("VITE_FEATURE_FLAG=true");
+
+    expect(contents).toContain("VITE_COIN=CNEWCONTRACTID");
+    expect(contents).not.toContain("COLDCONTRACTID");
+
+    expect(contents).toContain("VITE_RPC_URL=https://soroban-testnet.stellar.org");
+    expect(contents).toContain('VITE_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"');
   });
 
   it("fails when frontend env sync is not configured", async () => {

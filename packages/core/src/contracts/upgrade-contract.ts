@@ -1,3 +1,4 @@
+import { withArtifactsLock } from "../artifacts/artifacts-lock.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
@@ -174,29 +175,32 @@ export async function upgradeContractInPlace(
   });
 
   const deployedAt = new Date().toISOString();
-  const nextArtifacts = updateArtifact(
-    artifactsBefore,
-    network.name,
-    contract.name,
-    {
-      contractId: existing.contractId,
-      wasmHash: upload.wasmHash,
-      deployedAt,
-      sourcePath: contract.sourcePath,
-      wasmPath: contract.config.wasm,
-      dependencies: existing.dependencies ?? contract.config.dependsOn ?? [],
-      resolvedDeployArgs: existing.resolvedDeployArgs ?? {},
-      upgradeStrategy: "in-place",
-      metadata,
-    },
-    {
-      supersedeReason: "upgrade",
-      upgradeType: "in-place",
-      upgradeStrategy: "in-place",
-    }
-  );
+  const artifactPath = await withArtifactsLock(cwd, async () => {
+    const latestArtifacts = await readArtifacts(cwd);
+    const nextArtifacts = updateArtifact(
+      latestArtifacts,
+      network.name,
+      contract.name,
+      {
+        contractId: existing.contractId,
+        wasmHash: upload.wasmHash,
+        deployedAt,
+        sourcePath: contract.sourcePath,
+        wasmPath: contract.config.wasm,
+        dependencies: existing.dependencies ?? contract.config.dependsOn ?? [],
+        resolvedDeployArgs: existing.resolvedDeployArgs ?? {},
+        upgradeStrategy: "in-place",
+        metadata,
+      },
+      {
+        supersedeReason: "upgrade",
+        upgradeType: "in-place",
+        upgradeStrategy: "in-place",
+      }
+    );
 
-  const artifactPath = await writeArtifacts(nextArtifacts, cwd);
+    return writeArtifacts(nextArtifacts, cwd);
+  });
 
   return {
     contractName: contract.name,

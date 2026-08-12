@@ -14,7 +14,8 @@ vi.mock("../shell/run-command.js", () => ({
 
 import { deployContract } from "./deploy-contract.js";
 
-const CONTRACT_ID = `C${"1".repeat(55)}`;
+// Strkeys are base32 (A-Z2-7), so "1" would never appear in a real contract ID.
+const CONTRACT_ID = `C${"5".repeat(55)}`;
 
 const baseConfig: CaatingaConfig = {
   project: "app",
