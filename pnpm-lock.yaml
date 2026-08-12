@@ -105,7 +105,7 @@ importers:
         specifier: ^3.9.1
         version: link:../core
       '@caatinga/zk':
-        specifier: ^3.9.0
+        specifier: ^3.9.1
         version: link:../zk
       chalk:
         specifier: ^5.4.1
@@ -1870,6 +1870,7 @@ packages:
   '@stellar/stellar-base@14.0.1':
     resolution: {integrity: sha512-mI6Kjh9hGWDA1APawQTtCbR7702dNT/8Te1uuRFPqqdoAKBk3WpXOQI3ZSZO+5olW7BSHpmVG5KBPZpIpQxIvw==}
     engines: {node: '>=20.0.0'}
+    deprecated: This package is now rolled into @stellar/stellar-sdk. Please use @stellar/stellar-sdk to continue receiving updates and support.
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
