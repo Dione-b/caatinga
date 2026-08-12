@@ -28,11 +28,32 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # The install action downloads a tarball from the GitHub releases CDN, which
+      # intermittently answers 503 and fails the job before any test runs. Caching the
+      # binary keeps the network off the common path. See issue #119.
+      - name: Restore Stellar CLI from cache
+        id: stellar-cli-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/stellar
+          key: stellar-cli-27.0.0-${{ runner.os }}-${{ runner.arch }}
+
       - name: Install Stellar CLI
+        if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
         uses: stellar/stellar-cli@v27.0.0
 
+      # The install action puts ~/.local/bin on PATH itself; on a cache hit it is
+      # skipped, so add the directory here too.
+      - name: Add Stellar CLI to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Also guards the cache: a restored binary of the wrong version fails here
+      # rather than silently testing against something else.
       - name: Verify Stellar CLI version
-        run: stellar --version
+        run: |
+          version="$(stellar --version)"
+          echo "$version"
+          [[ "$version" == *"27.0.0"* ]]
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -75,13 +96,30 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # See the comment on the cache step in the `ci` job above (issue #119).
+      - name: Restore Stellar CLI from cache
+        id: stellar-cli-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/stellar
+          key: stellar-cli-${{ matrix.stellar-version }}-${{ runner.os }}-${{ runner.arch }}
+
       - name: Install Stellar CLI ${{ matrix.stellar-version }}
+        if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
         uses: stellar/stellar-cli@v27.0.0
         with:
           version: ${{ matrix.stellar-version }}
 
+      - name: Add Stellar CLI to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Also guards the cache: a restored binary of the wrong version fails here
+      # rather than silently testing against something else.
       - name: Verify Stellar CLI version
-        run: stellar --version
+        run: |
+          version="$(stellar --version)"
+          echo "$version"
+          [[ "$version" == *"${{ matrix.stellar-version }}"* ]]
 
       - name: Install
         run: pnpm install --frozen-lockfile
