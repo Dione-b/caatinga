@@ -291,6 +291,54 @@ describe("deployContract", () => {
     expect(deployAttempts).toBe(2);
   });
 
+  it("should_retry_when_rpc_has_not_indexed_the_just_uploaded_wasm", async () => {
+    let deployAttempts = 0;
+    const retries: number[] = [];
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        deployAttempts += 1;
+        if (deployAttempts === 1) {
+          throw new CaatingaError(
+            "Command failed: stellar contract deploy",
+            CaatingaErrorCode.DEPLOY_FAILED,
+            [
+              "error: transaction simulation failed: HostError: Error(Storage, MissingValue)",
+              '   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:["Wasm does not exist", Bytes(c191aaf8fe32345976438e7965194a39db34301176ee44a8bcea4399bb93c513)]',
+            ].join("\n")
+          );
+        }
+        return {
+          stdout: `deployed ${CONTRACT_ID}\n`,
+          stderr: "",
+          all: `deployed ${CONTRACT_ID}\n`,
+        };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-wasm-race-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const result = await deployContract({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+      deployRetryDelaysMs: [0],
+      onTransientDeployRetry: ({ attempt }) => {
+        retries.push(attempt);
+      },
+    });
+
+    expect(result.contractId).toBe(CONTRACT_ID);
+    expect(deployAttempts).toBe(2);
+    expect(retries).toEqual([1]);
+  });
+
   it("should_not_retry_non_transient_deploy_failures", async () => {
     let deployAttempts = 0;
     runCommand.mockImplementation(async (command: string, args: string[]) => {
