@@ -1,5 +1,6 @@
 import { z } from "zod";
 import semver from "semver";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { CAATINGA_CORE_VERSION } from "../version.js";
 
 export const CURRENT_TEMPLATE_VERSION = 1;
@@ -35,7 +36,11 @@ export type TemplateCompatibilityIssue =
 export function defaultCompatibleCoreRange(coreVersion = CAATINGA_CORE_VERSION): string {
   const version = semver.valid(semver.coerce(coreVersion));
   if (!version) {
-    throw new Error(`Invalid core version: ${coreVersion}`);
+    throw new CaatingaError(
+      `Invalid core version: ${coreVersion}`,
+      CaatingaErrorCode.INVALID_TEMPLATE_MANIFEST,
+      "Use a semver-compatible core version such as 1.2.3."
+    );
   }
 
   return `^${version}`;
@@ -90,13 +95,19 @@ export function formatTemplateCompatibilityHint(issue: TemplateCompatibilityIssu
 export function assertOfficialTemplateManifest(manifest: TemplateManifest): void {
   const expectedRange = defaultCompatibleCoreRange();
   if (manifest.caatinga.compatibleCore !== expectedRange) {
-    throw new Error(
-      `Official template compatibleCore must be ${expectedRange}, found ${manifest.caatinga.compatibleCore}.`
+    throw new CaatingaError(
+      `Official template compatibleCore must be ${expectedRange}, found ${manifest.caatinga.compatibleCore}.`,
+      CaatingaErrorCode.INVALID_TEMPLATE_MANIFEST,
+      `Set caatinga.compatibleCore to ${expectedRange} in the template manifest.`
     );
   }
 
   const issue = getTemplateCompatibilityIssue(manifest);
   if (issue) {
-    throw new Error(formatTemplateCompatibilityMessage(issue));
+    throw new CaatingaError(
+      formatTemplateCompatibilityMessage(issue),
+      CaatingaErrorCode.TEMPLATE_INCOMPATIBLE,
+      formatTemplateCompatibilityHint(issue)
+    );
   }
 }
