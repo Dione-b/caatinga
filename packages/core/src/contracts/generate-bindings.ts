@@ -4,6 +4,7 @@ import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { writeBindingMarker, type BindingMarker } from "../bindings/binding-marker.js";
 import { patchGeneratedBindingPackage } from "../bindings/patch-generated-binding-package.js";
 import { ensureBufferDependency } from "../frontend/ensure-buffer-dependency.js";
+import { frontendBindingsConfigHint } from "../frontend/bindings-config-hint.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
@@ -45,7 +46,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     throw new CaatingaError(
       "Frontend bindings are not configured.",
       CaatingaErrorCode.INVALID_CONFIG,
-      "Add a frontend.bindingsOutput entry to caatinga.config.ts before running ctg generate."
+      frontendBindingsConfigHint()
     );
   }
 

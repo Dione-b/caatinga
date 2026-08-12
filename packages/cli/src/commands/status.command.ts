@@ -1,5 +1,10 @@
 import { Command } from "commander";
-import { collectProjectStatus, loadConfig, type ContractStatusEntry } from "@caatinga/core";
+import {
+  collectProjectStatus,
+  frontendBindingsConfigHint,
+  loadConfig,
+  type ContractStatusEntry,
+} from "@caatinga/core";
 import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -62,10 +67,22 @@ export function registerStatusCommand(program: Command): void {
               (entry) => entry.deployed && entry.bindings.status !== "fresh"
             );
             for (const entry of needsAttention) {
-              logger.warn(
+              const summary =
                 `Bindings ${entry.bindings.status} for ${entry.name}` +
-                  `${entry.bindings.reason ? ` (${entry.bindings.reason})` : ""}` +
-                  ` — run: ${npxCli(`generate ${entry.name} --network ${network.network}`)}`
+                `${entry.bindings.reason ? ` (${entry.bindings.reason})` : ""}`;
+
+              // `generate` cannot run without frontend.bindingsOutput, so recommending it
+              // here would send the user to a guaranteed CAATINGA_INVALID_CONFIG.
+              if (entry.bindings.frontendUnconfigured) {
+                logger.warn(summary);
+                for (const hintLine of frontendBindingsConfigHint().split("\n")) {
+                  logger.warn(hintLine ? `  ${hintLine}` : "");
+                }
+                continue;
+              }
+
+              logger.warn(
+                `${summary} — run: ${npxCli(`generate ${entry.name} --network ${network.network}`)}`
               );
             }
           }

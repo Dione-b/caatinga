@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CaatingaConfig } from "@caatinga/core";
+import { frontendBindingsConfigSnippet, type CaatingaConfig } from "@caatinga/core";
 import { evaluateBindingCoverage } from "./doctor-bindings.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
@@ -81,6 +81,28 @@ describe("evaluateBindingCoverage", () => {
       status: "missing",
       fix: "Run: npx caatinga generate token --network testnet",
     });
+  });
+
+  it("points at the config fix instead of generate when no frontend is configured", async () => {
+    evaluateBindingsFreshnessMock.mockResolvedValue([
+      {
+        contractName: "counter",
+        status: "unknown",
+        outputDir: "",
+        marker: null,
+        reason: "frontend bindings are not configured",
+        frontendUnconfigured: true,
+      },
+    ]);
+
+    const coverage = await evaluateBindingCoverage({ networkName: "testnet" });
+
+    const fix = coverage.lines[0].fix ?? "";
+    // #104: suggesting `generate` here sent the user to a guaranteed CAATINGA_INVALID_CONFIG.
+    // Matched as a command — the default output path contains the word "generated".
+    expect(fix).not.toMatch(/(run|ctg|caatinga)\s+generate/i);
+    expect(fix).toContain("caatinga.config.ts");
+    expect(fix).toContain(frontendBindingsConfigSnippet());
   });
 
   it("returns no lines when nothing is deployed", async () => {
