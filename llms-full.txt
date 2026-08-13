@@ -9,11 +9,11 @@ Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. 
 
 | Item              | Value                                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` → **3.6.1**; `next` → **3.8.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
-| Status            | Alpha (pre-1.0). The `3.x` major does **not** imply API stability.                                      |
+| npm dist-tag      | `latest` → **3.9.2**; `next` → **3.9.1** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) — confirm with `npm view @caatinga/cli dist-tags` |
+| Status            | v1.0 stable contract on npm major `3.x`. Tier 1 breaking changes require a major bump; `3.x` holds until an explicit `4.0.0`. See `docs/public-api.md`. ZK commands are experimental. |
 | Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                                            |
 | No global install | `npx ctg <command>` (`caatinga` is a legacy alias)                                                                 |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.6.1`), not a floating tag                                   |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.2`), not a floating tag                                   |
 | Fresh machine     | Node 22+, then `npx ctg doctor`. Install Rust + Stellar CLI manually.                               |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                            |
 

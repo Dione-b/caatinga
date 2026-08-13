@@ -85,9 +85,16 @@ The only officially supported frontend is **Vite + React**.
 
 ### 10. Is Caatinga stable yet?
 
-Not yet.
+Yes, for the v1.0 stable contract.
 
-Although the packages use versions from the **3.x** series, the project remains in **Alpha (pre-1.0)**. This means the API may still undergo breaking changes before version 1.0.
+The Tier 1 surface — the `init → build → deploy → generate → invoke` flow, the documented CLI commands and flags, exit codes, `CAATINGA_*` error codes, and the `@caatinga/client` root exports — is frozen under the [Public API manifest](./public-api.md). Breaking changes to Tier 1 require a major bump; npm major stays on `3.x` until an explicit `4.0.0`.
+
+Two caveats worth knowing:
+
+- **ZK commands (`ctg zk *`) are experimental** and outside the stable contract — see [scope.md](./scope.md).
+- **One documented exception:** `ctg setup` was removed in 3.9.0 while staying on the `3.x` line (see the `@caatinga/cli` CHANGELOG). Use `ctg doctor` plus a manual toolchain install instead.
+
+Patch releases still move quickly, so pin an exact version in CI rather than a floating range.
 
 ## Part 2 — CLI and Workflow (11–20)
 

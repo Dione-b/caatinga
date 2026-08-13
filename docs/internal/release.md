@@ -18,21 +18,23 @@ Template files are bundled with `@caatinga/cli`; there is no separate public
 
 ## Version Alignment
 
-Public packages should remain version-aligned during alpha unless there is a deliberate exception.
+Public packages should remain version-aligned unless there is a deliberate exception.
 Any exception must be called out in release notes and package changelogs.
 
 ## Dist Tags
 
 - `alpha`
 - `beta`
-- `latest` — currently `3.7.0` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
-- `next` — currently `3.7.0` (pre-release candidates until promoted to `latest`)
+- `latest` — currently `3.9.2` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
+- `next` — currently `3.9.1` (pre-release candidates until promoted to `latest`)
 
-## Pre-1.0 semver note
+## Semver note
 
-The published **`3.x` line is a pre-1.0 development line**. The major version number reflects npm
-publish history, **not** API stability. Treat releases as alpha until `v1.0.0` readiness gates pass
-(see [`release/v1.0.0.md`](./release/v1.0.0.md)). Pin exact versions in production CI until then.
+The published **`3.x` line carries the v1.0 stable contract**. The major version number reflects npm
+publish history, so `3.x` is where v1 lives: breaking changes to the Tier 1 surface require a major
+bump and will land on an explicit `4.0.0` (see [`public-api.md`](../public-api.md) and
+[`release/v1.0.0.md`](./release/v1.0.0.md)). Surfaces outside Tier 1 — notably the experimental
+`ctg zk *` commands — are not covered. Pin exact versions in production CI regardless.
 
 ## Release Gate
 
@@ -42,7 +44,7 @@ checks. It does not publish to npm or create a GitHub Release.
 
 ## GitHub Releases
 
-GitHub Releases document alpha milestones for contributors and early adopters. Publishing a
+GitHub Releases document release milestones for contributors and adopters. Publishing a
 release on GitHub is a manual step after the Release Gate passes. See package changelogs under
 `packages/*/CHANGELOG.md` for version history.
 
