@@ -1,5 +1,19 @@
 ## Breaking changes policy
 
+## 3.9.2
+
+### Patch Changes
+
+- Updated dependencies [4b382a9]
+- Updated dependencies [6fc3b94]
+- Updated dependencies [ae9a936]
+- Updated dependencies [5c2157c]
+- Updated dependencies [34f2e4e]
+- Updated dependencies [9a942d0]
+- Updated dependencies [85dd6ae]
+- Updated dependencies [f4395b1]
+  - @caatinga/core@3.9.2
+
 ## 3.9.1
 
 ### Patch Changes
