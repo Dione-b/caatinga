@@ -121,4 +121,4 @@ Never recommend:
 
 Self-contained API/schema/command/error reference: [docs/for-llms.md](docs/for-llms.md) or [llms-full.txt](llms-full.txt).
 
-Install: `npm install -g @caatinga/cli` — confirm version with `npm view @caatinga/cli dist-tags` (latest **3.6.1**, next **3.8.0**). Alpha pre-1.0 — pin exact versions in CI.
+Install: `npm install -g @caatinga/cli` — confirm version with `npm view @caatinga/cli dist-tags` (latest **3.9.2**, next **3.9.1**). v1.0 stable contract on npm major `3.x` (see [docs/public-api.md](docs/public-api.md)) — pin exact versions in CI.
