@@ -1,5 +1,103 @@
 ## Breaking changes policy
 
+## 3.9.2
+
+### Patch Changes
+
+- 4b382a9: Show the config snippet `generate` needs, instead of naming the field in prose.
+
+  `ctg generate` fails with `CAATINGA_INVALID_CONFIG` when no `frontend.bindingsOutput` is
+  configured — which is every `--minimal` project. The hint named the field but not its shape,
+  so users had to read the Zod schema in the installed bundle to learn it. Worse, `doctor` and
+  `status` recommended running `generate` in exactly this state, which is guaranteed to fail.
+
+  All three now print the exact snippet to paste, from one shared helper so they cannot drift,
+  and the minimal scaffold's README documents how to enable bindings. `doctor`/`status` only
+  recommend `generate` once it can actually run.
+
+- 6fc3b94: Retry `deploy` when the RPC has not yet indexed the just-uploaded WASM.
+
+  `stellar contract deploy` uploads and instantiates in one command, and the instantiation
+  step can simulate against an RPC that has not indexed the new hash yet, failing with
+  `Error(Storage, MissingValue)` / `"Wasm does not exist"` for a hash that is on chain. Deploy
+  already had transient-failure retry with backoff, but this diagnostic matched none of its
+  patterns, so a timing-dependent infrastructure hiccup surfaced as a hard
+  `CAATINGA_DEPLOY_FAILED`. The match is narrow — a bare `MissingValue` or "simulation failed"
+  stays non-retryable.
+
+  The retry notice no longer calls this a "testnet" error, since it applies to any network.
+
+- ae9a936: Fix `ctg init --minimal` producing a project where `cargo test` fails out of the box.
+
+  The minimal contract scaffold shipped no `Cargo.lock`, so Cargo resolved dependencies at
+  run time and could pick `ed25519-dalek` 3.x alongside 2.x — a combination
+  `soroban-env-host` 22.1.3 accepts but does not compile against. The scaffold now ships a
+  lockfile (as the `react-vite-counter` and `zk-starter` templates already did), pinning a
+  graph that builds and tests cleanly.
+
+- 5c2157c: Fix the `NETWORK_NOT_FOUND` boilerplate hints emitting an unusable config snippet.
+
+  The hand-written snippets used `passphrase:` instead of `networkPassphrase:` (copying them
+  produced `CAATINGA_INVALID_CONFIG`), gave mainnet a Horizon URL and the wrong network
+  passphrase ("October 2015" rather than "September 2015"), appended a `:443` port
+  inconsistent with the rest of the codebase, and suggested a `friendbotUrl` field the config
+  schema does not accept.
+
+  The snippets are now rendered from the typed network config, reusing `WELL_KNOWN_NETWORKS`,
+  so the emitted keys and values cannot drift from `NetworkConfigSchema` again.
+
+- 34f2e4e: Enforce the no-retry error list against `error.code` instead of hoping the code appears in
+  the message text.
+
+  `isTransientCommandFailure` only ever scanned text for `CAATINGA_*` markers, so callers that
+  passed a thrown error's `message + hint` could never match the list — `CaatingaError` keeps
+  its code on the `code` property. A new `isTransientCaatingaFailure(error, retryableCode)`
+  reads the code directly, and the deploy, upgrade, and post-deploy-hook retry paths now share
+  it instead of each re-implementing the check. The list itself is typed against
+  `CaatingaErrorCode`, so a stale entry becomes a compile error.
+
+- 9a942d0: **Security fix — action required if you have ever run `ctg identity export` or `ctg identity import`.**
+
+  Earlier versions wrote a tarball of your Stellar config (including secret keys) to
+  `os.tmpdir()` and never deleted it. Upgrading stops new archives being left behind, but it
+  cannot remove the ones already there. Check every machine and CI image where those commands
+  ran:
+
+  ```bash
+  ls -la /tmp/caatinga-stellar-*.tar.gz
+  ```
+
+  Delete anything it lists — those files contain key material and were created world-readable
+  under a typical umask. Rotate the affected keys if the machine is shared or the files may
+  have been collected by CI artifact upload or backups.
+
+  Fix one secret-handling flaw and three data-integrity bugs:
+
+  - `ctg identity export`/`import` no longer leave a tarball of `~/.config/stellar` behind in `os.tmpdir()`. The archive used a predictable `Date.now()` name and default permissions and was never deleted, so exported key material stayed readable by other users of the machine or CI runner. It is now written inside a `0700` `mkdtemp` directory under a random name and removed in a `finally` block, so it never outlives the command even when it fails.
+  - `ctg sync-env` (and the env sync that runs after `ctg deploy`) no longer wipes the target env file. It rebuilt the file from the keys mapped in `frontend.env`, silently destroying any other variable living there — API keys, third-party secrets, feature flags. Only the managed keys are rewritten now; unrelated assignments, comments and blank lines are left untouched, and new keys are appended.
+  - Concurrent `ctg deploy`/`ctg upgrade` runs no longer drop each other's `contractId`. Both read `caatinga.artifacts.json` up front and wrote it back after the whole async deploy, so the second process overwrote the file from a stale snapshot. Artifact updates are now serialized with a lockfile and re-read inside the lock.
+  - `parseContractId` no longer mistakes a lookalike token for the deployed contract ID. It took the first `C…` match in the combined stdout/stderr of `stellar contract deploy`, but diagnostics are emitted before the real result, so a warning line could supply the ID persisted to `caatinga.artifacts.json`. It now prefers the last explicitly labeled line, then the last standalone ID line, then the last bare match, and restricts the character class to the base32 alphabet strkeys actually use (`A-Z2-7`).
+
+  `@caatinga/cli` also now depends on `@caatinga/zk` `^3.9.1`, matching the rest of the release group.
+
+- 85dd6ae: Throw `CaatingaError` instead of raw `Error` from the template manifest helpers.
+
+  `defaultCompatibleCoreRange` and `assertOfficialTemplateManifest` threw plain `Error`s, which
+  the CLI normalized to `CAATINGA_UNEXPECTED_ERROR` — discarding the `INVALID_TEMPLATE_MANIFEST`
+  and `TEMPLATE_INCOMPATIBLE` codes that describe what actually went wrong. All three now carry
+  the right code plus an actionable hint, reusing `formatTemplateCompatibilityHint` for the
+  compatibility case.
+
+- f4395b1: Fix `pnpm install` failing in scaffolded projects on pnpm 9.
+
+  Both official templates shipped a settings-only `pnpm-workspace.yaml` (carrying `allowBuilds`
+  and `overrides` for pnpm 10+) with no `packages` field. pnpm 9 treats any directory holding
+  that file as a workspace root and aborts with `ERROR packages field missing or empty` — so
+  `pnpm install` and `pnpm exec` both failed in a freshly scaffolded project, and the weekly
+  `testnet-deploy-regression` workflow had been red since 2026-07-27 for the same reason.
+
+  Adding `packages: []` satisfies pnpm 9 and leaves pnpm 10/11 behaviour unchanged.
+
 ## 3.9.1
 
 ### Patch Changes
