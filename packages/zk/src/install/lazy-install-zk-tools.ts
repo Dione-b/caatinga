@@ -6,9 +6,20 @@ import { createHash, randomBytes } from "node:crypto";
 import { ZkError } from "../errors/ZkError.js";
 import { downloadWithProgress } from "./download-with-progress.js";
 import type { ZkInstallProgress } from "./install-progress.js";
+import { verifyFileChecksum } from "./verify-checksum.js";
 
 const SNARKJS_VERSION = "0.7.5";
 const CIRCOM_VERSION = "2.1.9";
+
+/**
+ * SHA-256 of each circom v2.1.9 release asset, pinned so a compromised release
+ * asset or on-path tamperer can't silently swap the binary we execute locally.
+ * Recomputed directly from https://github.com/iden3/circom/releases/tag/v2.1.9.
+ */
+const CIRCOM_SHA256: Record<string, string> = {
+  "circom-linux-amd64": "e5575829252d763b7818049df9de2ef9304df834697de77fa63ce7babc23c967",
+  "circom-macos-amd64": "5c7dedaec105844dd90dc42c1ba9d7f67c265c5692fb3467465285fc09177e9f",
+};
 
 function zkCacheDir(): string {
   return path.join(process.env.HOME ?? os.homedir(), ".caatinga", "zk-tools");
@@ -32,15 +43,25 @@ function circomAssetName(): string {
 
 export async function ensureCircom(progress?: ZkInstallProgress): Promise<string> {
   const asset = circomAssetName();
+  const expectedSha256 = CIRCOM_SHA256[asset];
+  if (!expectedSha256) {
+    throw new ZkError(
+      `No pinned checksum for circom asset: ${asset}`,
+      "ZK_UNSUPPORTED_PLATFORM",
+      "Install circom 2.x manually and ensure it is on PATH."
+    );
+  }
+
   const installDir = path.join(zkCacheDir(), "circom", CIRCOM_VERSION);
   const binaryPath = path.join(installDir, asset);
 
   try {
     await access(binaryPath);
+    await verifyFileChecksum(binaryPath, expectedSha256, `cached circom v${CIRCOM_VERSION}`);
     progress?.onStatus?.(`Using cached circom v${CIRCOM_VERSION}`);
     return binaryPath;
   } catch {
-    // Fall through to download.
+    // Missing or tampered cache entry (verifyFileChecksum deletes it on mismatch) — redownload.
   }
 
   const url = `https://github.com/iden3/circom/releases/download/v${CIRCOM_VERSION}/${asset}`;
@@ -48,6 +69,7 @@ export async function ensureCircom(progress?: ZkInstallProgress): Promise<string
 
   progress?.onStatus?.(`Downloading circom v${CIRCOM_VERSION} (${asset})...`);
   await downloadWithProgress(url, binaryPath, progress);
+  await verifyFileChecksum(binaryPath, expectedSha256, `circom v${CIRCOM_VERSION} (${asset})`);
   await chmod(binaryPath, 0o755);
   progress?.onStatus?.(`circom installed → ${binaryPath}`);
 
