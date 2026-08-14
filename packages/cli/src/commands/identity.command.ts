@@ -33,8 +33,31 @@ async function tarDirectory(sourceDir: string, outputFile: string): Promise<void
   await execa("tar", ["-czf", outputFile, "-C", sourceDir, "."], { stdio: "inherit" });
 }
 
+async function assertNoPathTraversal(archiveFile: string, targetDir: string): Promise<void> {
+  const { stdout } = await execa("tar", ["-tzf", archiveFile]);
+  const resolvedTarget = path.resolve(targetDir);
+
+  for (const rawEntry of stdout.split("\n")) {
+    const entry = rawEntry.trim();
+    if (!entry) {
+      continue;
+    }
+
+    const resolvedEntry = path.resolve(resolvedTarget, entry);
+    if (
+      resolvedEntry !== resolvedTarget &&
+      !resolvedEntry.startsWith(resolvedTarget + path.sep)
+    ) {
+      throw new Error(
+        `Refusing to import archive: entry "${entry}" would extract outside ${resolvedTarget}`
+      );
+    }
+  }
+}
+
 async function untarDirectory(archiveFile: string, targetDir: string): Promise<void> {
   await mkdir(targetDir, { recursive: true, mode: 0o700 });
+  await assertNoPathTraversal(archiveFile, targetDir);
   await execa("tar", ["-xzf", archiveFile, "-C", targetDir], { stdio: "inherit" });
 }
 
