@@ -102,7 +102,7 @@ Run `ctg doctor` to check what is missing. Install prerequisites manually — se
 - [Cheatsheet](./docs/cheatsheet.md) · [CLI reference](./docs/cli.md) · [Troubleshooting](./docs/troubleshooting.md)
 - [Client](./docs/client.md) · [Wallets](./docs/wallets.md) · [Errors](./docs/errors.md)
 - [Architecture](./docs/architecture.md) · [ADRs](./docs/adr/index.md)
-- **Claude Code skill:** listed on [skills.stellar.org](https://skills.stellar.org/) (source: [ctg-skills](https://github.com/Dione-b/caatinga-skill)). Teaches Claude Code Caatinga's rules (no raw `stellar` deploys, no manual `caatinga.artifacts.json`/bindings edits, `--source` as an identity alias only). Install with `/plugin marketplace add Dione-b/caatinga-skill` then `/plugin install caatinga-skill@caatinga-skill`.
+- **Claude Code skill:** listed as a community skill on [skills.stellar.org](https://skills.stellar.org/) (source: [ctg-skills](https://github.com/Dione-b/caatinga-skill)). Teaches Claude Code Caatinga's rules (no raw `stellar` deploys, no manual `caatinga.artifacts.json`/bindings edits, `--source` as an identity alias only). Install with `/plugin marketplace add Dione-b/caatinga-skill` then `/plugin install caatinga-skill@caatinga-skill`.
 
 ## Project layout
 
