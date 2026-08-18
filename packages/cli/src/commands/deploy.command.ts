@@ -95,6 +95,11 @@ export function registerDeployCommand(program: Command): void {
             });
 
             logger.info(`Deploy estimate: ${estimate.contractName} (${estimate.network})`);
+            if (!estimate.simulation.ok) {
+              logger.warn(`Fee estimate unavailable: ${estimate.simulation.error}`);
+              logger.warn(estimate.advisory);
+              return;
+            }
             logger.info(`Total (estimate): ${estimate.totalFeeStroops} stroops`);
             logger.warn(estimate.advisory);
             return;

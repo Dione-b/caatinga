@@ -16,9 +16,10 @@ export type DeployCostEstimate = {
   contractName: string;
   network: string;
   wasmPath: string;
-  inclusionFeeStroops: number;
+  inclusionFeeStroops?: number;
   resourceFeeStroops?: number;
-  totalFeeStroops: number;
+  totalFeeStroops?: number;
+  simulation: { ok: true } | { ok: false; error: string };
   advisory: string;
   rawOutput?: string;
 };
@@ -102,7 +103,7 @@ export async function estimateDeployCost(
         `Deploy cost estimate failed for "${contract.name}".`,
         CaatingaErrorCode.ESTIMATE_FAILED,
         error.hint ?? "Ensure WASM is built and deploy args resolve correctly.",
-        error.cause
+        error
       );
     }
     throw error;
@@ -110,6 +111,7 @@ export async function estimateDeployCost(
 
   const simulateArgs = ["tx", "simulate", "--source-account", source, buildOutput];
   let simulateOutput = "";
+  let simulationError: string | undefined;
 
   try {
     const simulateResult = await runCommand("stellar", simulateArgs, {
@@ -117,14 +119,26 @@ export async function estimateDeployCost(
       failureCode: CaatingaErrorCode.ESTIMATE_FAILED,
     });
     simulateOutput = simulateResult.all || `${simulateResult.stdout}\n${simulateResult.stderr}`;
-  } catch {
+  } catch (error) {
+    simulationError = error instanceof Error ? error.message : String(error);
     simulateOutput = "";
   }
 
   const parsed = parseFeeStroops(simulateOutput);
-  const inclusionFeeStroops = parsed.inclusion ?? 100;
   const resourceFeeStroops = parsed.resource;
-  const totalFeeStroops = inclusionFeeStroops + (resourceFeeStroops ?? 0);
+  const inclusionFeeStroops = parsed.inclusion;
+  const totalFeeStroops =
+    inclusionFeeStroops === undefined ? undefined : inclusionFeeStroops + (resourceFeeStroops ?? 0);
+  const simulation =
+    simulationError || inclusionFeeStroops === undefined
+      ? {
+          ok: false as const,
+          error: simulationError ?? "Simulation output did not contain a parseable inclusion fee.",
+        }
+      : { ok: true as const };
+  const rawOutput = [buildOutput, simulateOutput, simulation.ok ? "" : simulation.error]
+    .filter(Boolean)
+    .join("\n");
 
   return {
     contractName: contract.name,
@@ -133,8 +147,11 @@ export async function estimateDeployCost(
     inclusionFeeStroops,
     resourceFeeStroops,
     totalFeeStroops,
+    simulation,
     advisory:
-      "Advisory estimate only — actual fees may differ under network congestion or contract complexity.",
-    rawOutput: simulateOutput || buildOutput,
+      simulation.ok
+        ? "Advisory estimate only — actual fees may differ under network congestion or contract complexity."
+        : "Fee estimate unavailable — simulation did not produce a parseable inclusion fee.",
+    rawOutput,
   };
 }

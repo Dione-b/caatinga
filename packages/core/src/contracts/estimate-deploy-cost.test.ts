@@ -96,8 +96,9 @@ describe("estimateDeployCost", () => {
   });
 
   it("should_throw_ESTIMATE_FAILED_when_build_only_fails", async () => {
+    const original = new CaatingaError("build failed", CaatingaErrorCode.ESTIMATE_FAILED, "fix wasm");
     runCommand.mockRejectedValue(
-      new CaatingaError("build failed", CaatingaErrorCode.ESTIMATE_FAILED, "fix wasm")
+      original
     );
 
     await expect(
@@ -110,6 +111,46 @@ describe("estimateDeployCost", () => {
       })
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.ESTIMATE_FAILED,
+      cause: original,
     });
+  });
+
+  it("should_mark_simulation_failure_as_unavailable", async () => {
+    runCommand.mockImplementation(async (_cmd: string, args: string[]) => {
+      if (args.includes("--build-only")) return { stdout: "AAAA", stderr: "", all: "AAAA" };
+      throw new Error("simulation rejected");
+    });
+
+    const result = await estimateDeployCost({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+    });
+
+    expect(result.simulation).toEqual({ ok: false, error: "simulation rejected" });
+    expect(result.inclusionFeeStroops).toBeUndefined();
+    expect(result.totalFeeStroops).toBeUndefined();
+    expect(result.rawOutput).toContain("simulation rejected");
+  });
+
+  it("should_mark_unparseable_simulation_output_as_unavailable", async () => {
+    runCommand.mockImplementation(async (_cmd: string, args: string[]) => {
+      if (args.includes("--build-only")) return { stdout: "AAAA", stderr: "", all: "AAAA" };
+      return { stdout: "completed", stderr: "", all: "completed" };
+    });
+
+    const result = await estimateDeployCost({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+    });
+
+    expect(result.simulation.ok).toBe(false);
+    expect(result.totalFeeStroops).toBeUndefined();
+    expect(result.advisory).toContain("unavailable");
   });
 });
