@@ -14,7 +14,7 @@ official `groth16_verifier` pattern.
 
 - **Protocol 25+** on the target network (testnet/mainnet must be at Protocol 25 before deploy).
 - **Verifier contract:** `soroban-sdk = "25.1.0"`, Rust `1.89.0`.
-- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau).
+- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary — freshly downloaded or read from cache — is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)).
 
 ## Quick start
 

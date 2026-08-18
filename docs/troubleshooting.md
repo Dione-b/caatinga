@@ -198,6 +198,17 @@ ctg doctor --network testnet
 
 ---
 
+## Security fixes
+
+**Applies to versions before the fix landed on `main` (3.9.2 and earlier are affected; check `npm view @caatinga/cli dist-tags` for the current patched version).**
+
+- **`ctg identity import` tar path traversal.** Import previously extracted attacker-controlled tarballs without checking entry paths, so a crafted archive could write files outside the target Stellar config directory. Import now lists archive entries first and refuses the import if any entry would resolve outside the target directory. Only import archives from a source you trust — the check blocks path traversal, not a malicious archive's legitimate-looking contents.
+- **Unverified `circom` downloads (`ensureCircom`).** The ZK toolchain downloaded and executed a platform `circom` binary from GitHub with no integrity check, so a compromised release asset or on-path tamperer could get an arbitrary binary run and cached for reuse. Every `circom` binary — freshly downloaded or read from `~/.caatinga/zk-tools` cache — is now verified against a pinned SHA-256 before use. A mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` (see [errors.md](./errors.md#zk)) instead of running an unverified binary.
+
+If either of these was ever exploited against you (unexpected files outside your Stellar config dir, or a `circom` binary you didn't expect), treat any keys under the affected `--path` as compromised and rotate them.
+
+---
+
 ## Still stuck?
 
 1. `ctg doctor --network testnet`
