@@ -29,6 +29,11 @@ export function registerEstimateCommand(program: Command): void {
 
         logger.info(`Deploy estimate: ${result.contractName} (${result.network})`);
         logger.info(`WASM: ${result.wasmPath}`);
+        if (!result.simulation.ok) {
+          logger.warn(`Fee estimate unavailable: ${result.simulation.error}`);
+          logger.warn(result.advisory);
+          return;
+        }
         logger.info(`Inclusion fee: ${result.inclusionFeeStroops} stroops`);
         if (result.resourceFeeStroops !== undefined) {
           logger.info(`Resource fee: ${result.resourceFeeStroops} stroops`);
