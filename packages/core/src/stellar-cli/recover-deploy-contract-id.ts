@@ -1,16 +1,12 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { NetworkConfig } from "../config/config.schema.js";
+import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
 
 const TX_HASH_REGEX = /Transaction hash is ([a-f0-9]{64})/i;
 const DEPLOY_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
-
-const HORIZON_URL_BY_PASSPHRASE: Record<string, string> = {
-  "Test SDF Network ; September 2015": "https://horizon-testnet.stellar.org",
-  "Public Global Stellar Network ; September 2015": "https://horizon.stellar.org",
-};
 
 type HorizonOperation = {
   transaction_successful?: boolean;
@@ -34,7 +30,7 @@ export function decimalSaltToHex(salt: string): string {
 }
 
 export function resolveHorizonUrl(network: NetworkConfig): string {
-  const horizonUrl = HORIZON_URL_BY_PASSPHRASE[network.networkPassphrase];
+  const horizonUrl = NETWORK_METADATA_BY_PASSPHRASE[network.networkPassphrase]?.horizonUrl;
   if (!horizonUrl) {
     throw new CaatingaError(
       `No Horizon URL mapping for network passphrase "${network.networkPassphrase}".`,
