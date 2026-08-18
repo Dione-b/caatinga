@@ -192,6 +192,10 @@ Exports the Stellar CLI config directory as a base64 tarball on stdout (for
 ## `ctg identity import <archive-file> [--path ~/.config/stellar]`
 
 Imports a base64-encoded tarball file produced by `ctg identity export` (not a raw binary path).
+Before extracting, Caatinga lists the archive's entries and refuses to import it if any entry
+would resolve outside the target directory (tar path traversal) — treat this the same as any
+untrusted archive: only import files from a source you trust, since the check blocks path
+traversal but not a malicious archive's legitimate-looking contents.
 
 ## `ctg invoke <contract.method> --source <identity> [--network testnet] [args...]`
 

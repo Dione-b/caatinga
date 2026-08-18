@@ -13,6 +13,20 @@ two tools work in complementary layers:
 stellar-build is a separate, third-party project. This page documents how to wire it to a
 Caatinga workspace; it is optional and not required to use Caatinga.
 
+For a lighter-weight option, Caatinga ships its own Claude Code skill, listed as a
+community skill on [skills.stellar.org](https://skills.stellar.org/) (source:
+[ctg-skills](https://github.com/Dione-b/caatinga-skill)) — it teaches the agent Caatinga's
+hard rules directly (no raw `stellar` deploys, no manual `caatinga.artifacts.json`/binding
+edits, `--source` as an identity alias only) without installing a full persona/agent system:
+
+```
+/plugin marketplace add Dione-b/caatinga-skill
+/plugin install caatinga-skill@caatinga-skill
+```
+
+Use ctg-skills alone if you just want a Caatinga-aware Claude Code, or combine it with
+stellar-build below if you also want the planning/persona layer.
+
 ## Prerequisites
 
 - A working Caatinga project. If you do not have one yet, follow

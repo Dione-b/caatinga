@@ -10,11 +10,11 @@ Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). A
 
 | Item              | Value                                                                                        |
 | ----------------- | -------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` → **3.9.0** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
+| npm dist-tag      | `latest` → **3.9.2** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
 | Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. |
 | Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                                 |
 | No global install | `npx ctg <command>` (`caatinga` is a legacy alias)                                           |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.0`), not a floating tag                        |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.2`), not a floating tag                        |
 | Fresh machine     | Node 22+, then check with `npx ctg doctor`. Install Rust, Stellar CLI manually.              |
 | Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                 |
 
