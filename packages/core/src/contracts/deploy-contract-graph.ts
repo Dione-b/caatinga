@@ -96,7 +96,9 @@ export async function deployContractGraph(options: {
     }
 
     if (result.skipped) {
-      skippedContracts.push(toSkippedContract(contractName, result.contractId, network.name));
+      skippedContracts.push(
+        toSkippedContract(contractName, result.contractId, network.name, result.skipReason)
+      );
     } else {
       deployedContracts.push({ name: contractName, contractId: result.contractId });
     }

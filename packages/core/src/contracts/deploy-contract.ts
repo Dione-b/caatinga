@@ -107,6 +107,7 @@ export async function deployContract(options: DeployContractOptions) {
         output: "",
         skipped: true as const,
         staleWasmWarning,
+        skipReason: "already-deployed" as const,
       };
     }
   }
