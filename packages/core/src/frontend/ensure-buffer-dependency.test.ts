@@ -52,6 +52,36 @@ describe("ensureBufferDependency", () => {
     expect(result?.added).toBe(false);
   });
 
+  // #98: presence is not enough — an out-of-range version must be corrected.
+  it("should_update_buffer_when_the_declared_version_is_out_of_range", async () => {
+    const cwd = await scaffold({ name: "app", dependencies: { buffer: "^1.0.0" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(true);
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+    expect(pkg.dependencies.buffer).toBe("^6.0.3");
+  });
+
+  it("should_update_an_out_of_range_buffer_in_devDependencies_in_place", async () => {
+    const cwd = await scaffold({ name: "app", devDependencies: { buffer: "5.0.0" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(true);
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+    expect(pkg.devDependencies.buffer).toBe("^6.0.3");
+    expect(pkg.dependencies?.buffer).toBeUndefined();
+  });
+
+  it("should_be_a_noop_when_a_higher_in_range_version_is_declared", async () => {
+    const cwd = await scaffold({ name: "app", dependencies: { buffer: "^6.1.0" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(false);
+  });
+
   it("should_return_undefined_when_no_package_json_is_found", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-buffer-dep-none-"));
     await mkdir(path.join(tmpDir, "frontend", "src", "contracts"), { recursive: true });

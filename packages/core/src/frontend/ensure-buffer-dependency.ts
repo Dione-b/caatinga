@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import semver from "semver";
 
 // Backs the Buffer polyfill that every generated binding imports. Pinned to the
 // same major the templates ship so behaviour matches across init and adoption.
@@ -75,8 +76,25 @@ export async function ensureBufferDependency(
     return undefined;
   }
 
-  if (pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer) {
-    return { packageJsonPath, added: false };
+  const existing = pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer;
+  if (existing) {
+    // #98: presence alone isn't enough — the templates pin `buffer` to a major
+    // (^6). If the declared range already resolves within the supported range,
+    // leave it; otherwise pin it, so a stale `buffer: "^1.0.0"` gets corrected
+    // instead of silently kept.
+    const minVersion = semver.minVersion(existing);
+    if (minVersion && semver.satisfies(minVersion, BUFFER_DEPENDENCY_RANGE)) {
+      return { packageJsonPath, added: false };
+    }
+
+    // Out of range (or unparseable) — update it in the section it already lives.
+    if (pkg.dependencies?.buffer) {
+      pkg.dependencies.buffer = BUFFER_DEPENDENCY_RANGE;
+    } else {
+      (pkg.devDependencies as Record<string, string>).buffer = BUFFER_DEPENDENCY_RANGE;
+    }
+    await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+    return { packageJsonPath, added: true };
   }
 
   pkg.dependencies = { ...(pkg.dependencies ?? {}), buffer: BUFFER_DEPENDENCY_RANGE };
