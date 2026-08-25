@@ -14,6 +14,10 @@ export function registerInvokeCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign (for example alice)"
     )
+    .option(
+      "--no-resolve-aliases",
+      "Pass string args literally; skip CLI identity alias resolution"
+    )
     .action(
       (
         target: string,
@@ -21,6 +25,7 @@ export function registerInvokeCommand(program: Command): void {
         options: {
           network?: string;
           source: string;
+          resolveAliases?: boolean;
         }
       ) =>
         runCliAction(async () => {
@@ -31,6 +36,7 @@ export function registerInvokeCommand(program: Command): void {
             args,
             networkName: options.network,
             source: options.source,
+            resolveAliases: options.resolveAliases,
           });
 
           logger.success("Invoke complete");

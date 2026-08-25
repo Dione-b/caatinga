@@ -71,8 +71,44 @@ describe("resolveMethodArgs", () => {
     expect(looksLikeStellarAlias("${source.address}")).toBe(false);
   });
 
+  it("should_keep_backslash_escaped_values_literal", async () => {
+    const result = await resolveMethodArgs({
+      args: { name: "\\Dione", caller: "alice" },
+      cwd: "/tmp",
+    });
+
+    expect(result.name).toBe("Dione");
+    expect(result.caller).toBe(VALID_G_ADDRESS);
+  });
+
+  it("should_skip_alias_resolution_when_resolve_aliases_is_false", async () => {
+    const result = await resolveMethodArgs({
+      args: { name: "Dione" },
+      resolveAliases: false,
+    });
+
+    expect(result.name).toBe("Dione");
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
+  it("should_mention_escape_and_flag_in_unresolved_hint", async () => {
+    runCommand.mockRejectedValue(
+      new CaatingaError("missing", CaatingaErrorCode.SOURCE_ADDRESS_UNRESOLVED)
+    );
+
+    await expect(resolveMethodArgs({ args: { name: "Dione" } })).rejects.toMatchObject({
+      code: CaatingaErrorCode.ADDRESS_ALIAS_UNRESOLVED,
+      hint: expect.stringContaining("\\Dione"),
+    });
+  });
+
   it("should_resolve_named_cli_args_for_invoke", async () => {
     const resolved = await resolveCliMethodArgs(["--caller", "alice"], { cwd: "/tmp" });
     expect(resolved).toEqual(["--caller", VALID_G_ADDRESS]);
+  });
+
+  it("should_keep_escaped_named_cli_args_literal_for_invoke", async () => {
+    const resolved = await resolveCliMethodArgs(["--name", "\\Dione"], { cwd: "/tmp" });
+    expect(resolved).toEqual(["--name", "Dione"]);
   });
 });

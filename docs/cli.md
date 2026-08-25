@@ -213,6 +213,12 @@ Named args in `read` and `invoke` resolve CLI identity aliases (≥3 characters,
 `--owner alice`) to `G...` addresses before calling Stellar CLI. Prefer `${source.address}` in
 config hooks over raw aliases. Unresolved aliases fail with `CAATINGA_ADDRESS_ALIAS_UNRESOLVED`.
 
+When an argument is a plain `String` (not an `Address`) — usernames, symbols, codes — escape the
+heuristic instead of working around it:
+
+- Prefix the value with a backslash: `--name '\Dione'` passes the literal string `Dione`.
+- Or pass `--no-resolve-aliases` to skip alias resolution entirely for the call.
+
 `--expect` accepts the same DSL as `postDeploy` (plain string or JSON matcher). Mismatch fails with
 `CAATINGA_POST_DEPLOY_VERIFY_FAILED`. `--summary` / `--quiet` print compact output for large array
 payloads (see [Testnet hygiene](./internal/testnet-hygiene.md)).

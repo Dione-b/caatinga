@@ -205,7 +205,7 @@ Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 14. **`ctg upgrade` vs `deploy --upgrade`** — in-place preserves `contractId`; redeploy creates a new instance.
 15. **Config graph validation** — `${contracts.*.contractId}` in `deployArgs` must be listed in `dependsOn`.
 16. **`doctor --strict`** — env drift + stale bindings only.
-17. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars).
+17. **Alias resolution** — method args may use `${source.address}` or CLI aliases (≥3 chars). Plain `String` args: escape with a leading backslash (`\Dione`) or pass `--no-resolve-aliases`.
 
 ---
 
