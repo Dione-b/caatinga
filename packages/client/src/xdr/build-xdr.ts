@@ -6,6 +6,10 @@ interface XdrTransactionLike {
   prepare?: () => Promise<unknown> | unknown;
 }
 
+export interface PreparedXdrBuildResult extends CaatingaXdrBuildResult {
+  preparedTransaction: unknown;
+}
+
 export async function buildXdr(input: {
   contractName: string;
   method: string;
@@ -13,7 +17,7 @@ export async function buildXdr(input: {
   transaction: unknown;
   rpcUrl: string;
   debug?: boolean;
-}): Promise<CaatingaXdrBuildResult> {
+}): Promise<PreparedXdrBuildResult> {
   try {
     const transaction = input.transaction as XdrTransactionLike;
     const unsignedXdr = readXdr(transaction);
@@ -46,6 +50,7 @@ export async function buildXdr(input: {
       contractId: input.contractId,
       unsignedXdr,
       preparedXdr,
+      preparedTransaction,
       ...(input.debug ? { raw: preparedTransaction } : {}),
     };
   } catch (error) {
