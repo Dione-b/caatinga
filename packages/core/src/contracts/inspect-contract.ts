@@ -1,3 +1,4 @@
+import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
@@ -69,11 +70,32 @@ export async function inspectContract(
   } catch (error) {
     reachable = false;
     detail = error instanceof CaatingaError ? error.message : "Contract not reachable on network.";
+    // #133 (bug 2): the reachability probe wraps the Stellar CLI failure in a
+    // generic message and only forwards the original error as `cause`. Surface
+    // that underlying CLI output (carried on the cause's hint) so an
+    // unreachable result is diagnosable instead of a bare "not reachable".
+    const cause = error instanceof CaatingaError ? error.cause : undefined;
+    const cliOutput = cause instanceof CaatingaError ? cause.hint?.trim() : undefined;
+    if (cliOutput) {
+      detail = `${detail}\nStellar CLI: ${cliOutput}`;
+    }
   }
+
+  // #133 (bug 1): prefer the per-network artifact wasmPath (e.g. a mainnet build
+  // under ./deploy/mainnet-wasm) over the config `wasm`, which always points at
+  // the default (testnet) build output. Comparing the mainnet artifact hash
+  // against the testnet WASM produced a false "Local WASM: differs or missing".
+  // artifact.wasmPath is stored relative to the project root, so resolve it
+  // against cwd (resolveWasmArtifactPath would otherwise resolve it against
+  // process.cwd()).
+  const localWasmSource = artifact.wasmPath
+    ? path.resolve(cwd, artifact.wasmPath)
+    : contract.wasmPath;
+  const localWasmDisplayPath = artifact.wasmPath ?? contract.config.wasm;
 
   let localHash: string | undefined;
   try {
-    const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
+    const wasmPath = await resolveWasmArtifactPath(localWasmSource, {
       sourcePath: contract.sourcePath,
     });
     localHash = await hashWasm(wasmPath);
@@ -92,7 +114,7 @@ export async function inspectContract(
     },
     onChain: { reachable, detail },
     localWasm: {
-      path: contract.config.wasm,
+      path: localWasmDisplayPath,
       hash: localHash,
       matchesArtifact: Boolean(localHash && localHash === artifact.wasmHash),
     },
