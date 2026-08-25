@@ -4,6 +4,10 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 // 22.x fails to sign `stellar contract invoke` (xdr value invalid); 23.0.0+ is required.
 export const STELLAR_CLI_MIN_VERSION = "23.0.0";
 
+// Latest Stellar CLI version this release was verified against. Kept next to
+// MIN_VERSION so both version anchors live in one place (#100).
+export const STELLAR_CLI_LAST_TESTED_VERSION = "27.0.0";
+
 const STELLAR_CLI_SEMVER_REGEX = /\b(\d+\.\d+\.\d+(?:-[0-9A-Za-z-.]+)?(?:\+[0-9A-Za-z-.]+)?)\b/;
 
 export function parseStellarCliVersion(output: string): string {
