@@ -133,7 +133,7 @@ describe("createProgram", () => {
           "--template",
           "react-vite-counter",
         ]);
-      expect(logSpy).toHaveBeenCalledWith(`${chalk.blue("ℹ")}   npx caatinga build    counter`);
+      expect(logSpy).toHaveBeenCalledWith(`${chalk.blue("ℹ")}   npx ctg build    counter`);
     } finally {
       logSpy.mockRestore();
     }

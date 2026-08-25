@@ -110,7 +110,7 @@ describe("evaluateDeployCoverage", () => {
       {
         name: "marketplace",
         ok: false,
-        fix: "Run: npx caatinga deploy marketplace --network testnet --source <identity>",
+        fix: "Run: npx ctg deploy marketplace --network testnet --source <identity>",
       },
     ]);
   });
