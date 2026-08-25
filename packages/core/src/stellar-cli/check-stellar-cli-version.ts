@@ -1,4 +1,3 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarCliCompatibility,
@@ -27,15 +26,10 @@ export async function checkStellarCliVersion(
     });
     rawOutput = result.all || result.stdout || result.stderr;
   } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
-      throw new CaatingaError(
-        "Stellar CLI was not found.",
-        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
-        "Install Stellar CLI before running Caatinga-backed commands.",
-        error
-      );
-    }
-
+    // #95: `runCommand` already converts a spawn ENOENT into
+    // CaatingaError(STELLAR_CLI_NOT_FOUND), so the thrown error's code is
+    // "CAATINGA_STELLAR_CLI_NOT_FOUND", never "ENOENT" — the old guard here was
+    // dead. Just re-throw the already-wrapped error.
     throw error;
   }
 
