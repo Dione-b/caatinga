@@ -11,7 +11,7 @@ import { isTransientCaatingaFailure } from "../shell/is-transient-command-failur
  * or "simulation failed" broadly, so a genuine simulation error (contract trap, missing
  * storage entry) stays non-retryable.
  */
-const WASM_NOT_YET_INDEXED_PATTERN = /wasm does not exist/i;
+import { WASM_NOT_YET_INDEXED_PATTERN } from "./wasm-indexing-pattern.js";
 
 export function isTransientDeployFailure(error: unknown): boolean {
   if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.DEPLOY_FAILED) {

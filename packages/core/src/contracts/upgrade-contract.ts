@@ -15,6 +15,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
 import { uploadWasm } from "./upload-wasm.js";
 import { hashWasm, resolveWasmArtifactPath } from "./wasm.js";
+import { WASM_NOT_YET_INDEXED_PATTERN } from "./wasm-indexing-pattern.js";
 
 export type UpgradeContractOptions = {
   config: CaatingaConfig;
@@ -56,6 +57,11 @@ function sleep(ms: number): Promise<void> {
 }
 
 function isTransientUpgradeFailure(error: unknown): boolean {
+  if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
+    if (WASM_NOT_YET_INDEXED_PATTERN.test(`${error.message}\n${error.hint ?? ""}`)) {
+      return true;
+    }
+  }
   return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
 }
 
