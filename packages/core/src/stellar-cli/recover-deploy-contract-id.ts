@@ -24,9 +24,9 @@ type HorizonOperationsResponse = {
   };
 };
 
-export function isLikelyPublicKeySource(source: string): boolean {
-  return /^G[A-Z2-7]{55}$/.test(source);
-}
+// Re-exported from the shared strkey module (#148); kept here for back-compat
+// with existing importers of this path.
+export { isLikelyPublicKeySource } from "./strkey.js";
 
 export function decimalSaltToHex(salt: string): string {
   return BigInt(salt).toString(16).padStart(64, "0");
