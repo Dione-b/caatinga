@@ -47,9 +47,22 @@ export async function deployContractGraph(options: {
   const staleWasmWarnings: StaleWasmWarning[] = [];
 
   for (const contractName of order) {
+    // Re-read per iteration on purpose: a dependency deployed earlier in this
+    // loop writes its contractId, and a later contract's arg resolution
+    // (`${contracts.<dep>.contractId}`) must see it — so this cannot be hoisted
+    // out of the loop (#150).
     const artifacts = await readArtifacts(cwd);
     const existing = artifacts.networks[network.name]?.contracts[contractName];
     const contractConfig = options.config.contracts[contractName];
+
+    // #150: decide the already-deployed skip up front. It only needs `existing`
+    // and the flags, so doing it before dependency verification and arg
+    // resolution avoids N pointless subprocess calls (resolveDeployArgs can
+    // spawn `stellar keys address`) when redeploying an up-to-date graph.
+    if (existing?.contractId && !options.force && !options.ifChanged) {
+      skippedContracts.push(toSkippedContract(contractName, existing.contractId, network.name));
+      continue;
+    }
 
     if (options.verifyDeps && contractConfig.dependsOn.length > 0) {
       await verifyDependencyContracts({
@@ -67,11 +80,6 @@ export async function deployContractGraph(options: {
       source: options.source,
       cwd,
     });
-
-    if (existing?.contractId && !options.force && !options.ifChanged) {
-      skippedContracts.push(toSkippedContract(contractName, existing.contractId, network.name));
-      continue;
-    }
 
     const result = await deployContract({
       config: options.config,
