@@ -22,12 +22,17 @@ mkdir -p "$install_dir"
 file="stellar-cli-${version}-${os_arch}.tar.gz"
 url="https://github.com/stellar/stellar-cli/releases/download/v${version}/${file}"
 
+temp_dir="$(mktemp -d)"
+trap 'rm -rf "$temp_dir"' EXIT
+
+archive_path="${temp_dir}/${file}"
+
 # Exponential backoff: 10s, 20s, 40s, 80s, 160s => ~5min of retries.
 max_attempts=6
 delay=10
 
 attempt=1
-until curl -fSL "$url" | tar xz -C "$install_dir"; do
+until curl -fSL --retry 0 "$url" -o "$archive_path"; do
   if (( attempt >= max_attempts )); then
     echo "error: failed to download ${url} after ${max_attempts} attempts" >&2
     exit 1
@@ -37,6 +42,9 @@ until curl -fSL "$url" | tar xz -C "$install_dir"; do
   delay=$(( delay * 2 ))
   attempt=$(( attempt + 1 ))
 done
+
+tar xzf "$archive_path" -C "$install_dir"
+chmod +x "${install_dir}/stellar"
 
 binary="${install_dir}/stellar"
 "${binary}" --version
