@@ -118,6 +118,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/artifacts/read-write-artifacts.test.ts",
     trigger: "readArtifacts(",
   },
+  [CaatingaErrorCode.ARTIFACTS_LOCK_TIMEOUT]: {
+    file: "packages/core/src/artifacts/artifacts-lock.test.ts",
+    trigger: "withArtifactsLock(",
+  },
   [CaatingaErrorCode.CONTRACT_ID_NOT_FOUND]: {
     file: "packages/core/src/stellar-cli/parse-contract-id.test.ts",
     trigger: "parseContractId(",
