@@ -13,6 +13,15 @@ describe("isTransientCommandFailure", () => {
 
   it("should_return_true_when_log_contains_503_service_unavailable", () => {
     expect(isTransientCommandFailure("503 Service Unavailable")).toBe(true);
+    expect(isTransientCommandFailure("HTTP 429 Too Many Requests")).toBe(true);
+    expect(isTransientCommandFailure("received 502 bad gateway")).toBe(true);
+  });
+
+  // #93: bare status numbers must not match as substrings of larger numbers.
+  it("should_not_match_status_codes_embedded_in_larger_numbers", () => {
+    expect(isTransientCommandFailure("listening on port 4290")).toBe(false);
+    expect(isTransientCommandFailure("compiled test 5030 in 2s")).toBe(false);
+    expect(isTransientCommandFailure("build artifact 5023 ready")).toBe(false);
   });
 
   it("should_return_true_when_log_contains_connection_reset", () => {
