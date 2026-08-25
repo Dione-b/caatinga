@@ -11,7 +11,14 @@ export async function checkBinary(
   options: CheckBinaryOptions = {}
 ): Promise<void> {
   try {
-    await runCommand(binary, ["--version"], options);
+    // For stellar this is only a presence check: the real Stellar command that
+    // runs right after triggers checkStellarCliVersion itself, so re-running
+    // that cascade here (version parse + three feature probes) is duplicate
+    // work. Non-stellar binaries never trigger the cascade, so pass options
+    // through unchanged.
+    const runOptions =
+      binary === "stellar" ? { ...options, skipStellarVersionCheck: true } : options;
+    await runCommand(binary, ["--version"], runOptions);
   } catch (error) {
     if (error instanceof CaatingaError) {
       throw error;

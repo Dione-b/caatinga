@@ -16,8 +16,45 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
+let cachedReport: Promise<CompatibilityReport> | undefined;
+
+/** Clears the per-process version-check cache. Intended for tests. */
+export function resetStellarCliVersionCache(): void {
+  cachedReport = undefined;
+}
+
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
+): Promise<CompatibilityReport> {
+  // runCommand calls this with no arguments before every `stellar` subprocess,
+  // so a single `ctg deploy` used to re-run the version parse plus three
+  // `--help` probes ~10 times. Memoize exactly that plain call for the process
+  // lifetime. Any call that passes explicit options (features, a custom
+  // onWarning, probeFeatures, a lastTestedVersion override) is evaluated fresh,
+  // so callers that need a real re-probe still get one.
+  const isPlainRuntimeCheck =
+    input.features === undefined &&
+    input.lastTestedVersion === undefined &&
+    input.onWarning === undefined &&
+    input.probeFeatures === undefined;
+
+  if (isPlainRuntimeCheck) {
+    if (!cachedReport) {
+      // Cache the in-flight promise so concurrent callers share one probe;
+      // drop it on failure so a transient error does not poison the process.
+      cachedReport = performStellarCliVersionCheck(input).catch((error) => {
+        cachedReport = undefined;
+        throw error;
+      });
+    }
+    return cachedReport;
+  }
+
+  return performStellarCliVersionCheck(input);
+}
+
+async function performStellarCliVersionCheck(
+  input: CheckStellarCliVersionOptions
 ): Promise<CompatibilityReport> {
   let rawOutput: string;
 

@@ -7,12 +7,18 @@ vi.mock("../shell/run-command.js", () => ({
   runCommand: runCommandMock,
 }));
 
-import { checkStellarCliVersion } from "./check-stellar-cli-version.js";
+import {
+  checkStellarCliVersion,
+  resetStellarCliVersionCache,
+} from "./check-stellar-cli-version.js";
 import { parseStellarCliVersion } from "./version.js";
 
 describe("checkStellarCliVersion", () => {
   beforeEach(() => {
     runCommandMock.mockReset();
+    // The plain checkStellarCliVersion() result is memoized per process, so
+    // clear it between cases that each stub a different CLI version.
+    resetStellarCliVersionCache();
   });
 
   it("returns a supported report for the last-tested version", async () => {
