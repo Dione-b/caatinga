@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  HORIZON_RECOVERY_TIMEOUT_MS,
   decimalSaltToHex,
   fetchCreateContractSalt,
   isLikelyPublicKeySource,
@@ -104,5 +105,73 @@ describe("recover deploy contract id", () => {
       ]),
       expect.any(Object)
     );
+  });
+});
+
+describe("horizon recovery timeout", () => {
+  const HORIZON_URL = "https://horizon-testnet.stellar.org";
+  const TX_HASH = "9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6";
+
+  /** Never settles on its own — only the abort signal can end it. */
+  const hangingFetch = () =>
+    vi.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject(init.signal?.reason ?? new Error("aborted"));
+          });
+        })
+    ) as unknown as typeof fetch;
+
+  it("should_expose_a_positive_default_timeout", () => {
+    expect(HORIZON_RECOVERY_TIMEOUT_MS).toBeGreaterThan(0);
+  });
+
+  it("should_pass_an_abort_signal_to_the_horizon_fetch", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) });
+
+    await fetchCreateContractSalt(HORIZON_URL, TX_HASH, fetchImpl as unknown as typeof fetch);
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `${HORIZON_URL}/transactions/${TX_HASH}/operations`,
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+  });
+
+  it("should_return_null_when_the_horizon_fetch_times_out", async () => {
+    await expect(
+      fetchCreateContractSalt(HORIZON_URL, TX_HASH, hangingFetch(), 10)
+    ).resolves.toBeNull();
+  });
+
+  it("should_return_null_when_horizon_returns_unparseable_json", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => {
+        throw new SyntaxError("Unexpected token < in JSON at position 0");
+      },
+    });
+
+    await expect(
+      fetchCreateContractSalt(HORIZON_URL, TX_HASH, fetchImpl as unknown as typeof fetch)
+    ).resolves.toBeNull();
+  });
+
+  it("should_not_hang_or_throw_when_recovery_times_out_after_a_failed_deploy", async () => {
+    await expect(
+      tryRecoverContractIdFromDeployFailure({
+        output: [
+          `Transaction hash is ${TX_HASH}`,
+          "error: xdr processing error: xdr value invalid",
+        ].join("\n"),
+        source: "alice",
+        network: {
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
+        fetchImpl: hangingFetch(),
+        horizonTimeoutMs: 10,
+      })
+    ).resolves.toBeNull();
   });
 });
