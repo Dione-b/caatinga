@@ -85,6 +85,9 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     {
       cwd,
       failureCode: CaatingaErrorCode.BINDINGS_FAILED,
+      // #145: npx downloads @stellar/stellar-sdk from the registry; cap it so a
+      // stalled download can't hang generation. Generous, since it also builds.
+      timeout: 120_000,
     }
   );
 

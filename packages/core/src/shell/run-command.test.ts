@@ -32,4 +32,25 @@ describe("runCommand failureCode", () => {
       code: CaatingaErrorCode.COMMAND_FAILED,
     });
   });
+
+  // #145
+  it("should_surface_COMMAND_TIMEOUT_when_execa_reports_a_timeout", async () => {
+    execaMock.mockRejectedValueOnce({ timedOut: true, all: "" });
+
+    await expect(
+      runCommand("npm", ["view", "pkg"], { skipStellarVersionCheck: true, timeout: 60_000 })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.COMMAND_TIMEOUT });
+  });
+
+  it("should_pass_the_timeout_through_to_execa", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" } as never);
+
+    await runCommand("node", ["-v"], { skipStellarVersionCheck: true, timeout: 1234 });
+
+    expect(execaMock).toHaveBeenCalledWith(
+      "node",
+      ["-v"],
+      expect.objectContaining({ timeout: 1234 })
+    );
+  });
 });

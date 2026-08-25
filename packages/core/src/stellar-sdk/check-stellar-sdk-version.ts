@@ -29,6 +29,8 @@ async function readInstalledSdkVersion(cwd: string): Promise<string | undefined>
 async function resolveRegistrySdkVersion(): Promise<string> {
   const result = await runCommand("npm", ["view", "@stellar/stellar-sdk", "version"], {
     skipStellarVersionCheck: true,
+    // #145: a wedged registry must not hang the CLI forever.
+    timeout: 60_000,
   });
   return parseStellarSdkVersion(result.stdout || result.all);
 }
