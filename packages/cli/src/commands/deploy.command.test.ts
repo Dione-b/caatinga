@@ -126,7 +126,7 @@ describe("deploy command", () => {
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Bindings generation skipped (--no-generate).");
-      expect(output).toContain("npx caatinga generate counter --network testnet");
+      expect(output).toContain("npx ctg generate counter --network testnet");
     } finally {
       logSpy.mockRestore();
     }
@@ -153,7 +153,7 @@ describe("deploy command", () => {
       expect(logOutput).toContain("Deploy complete");
       expect(warnOutput).toContain("Deploy succeeded, but bindings generation failed.");
       expect(warnOutput).toContain("CAATINGA_BINDINGS_FAILED");
-      expect(logOutput).toContain("npx caatinga generate --network testnet");
+      expect(logOutput).toContain("npx ctg generate --network testnet");
     } finally {
       logSpy.mockRestore();
       warnSpy.mockRestore();

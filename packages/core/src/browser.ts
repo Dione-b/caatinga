@@ -5,4 +5,3 @@ export type {
   ContractArtifact,
   ContractMetadata,
 } from "./artifacts/artifact.schema.js";
-export { assertSorobanSymbol } from "./soroban/assert-soroban-symbol.js";

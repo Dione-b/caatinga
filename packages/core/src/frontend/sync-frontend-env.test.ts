@@ -213,7 +213,7 @@ describe("syncFrontendEnv", () => {
       [
         "# local overrides",
         "STRIPE_SECRET_KEY=sk_test_do_not_lose_me",
-        "VITE_COIN=COLDCONTRACTID",
+        "export VITE_COIN=COLDCONTRACTID",
         "",
         "VITE_FEATURE_FLAG=true",
         "",
@@ -228,7 +228,8 @@ describe("syncFrontendEnv", () => {
     expect(contents).toContain("STRIPE_SECRET_KEY=sk_test_do_not_lose_me");
     expect(contents).toContain("VITE_FEATURE_FLAG=true");
 
-    expect(contents).toContain("VITE_COIN=CNEWCONTRACTID");
+    // #153: the managed line keeps its `export ` prefix after the rewrite.
+    expect(contents).toContain("export VITE_COIN=CNEWCONTRACTID");
     expect(contents).not.toContain("COLDCONTRACTID");
 
     expect(contents).toContain("VITE_RPC_URL=https://soroban-testnet.stellar.org");

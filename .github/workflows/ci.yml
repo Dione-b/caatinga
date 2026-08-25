@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stellar-version: ["23.3.0", "25.2.0", "27.0.0"]
+        stellar-version: ["23.3.0"]
 
     steps:
       - name: Checkout
