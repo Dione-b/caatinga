@@ -20,13 +20,13 @@ describe("resolveCliProgramName", () => {
     expect(resolveCliProgramName(undefined)).toBe("caatinga");
   });
 
-  it("should_format_npx_tips_with_invoked_binary", () => {
+  it("should_format_npx_tips_with_canonical_binary", () => {
     process.argv = ["node", "/usr/local/bin/ctg"];
     expect(npxCli("build counter")).toBe("npx ctg build counter");
 
     process.argv = ["node", "/usr/local/bin/caatinga"];
     expect(npxCli("deploy counter --network testnet")).toBe(
-      "npx caatinga deploy counter --network testnet"
+      "npx ctg deploy counter --network testnet"
     );
   });
 });

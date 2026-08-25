@@ -381,4 +381,41 @@ describe("deployContractGraph", () => {
       })
     );
   });
+
+  it("should_skip_before_verifying_deps_or_resolving_args_when_already_deployed", async () => {
+    // #150: an up-to-date graph must take the already-deployed skip before it
+    // verifies dependencies or resolves deploy args. resolveDeployArgs can spawn
+    // `stellar keys address` subprocesses, so paying for it (and for dep
+    // verification, which sits just before it) on a pure skip is wasted work.
+    readArtifactsMock.mockResolvedValue({
+      project: "marketplace-app",
+      version: 1,
+      networks: {
+        testnet: {
+          contracts: {
+            token: { contractId: "C".padEnd(56, "X") },
+            marketplace: { contractId: "C".padEnd(56, "Y") },
+          },
+          dependencyGraph: { token: [], marketplace: ["token"] },
+        },
+      },
+    });
+
+    const result = await deployContractGraph({
+      config,
+      networkName: "testnet",
+      source: "alice",
+      cwd: "/tmp/app",
+      includeDependencies: true,
+      force: false,
+      verifyDeps: true,
+    });
+
+    expect(deployContractMock).not.toHaveBeenCalled();
+    // marketplace has dependsOn: ["token"], so before the reorder verifyDeps
+    // would have run for it even though it is being skipped.
+    expect(verifyDependencyContractsMock).not.toHaveBeenCalled();
+    expect(result.deployedContracts).toEqual([]);
+    expect(result.skippedContracts.map((c) => c.name)).toEqual(["token", "marketplace"]);
+  });
 });

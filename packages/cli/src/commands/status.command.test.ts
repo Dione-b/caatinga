@@ -109,7 +109,7 @@ describe("status command", () => {
       expect(output).toContain("✗");
 
       const warnings = warnSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(warnings).toContain("npx caatinga generate counter --network testnet");
+      expect(warnings).toContain("npx ctg generate counter --network testnet");
       expect(warnings).not.toContain("token");
     } finally {
       logSpy.mockRestore();

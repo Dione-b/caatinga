@@ -200,11 +200,15 @@ export async function deployContract(options: DeployContractOptions) {
       }
 
       const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
-      options.onTransientDeployRetry?.({
-        attempt: attempt + 1,
-        maxAttempts: maxDeployAttempts,
-        delayMs,
-      });
+      try {
+        options.onTransientDeployRetry?.({
+          attempt: attempt + 1,
+          maxAttempts: maxDeployAttempts,
+          delayMs,
+        });
+      } catch {
+        // #151: callback error is non-fatal; the original transient error takes precedence.
+      }
       await sleep(delayMs);
     }
   }

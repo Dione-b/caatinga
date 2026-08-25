@@ -66,7 +66,10 @@ function mergeEnvContents(
       return line;
     }
     written.add(key);
-    return managed.get(key) as string;
+    const rewritten = managed.get(key) as string;
+    // #153: keep a leading `export ` so a file written for shell `source` still
+    // exports the managed variables after ctg sync-env rewrites the line.
+    return /^\s*export\s+/.test(line) ? `export ${rewritten}` : rewritten;
   });
 
   const appended = entries
