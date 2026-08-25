@@ -44,10 +44,7 @@ async function assertNoPathTraversal(archiveFile: string, targetDir: string): Pr
     }
 
     const resolvedEntry = path.resolve(resolvedTarget, entry);
-    if (
-      resolvedEntry !== resolvedTarget &&
-      !resolvedEntry.startsWith(resolvedTarget + path.sep)
-    ) {
+    if (resolvedEntry !== resolvedTarget && !resolvedEntry.startsWith(resolvedTarget + path.sep)) {
       throw new Error(
         `Refusing to import archive: entry "${entry}" would extract outside ${resolvedTarget}`
       );

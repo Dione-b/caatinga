@@ -16,9 +16,26 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
+let cachedReport: CompatibilityReport | undefined;
+
+/** @internal — exposed for tests that need to invalidate the module-level cache. */
+export function _clearStellarCliVersionCache(): void {
+  cachedReport = undefined;
+}
+
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
 ): Promise<CompatibilityReport> {
+  if (cachedReport) {
+    for (const warning of cachedReport.warnings) {
+      if (input.onWarning) {
+        input.onWarning(warning);
+      } else {
+        defaultEmitWarning(warning);
+      }
+    }
+    return cachedReport;
+  }
   let rawOutput: string;
 
   try {
@@ -49,6 +66,8 @@ export async function checkStellarCliVersion(
     features: missingFeatures.length > 0 ? missingFeatures : undefined,
     lastTestedVersion: input.lastTestedVersion,
   });
+
+  cachedReport = report;
 
   for (const warning of report.warnings) {
     if (input.onWarning) {

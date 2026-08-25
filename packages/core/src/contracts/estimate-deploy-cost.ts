@@ -148,10 +148,9 @@ export async function estimateDeployCost(
     resourceFeeStroops,
     totalFeeStroops,
     simulation,
-    advisory:
-      simulation.ok
-        ? "Advisory estimate only — actual fees may differ under network congestion or contract complexity."
-        : "Fee estimate unavailable — simulation did not produce a parseable inclusion fee.",
+    advisory: simulation.ok
+      ? "Advisory estimate only — actual fees may differ under network congestion or contract complexity."
+      : "Fee estimate unavailable — simulation did not produce a parseable inclusion fee.",
     rawOutput,
   };
 }

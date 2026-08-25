@@ -7,12 +7,16 @@ vi.mock("../shell/run-command.js", () => ({
   runCommand: runCommandMock,
 }));
 
-import { checkStellarCliVersion } from "./check-stellar-cli-version.js";
+import {
+  checkStellarCliVersion,
+  _clearStellarCliVersionCache,
+} from "./check-stellar-cli-version.js";
 import { parseStellarCliVersion } from "./version.js";
 
 describe("checkStellarCliVersion", () => {
   beforeEach(() => {
     runCommandMock.mockReset();
+    _clearStellarCliVersionCache();
   });
 
   it("returns a supported report for the last-tested version", async () => {
@@ -106,5 +110,98 @@ describe("checkStellarCliVersion", () => {
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
       code: CaatingaErrorCode.STELLAR_CLI_VERSION_PARSE_FAILED,
     });
+  });
+});
+
+// Memoization tests use fresh module state via vi.resetModules().
+const memoRunCommandMock = vi.hoisted(() => vi.fn());
+
+describe("checkStellarCliVersion memoization", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    memoRunCommandMock.mockReset();
+  });
+
+  it("runs stellar --version only once and returns the cached report on subsequent calls", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    const report1 = await checkStellarCliVersion();
+    const report2 = await checkStellarCliVersion();
+
+    expect(report1).toBe(report2);
+    expect(report1.status).toBe("supported");
+    expect(report1.version).toBe("25.2.0");
+    // 1 call for --version, 3 calls for feature probes = 4 total.
+    // The second call to checkStellarCliVersion hits the cache, so no extra calls.
+    expect(memoRunCommandMock).toHaveBeenCalledTimes(4);
+  });
+
+  it("still emits warnings on each call when returning from cache", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 28.0.0",
+      stderr: "",
+      all: "stellar 28.0.0",
+    });
+
+    const onWarning1 = vi.fn();
+    const onWarning2 = vi.fn();
+
+    const report1 = await checkStellarCliVersion({ onWarning: onWarning1 });
+    const report2 = await checkStellarCliVersion({ onWarning: onWarning2 });
+
+    expect(report1).toBe(report2);
+    expect(report1.status).toBe("untested");
+    expect(onWarning1).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "STELLAR_CLI_UNTESTED_VERSION" })
+    );
+    expect(onWarning2).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "STELLAR_CLI_UNTESTED_VERSION" })
+    );
+    // 1 call for --version, 3 calls for feature probes = 4 total.
+    expect(memoRunCommandMock).toHaveBeenCalledTimes(4);
+  });
+
+  it("does not cache errors — a second call retries stellar --version", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockRejectedValueOnce(
+      Object.assign(new Error("spawn ENOENT"), { code: "ENOENT" })
+    );
+
+    await expect(checkStellarCliVersion()).rejects.toMatchObject({
+      code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+    });
+
+    // Second call should try again (not return a cached error)
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    const report = await checkStellarCliVersion();
+    expect(report.status).toBe("supported");
+    // 1 failed call + (1 --version + 3 feature probes) = 5 total.
+    expect(memoRunCommandMock).toHaveBeenCalledTimes(5);
   });
 });
