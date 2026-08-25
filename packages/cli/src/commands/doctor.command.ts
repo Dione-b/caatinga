@@ -6,6 +6,7 @@ import { evaluateBindingCoverage, type BindingCoverageLine } from "./doctor-bind
 import { evaluateEnvSyncDiagnostics } from "./doctor-env-sync.js";
 import { evaluatePostDeployDiagnostics } from "./doctor-post-deploy.js";
 import { evaluateWasmDriftDiagnostics } from "./doctor-wasm-drift.js";
+import { reportCliVersionChannel } from "./doctor-cli-version.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { loadConfig, readContractSorobanSdkVersions, WELL_KNOWN_NETWORKS } from "@caatinga/core";
@@ -214,6 +215,10 @@ export function registerDoctorCommand(program: Command): void {
         }
 
         const ready = diagnostics.every((diagnostic) => diagnostic.ok);
+
+        // Advisory only: never contributes to `blocked`. Surfaces when this install
+        // is a pre-release (for example published under the `next` dist-tag).
+        await reportCliVersionChannel();
 
         let deployNetwork = options.network;
         if (!deployNetwork && ready && config) {
