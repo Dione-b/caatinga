@@ -52,6 +52,14 @@ describe("parseInvokeTarget", () => {
       expect.objectContaining({ code: CaatingaErrorCode.INVOKE_TARGET_INVALID })
     );
   });
+  it("rejects flag-shaped method names", () => {
+    expect(() => parseInvokeTarget("counter.--help")).toThrow(
+      expect.objectContaining({ code: CaatingaErrorCode.INVOKE_FAILED })
+    );
+    expect(() => parseInvokeTarget("counter.bad-name")).toThrow(
+      expect.objectContaining({ code: CaatingaErrorCode.INVOKE_FAILED })
+    );
+  });
 });
 
 describe("invokeContract", () => {

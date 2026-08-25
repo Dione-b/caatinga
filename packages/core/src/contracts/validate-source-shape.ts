@@ -1,8 +1,18 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { isLikelyPublicKeySource } from "../stellar-cli/recover-deploy-contract-id.js";
 
+const STELLAR_SECRET_KEY_PATTERN = /^S[A-Z2-7]{55}$/;
+
 export function validateSourceShape(source: string): CaatingaError | undefined {
-  if (source.startsWith("S")) {
+  if (source.startsWith("-")) {
+    return new CaatingaError(
+      "Refusing to accept a flag-shaped value as --source.",
+      CaatingaErrorCode.UNSAFE_SOURCE_ACCOUNT,
+      "Use a Stellar CLI identity alias instead, for example: --source alice"
+    );
+  }
+
+  if (STELLAR_SECRET_KEY_PATTERN.test(source)) {
     return new CaatingaError(
       "Refusing to accept a Stellar secret key as --source.",
       CaatingaErrorCode.SOURCE_IS_SECRET_KEY,
