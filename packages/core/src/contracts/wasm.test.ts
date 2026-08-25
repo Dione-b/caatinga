@@ -2,10 +2,11 @@ import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import {
   CURRENT_RUST_WASM_TARGET,
   LEGACY_RUST_WASM_TARGET,
+  isMissingRustWasmTargetError,
   resolveWasmArtifactPath,
   toCurrentWasmTargetPath,
 } from "./wasm.js";
@@ -136,5 +137,65 @@ describe("wasm target paths", () => {
         process.env.CARGO_TARGET_DIR = previous;
       }
     }
+  });
+});
+
+describe("isMissingRustWasmTargetError", () => {
+  const buildFailure = (options: { message?: string; hint?: string; cause?: unknown }) =>
+    new CaatingaError(
+      options.message ?? "cargo build failed",
+      CaatingaErrorCode.BUILD_FAILED,
+      options.hint,
+      options.cause
+    );
+
+  it("should_return_false_when_error_is_not_a_CaatingaError", () => {
+    expect(
+      isMissingRustWasmTargetError(
+        new Error(`the ${CURRENT_RUST_WASM_TARGET} target is not installed`)
+      )
+    ).toBe(false);
+  });
+
+  it("should_detect_missing_target_from_the_message", () => {
+    expect(
+      isMissingRustWasmTargetError(
+        buildFailure({
+          message: `error: the ${CURRENT_RUST_WASM_TARGET} target is not installed`,
+        })
+      )
+    ).toBe(true);
+  });
+
+  it("should_detect_missing_target_from_the_hint", () => {
+    expect(
+      isMissingRustWasmTargetError(
+        buildFailure({ hint: `run \`rustup target add ${CURRENT_RUST_WASM_TARGET}\`` })
+      )
+    ).toBe(true);
+  });
+
+  it("should_detect_missing_target_from_the_cause", () => {
+    expect(
+      isMissingRustWasmTargetError(
+        buildFailure({
+          cause: new Error(`target ${CURRENT_RUST_WASM_TARGET} needs to be installed`),
+        })
+      )
+    ).toBe(true);
+  });
+
+  it("should_return_false_when_the_target_is_named_without_a_missing_target_phrase", () => {
+    expect(
+      isMissingRustWasmTargetError(
+        buildFailure({ message: `compiling counter for ${CURRENT_RUST_WASM_TARGET} failed` })
+      )
+    ).toBe(false);
+  });
+
+  it("should_return_false_when_the_phrase_matches_but_the_target_is_not_named", () => {
+    expect(
+      isMissingRustWasmTargetError(buildFailure({ message: "linker `cc` not found" }))
+    ).toBe(false);
   });
 });

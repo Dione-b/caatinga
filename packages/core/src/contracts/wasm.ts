@@ -14,6 +14,38 @@ export function toCurrentWasmTargetPath(wasmPath: string): string {
   return wasmPath.replaceAll(LEGACY_RUST_WASM_TARGET, CURRENT_RUST_WASM_TARGET);
 }
 
+const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
+  "not installed",
+  "not found",
+  "needs to be installed",
+  "add the",
+  "rustup target",
+] as const;
+
+/**
+ * Heuristic: does this build failure mean the Rust wasm target is missing?
+ * Matched against the merged message/hint/cause text, so it stays a single
+ * definition shared by the single-contract and workspace build paths.
+ */
+export function isMissingRustWasmTargetError(error: unknown): boolean {
+  if (!(error instanceof CaatingaError)) {
+    return false;
+  }
+
+  const parts = [
+    error.message,
+    error.hint ?? "",
+    error.cause === undefined ? "" : String(error.cause),
+  ];
+  const haystack = parts.join("\n").toLowerCase();
+
+  if (!haystack.includes(CURRENT_RUST_WASM_TARGET)) {
+    return false;
+  }
+
+  return MISSING_WASM_TARGET_HINT_SUBSTRINGS.some((needle) => haystack.includes(needle));
+}
+
 export type ResolveWasmArtifactPathOptions = {
   sourcePath?: string;
 };

@@ -3,40 +3,17 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { resolveContract } from "./resolve-contract.js";
-import { CURRENT_RUST_WASM_TARGET, resolveWasmArtifactPath } from "./wasm.js";
+import {
+  CURRENT_RUST_WASM_TARGET,
+  isMissingRustWasmTargetError,
+  resolveWasmArtifactPath,
+} from "./wasm.js";
 
 export type BuildContractOptions = {
   config: CaatingaConfig;
   contractName: string;
   cwd?: string;
 };
-
-const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
-  "not installed",
-  "not found",
-  "needs to be installed",
-  "add the",
-  "rustup target",
-] as const;
-
-function isMissingRustWasmTargetError(error: unknown): boolean {
-  if (!(error instanceof CaatingaError)) {
-    return false;
-  }
-
-  const parts = [
-    error.message,
-    error.hint ?? "",
-    error.cause === undefined ? "" : String(error.cause),
-  ];
-  const haystack = parts.join("\n").toLowerCase();
-
-  if (!haystack.includes(CURRENT_RUST_WASM_TARGET)) {
-    return false;
-  }
-
-  return MISSING_WASM_TARGET_HINT_SUBSTRINGS.some((needle) => haystack.includes(needle));
-}
 
 export async function buildContract(options: BuildContractOptions) {
   const cwd = options.cwd ?? process.cwd();
