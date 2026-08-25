@@ -24,7 +24,9 @@ export async function probeMissingStellarCliFeatures(version: string): Promise<s
   const missing: string[] = [];
 
   if (semver.valid(version) && semver.lt(version, STELLAR_CLI_MIN_VERSION)) {
-    return ["contract-invoke-sign"];
+    // Below the minimum version every required subcommand is considered
+    // unreliable, not just contract-invoke-sign — report them all.
+    return [...STELLAR_CLI_REQUIRED_FEATURES];
   }
 
   for (const feature of STELLAR_CLI_REQUIRED_FEATURES) {

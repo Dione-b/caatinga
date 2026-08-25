@@ -41,3 +41,11 @@ describe("probeMissingStellarCliFeatures (live Stellar CLI)", () => {
     expect(parseStellarCliVersion(`stellar ${report.version}`)).toBe(report.version);
   });
 });
+
+describe("probeMissingStellarCliFeatures (below minimum version)", () => {
+  it("reports every required feature as missing when the CLI is below the minimum", async () => {
+    // Returns early without probing the binary, so this needs no live CLI.
+    const missing = await probeMissingStellarCliFeatures("22.0.0");
+    expect(missing.sort()).toEqual([...STELLAR_CLI_REQUIRED_FEATURES].sort());
+  });
+});
