@@ -42,11 +42,11 @@ export function buildToolchainPrepend(
       (entry) => entry !== binDir && executableExists(entry, "stellar")
     );
 
+    prepend.push(binDir);
+
     if (externalStellarDir && executableExists(binDir, "stellar")) {
       prepend.push(externalStellarDir);
     }
-
-    prepend.push(binDir);
   }
 
   return prepend;

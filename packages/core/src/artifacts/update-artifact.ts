@@ -31,6 +31,7 @@ function appendHistory(
     supersededAt,
     reason,
     ...(upgradeType ? { upgradeType } : {}),
+    ...(existing.metadata ? { metadata: existing.metadata } : {}),
   };
 
   return [...(existing.history ?? []), entry];
@@ -116,6 +117,7 @@ export function restoreArtifactFromHistory(input: {
     wasmPath: current.wasmPath,
     dependencies: current.dependencies,
     resolvedDeployArgs: current.resolvedDeployArgs,
+    ...(fromHistory.metadata ? { metadata: fromHistory.metadata } : {}),
     history: [
       ...(current.history ?? []),
       {
@@ -124,6 +126,7 @@ export function restoreArtifactFromHistory(input: {
         deployedAt: current.deployedAt,
         supersededAt,
         reason: "rollback",
+        ...(current.metadata ? { metadata: current.metadata } : {}),
       },
     ],
   };

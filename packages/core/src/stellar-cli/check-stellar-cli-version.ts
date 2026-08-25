@@ -61,11 +61,8 @@ export async function checkStellarCliVersion(
   return report;
 }
 
-function defaultEmitWarning(warning: CompatibilityWarning): void {
-  const lines = [
-    `Warning: ${warning.message}`,
-    warning.remediation ? `  ${warning.remediation}` : undefined,
-  ].filter((line): line is string => Boolean(line));
-
-  process.stderr.write(`${lines.join("\n")}\n`);
+function defaultEmitWarning(_warning: CompatibilityWarning): void {
+  // Intentionally a no-op: library consumers and browser builds should not
+  // receive unsolicited stderr output.  Supply an `onWarning` callback to
+  // handle warnings explicitly.
 }
