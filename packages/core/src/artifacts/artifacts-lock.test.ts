@@ -1,7 +1,9 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { withArtifactsLock } from "./artifacts-lock.js";
 import { readArtifacts } from "./read-artifacts.js";
 import { updateArtifact } from "./update-artifact.js";
@@ -57,5 +59,75 @@ describe("withArtifactsLock", () => {
     );
 
     await expect(withArtifactsLock(cwd, () => Promise.resolve("ok"))).resolves.toBe("ok");
+  });
+});
+
+/** A PID that is guaranteed to have exited, so the lock it "holds" is stale. */
+async function deadPid(): Promise<number> {
+  const child = spawn(process.execPath, ["-e", ""], { stdio: "ignore" });
+  await new Promise((resolve) => child.on("close", resolve));
+  return child.pid as number;
+}
+
+function lockPathFor(cwd: string): string {
+  return path.join(cwd, "caatinga.artifacts.json.lock");
+}
+
+describe("withArtifactsLock stale lock handling", () => {
+  it("should_record_the_owning_pid_in_the_lockfile", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-lock-"));
+    tempDirs.push(cwd);
+
+    const owner = await withArtifactsLock(cwd, async () =>
+      JSON.parse(await readFile(lockPathFor(cwd), "utf8"))
+    );
+
+    expect(owner.pid).toBe(process.pid);
+    expect(typeof owner.since).toBe("number");
+  });
+
+  it("should_reclaim_a_lock_left_behind_by_a_dead_process", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-lock-"));
+    tempDirs.push(cwd);
+
+    await writeFile(
+      lockPathFor(cwd),
+      JSON.stringify({ pid: await deadPid(), since: Date.now() - 60_000 }),
+      "utf8"
+    );
+
+    const startedAt = Date.now();
+    // No timeoutMs override on purpose: the point is that the default 15s wait
+    // is never entered when the owner is gone.
+    await expect(withArtifactsLock(cwd, () => Promise.resolve("ok"))).resolves.toBe("ok");
+    expect(Date.now() - startedAt).toBeLessThan(2_000);
+  });
+
+  it("should_throw_ARTIFACTS_LOCK_TIMEOUT_naming_the_live_owner", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-lock-"));
+    tempDirs.push(cwd);
+
+    await withArtifactsLock(cwd, async () => {
+      await expect(
+        withArtifactsLock(cwd, () => Promise.resolve("inner"), { timeoutMs: 100 })
+      ).rejects.toMatchObject({
+        code: CaatingaErrorCode.ARTIFACTS_LOCK_TIMEOUT,
+        hint: expect.stringContaining(`PID ${process.pid}`),
+      });
+    });
+  });
+
+  it("should_not_reclaim_a_lockfile_that_records_no_owner", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-lock-"));
+    tempDirs.push(cwd);
+
+    await writeFile(lockPathFor(cwd), "", "utf8");
+
+    await expect(
+      withArtifactsLock(cwd, () => Promise.resolve("ok"), { timeoutMs: 100 })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.ARTIFACTS_LOCK_TIMEOUT,
+      hint: expect.stringContaining("no owner"),
+    });
   });
 });
