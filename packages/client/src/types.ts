@@ -37,6 +37,7 @@ export type CaatingaInvokeStatus =
   | "prepared"
   | "signed"
   | "submitted"
+  | "pending"
   | "confirmed"
   | "failed";
 
@@ -56,6 +57,8 @@ export interface CaatingaInvokeResult<T = unknown> {
   contractId: string;
   transactionHash?: string;
   result?: T;
+  resultXdr?: string;
+  diagnosticEvents?: unknown[];
   xdr?: {
     unsigned?: string;
     prepared?: string;

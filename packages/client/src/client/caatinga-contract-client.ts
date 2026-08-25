@@ -122,12 +122,16 @@ export class CaatingaContractClient {
     const normalized = normalizeSubmitResult<T>(raw);
 
     return {
-      status: "confirmed",
+      status: normalized.status,
       contract: this.contractName,
       method,
       contractId,
       ...(normalized.transactionHash ? { transactionHash: normalized.transactionHash } : {}),
       ...(normalized.result !== undefined ? { result: normalized.result } : {}),
+      ...(normalized.resultXdr !== undefined ? { resultXdr: normalized.resultXdr } : {}),
+      ...(normalized.diagnosticEvents !== undefined
+        ? { diagnosticEvents: normalized.diagnosticEvents }
+        : {}),
       ...(debugXdr
         ? {
             xdr: {
