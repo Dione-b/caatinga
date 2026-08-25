@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
-import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 
 const runCommand = vi.hoisted(() => vi.fn());
 
@@ -162,5 +162,87 @@ describe("upgradeContractInPlace", () => {
         build: false,
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.ARTIFACT_NOT_FOUND });
+  });
+
+  it("should_retry_on_transient_wasm_not_yet_indexed_failure", async () => {
+    await seedProject(NEW_WASM, OLD_HASH);
+    let invokeCalls = 0;
+    
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "build") {
+        return { stdout: "built", stderr: "", all: "built" };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "upload") {
+        return { stdout: `${NEW_HASH}\n`, stderr: "", all: `${NEW_HASH}\n` };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        invokeCalls++;
+        if (invokeCalls === 1) {
+          const error = new Error("Simulation failed");
+          (error as any).code = CaatingaErrorCode.INVOKE_FAILED;
+          (error as any).hint = "Wasm does not exist";
+          Object.setPrototypeOf(error, Object.getPrototypeOf(new CaatingaError("Simulation failed", CaatingaErrorCode.INVOKE_FAILED)));
+          throw error;
+        }
+        return { stdout: "[]", stderr: "", all: "[]" };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    const onRetry = vi.fn();
+
+    const result = await upgradeContractInPlace({
+      config: baseConfig,
+      contractName: "sticker",
+      networkName: "testnet",
+      source: "deployer",
+      cwd: tmpDir,
+      upgradeRetryDelaysMs: [10],
+      onTransientUpgradeRetry: onRetry,
+    });
+
+    expect(result.skipped).toBe(false);
+    expect(invokeCalls).toBe(2);
+    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(onRetry).toHaveBeenCalledWith({
+      attempt: 1,
+      maxAttempts: 2,
+      delayMs: 10,
+    });
+  });
+
+  it("should_not_retry_on_non_transient_invoke_failure", async () => {
+    await seedProject(NEW_WASM, OLD_HASH);
+    
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "build") {
+        return { stdout: "built", stderr: "", all: "built" };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "upload") {
+        return { stdout: `${NEW_HASH}\n`, stderr: "", all: `${NEW_HASH}\n` };
+      }
+      if (command === "stellar" && args[0] === "contract" && args[1] === "invoke") {
+        const error = new Error("Simulation failed: MissingValue");
+        (error as any).code = CaatingaErrorCode.INVOKE_FAILED;
+        (error as any).hint = "some other hint";
+        Object.setPrototypeOf(error, Object.getPrototypeOf(new CaatingaError("Simulation failed: MissingValue", CaatingaErrorCode.INVOKE_FAILED)));
+        throw error;
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    const onRetry = vi.fn();
+
+    await expect(upgradeContractInPlace({
+      config: baseConfig,
+      contractName: "sticker",
+      networkName: "testnet",
+      source: "deployer",
+      cwd: tmpDir,
+      upgradeRetryDelaysMs: [10],
+      onTransientUpgradeRetry: onRetry,
+    })).rejects.toMatchObject({ code: CaatingaErrorCode.INVOKE_FAILED });
+
+    expect(onRetry).not.toHaveBeenCalled();
   });
 });
