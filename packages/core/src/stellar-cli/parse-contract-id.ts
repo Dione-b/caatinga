@@ -1,16 +1,19 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { STRKEY_BODY } from "./strkey.js";
 
 /**
  * Stellar strkeys are RFC4648 base32, so the alphabet is A-Z2-7 — digits 0, 1, 8
- * and 9 never appear. Matches the source-account check in recover-deploy-contract-id.
+ * and 9 never appear. Built from the shared {@link STRKEY_BODY} so the scan stays
+ * in sync with the anchored contract-strkey check in the artifacts schema, while
+ * keeping the unanchored word-boundary semantics this stdout scan needs.
  */
-const CONTRACT_ID_REGEX_GLOBAL = /\bC[A-Z2-7]{55}\b/g;
+const CONTRACT_ID_REGEX_GLOBAL = new RegExp(`\\bC${STRKEY_BODY}\\b`, "g");
 
 /** e.g. `Contract ID: C...`, `contract_id = "C..."` */
 const LABELED_LINE_REGEX = /contract[\s_-]*id\s*[:=]/i;
 
 /** A line holding nothing but the ID, optionally quoted — the CLI's own stdout shape. */
-const STANDALONE_LINE_REGEX = /^\s*["']?(C[A-Z2-7]{55})["']?\s*$/;
+const STANDALONE_LINE_REGEX = new RegExp(`^\\s*["']?(C${STRKEY_BODY})["']?\\s*$`);
 
 function lastMatch(line: string): string | undefined {
   const matches = line.match(CONTRACT_ID_REGEX_GLOBAL);

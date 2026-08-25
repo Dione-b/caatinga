@@ -1,9 +1,8 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { STELLAR_ADDRESS_REGEX } from "../stellar-cli/strkey.js";
 import { formatNamedCliArgs } from "./format-cli-args.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import type { DeployArgValue } from "./resolve-deploy-args.js";
-
-const STELLAR_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/;
 
 export type ResolveMethodArgsOptions = {
   args: Record<string, DeployArgValue>;

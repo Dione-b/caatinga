@@ -51,8 +51,8 @@ describe("evaluateEnvDrift", () => {
           testnet: {
             contracts: {
               counter: {
-                contractId: "CCOUNTERCONTRACTID",
-                wasmHash: "abc123",
+                contractId: `C${"C".repeat(55)}`,
+                wasmHash: "a".repeat(64),
                 deployedAt: "2026-07-04T00:00:00.000Z",
                 sourcePath: "./contracts/counter",
                 wasmPath: "./rel/counter.wasm",
