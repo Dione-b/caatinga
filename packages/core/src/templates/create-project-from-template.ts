@@ -37,7 +37,6 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
 
   const manifest = await readTemplateManifest(templateDir);
 
-  const mergeIntoExisting = Boolean(options.filter);
   await mkdir(targetDir, { recursive: true });
   await cp(templateDir, targetDir, {
     recursive: true,
@@ -47,9 +46,12 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
   });
 
   await replaceTemplateVariables(targetDir, options.projectName);
-  if (!mergeIntoExisting) {
-    await ensureArtifacts(targetDir, options.projectName);
-  }
+  // Run in both fresh and merge modes (#91). ensureArtifacts only sets the
+  // `project` field — preserving any existing contracts/history via spread —
+  // or creates initial artifacts when none exist. So a template that ships
+  // static artifacts still gets the right project name, and a merge into an
+  // existing project keeps its data instead of being left without artifacts.
+  await ensureArtifacts(targetDir, options.projectName);
 
   return { targetDir, template: manifest };
 }

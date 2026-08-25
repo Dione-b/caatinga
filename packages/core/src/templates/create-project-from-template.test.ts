@@ -305,6 +305,71 @@ describe("createProjectFromTemplate", () => {
     expect(configToml).not.toContain("__PROJECT_NAME__");
   });
 
+  it("merge mode updates the project name in existing artifacts without dropping user data (#91)", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
+    const templateDir = path.join(tmpDir, "template");
+    const targetDir = path.join(tmpDir, "existing-project");
+
+    await mkdir(path.join(templateDir, "circuits"), { recursive: true });
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "zk-starter",
+        version: "0.1.0",
+        caatinga: { compatibleCore: "^3.0.0", templateVersion: 1 },
+        frontend: { framework: "vite-react", packageManager: "npm" },
+        contracts: { path: "contracts" },
+        files: { config: "caatinga.config.ts", artifacts: "caatinga.artifacts.json" },
+      }),
+      "utf8"
+    );
+    await writeFile(path.join(templateDir, "circuits", "config.toml"), "name = \"x\"\n", "utf8");
+
+    // Pre-existing project with its own artifacts: a deployed contract plus a
+    // stale project name that the merge should correct.
+    await mkdir(targetDir, { recursive: true });
+    await writeFile(
+      path.join(targetDir, "caatinga.artifacts.json"),
+      JSON.stringify({
+        project: "old-name",
+        version: 2,
+        networks: {
+          testnet: {
+            contracts: {
+              counter: {
+                contractId: `C${"A".repeat(55)}`,
+                wasmHash: "a".repeat(64),
+                deployedAt: "2026-01-01T00:00:00.000Z",
+                sourcePath: "./contracts/counter",
+                wasmPath: "./counter.wasm",
+                dependencies: [],
+                resolvedDeployArgs: {},
+              },
+            },
+            dependencyGraph: {},
+          },
+        },
+      }),
+      "utf8"
+    );
+
+    await createProjectFromTemplate({
+      projectName: "renamed-dapp",
+      targetDir,
+      templateDir,
+      filter: (relativePath) =>
+        relativePath === "circuits" || relativePath.startsWith("circuits/"),
+    });
+
+    const artifacts = JSON.parse(
+      await readFile(path.join(targetDir, "caatinga.artifacts.json"), "utf8")
+    );
+    // project renamed...
+    expect(artifacts.project).toBe("renamed-dapp");
+    // ...and the deployed contract preserved.
+    expect(artifacts.networks.testnet.contracts.counter.contractId).toBe(`C${"A".repeat(55)}`);
+  });
+
   it("should_pin_internal_dependency_ranges_for_official_templates", async () => {
     const templateRoot = path.resolve(__dirname, "../../../templates");
     const packageVersions = await Promise.all([
