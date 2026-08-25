@@ -47,18 +47,16 @@ describe("init command", () => {
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("npm install");
-      expect(output).toContain("npx caatinga build    counter");
-      expect(output).toContain(
-        "npx caatinga deploy   counter --network testnet --source <identity>"
-      );
-      expect(output).not.toContain("npx caatinga generate counter");
+      expect(output).toContain("npx ctg build    counter");
+      expect(output).toContain("npx ctg deploy   counter --network testnet --source <identity>");
+      expect(output).not.toContain("npx ctg generate counter");
       expect(output).toContain("npm run dev");
       expect(output).toContain(
         "Note: deploy generates TypeScript bindings automatically (--no-generate to skip)"
       );
       expect(output).toContain("the dApp reads the contract ID from caatinga.artifacts.json");
       expect(output).toContain(
-        "If generation fails, recover with: npx caatinga generate --network testnet"
+        "If generation fails, recover with: npx ctg generate --network testnet"
       );
     } finally {
       logSpy.mockRestore();
@@ -79,7 +77,7 @@ describe("init command", () => {
       expect(output).toContain(
         "If generation fails, recover with: npx ctg generate --network testnet"
       );
-      expect(output).not.toContain("npx caatinga build");
+      expect(output).not.toContain("npx ctg build app");
     } finally {
       process.argv = originalArgv;
       logSpy.mockRestore();
@@ -97,8 +95,8 @@ describe("init command", () => {
       await createInitProgram().parseAsync(["node", "caatinga", "init", "my-dapp"]);
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
-      expect(output).toContain("npx caatinga build");
-      expect(output).toContain("npx caatinga deploy   --network testnet --source <identity>");
+      expect(output).toContain("npx ctg build");
+      expect(output).toContain("npx ctg deploy   --network testnet --source <identity>");
       expect(output).toContain(
         "Note: deploy generates TypeScript bindings automatically (--no-generate to skip)"
       );
@@ -122,8 +120,8 @@ describe("init command", () => {
 
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Minimal project created");
-      expect(output).toContain("npx caatinga build app");
-      expect(output).toContain("npx caatinga read app.hello --network testnet --source <identity>");
+      expect(output).toContain("npx ctg build app");
+      expect(output).toContain("npx ctg read app.hello --network testnet --source <identity>");
       expect(output).not.toContain("npm run dev");
     } finally {
       logSpy.mockRestore();
