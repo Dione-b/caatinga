@@ -4,12 +4,12 @@ import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js"
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
+import { XDR_SIGNING_FAILURE_REGEX } from "./signing-failure.js";
 
 const TX_HASH_REGEX = /Transaction hash is ([a-f0-9]{64})/i;
 
 /** Horizon is only consulted on the deploy-recovery path; fail fast rather than stall a failed deploy. */
 export const HORIZON_RECOVERY_TIMEOUT_MS = 10_000;
-const DEPLOY_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
 type HorizonOperation = {
   transaction_successful?: boolean;
@@ -117,7 +117,7 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
   /** Abort the Horizon lookup after this many ms (default {@link HORIZON_RECOVERY_TIMEOUT_MS}). */
   horizonTimeoutMs?: number;
 }): Promise<string | null> {
-  if (!DEPLOY_SIGNING_FAILURE_REGEX.test(options.output)) {
+  if (!XDR_SIGNING_FAILURE_REGEX.test(options.output)) {
     return null;
   }
 

@@ -9,7 +9,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
 import { resolveCliMethodArgs } from "./resolve-method-args.js";
 
-const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
+import { XDR_SIGNING_FAILURE_REGEX } from "../stellar-cli/signing-failure.js";
 
 export type { InvokeTarget } from "./invoke-target.js";
 export { parseInvokeTarget } from "./invoke-target.js";
@@ -85,7 +85,7 @@ export async function invokeContract(options: InvokeContractOptions) {
     if (
       error instanceof CaatingaError &&
       error.code === CaatingaErrorCode.INVOKE_FAILED &&
-      INVOKE_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
+      XDR_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
     ) {
       throw new CaatingaError(
         error.message,
