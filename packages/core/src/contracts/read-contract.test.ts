@@ -56,7 +56,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",
@@ -104,7 +104,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",
@@ -147,7 +147,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",

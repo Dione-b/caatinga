@@ -7,6 +7,10 @@ import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
 import { syncFrontendEnv } from "./sync-frontend-env.js";
 
+const COIN_ID = `C${"O".repeat(55)}`;
+const NEW_COIN_ID = `C${"N".repeat(55)}`;
+const COIN_WASM_HASH = "abcdef1234567890".repeat(4);
+
 const tempDirs: string[] = [];
 
 afterEach(async () => {
@@ -61,8 +65,8 @@ describe("syncFrontendEnv", () => {
           testnet: {
             contracts: {
               coin: {
-                contractId: "CCOINCONTRACTID",
-                wasmHash: "hash",
+                contractId: COIN_ID,
+                wasmHash: "a".repeat(64),
                 deployedAt: "2026-06-25T00:00:00.000Z",
                 sourcePath: "./contracts/coin",
                 wasmPath: "./target/wasm32v1-none/release/coin.wasm",
@@ -81,11 +85,11 @@ describe("syncFrontendEnv", () => {
     const contents = await readFile(result.envFile, "utf8");
 
     expect(result.entries).toEqual([
-      { key: "VITE_COIN", value: "CCOINCONTRACTID" },
+      { key: "VITE_COIN", value: COIN_ID },
       { key: "VITE_RPC_URL", value: "https://soroban-testnet.stellar.org" },
       { key: "VITE_NETWORK_PASSPHRASE", value: "Test SDF Network ; September 2015" },
     ]);
-    expect(contents).toContain("VITE_COIN=CCOINCONTRACTID");
+    expect(contents).toContain(`VITE_COIN=${COIN_ID}`);
     expect(contents).toContain("VITE_RPC_URL=https://soroban-testnet.stellar.org");
     expect(contents).toContain('VITE_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"');
   });
@@ -116,8 +120,8 @@ describe("syncFrontendEnv", () => {
           testnet: {
             contracts: {
               coin: {
-                contractId: "CCOINCONTRACTID",
-                wasmHash: "abcdef1234567890",
+                contractId: COIN_ID,
+                wasmHash: COIN_WASM_HASH,
                 deployedAt: "2026-06-25T00:00:00.000Z",
                 sourcePath: "./contracts/coin",
                 wasmPath: "./target/wasm32v1-none/release/coin.wasm",
@@ -136,11 +140,11 @@ describe("syncFrontendEnv", () => {
     const contents = await readFile(result.envFile, "utf8");
 
     expect(result.entries).toEqual([
-      { key: "VITE_COIN", value: "CCOINCONTRACTID" },
-      { key: "VITE_COIN_WASM_HASH", value: "abcdef1234567890" },
+      { key: "VITE_COIN", value: COIN_ID },
+      { key: "VITE_COIN_WASM_HASH", value: COIN_WASM_HASH },
       { key: "VITE_RPC_URL", value: "https://soroban-testnet.stellar.org" },
     ]);
-    expect(contents).toContain("VITE_COIN_WASM_HASH=abcdef1234567890");
+    expect(contents).toContain(`VITE_COIN_WASM_HASH=${COIN_WASM_HASH}`);
   });
 
   it("fails when .wasmHash source key references unknown contract", async () => {
@@ -190,8 +194,8 @@ describe("syncFrontendEnv", () => {
           testnet: {
             contracts: {
               coin: {
-                contractId: "CNEWCONTRACTID",
-                wasmHash: "hash",
+                contractId: NEW_COIN_ID,
+                wasmHash: "a".repeat(64),
                 deployedAt: "2026-06-25T00:00:00.000Z",
                 sourcePath: "./contracts/coin",
                 wasmPath: "./target/wasm32v1-none/release/coin.wasm",
@@ -228,7 +232,7 @@ describe("syncFrontendEnv", () => {
     expect(contents).toContain("STRIPE_SECRET_KEY=sk_test_do_not_lose_me");
     expect(contents).toContain("VITE_FEATURE_FLAG=true");
 
-    expect(contents).toContain("VITE_COIN=CNEWCONTRACTID");
+    expect(contents).toContain(`VITE_COIN=${NEW_COIN_ID}`);
     expect(contents).not.toContain("COLDCONTRACTID");
 
     expect(contents).toContain("VITE_RPC_URL=https://soroban-testnet.stellar.org");

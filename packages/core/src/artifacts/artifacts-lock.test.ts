@@ -18,7 +18,7 @@ afterEach(async () => {
 function contractRecord(contractId: string) {
   return {
     contractId,
-    wasmHash: "hash",
+    wasmHash: "a".repeat(64),
     deployedAt: "2026-06-25T00:00:00.000Z",
     sourcePath: "./contracts/x",
     wasmPath: "./target/x.wasm",
@@ -43,11 +43,13 @@ describe("withArtifactsLock", () => {
         return writeArtifacts(next, cwd);
       });
 
-    await Promise.all([deploy("alpha", "CALPHA"), deploy("beta", "CBETA")]);
+    const alphaId = "C".padEnd(56, "A");
+    const betaId = "C".padEnd(56, "B");
+    await Promise.all([deploy("alpha", alphaId), deploy("beta", betaId)]);
 
     const artifacts = await readArtifacts(cwd);
-    expect(artifacts.networks.testnet?.contracts.alpha?.contractId).toBe("CALPHA");
-    expect(artifacts.networks.testnet?.contracts.beta?.contractId).toBe("CBETA");
+    expect(artifacts.networks.testnet?.contracts.alpha?.contractId).toBe(alphaId);
+    expect(artifacts.networks.testnet?.contracts.beta?.contractId).toBe(betaId);
   });
 
   it("releases the lock when the callback throws", async () => {

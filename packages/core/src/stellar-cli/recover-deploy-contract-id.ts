@@ -4,6 +4,7 @@ import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js"
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
+import { STELLAR_ADDRESS_REGEX } from "./strkey.js";
 
 const TX_HASH_REGEX = /Transaction hash is ([a-f0-9]{64})/i;
 
@@ -25,7 +26,7 @@ type HorizonOperationsResponse = {
 };
 
 export function isLikelyPublicKeySource(source: string): boolean {
-  return /^G[A-Z2-7]{55}$/.test(source);
+  return STELLAR_ADDRESS_REGEX.test(source);
 }
 
 export function decimalSaltToHex(salt: string): string {

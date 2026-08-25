@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { CONTRACT_ID_REGEX, WASM_HASH_REGEX } from "../stellar-cli/strkey.js";
+
+const CONTRACT_ID_MESSAGE =
+  "contractId must be a Stellar contract strkey: a `C` prefix followed by 55 base32 characters (A-Z2-7).";
+const WASM_HASH_MESSAGE = "wasmHash must be 64 lowercase hex characters.";
 
 export const ArtifactSupersedeReasonSchema = z.enum(["upgrade", "rollback", "force-redeploy"]);
 
@@ -24,8 +29,8 @@ export const ContractMetadataSchema = z.object({
 export type ContractMetadata = z.infer<typeof ContractMetadataSchema>;
 
 export const ContractArtifactHistoryEntrySchema = z.object({
-  contractId: z.string().min(1),
-  wasmHash: z.string().min(1),
+  contractId: z.string().regex(CONTRACT_ID_REGEX, CONTRACT_ID_MESSAGE),
+  wasmHash: z.string().regex(WASM_HASH_REGEX, WASM_HASH_MESSAGE),
   deployedAt: z.string().datetime(),
   supersededAt: z.string().datetime(),
   reason: ArtifactSupersedeReasonSchema.optional(),
@@ -36,8 +41,8 @@ export const ContractArtifactHistoryEntrySchema = z.object({
 export type ContractArtifactHistoryEntry = z.infer<typeof ContractArtifactHistoryEntrySchema>;
 
 export const ContractArtifactSchema = z.object({
-  contractId: z.string().min(1),
-  wasmHash: z.string().min(1),
+  contractId: z.string().regex(CONTRACT_ID_REGEX, CONTRACT_ID_MESSAGE),
+  wasmHash: z.string().regex(WASM_HASH_REGEX, WASM_HASH_MESSAGE),
   deployedAt: z.string().datetime(),
   sourcePath: z.string().min(1),
   wasmPath: z.string().min(1),

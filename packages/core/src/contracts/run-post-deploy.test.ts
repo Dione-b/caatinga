@@ -64,7 +64,7 @@ describe("runPostDeployHooks", () => {
       "coin",
       {
         contractId: CONTRACT_ID,
-        wasmHash: "abc123",
+        wasmHash: "a".repeat(64),
         deployedAt: new Date().toISOString(),
         sourcePath: "./contracts/coin",
         wasmPath: "./rel/coin.wasm",
