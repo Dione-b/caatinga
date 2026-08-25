@@ -5,6 +5,7 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
+import { withRetries } from "../shell/with-retries.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { formatNamedCliArgs } from "./format-cli-args.js";
 import { readContract } from "./read-contract.js";
@@ -38,12 +39,6 @@ export type PostDeployHookResult = {
 };
 
 const DEFAULT_HOOK_RETRY_DELAYS_MS = [2000, 5000] as const;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 function isTransientHookFailure(error: unknown): boolean {
   return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
@@ -184,12 +179,21 @@ export async function runPostDeployHooks(
       output = readResult.result?.trim() ?? "";
     } else {
       const retryDelaysMs = options.hookRetryDelaysMs ?? DEFAULT_HOOK_RETRY_DELAYS_MS;
-      const maxHookAttempts = retryDelaysMs.length + 1;
-      let result: { stdout: string; stderr: string; all: string } = undefined!;
 
-      for (let attempt = 0; attempt < maxHookAttempts; attempt++) {
-        try {
-          result = await runCommand(
+      const result = await withRetries({
+        delaysMs: retryDelaysMs,
+        isRetryable: (error) => isTransientHookFailure(error),
+        onRetry: (info) =>
+          options.onTransientHookRetry?.({
+            hook: {
+              contract: hook.contract,
+              method: hook.method,
+              kind: hookKind,
+            },
+            ...info,
+          }),
+        run: () =>
+          runCommand(
             "stellar",
             [
               "contract",
@@ -207,32 +211,8 @@ export async function runPostDeployHooks(
               cwd,
               failureCode: CaatingaErrorCode.INVOKE_FAILED,
             }
-          );
-          break;
-        } catch (error) {
-          const isLastAttempt = attempt === maxHookAttempts - 1;
-          if (!isTransientHookFailure(error) || isLastAttempt) {
-            throw error;
-          }
-
-          const delayMs = retryDelaysMs[attempt];
-          try {
-            options.onTransientHookRetry?.({
-              hook: {
-                contract: hook.contract,
-                method: hook.method,
-                kind: hookKind,
-              },
-              attempt: attempt + 1,
-              maxAttempts: maxHookAttempts,
-              delayMs,
-            });
-          } catch {
-            // Callback error is non-fatal; original transient error takes precedence.
-          }
-          await sleep(delayMs);
-        }
-      }
+          ),
+      });
 
       output = (result.stdout || result.all || "").trim();
     }

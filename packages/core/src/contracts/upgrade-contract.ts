@@ -9,6 +9,7 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
+import { withRetries } from "../shell/with-retries.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
 import { buildContract } from "./build-contract.js";
 import { assertSafeSourceAccount } from "./source-account.js";
@@ -48,12 +49,6 @@ export type UpgradeContractResult = {
 const DEFAULT_UPGRADE_RETRY_DELAYS_MS = [2000, 5000] as const;
 const DEFAULT_UPGRADE_METHOD = "upgrade";
 const DEFAULT_WASM_ARG = "new_wasm_hash";
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 function isTransientUpgradeFailure(error: unknown): boolean {
   return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
@@ -115,53 +110,47 @@ export async function upgradeContractInPlace(
   });
 
   const retryDelaysMs = options.upgradeRetryDelaysMs ?? DEFAULT_UPGRADE_RETRY_DELAYS_MS;
-  const maxAttempts = retryDelaysMs.length + 1;
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      await runCommand(
-        "stellar",
-        [
-          "contract",
-          "invoke",
-          "--id",
-          existing.contractId,
-          "--source-account",
-          source,
-          ...buildStellarNetworkArgs(network),
-          "--",
-          upgradeMethod,
-          `--${wasmArg}`,
-          upload.wasmHash,
-        ],
-        {
-          cwd,
-          failureCode: CaatingaErrorCode.INVOKE_FAILED,
-        }
+  try {
+    await withRetries({
+      delaysMs: retryDelaysMs,
+      isRetryable: (error) => isTransientUpgradeFailure(error),
+      onRetry: (info) => options.onTransientUpgradeRetry?.(info),
+      run: () =>
+        runCommand(
+          "stellar",
+          [
+            "contract",
+            "invoke",
+            "--id",
+            existing.contractId,
+            "--source-account",
+            source,
+            ...buildStellarNetworkArgs(network),
+            "--",
+            upgradeMethod,
+            `--${wasmArg}`,
+            upload.wasmHash,
+          ],
+          {
+            cwd,
+            failureCode: CaatingaErrorCode.INVOKE_FAILED,
+          }
+        ),
+    });
+  } catch (error) {
+    // Once retries are exhausted (or the failure was never transient), an
+    // INVOKE_FAILED almost always means the contract lacks the upgrade entry
+    // point or admin auth — rewrap with that actionable hint.
+    if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
+      throw new CaatingaError(
+        error.message,
+        error.code,
+        `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use ctg deploy --upgrade for redeploy.`,
+        error
       );
-      break;
-    } catch (error) {
-      const isLastAttempt = attempt === maxAttempts - 1;
-      if (!isTransientUpgradeFailure(error) || isLastAttempt) {
-        if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
-          throw new CaatingaError(
-            error.message,
-            error.code,
-            `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use ctg deploy --upgrade for redeploy.`,
-            error
-          );
-        }
-        throw error;
-      }
-
-      const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
-      options.onTransientUpgradeRetry?.({
-        attempt: attempt + 1,
-        maxAttempts,
-        delayMs,
-      });
-      await sleep(delayMs);
     }
+    throw error;
   }
 
   const metadata = await collectDeploymentMetadata({
