@@ -141,6 +141,8 @@ describe("upgradeContractInPlace", () => {
     });
 
     expect(result.skipped).toBe(true);
+    // #85: the skip path must return the artifacts file path, not cwd.
+    expect(result.artifactPath).toBe(path.join(tmpDir, "caatinga.artifacts.json"));
     const uploadCalls = runCommand.mock.calls.filter(([, args]) => args[1] === "upload");
     const invokeCalls = runCommand.mock.calls.filter(([, args]) => args[1] === "invoke");
     expect(uploadCalls).toHaveLength(0);

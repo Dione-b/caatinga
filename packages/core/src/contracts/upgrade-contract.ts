@@ -1,3 +1,4 @@
+import path from "node:path";
 import { withArtifactsLock } from "../artifacts/artifacts-lock.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
@@ -102,7 +103,9 @@ export async function upgradeContractInPlace(
       wasmHash: existing.wasmHash,
       network,
       skipped: true,
-      artifactPath: cwd,
+      // Match the non-skip path (and deploy-contract), which returns the
+      // artifacts file path — not the working directory.
+      artifactPath: path.resolve(cwd, "caatinga.artifacts.json"),
     };
   }
 
