@@ -68,7 +68,9 @@ export async function inspectContract(
     detail = "Contract interface reachable on network.";
   } catch (error) {
     reachable = false;
-    detail = error instanceof CaatingaError ? error.message : "Contract not reachable on network.";
+    // #96: preserve the underlying message for any Error, not just CaatingaError,
+    // so an unexpected failure isn't flattened to a generic string.
+    detail = error instanceof Error ? error.message : "Contract not reachable on network.";
   }
 
   let localHash: string | undefined;
