@@ -3,8 +3,9 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { CaatingaConfig } from "../config/config.schema.js";
+import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
-import { evaluateEnvDrift } from "./evaluate-env-drift.js";
+import { evaluateEnvDrift, evaluateWasmDrift } from "./evaluate-env-drift.js";
 import { syncFrontendEnv } from "./sync-frontend-env.js";
 
 const tempDirs: string[] = [];
@@ -108,5 +109,17 @@ describe("evaluateEnvDrift", () => {
     });
 
     expect(report).toBeNull();
+  });
+
+  // #87: evaluateWasmDrift must validate the network like evaluateEnvDrift does,
+  // rather than silently reporting no drift for a network that doesn't exist.
+  it("should_throw_NETWORK_NOT_FOUND_for_an_unknown_network_in_wasm_drift", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-drift-"));
+    tempDirs.push(cwd);
+    await seedArtifacts(cwd);
+
+    await expect(
+      evaluateWasmDrift({ config, cwd, networkName: "does-not-exist" })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.NETWORK_NOT_FOUND });
   });
 });

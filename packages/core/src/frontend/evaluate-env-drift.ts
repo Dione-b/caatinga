@@ -134,7 +134,10 @@ export async function evaluateWasmDrift(options: {
   const cwd = options.cwd ?? process.cwd();
   const config = options.config ?? (await loadConfig({ cwd }));
   const artifacts = await readArtifacts(cwd);
-  const networkName = options.networkName ?? config.defaultNetwork;
+  // #87: validate the network the same way evaluateEnvDrift does, so an unknown
+  // name throws NETWORK_NOT_FOUND instead of silently reporting "no drift".
+  const network = resolveNetwork(config, options.networkName);
+  const networkName = network.name;
   const networkArtifacts = artifacts.networks[networkName];
 
   const lines: Array<{
