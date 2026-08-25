@@ -34,13 +34,24 @@ async function tarDirectory(sourceDir: string, outputFile: string): Promise<void
 }
 
 async function assertNoPathTraversal(archiveFile: string, targetDir: string): Promise<void> {
-  const { stdout } = await execa("tar", ["-tzf", archiveFile]);
+  const { stdout } = await execa("tar", ["--full-time", "-tvzf", archiveFile]);
   const resolvedTarget = path.resolve(targetDir);
 
   for (const rawEntry of stdout.split("\n")) {
-    const entry = rawEntry.trim();
+    const line = rawEntry.trim();
+    const entry = line.replace(
+      /^\S+\s+\S+\s+\d+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+/,
+      ""
+    );
     if (!entry) {
       continue;
+    }
+
+    const memberType = line[0];
+    if (memberType !== "-" && memberType !== "d") {
+      throw new Error(
+        `Refusing to import archive: entry "${entry}" is not a regular file or directory`
+      );
     }
 
     const resolvedEntry = path.resolve(resolvedTarget, entry);
@@ -58,7 +69,23 @@ async function assertNoPathTraversal(archiveFile: string, targetDir: string): Pr
 async function untarDirectory(archiveFile: string, targetDir: string): Promise<void> {
   await mkdir(targetDir, { recursive: true, mode: 0o700 });
   await assertNoPathTraversal(archiveFile, targetDir);
-  await execa("tar", ["-xzf", archiveFile, "-C", targetDir], { stdio: "inherit" });
+  try {
+    await execa(
+      "tar",
+      [
+        "-xzf",
+        archiveFile,
+        "-C",
+        targetDir,
+        "--no-same-permissions",
+        "--no-same-owner",
+        "--no-overwrite-dir",
+      ],
+      { stdio: "inherit" }
+    );
+  } finally {
+    await execa("chmod", ["-R", "go-rwx", targetDir], { stdio: "inherit" });
+  }
 }
 
 export function registerIdentityCommand(program: Command): void {
