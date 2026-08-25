@@ -291,6 +291,50 @@ describe("deployContract", () => {
     expect(deployAttempts).toBe(2);
   });
 
+  // #151: a throwing retry callback must not mask the deploy outcome.
+  it("should_not_let_a_throwing_onTransientDeployRetry_mask_the_result", async () => {
+    let deployAttempts = 0;
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        deployAttempts += 1;
+        if (deployAttempts === 1) {
+          throw new CaatingaError(
+            "Command failed: stellar contract deploy",
+            CaatingaErrorCode.DEPLOY_FAILED,
+            "transaction submission timeout"
+          );
+        }
+        return {
+          stdout: `deployed ${CONTRACT_ID}\n`,
+          stderr: "",
+          all: `deployed ${CONTRACT_ID}\n`,
+        };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-retry-cb-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const result = await deployContract({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+      deployRetryDelaysMs: [0],
+      onTransientDeployRetry: () => {
+        throw new Error("callback boom");
+      },
+    });
+
+    expect(result.contractId).toBe(CONTRACT_ID);
+    expect(deployAttempts).toBe(2);
+  });
+
   it("should_retry_when_rpc_has_not_indexed_the_just_uploaded_wasm", async () => {
     let deployAttempts = 0;
     const retries: number[] = [];
