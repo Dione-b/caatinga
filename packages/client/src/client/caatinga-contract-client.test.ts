@@ -325,6 +325,73 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     });
   });
 
+  it("should_submit_the_prepared_transaction_returned_by_build_xdr", async () => {
+    const originalSignAndSend = vi.fn(async () => {
+      throw new Error("submitted original transaction");
+    });
+    const preparedSignAndSend = vi.fn(
+      async (input: {
+        signTransaction: (
+          xdr: string,
+          opts?: { networkPassphrase?: string; address?: string }
+        ) => Promise<{ signedTxXdr: string }>;
+      }) => {
+        const signed = await input.signTransaction("AAAA_PREPARED", {
+          networkPassphrase: "Test SDF Network ; September 2015",
+          address: "GPUBLIC",
+        });
+        return { txHash: `hash:${signed.signedTxXdr}`, result: 11 };
+      }
+    );
+    const prepare = vi.fn(async () => ({
+      toXDR() {
+        return "AAAA_PREPARED";
+      },
+      signAndSend: preparedSignAndSend,
+    }));
+
+    class Client {
+      increment() {
+        return {
+          toXDR() {
+            return "AAAA_UNSIGNED";
+          },
+          prepare,
+          signAndSend: originalSignAndSend,
+        };
+      }
+    }
+
+    const config = createClientConfig({
+      contracts: {
+        counter: {
+          binding: { Client },
+        },
+      },
+    });
+
+    const result = await createCaatingaClient(config).contract("counter").invoke("increment", {
+      debugXdr: true,
+    });
+
+    expect(prepare).toHaveBeenCalledOnce();
+    expect(originalSignAndSend).not.toHaveBeenCalled();
+    expect(preparedSignAndSend).toHaveBeenCalledOnce();
+    expect(config.wallet.signTransaction).toHaveBeenCalledWith({
+      xdr: "AAAA_PREPARED",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    });
+    expect(result).toMatchObject({
+      status: "confirmed",
+      transactionHash: "hash:AAAA_SIGNED",
+      result: 11,
+      xdr: {
+        unsigned: "AAAA_UNSIGNED",
+        prepared: "AAAA_PREPARED",
+        signed: "AAAA_SIGNED",
+      },
+    });
+  });
   it("should_submit_with_stellar_sdk_signAndSend_signTransaction_callback", async () => {
     const signAndSend = vi.fn(
       async (input: {
