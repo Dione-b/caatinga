@@ -35,7 +35,12 @@ function parseEnvFile(content: string): Map<string, string> {
       continue;
     }
 
-    const key = trimmed.slice(0, eqIndex).trim();
+    // #86: strip a leading `export ` (Vite/Next.js-generated env files use it),
+    // matching the assignment grammar in sync-frontend-env, so keys line up.
+    const key = trimmed
+      .slice(0, eqIndex)
+      .trim()
+      .replace(/^export\s+/, "");
     let value = trimmed.slice(eqIndex + 1).trim();
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
