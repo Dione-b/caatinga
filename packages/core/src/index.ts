@@ -15,6 +15,7 @@ export {
   CaatingaArtifactsSchema,
   type CaatingaArtifacts,
   type ContractArtifact,
+  type ContractMetadata,
 } from "./artifacts/artifact.schema.js";
 export { readArtifacts } from "./artifacts/read-artifacts.js";
 export {
@@ -130,7 +131,6 @@ export {
   resolveCliMethodArgs,
   parseNamedCliArgs,
   looksLikeStellarAlias,
-  STELLAR_ADDRESS_REGEX,
   type ResolveMethodArgsOptions,
 } from "./contracts/resolve-method-args.js";
 export { resolveSourceAddress } from "./contracts/resolve-source-address.js";
@@ -205,7 +205,6 @@ export {
   readContract,
   buildReadCallHint,
   isReadCallFailure,
-  READ_CALL_FAILURE_REGEX,
   type ReadContractOptions,
 } from "./contracts/read-contract.js";
 export {
