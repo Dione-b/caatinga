@@ -29,6 +29,13 @@ function looksLikeStellarAlias(value: string): boolean {
   return /^[A-Za-z0-9_-]+$/.test(value);
 }
 
+const LITERAL_ESCAPE_PREFIX = "\\";
+
+/** Strips a leading backslash escape so `\alice` is treated as the literal string "alice". */
+function unescapeLiteral(value: string): string {
+  return value.slice(LITERAL_ESCAPE_PREFIX.length);
+}
+
 export async function resolveMethodArgs(
   options: ResolveMethodArgsOptions
 ): Promise<Record<string, DeployArgValue>> {
@@ -40,6 +47,11 @@ export async function resolveMethodArgs(
   const resolved: Record<string, DeployArgValue> = {};
 
   for (const [key, value] of Object.entries(options.args)) {
+    if (typeof value === "string" && value.startsWith(LITERAL_ESCAPE_PREFIX)) {
+      resolved[key] = unescapeLiteral(value);
+      continue;
+    }
+
     if (typeof value !== "string" || !looksLikeStellarAlias(value)) {
       resolved[key] = value;
       continue;
@@ -55,7 +67,7 @@ export async function resolveMethodArgs(
         throw new CaatingaError(
           `Method arg "${key}" looks like a CLI identity alias but could not be resolved to an Address.`,
           CaatingaErrorCode.ADDRESS_ALIAS_UNRESOLVED,
-          `expected Address (G...), got identity alias "${value}". Use ${"${source.address}"} or pass the resolved G... address.`,
+          `expected Address (G...), got identity alias "${value}". If the value is a plain String arg, escape it with a leading backslash ("\\${value}") or pass --no-resolve-aliases. Otherwise use ${"${source.address}"} or pass the resolved G... address.`,
           error
         );
       }
