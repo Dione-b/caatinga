@@ -28,7 +28,10 @@ function lastMatch(line: string): string | undefined {
  *
  *   1. the last explicitly labeled line (`Contract ID: C...`)
  *   2. the last line consisting solely of a contract ID
- *   3. the last bare match anywhere in the output
+ *   3. a bare match anywhere in the output, but only when the whole output
+ *      contains exactly one distinct contract ID — with two or more we cannot
+ *      tell the deployed one from a lookalike in a warning or an RPC error
+ *      body, so we refuse to guess and name the candidates instead.
  */
 export function parseContractId(output: string): string {
   const lines = output.split("\n");
@@ -50,11 +53,21 @@ export function parseContractId(output: string): string {
     }
   }
 
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const id = lastMatch(lines[i] as string);
-    if (id) {
-      return id;
-    }
+  const distinctIds = [...new Set(output.match(CONTRACT_ID_REGEX_GLOBAL) ?? [])];
+  if (distinctIds.length === 1) {
+    return distinctIds[0] as string;
+  }
+
+  if (distinctIds.length > 1) {
+    throw new CaatingaError(
+      `Found ${distinctIds.length} contract IDs in Stellar CLI output and none on a labeled or standalone line.`,
+      CaatingaErrorCode.CONTRACT_ID_NOT_FOUND,
+      [
+        "Refusing to guess which one was deployed — the wrong ID would be persisted to caatinga.artifacts.json and become the target of every later invoke, read, upgrade and wire.",
+        `Candidates: ${distinctIds.join(", ")}.`,
+        "Confirm the deployed ID on a block explorer and set it in caatinga.artifacts.json, or report the CLI output format if this is a false alarm.",
+      ].join(" ")
+    );
   }
 
   throw new CaatingaError(
