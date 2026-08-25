@@ -1,7 +1,8 @@
 import { Command } from "commander";
-import { loadConfig, runPostDeployHooks } from "@caatinga/core";
+import { loadConfig, resolveNetwork, runPostDeployHooks } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 
 export function registerWireCommand(program: Command): void {
   program
@@ -12,14 +13,24 @@ export function registerWireCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign (for example deployer)"
     )
-    .action((options: { network?: string; source: string }) =>
+    .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
+    .action((options: { network?: string; source: string; yes?: boolean }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const { name: networkName, config: networkConfig } = resolveNetwork(config, options.network);
 
         if (!config.postDeploy || config.postDeploy.length === 0) {
           logger.info("No postDeploy hooks configured in caatinga.config.ts.");
           return;
         }
+
+        await confirmMainnetOperation({
+          operation: "wire",
+          networkName,
+          networkConfig,
+          source: options.source,
+          yes: options.yes,
+        });
 
         const results = await runPostDeployHooks({
           config,

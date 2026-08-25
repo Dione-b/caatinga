@@ -14,6 +14,7 @@ import {
 import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 import {
   assertZkVerifierDeployAllowed,
   resolveContractNamesForDeploy,
@@ -29,6 +30,7 @@ export function registerDeployCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign (for example alice)"
     )
+    .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
     .option("--force", "Redeploy contracts even if artifacts already contain contract IDs")
     .option(
       "--if-changed",
@@ -52,6 +54,7 @@ export function registerDeployCommand(program: Command): void {
         options: {
           network?: string;
           source: string;
+          yes?: boolean;
           force?: boolean;
           ifChanged?: boolean;
           upgrade?: boolean;
@@ -75,7 +78,18 @@ export function registerDeployCommand(program: Command): void {
           }
 
           const config = await loadConfig();
-          const { name: networkName } = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = resolveNetwork(config, options.network);
+
+          if (!options.dryRun) {
+            await confirmMainnetOperation({
+              operation: "deploy",
+              networkName,
+              networkConfig,
+              contractName,
+              source: options.source,
+              yes: options.yes,
+            });
+          }
 
           if (options.dryRun) {
             const target = contractName ?? Object.keys(config.contracts)[0];
