@@ -84,6 +84,56 @@ describe("parseContractId", () => {
     expect(parseContractId(`  "${CONTRACT_ID}"  `)).toBe(CONTRACT_ID);
   });
 
+  it("should_still_accept_a_bare_id_when_it_is_the_only_one_in_the_output", () => {
+    const output = ["deploying...", `done -> ${CONTRACT_ID} (ledger 1234)`].join("\n");
+
+    expect(parseContractId(output)).toBe(CONTRACT_ID);
+  });
+
+  it("should_accept_a_bare_id_repeated_across_lines", () => {
+    const output = [
+      `uploading wasm for ${CONTRACT_ID}`,
+      `deployed ${CONTRACT_ID} (ledger 1234)`,
+    ].join("\n");
+
+    expect(parseContractId(output)).toBe(CONTRACT_ID);
+  });
+
+  it("should_refuse_to_guess_when_a_warning_adds_a_second_bare_id", () => {
+    const decoy = `C${"B".repeat(55)}`;
+    const output = [
+      `deployed ${CONTRACT_ID} (ledger 1234)`,
+      `warning: contract ${decoy} is deprecated, migrate to a newer version`,
+    ].join("\n");
+
+    expect(() => parseContractId(output)).toThrow(
+      expect.objectContaining({ code: CaatingaErrorCode.CONTRACT_ID_NOT_FOUND })
+    );
+  });
+
+  it("should_name_the_candidates_when_it_refuses_to_guess", () => {
+    const decoy = `C${"B".repeat(55)}`;
+    const output = [`deployed ${CONTRACT_ID}`, `see also ${decoy}`].join("\n");
+
+    expect(() => parseContractId(output)).toThrow(
+      expect.objectContaining({
+        hint: expect.stringContaining(decoy),
+      })
+    );
+  });
+
+  it("should_keep_preferring_a_labeled_line_when_several_bare_ids_are_present", () => {
+    const decoy = `C${"B".repeat(55)}`;
+    const other = `C${"D".repeat(55)}`;
+    const output = [
+      `warning: ${decoy} expiring`,
+      `note: ${other} cached`,
+      `Contract ID: ${CONTRACT_ID}`,
+    ].join("\n");
+
+    expect(parseContractId(output)).toBe(CONTRACT_ID);
+  });
+
   it("should_throw_when_output_has_no_contract_id", async () => {
     const output = await fixture("unknown/deploy-success-no-contract-id.txt");
 
