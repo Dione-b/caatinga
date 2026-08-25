@@ -38,15 +38,27 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
   const manifest = await readTemplateManifest(templateDir);
 
   const mergeIntoExisting = Boolean(options.filter);
+  // #90: in merge mode, record exactly which relative paths the copy writes so
+  // variable substitution never touches a user's pre-existing files.
+  const copiedRelPaths = mergeIntoExisting ? new Set<string>() : undefined;
   await mkdir(targetDir, { recursive: true });
   await cp(templateDir, targetDir, {
     recursive: true,
     force: true,
     errorOnExist: false,
-    filter: (source) => shouldCopyTemplateEntry(templateDir, source, options.filter),
+    filter: (source) => {
+      const keep = shouldCopyTemplateEntry(templateDir, source, options.filter);
+      if (keep && copiedRelPaths) {
+        const rel = path.relative(templateDir, source);
+        if (rel) {
+          copiedRelPaths.add(rel);
+        }
+      }
+      return keep;
+    },
   });
 
-  await replaceTemplateVariables(targetDir, options.projectName);
+  await replaceTemplateVariables(targetDir, options.projectName, copiedRelPaths);
   if (!mergeIntoExisting) {
     await ensureArtifacts(targetDir, options.projectName);
   }
@@ -113,7 +125,12 @@ async function readTemplateManifest(templateDir: string): Promise<TemplateManife
   }
 }
 
-async function replaceTemplateVariables(dir: string, projectName: string): Promise<void> {
+async function replaceTemplateVariables(
+  dir: string,
+  projectName: string,
+  allowlist?: ReadonlySet<string>,
+  rootDir: string = dir
+): Promise<void> {
   const entries = await readdir(dir);
 
   await Promise.all(
@@ -136,11 +153,17 @@ async function replaceTemplateVariables(dir: string, projectName: string): Promi
       }
 
       if (entryStat.isDirectory()) {
-        await replaceTemplateVariables(entryPath, projectName);
+        await replaceTemplateVariables(entryPath, projectName, allowlist, rootDir);
         return;
       }
 
       if (!entryStat.isFile() || !isTextTemplateFile(entryPath)) {
+        return;
+      }
+
+      // #90: in merge mode, only substitute in files the template actually
+      // copied — never in a user's pre-existing files.
+      if (allowlist && !allowlist.has(path.relative(rootDir, entryPath))) {
         return;
       }
 

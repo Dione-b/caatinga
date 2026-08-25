@@ -160,6 +160,49 @@ describe("createProjectFromTemplate", () => {
     expect(artifacts.networks.testnet.dependencyGraph).toEqual({});
   });
 
+  // #90: in merge mode, placeholder substitution must touch only the files the
+  // template copied — never a user's pre-existing files.
+  it("should_not_replace_placeholders_in_pre_existing_files_in_merge_mode", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-merge-"));
+    const templateDir = path.join(tmpDir, "template");
+    const targetDir = path.join(tmpDir, "existing-app");
+    await mkdir(templateDir);
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "merge-template",
+        version: "0.1.0",
+        caatinga: { compatibleCore: "^3.0.0", templateVersion: 1 },
+        frontend: { framework: "vite-react", packageManager: "npm" },
+        contracts: { path: "contracts", default: "counter" },
+        files: { config: "caatinga.config.ts", artifacts: "caatinga.artifacts.json" },
+      }),
+      "utf8"
+    );
+    await writeFile(
+      path.join(templateDir, "caatinga.config.ts"),
+      'export default { project: "__PROJECT_NAME__" };\n',
+      "utf8"
+    );
+
+    // A pre-existing user file that is NOT part of the template but happens to
+    // contain the placeholder token.
+    await mkdir(targetDir, { recursive: true });
+    await writeFile(path.join(targetDir, "README.md"), "# __PROJECT_NAME__ notes\n", "utf8");
+
+    await createProjectFromTemplate({
+      projectName: "my-dapp",
+      targetDir,
+      templateDir,
+      filter: (relativePath) => relativePath === "caatinga.config.ts",
+    });
+
+    // The copied template file had its placeholder replaced …
+    expect(await readFile(path.join(targetDir, "caatinga.config.ts"), "utf8")).toContain("my-dapp");
+    // … while the user's pre-existing file was left byte-for-byte untouched.
+    expect(await readFile(path.join(targetDir, "README.md"), "utf8")).toBe("# __PROJECT_NAME__ notes\n");
+  });
+
   it("should_fail_when_template_manifest_is_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
     const templateDir = path.join(tmpDir, "template");
