@@ -294,6 +294,7 @@ describe("deploy command", () => {
         "mainnet",
         "--source",
         "alice",
+        "--yes",
       ]);
 
       expect(process.exitCode).toBe(1);
