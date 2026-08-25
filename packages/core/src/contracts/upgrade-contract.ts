@@ -155,11 +155,15 @@ export async function upgradeContractInPlace(
       }
 
       const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
-      options.onTransientUpgradeRetry?.({
-        attempt: attempt + 1,
-        maxAttempts,
-        delayMs,
-      });
+      try {
+        options.onTransientUpgradeRetry?.({
+          attempt: attempt + 1,
+          maxAttempts,
+          delayMs,
+        });
+      } catch {
+        // #151: callback error is non-fatal; the original transient error takes precedence.
+      }
       await sleep(delayMs);
     }
   }
