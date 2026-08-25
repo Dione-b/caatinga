@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
 
 export type SyncFrontendEnvOptions = {
@@ -35,7 +35,7 @@ async function readExistingEnv(envFile: string): Promise<string | undefined> {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return undefined;
     }
-    throw error;
+    throw toCaatingaError(error);
   }
 }
 

@@ -1,5 +1,5 @@
 import type { CaatingaArtifacts } from "../artifacts/artifact.schema.js";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import type { ResolvedNetwork } from "../networks/resolve-network.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
@@ -39,7 +39,7 @@ export async function verifyDependencyContract(options: {
       );
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 }
 

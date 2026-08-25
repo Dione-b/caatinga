@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CaatingaArtifacts } from "./artifact.schema.js";
+import { toCaatingaError } from "../errors/CaatingaError.js";
 
 export async function writeArtifacts(
   artifacts: CaatingaArtifacts,
@@ -18,7 +19,7 @@ export async function writeArtifacts(
     await rename(tmpPath, artifactsPath);
   } catch (error) {
     await unlink(tmpPath).catch(() => undefined);
-    throw error;
+    throw toCaatingaError(error);
   }
 
   return artifactsPath;

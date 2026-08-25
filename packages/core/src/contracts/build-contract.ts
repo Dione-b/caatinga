@@ -1,5 +1,5 @@
 import type { CaatingaConfig } from "../config/config.schema.js";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { resolveContract } from "./resolve-contract.js";
@@ -42,7 +42,7 @@ export async function buildContract(options: BuildContractOptions) {
         error
       );
     }
-    throw error;
+    throw toCaatingaError(error);
   }
 
   const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {

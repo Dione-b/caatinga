@@ -1,7 +1,7 @@
 import { cp, lstat, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
 import {
@@ -67,7 +67,7 @@ async function ensureArtifacts(targetDir: string, projectName: string): Promise<
       return;
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 }
 
@@ -109,7 +109,7 @@ async function readTemplateManifest(templateDir: string): Promise<TemplateManife
       );
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 }
 

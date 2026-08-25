@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarCliCompatibility,
@@ -36,7 +36,7 @@ export async function checkStellarCliVersion(
       );
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 
   const version = parseStellarCliVersion(rawOutput);

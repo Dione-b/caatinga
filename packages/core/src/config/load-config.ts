@@ -2,7 +2,7 @@ import { access } from "node:fs/promises";
 import path from "node:path";
 import { createJiti } from "jiti";
 import { z } from "zod";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { isDependenciesNotInstalledError } from "./is-dependencies-not-installed-error.js";
 import { CaatingaConfigSchema, type CaatingaConfig } from "./config.schema.js";
 
@@ -47,6 +47,6 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Caati
       );
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 }

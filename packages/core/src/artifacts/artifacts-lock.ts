@@ -1,6 +1,6 @@
 import { open, readFile, rename, unlink } from "node:fs/promises";
 import path from "node:path";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 
 const LOCK_RETRY_DELAY_MS = 50;
 const LOCK_TIMEOUT_MS = 15_000;
@@ -113,7 +113,7 @@ async function acquireLock(lockPath: string, deadline: number): Promise<void> {
       return;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
-        throw error;
+        throw toCaatingaError(error);
       }
 
       owner = await readLockOwner(lockPath);

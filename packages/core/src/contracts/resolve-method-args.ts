@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { formatNamedCliArgs } from "./format-cli-args.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import type { DeployArgValue } from "./resolve-deploy-args.js";
@@ -59,7 +59,7 @@ export async function resolveMethodArgs(
           error
         );
       }
-      throw error;
+      throw toCaatingaError(error);
     }
   }
 

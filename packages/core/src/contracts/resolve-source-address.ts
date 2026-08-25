@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { assertSafeSourceAccount } from "./source-account.js";
@@ -29,7 +29,7 @@ export async function resolveSourceAddress(options: {
         error
       );
     }
-    throw error;
+    throw toCaatingaError(error);
   }
 
   const address = (result.stdout || result.all || "").trim();

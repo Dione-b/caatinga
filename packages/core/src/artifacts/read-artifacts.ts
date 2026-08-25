@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode, toCaatingaError } from "../errors/CaatingaError.js";
 import {
   CaatingaArtifactsSchema,
   CURRENT_ARTIFACTS_SCHEMA_VERSION,
@@ -44,6 +44,6 @@ export async function readArtifacts(cwd = process.cwd()): Promise<CaatingaArtifa
       );
     }
 
-    throw error;
+    throw toCaatingaError(error);
   }
 }
