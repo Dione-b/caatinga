@@ -1,4 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { ExpectMatcherSchema } from "../config/config.schema.js";
 import type { ExpectMatcher, ExpectSpec } from "../config/config.schema.js";
 
 export type VerifyExpectResult = {
@@ -14,17 +15,9 @@ export type VerifyExpectFailure = {
 
 export type VerifyExpectOutcome = VerifyExpectResult | VerifyExpectFailure;
 
-const EXPECT_MATCHERS: ReadonlySet<ExpectMatcher> = new Set([
-  "equals",
-  "reachable",
-  "isNull",
-  "isArray",
-  "minLength",
-  "maxLength",
-  "contains",
-  "matches",
-  "jsonEquals",
-]);
+// #158: derive the allowed matchers from the canonical Zod enum so the list
+// can't drift from the schema and a new matcher only needs adding in one place.
+const EXPECT_MATCHERS: ReadonlySet<ExpectMatcher> = new Set(ExpectMatcherSchema.options);
 
 function describeExpectSpec(spec: ExpectSpec): string {
   if (typeof spec === "string") {
