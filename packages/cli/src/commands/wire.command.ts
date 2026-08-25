@@ -19,6 +19,11 @@ export function registerWireCommand(program: Command): void {
         const config = await loadConfig();
         const { name: networkName, config: networkConfig } = resolveNetwork(config, options.network);
 
+        if (!config.postDeploy || config.postDeploy.length === 0) {
+          logger.info("No postDeploy hooks configured in caatinga.config.ts.");
+          return;
+        }
+
         await confirmMainnetOperation({
           operation: "wire",
           networkName,
@@ -26,11 +31,6 @@ export function registerWireCommand(program: Command): void {
           source: options.source,
           yes: options.yes,
         });
-
-        if (!config.postDeploy || config.postDeploy.length === 0) {
-          logger.info("No postDeploy hooks configured in caatinga.config.ts.");
-          return;
-        }
 
         const results = await runPostDeployHooks({
           config,

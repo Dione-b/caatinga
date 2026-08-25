@@ -32,4 +32,10 @@ describe("mainnet-guardrails", () => {
       requiresMainnetConfirmation("mainnet", { ...mainnetConfig, requireConfirmation: false })
     ).toBe(false);
   });
+
+  it("should_keep_isMainnetNetwork_true_when_requireConfirmation_is_false", () => {
+    const optOutMainnet = { ...mainnetConfig, requireConfirmation: false };
+    expect(isMainnetNetwork("mainnet", optOutMainnet)).toBe(true);
+    expect(requiresMainnetConfirmation("mainnet", optOutMainnet)).toBe(false);
+  });
 });
