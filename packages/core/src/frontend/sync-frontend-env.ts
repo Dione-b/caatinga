@@ -1,5 +1,6 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
@@ -141,10 +142,8 @@ export async function syncFrontendEnv(
   }
 
   const envFile = path.resolve(cwd, frontend.envFile);
-  await mkdir(path.dirname(envFile), { recursive: true });
-
   const body = mergeEnvContents(await readExistingEnv(envFile), entries);
-  await writeFile(envFile, body, "utf8");
+  await atomicWriteFile(envFile, body);
 
   return { envFile, entries };
 }

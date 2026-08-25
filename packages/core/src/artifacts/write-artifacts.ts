@@ -1,6 +1,5 @@
-import { randomBytes } from "node:crypto";
-import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 import type { CaatingaArtifacts } from "./artifact.schema.js";
 
 export async function writeArtifacts(
@@ -8,19 +7,7 @@ export async function writeArtifacts(
   cwd = process.cwd()
 ): Promise<string> {
   const artifactsPath = path.resolve(cwd, "caatinga.artifacts.json");
-  await mkdir(path.dirname(artifactsPath), { recursive: true });
-
-  const tmpPath = `${artifactsPath}.${randomBytes(4).toString("hex")}.tmp`;
-  const payload = `${JSON.stringify(artifacts, null, 2)}\n`;
-
-  try {
-    await writeFile(tmpPath, payload, "utf8");
-    await rename(tmpPath, artifactsPath);
-  } catch (error) {
-    await unlink(tmpPath).catch(() => undefined);
-    throw error;
-  }
-
+  await atomicWriteFile(artifactsPath, `${JSON.stringify(artifacts, null, 2)}\n`);
   return artifactsPath;
 }
 

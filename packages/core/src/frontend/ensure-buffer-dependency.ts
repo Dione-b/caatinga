@@ -1,5 +1,6 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 
 // Backs the Buffer polyfill that every generated binding imports. Pinned to the
 // same major the templates ship so behaviour matches across init and adoption.
@@ -80,7 +81,7 @@ export async function ensureBufferDependency(
   }
 
   pkg.dependencies = { ...(pkg.dependencies ?? {}), buffer: BUFFER_DEPENDENCY_RANGE };
-  await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+  await atomicWriteFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`);
 
   return { packageJsonPath, added: true };
 }

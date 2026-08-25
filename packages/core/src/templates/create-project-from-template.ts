@@ -1,4 +1,5 @@
-import { cp, lstat, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, readdir, stat } from "node:fs/promises";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 import path from "node:path";
 import { z } from "zod";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
@@ -145,7 +146,7 @@ async function replaceTemplateVariables(dir: string, projectName: string): Promi
       }
 
       const content = await readFile(entryPath, "utf8");
-      await writeFile(entryPath, content.replaceAll("__PROJECT_NAME__", projectName), "utf8");
+      await atomicWriteFile(entryPath, content.replaceAll("__PROJECT_NAME__", projectName));
     })
   );
 }
