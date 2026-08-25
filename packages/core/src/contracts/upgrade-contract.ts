@@ -6,6 +6,7 @@ import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { requiresMainnetConfirmation } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
@@ -114,7 +115,10 @@ export async function upgradeContractInPlace(
     expectedHash: options.expectedHash,
   });
 
-  const retryDelaysMs = options.upgradeRetryDelaysMs ?? DEFAULT_UPGRADE_RETRY_DELAYS_MS;
+  const defaultRetryDelays = requiresMainnetConfirmation(network.name, network.config)
+    ? []
+    : DEFAULT_UPGRADE_RETRY_DELAYS_MS;
+  const retryDelaysMs = options.upgradeRetryDelaysMs ?? defaultRetryDelays;
   const maxAttempts = retryDelaysMs.length + 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

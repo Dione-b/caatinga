@@ -14,6 +14,7 @@ export const ContractConfigSchema = z.object({
 export const NetworkConfigSchema = z.object({
   rpcUrl: z.string().url(),
   networkPassphrase: z.string().min(1),
+  requireConfirmation: z.boolean().optional(),
 });
 
 const ZkCircuitSchema = z.object({

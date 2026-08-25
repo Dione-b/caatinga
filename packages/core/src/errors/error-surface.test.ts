@@ -270,6 +270,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/cli/src/commands/generate.command.test.ts",
     trigger: "--strict-network",
   },
+  [CaatingaErrorCode.MAINNET_CONFIRMATION_REQUIRED]: {
+    file: "packages/cli/src/utils/mainnet-guardrails.test.ts",
+    trigger: "confirmMainnetOperation(",
+  },
 };
 
 function testBlocks(source: string): string[] {

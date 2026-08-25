@@ -7,6 +7,7 @@ import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { requiresMainnetConfirmation } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
@@ -153,7 +154,10 @@ export async function deployContract(options: DeployContractOptions) {
   ];
 
   let deployOutcome: { output: string; contractId: string } | undefined;
-  const retryDelaysMs = options.deployRetryDelaysMs ?? DEFAULT_DEPLOY_RETRY_DELAYS_MS;
+  const defaultRetryDelays = requiresMainnetConfirmation(network.name, network.config)
+    ? []
+    : DEFAULT_DEPLOY_RETRY_DELAYS_MS;
+  const retryDelaysMs = options.deployRetryDelaysMs ?? defaultRetryDelays;
   const maxDeployAttempts = retryDelaysMs.length + 1;
 
   for (let attempt = 0; attempt < maxDeployAttempts; attempt++) {

@@ -53,6 +53,7 @@ export {
 
 export { WELL_KNOWN_NETWORKS } from "./networks/networks.js";
 export { resolveNetwork, type ResolvedNetwork } from "./networks/resolve-network.js";
+export { isMainnetNetwork, requiresMainnetConfirmation } from "./networks/mainnet-guardrails.js";
 
 export { runCommand, type RunCommandResult } from "./shell/run-command.js";
 export { resolveSubprocessEnv, isCargoBinMissingFromPath } from "./shell/resolve-subprocess-env.js";

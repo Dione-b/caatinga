@@ -2,6 +2,7 @@ import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig, PostDeployHook } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { requiresMainnetConfirmation } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
@@ -183,7 +184,10 @@ export async function runPostDeployHooks(
       });
       output = readResult.result?.trim() ?? "";
     } else {
-      const retryDelaysMs = options.hookRetryDelaysMs ?? DEFAULT_HOOK_RETRY_DELAYS_MS;
+      const defaultRetryDelays = requiresMainnetConfirmation(network.name, network.config)
+        ? []
+        : DEFAULT_HOOK_RETRY_DELAYS_MS;
+      const retryDelaysMs = options.hookRetryDelaysMs ?? defaultRetryDelays;
       const maxHookAttempts = retryDelaysMs.length + 1;
       let result: { stdout: string; stderr: string; all: string } = undefined!;
 
