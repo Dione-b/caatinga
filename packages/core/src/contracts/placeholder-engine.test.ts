@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { resolvePlaceholders, type PlaceholderContext } from "./placeholder-engine.js";
+import {
+  CONTRACT_ID_PLACEHOLDER_SOURCE,
+  resolvePlaceholders,
+  type PlaceholderContext,
+} from "./placeholder-engine.js";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 
 describe("resolvePlaceholders", () => {
@@ -69,5 +73,18 @@ describe("resolvePlaceholders", () => {
         code: CaatingaErrorCode.DEPLOY_ARG_PLACEHOLDER_INVALID,
       })
     );
+  });
+  it("should reuse the shared grammar for whole-value validation", () => {
+    const wholeValue = new RegExp(`^${CONTRACT_ID_PLACEHOLDER_SOURCE}$`);
+
+    expect(wholeValue.exec("${contracts.token.contractId}")?.[1]).toBe("token");
+    expect(wholeValue.test("Contract ${contracts.token.contractId} deployed")).toBe(false);
+  });
+
+  it("should not carry regex state across calls", () => {
+    // The shared grammar is compiled with /g here and anchored without /g in
+    // validation; reusing one RegExp instance across both would carry lastIndex.
+    expect(resolvePlaceholders("${contracts.token.contractId}", context)).toBe("CAS3JIO4YZHG45NVU");
+    expect(resolvePlaceholders("${contracts.token.contractId}", context)).toBe("CAS3JIO4YZHG45NVU");
   });
 });
