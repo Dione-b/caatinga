@@ -7,7 +7,15 @@ export type PlaceholderContext = {
   sourceAddress?: string;
 };
 
-const CONTRACT_ID_REGEX = /\$\{contracts\.([A-Za-z0-9_-]+)\.contractId\}/g;
+/**
+ * Grammar for `${contracts.<name>.contractId}` placeholders. Exported so that
+ * config-time validation and resolve-time substitution cannot drift apart.
+ * Callers compile their own RegExp because the two uses need different flags:
+ * a global replace here, an anchored whole-value match in validation.
+ */
+export const CONTRACT_ID_PLACEHOLDER_SOURCE = String.raw`\$\{contracts\.([A-Za-z0-9_-]+)\.contractId\}`;
+
+const CONTRACT_ID_REGEX = new RegExp(CONTRACT_ID_PLACEHOLDER_SOURCE, "g");
 const SOURCE_ADDRESS_REGEX = /\$\{source\.address\}/g;
 
 export function resolvePlaceholders(text: string, context: PlaceholderContext): string {

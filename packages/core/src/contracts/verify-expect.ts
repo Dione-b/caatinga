@@ -1,4 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { ExpectMatcherSchema } from "../config/config.schema.js";
 import type { ExpectMatcher, ExpectSpec } from "../config/config.schema.js";
 
 export type VerifyExpectResult = {
@@ -14,17 +15,8 @@ export type VerifyExpectFailure = {
 
 export type VerifyExpectOutcome = VerifyExpectResult | VerifyExpectFailure;
 
-const EXPECT_MATCHERS: ReadonlySet<ExpectMatcher> = new Set([
-  "equals",
-  "reachable",
-  "isNull",
-  "isArray",
-  "minLength",
-  "maxLength",
-  "contains",
-  "matches",
-  "jsonEquals",
-]);
+/** Derived from the schema so `ExpectMatcherSchema` stays the single source of truth. */
+const EXPECT_MATCHERS: readonly ExpectMatcher[] = ExpectMatcherSchema.options;
 
 function describeExpectSpec(spec: ExpectSpec): string {
   if (typeof spec === "string") {
@@ -190,7 +182,7 @@ function evaluateMatcher(actual: string, spec: Exclude<ExpectSpec, string>): Ver
       throw new CaatingaError(
         `Unknown expect matcher "${unknownMatcher}".`,
         CaatingaErrorCode.INVALID_CONFIG,
-        `Supported matchers: ${[...EXPECT_MATCHERS].join(", ")}.`
+        `Supported matchers: ${EXPECT_MATCHERS.join(", ")}.`
       );
     }
   }
