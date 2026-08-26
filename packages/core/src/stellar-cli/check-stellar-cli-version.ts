@@ -16,47 +16,43 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
-let cachedReport: CompatibilityReport | undefined;
+let cachedVersion: string | undefined;
 
 /** @internal — exposed for tests that need to invalidate the module-level cache. */
 export function _clearStellarCliVersionCache(): void {
-  cachedReport = undefined;
+  cachedVersion = undefined;
 }
 
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
 ): Promise<CompatibilityReport> {
-  if (cachedReport) {
-    for (const warning of cachedReport.warnings) {
-      if (input.onWarning) {
-        input.onWarning(warning);
-      } else {
-        defaultEmitWarning(warning);
+  let version = cachedVersion;
+
+  if (!version) {
+    let rawOutput: string;
+
+    try {
+      const result = await runCommand("stellar", ["--version"], {
+        skipStellarVersionCheck: true,
+      });
+      rawOutput = result.all || result.stdout || result.stderr;
+    } catch (error) {
+      if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
+        throw new CaatingaError(
+          "Stellar CLI was not found.",
+          CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+          "Install Stellar CLI before running Caatinga-backed commands.",
+          error
+        );
       }
-    }
-    return cachedReport;
-  }
-  let rawOutput: string;
 
-  try {
-    const result = await runCommand("stellar", ["--version"], {
-      skipStellarVersionCheck: true,
-    });
-    rawOutput = result.all || result.stdout || result.stderr;
-  } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
-      throw new CaatingaError(
-        "Stellar CLI was not found.",
-        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
-        "Install Stellar CLI before running Caatinga-backed commands.",
-        error
-      );
+      throw error;
     }
 
-    throw error;
+    version = parseStellarCliVersion(rawOutput);
+    cachedVersion = version;
   }
 
-  const version = parseStellarCliVersion(rawOutput);
   const probedMissing =
     input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version);
   const missingFeatures = [...(input.features ?? []), ...probedMissing];
@@ -66,8 +62,6 @@ export async function checkStellarCliVersion(
     features: missingFeatures.length > 0 ? missingFeatures : undefined,
     lastTestedVersion: input.lastTestedVersion,
   });
-
-  cachedReport = report;
 
   for (const warning of report.warnings) {
     if (input.onWarning) {

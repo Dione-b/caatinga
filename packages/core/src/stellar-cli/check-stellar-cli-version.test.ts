@@ -138,11 +138,13 @@ describe("checkStellarCliVersion memoization", () => {
     const report1 = await checkStellarCliVersion();
     const report2 = await checkStellarCliVersion();
 
-    expect(report1).toBe(report2);
-    expect(report1.status).toBe("supported");
     expect(report1.version).toBe("25.2.0");
-    // 1 call for --version, 3 calls for feature probes = 4 total.
-    // The second call to checkStellarCliVersion hits the cache, so no extra calls.
+    expect(report2.version).toBe(report1.version);
+    expect(report1.status).toBe("supported");
+    // The --version subprocess is memoized and the per-version feature probe
+    // results are cached, so the second call spawns nothing:
+    // 1 --version call + 3 feature probes = 4 total.
+    expect(stellarVersionProbeCount()).toBe(1);
     expect(memoRunCommandMock).toHaveBeenCalledTimes(4);
   });
 
@@ -165,7 +167,7 @@ describe("checkStellarCliVersion memoization", () => {
     const report1 = await checkStellarCliVersion({ onWarning: onWarning1 });
     const report2 = await checkStellarCliVersion({ onWarning: onWarning2 });
 
-    expect(report1).toBe(report2);
+    expect(report1.version).toBe(report2.version);
     expect(report1.status).toBe("untested");
     expect(onWarning1).toHaveBeenCalledWith(
       expect.objectContaining({ code: "STELLAR_CLI_UNTESTED_VERSION" })
@@ -173,7 +175,9 @@ describe("checkStellarCliVersion memoization", () => {
     expect(onWarning2).toHaveBeenCalledWith(
       expect.objectContaining({ code: "STELLAR_CLI_UNTESTED_VERSION" })
     );
-    // 1 call for --version, 3 calls for feature probes = 4 total.
+    // The --version subprocess is memoized and the per-version feature probe
+    // results are cached, so the second call spawns nothing.
+    expect(stellarVersionProbeCount()).toBe(1);
     expect(memoRunCommandMock).toHaveBeenCalledTimes(4);
   });
 
@@ -204,4 +208,10 @@ describe("checkStellarCliVersion memoization", () => {
     // 1 failed call + (1 --version + 3 feature probes) = 5 total.
     expect(memoRunCommandMock).toHaveBeenCalledTimes(5);
   });
+
+  function stellarVersionProbeCount(): number {
+    return memoRunCommandMock.mock.calls.filter(
+      (call) => Array.isArray(call[1]) && call[1][0] === "--version"
+    ).length;
+  }
 });
