@@ -5,11 +5,10 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
+import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "../stellar-cli/version.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
 import { resolveCliMethodArgs } from "./resolve-method-args.js";
-
-const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
 export type { InvokeTarget } from "./invoke-target.js";
 export { parseInvokeTarget } from "./invoke-target.js";
@@ -85,7 +84,7 @@ export async function invokeContract(options: InvokeContractOptions) {
     if (
       error instanceof CaatingaError &&
       error.code === CaatingaErrorCode.INVOKE_FAILED &&
-      INVOKE_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
+      STELLAR_CLI_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
     ) {
       throw new CaatingaError(
         error.message,
