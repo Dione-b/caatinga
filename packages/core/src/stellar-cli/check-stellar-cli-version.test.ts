@@ -209,6 +209,154 @@ describe("checkStellarCliVersion memoization", () => {
     expect(memoRunCommandMock).toHaveBeenCalledTimes(5);
   });
 
+  it("does not reuse the CompatibilityReport when features differ between calls (regression)", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    // First call: no extra features
+    const report1 = await checkStellarCliVersion();
+    expect(report1.warnings.filter((w) => w.code === "STELLAR_CLI_MISSING_FEATURE")).toHaveLength(
+      0
+    );
+
+    // Second call: request a feature that doesn't exist — must produce a warning
+    const report2 = await checkStellarCliVersion({ features: ["nonexistent-feature"] });
+    const featureWarnings2 = report2.warnings.filter(
+      (w) => w.code === "STELLAR_CLI_MISSING_FEATURE"
+    );
+    expect(featureWarnings2).toHaveLength(1);
+    expect(featureWarnings2[0].message).toContain("nonexistent-feature");
+
+    // Third call: different features — must reflect its own options, not previous ones
+    const report3 = await checkStellarCliVersion({ features: ["another-feature"] });
+    const featureWarnings3 = report3.warnings.filter(
+      (w) => w.code === "STELLAR_CLI_MISSING_FEATURE"
+    );
+    expect(featureWarnings3).toHaveLength(1);
+    expect(featureWarnings3[0].message).toContain("another-feature");
+    expect(featureWarnings3[0].message).not.toContain("nonexistent-feature");
+
+    // Only one --version subprocess should have been spawned across all three calls
+    expect(stellarVersionProbeCount()).toBe(1);
+  });
+
+  it("respects different lastTestedVersion values on each call (regression)", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    // First call: version 25.2.0 is within lastTestedVersion 26.0.0 — supported
+    const report1 = await checkStellarCliVersion({ lastTestedVersion: "26.0.0" });
+    expect(report1.status).toBe("supported");
+    expect(report1.lastTestedVersion).toBe("26.0.0");
+    expect(report1.warnings).toHaveLength(0);
+
+    // Second call: same version but lastTestedVersion 24.0.0 — untested (25.2.0 > 24.0.0)
+    const report2 = await checkStellarCliVersion({ lastTestedVersion: "24.0.0" });
+    expect(report2.status).toBe("untested");
+    expect(report2.lastTestedVersion).toBe("24.0.0");
+    expect(report2.warnings).toHaveLength(1);
+    expect(report2.warnings[0].code).toBe("STELLAR_CLI_UNTESTED_VERSION");
+
+    // Only one --version subprocess across both calls
+    expect(stellarVersionProbeCount()).toBe(1);
+  });
+
+  it("respects probeFeatures: false on a subsequent call (regression)", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    // First call: default probeFeatures (true) — triggers feature probing
+    const report1 = await checkStellarCliVersion();
+    expect(report1.version).toBe("25.2.0");
+    const callsAfterFirst = memoRunCommandMock.mock.calls.length;
+
+    // Second call: probeFeatures: false — must NOT trigger feature probes
+    const report2 = await checkStellarCliVersion({ probeFeatures: false });
+    expect(report2.version).toBe("25.2.0");
+    // No additional calls should have been made (version is cached, probes skipped)
+    expect(memoRunCommandMock.mock.calls.length).toBe(callsAfterFirst);
+  });
+
+  it("cache invalidation forces a fresh version probe", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion, _clearStellarCliVersionCache } =
+      await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    await checkStellarCliVersion();
+    expect(stellarVersionProbeCount()).toBe(1);
+
+    // Clear the cache
+    _clearStellarCliVersionCache();
+
+    await checkStellarCliVersion();
+    // After invalidation, a fresh --version probe should occur
+    expect(stellarVersionProbeCount()).toBe(2);
+  });
+
+  it("caches the version string, not the full CompatibilityReport (regression)", async () => {
+    vi.doMock("../shell/run-command.js", () => ({
+      runCommand: memoRunCommandMock,
+    }));
+
+    const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
+
+    memoRunCommandMock.mockResolvedValue({
+      stdout: "stellar 25.2.0",
+      stderr: "",
+      all: "stellar 25.2.0",
+    });
+
+    const report1 = await checkStellarCliVersion();
+    const report2 = await checkStellarCliVersion({ lastTestedVersion: "24.0.0" });
+
+    // The two reports must be different objects with different evaluation results
+    expect(report1).not.toBe(report2);
+    expect(report1.status).toBe("supported");
+    expect(report2.status).toBe("untested");
+    expect(report1.warnings).toHaveLength(0);
+    expect(report2.warnings).toHaveLength(1);
+    // The version is the same because it was cached
+    expect(report1.version).toBe(report2.version);
+    // Only one --version subprocess was spawned
+    expect(stellarVersionProbeCount()).toBe(1);
+  });
+
   function stellarVersionProbeCount(): number {
     return memoRunCommandMock.mock.calls.filter(
       (call) => Array.isArray(call[1]) && call[1][0] === "--version"
