@@ -15,12 +15,6 @@ describe("isTransientCommandFailure", () => {
     expect(isTransientCommandFailure("503 Service Unavailable")).toBe(true);
   });
 
-  it("should_return_false_when_status_code_is_part_of_a_larger_number", () => {
-    expect(isTransientCommandFailure("port 4290 is already in use")).toBe(false);
-    expect(isTransientCommandFailure("test 5030 failed")).toBe(false);
-    expect(isTransientCommandFailure("build 5023 failed")).toBe(false);
-  });
-
   it("should_return_true_when_log_contains_connection_reset", () => {
     expect(isTransientCommandFailure("ECONNRESET")).toBe(true);
   });

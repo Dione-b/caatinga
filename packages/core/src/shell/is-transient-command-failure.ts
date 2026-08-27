@@ -16,7 +16,7 @@ export const NO_RETRY_ERROR_CODES: ReadonlySet<CaatingaErrorCodeValue> = new Set
 ]);
 
 const TRANSIENT_COMMAND_FAILURE_PATTERN =
-  /timeout|i\/o timeout|econnreset|connection reset|\b503\b|\b502\b|\b429\b|rate limit|temporar|bad gateway|fetch failed|network error|unavailable|tx_?bad_?seq|bad sequence|bad seq/i;
+  /timeout|i\/o timeout|econnreset|connection reset|503|502|429|rate limit|temporar|bad gateway|fetch failed|network error|unavailable|tx_?bad_?seq|bad sequence|bad seq/i;
 
 /**
  * Decides retryability from raw log text — captured CLI output, as passed by the
