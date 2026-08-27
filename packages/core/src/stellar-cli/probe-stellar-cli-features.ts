@@ -16,15 +16,24 @@ const FEATURE_COMMANDS: Record<StellarCliRequiredFeature, string[]> = {
   "contract-invoke-sign": ["contract", "invoke", "--help"],
 };
 
+const cachedMissingByVersion = new Map<string, string[]>();
+
 /**
  * Probes the installed Stellar CLI for subcommands Caatinga depends on.
  * Returns feature ids that are missing or unreachable.
  */
 export async function probeMissingStellarCliFeatures(version: string): Promise<string[]> {
+  const cached = cachedMissingByVersion.get(version);
+  if (cached) {
+    return cached;
+  }
+
   const missing: string[] = [];
 
   if (semver.valid(version) && semver.lt(version, STELLAR_CLI_MIN_VERSION)) {
-    return ["contract-invoke-sign"];
+    const result = ["contract-invoke-sign"];
+    cachedMissingByVersion.set(version, result);
+    return result;
   }
 
   for (const feature of STELLAR_CLI_REQUIRED_FEATURES) {
@@ -37,5 +46,6 @@ export async function probeMissingStellarCliFeatures(version: string): Promise<s
     }
   }
 
+  cachedMissingByVersion.set(version, missing);
   return missing;
 }

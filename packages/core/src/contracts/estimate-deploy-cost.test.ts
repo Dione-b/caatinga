@@ -96,10 +96,12 @@ describe("estimateDeployCost", () => {
   });
 
   it("should_throw_ESTIMATE_FAILED_when_build_only_fails", async () => {
-    const original = new CaatingaError("build failed", CaatingaErrorCode.ESTIMATE_FAILED, "fix wasm");
-    runCommand.mockRejectedValue(
-      original
+    const original = new CaatingaError(
+      "build failed",
+      CaatingaErrorCode.ESTIMATE_FAILED,
+      "fix wasm"
     );
+    runCommand.mockRejectedValue(original);
 
     await expect(
       estimateDeployCost({

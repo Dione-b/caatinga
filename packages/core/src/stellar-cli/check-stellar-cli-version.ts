@@ -16,30 +16,43 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
+let cachedVersion: string | undefined;
+
+/** @internal — exposed for tests that need to invalidate the module-level cache. */
+export function _clearStellarCliVersionCache(): void {
+  cachedVersion = undefined;
+}
+
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
 ): Promise<CompatibilityReport> {
-  let rawOutput: string;
+  let version = cachedVersion;
 
-  try {
-    const result = await runCommand("stellar", ["--version"], {
-      skipStellarVersionCheck: true,
-    });
-    rawOutput = result.all || result.stdout || result.stderr;
-  } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
-      throw new CaatingaError(
-        "Stellar CLI was not found.",
-        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
-        "Install Stellar CLI before running Caatinga-backed commands.",
-        error
-      );
+  if (!version) {
+    let rawOutput: string;
+
+    try {
+      const result = await runCommand("stellar", ["--version"], {
+        skipStellarVersionCheck: true,
+      });
+      rawOutput = result.all || result.stdout || result.stderr;
+    } catch (error) {
+      if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
+        throw new CaatingaError(
+          "Stellar CLI was not found.",
+          CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+          "Install Stellar CLI before running Caatinga-backed commands.",
+          error
+        );
+      }
+
+      throw error;
     }
 
-    throw error;
+    version = parseStellarCliVersion(rawOutput);
+    cachedVersion = version;
   }
 
-  const version = parseStellarCliVersion(rawOutput);
   const probedMissing =
     input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version);
   const missingFeatures = [...(input.features ?? []), ...probedMissing];
