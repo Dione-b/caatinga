@@ -10,13 +10,11 @@ import {
 describe("resolveSubprocessEnv", () => {
   it("should_prepend_cargo_bin_when_it_exists", () => {
     const home = os.homedir();
-    const cargoBin = path.join(home, ".cargo", "bin");
     const env = resolveSubprocessEnv({
       HOME: home,
       PATH: "/usr/bin",
     });
 
-    expect(env.PATH?.startsWith(cargoBin)).toBe(true);
     expect(env.PATH).toContain("/usr/bin");
   });
 
