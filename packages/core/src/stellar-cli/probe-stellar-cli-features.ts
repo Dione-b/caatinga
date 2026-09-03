@@ -16,12 +16,12 @@ const FEATURE_COMMANDS: Record<StellarCliRequiredFeature, string[]> = {
   "contract-invoke-sign": ["contract", "invoke", "--help"],
 };
 
+const featureProbeCache = new Map<string, Promise<string[]>>();
+
 /**
  * Probes the installed Stellar CLI for subcommands Caatinga depends on.
  * Returns feature ids that are missing or unreachable.
  */
-const featureProbeCache = new Map<string, Promise<string[]>>();
-
 export async function probeMissingStellarCliFeatures(
   version: string,
   cwd = process.cwd()
