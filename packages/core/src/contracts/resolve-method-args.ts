@@ -1,5 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
-import { formatNamedCliArgs } from "./format-cli-args.js";
+import { assertSafeCliArgs, formatNamedCliArgs } from "./format-cli-args.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import type { DeployArgValue } from "./resolve-deploy-args.js";
 
@@ -95,6 +95,8 @@ export async function resolveCliMethodArgs(
   if (args.length === 0) {
     return [];
   }
+
+  assertSafeCliArgs(args);
 
   const named = parseNamedCliArgs(args);
   if (Object.keys(named).length === 0) {

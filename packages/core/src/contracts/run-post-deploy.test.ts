@@ -166,7 +166,7 @@ describe("runPostDeployHooks", () => {
           contract: "coin",
           method: "set_minter",
           args: {},
-          source: "SABC123DEF456GHI789JKL012MNO345PQR678STU901VWX234YZA567BCD890EFG123",
+          source: "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
           kind: "invoke",
         },
       ],
@@ -339,5 +339,21 @@ describe("runPostDeployHooks", () => {
     expect(result).toEqual([
       { contract: "coin", method: "list_items", result: '[{"id":1}]', kind: "invoke" },
     ]);
+  });
+
+  it("should_reject_flag_shaped_hook_method", async () => {
+    const configWithBadMethod: CaatingaConfig = {
+      ...config,
+      postDeploy: [{ contract: "coin", method: "--help", args: {}, kind: "invoke" }],
+    };
+
+    await expect(
+      runPostDeployHooks({
+        config: configWithBadMethod,
+        source: "alice",
+        cwd: tmpDir,
+        hookRetryDelaysMs: [0],
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.INVOKE_FAILED });
   });
 });
