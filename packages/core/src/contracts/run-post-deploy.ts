@@ -185,55 +185,62 @@ export async function runPostDeployHooks(
     } else {
       const retryDelaysMs = options.hookRetryDelaysMs ?? DEFAULT_HOOK_RETRY_DELAYS_MS;
       const maxHookAttempts = retryDelaysMs.length + 1;
-      let result: { stdout: string; stderr: string; all: string } = undefined!;
 
-      for (let attempt = 0; attempt < maxHookAttempts; attempt++) {
-        try {
-          result = await runCommand(
-            "stellar",
-            [
-              "contract",
-              "invoke",
-              "--id",
-              contractArtifact.contractId,
-              "--source-account",
-              hookSource,
-              ...buildStellarNetworkArgs(network),
-              "--",
-              hook.method,
-              ...namedArgs,
-            ],
-            {
-              cwd,
-              failureCode: CaatingaErrorCode.INVOKE_FAILED,
-            }
-          );
-          break;
-        } catch (error) {
-          const isLastAttempt = attempt === maxHookAttempts - 1;
-          if (!isTransientHookFailure(error) || isLastAttempt) {
-            throw error;
-          }
-
-          const delayMs = retryDelaysMs[attempt];
+      async function invokeWithRetry(): Promise<{ stdout: string; stderr: string; all: string }> {
+        for (let attempt = 0; attempt < maxHookAttempts; attempt++) {
           try {
-            options.onTransientHookRetry?.({
-              hook: {
-                contract: hook.contract,
-                method: hook.method,
-                kind: hookKind,
-              },
-              attempt: attempt + 1,
-              maxAttempts: maxHookAttempts,
-              delayMs,
-            });
-          } catch {
-            // Callback error is non-fatal; original transient error takes precedence.
+            return await runCommand(
+              "stellar",
+              [
+                "contract",
+                "invoke",
+                "--id",
+                contractArtifact.contractId,
+                "--source-account",
+                hookSource,
+                ...buildStellarNetworkArgs(network),
+                "--",
+                hook.method,
+                ...namedArgs,
+              ],
+              {
+                cwd,
+                failureCode: CaatingaErrorCode.INVOKE_FAILED,
+              }
+            );
+          } catch (error) {
+            const isLastAttempt = attempt === maxHookAttempts - 1;
+            if (!isTransientHookFailure(error) || isLastAttempt) {
+              throw error;
+            }
+
+            const delayMs = retryDelaysMs[attempt];
+            try {
+              options.onTransientHookRetry?.({
+                hook: {
+                  contract: hook.contract,
+                  method: hook.method,
+                  kind: hookKind,
+                },
+                attempt: attempt + 1,
+                maxAttempts: maxHookAttempts,
+                delayMs,
+              });
+            } catch {
+              // Callback error is non-fatal; original transient error takes precedence.
+            }
+            await sleep(delayMs);
           }
-          await sleep(delayMs);
         }
+
+        throw new CaatingaError(
+          "Hook invocation failed after all retry attempts.",
+          CaatingaErrorCode.INVOKE_FAILED,
+          "The network may be congested; try again later."
+        );
       }
 
+      const result = await invokeWithRetry();
       output = (result.stdout || result.all || "").trim();
     }
 

@@ -107,7 +107,7 @@ describe("checkStellarCliVersion", () => {
     );
   });
 
-  it("writes the default warning to stderr when no hook is provided", async () => {
+  it("silently drops warnings when no onWarning hook is provided", async () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 28.0.0",
       stderr: "",
@@ -119,10 +119,7 @@ describe("checkStellarCliVersion", () => {
     try {
       const report = await checkStellarCliVersion();
       expect(report.status).toBe("untested");
-      expect(stderrSpy).toHaveBeenCalled();
-      expect(stderrSpy.mock.calls.map((call) => call[0]).join("\n")).toContain(
-        "Stellar CLI 28.0.0"
-      );
+      expect(stderrSpy).not.toHaveBeenCalled();
     } finally {
       stderrSpy.mockRestore();
     }
