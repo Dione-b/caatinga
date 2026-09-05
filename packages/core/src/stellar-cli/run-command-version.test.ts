@@ -26,6 +26,7 @@ describe("checkStellarCliVersion", () => {
     expect(report.status).toBe("supported");
     expect(report.version).toBe("25.2.0");
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
+      cwd: process.cwd(),
       skipStellarVersionCheck: true,
     });
   });
@@ -146,7 +147,7 @@ describe("runCommand Stellar CLI version gate", () => {
 
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock).toHaveBeenCalledWith("stellar", ["--version"], {
-      cwd: undefined,
+      cwd: process.cwd(),
       env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
       reject: true,

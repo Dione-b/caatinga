@@ -16,13 +16,60 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
+type ValidationContext = {
+  cwd: string;
+  features?: readonly string[];
+  lastTestedVersion?: string;
+};
+
+const validationCache = new Map<string, Promise<CompatibilityReport>>();
+
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
+): Promise<CompatibilityReport> {
+  const context: ValidationContext = {
+    cwd: process.cwd(),
+    features: input.features,
+    lastTestedVersion: input.lastTestedVersion,
+  };
+  const cacheKey = JSON.stringify({
+    cwd: context.cwd,
+    features: context.features ?? [],
+    lastTestedVersion: context.lastTestedVersion,
+    probeFeatures: input.probeFeatures !== false,
+  });
+
+  let validation = validationCache.get(cacheKey);
+  if (!validation) {
+    validation = validateStellarCli(context, input.probeFeatures !== false);
+    validationCache.set(cacheKey, validation);
+    validation.catch(() => {
+      if (validationCache.get(cacheKey) === validation) {
+        validationCache.delete(cacheKey);
+      }
+    });
+  }
+
+  const report = await validation;
+  for (const warning of report.warnings) {
+    if (input.onWarning) {
+      input.onWarning(warning);
+    } else {
+      defaultEmitWarning(warning);
+    }
+  }
+  return report;
+}
+
+async function validateStellarCli(
+  input: ValidationContext,
+  probeFeatures: boolean
 ): Promise<CompatibilityReport> {
   let rawOutput: string;
 
   try {
     const result = await runCommand("stellar", ["--version"], {
+      cwd: input.cwd,
       skipStellarVersionCheck: true,
     });
     rawOutput = result.all || result.stdout || result.stderr;
@@ -40,25 +87,16 @@ export async function checkStellarCliVersion(
   }
 
   const version = parseStellarCliVersion(rawOutput);
-  const probedMissing =
-    input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version);
+  const probedMissing = probeFeatures
+    ? await probeMissingStellarCliFeatures(version, input.cwd)
+    : [];
   const missingFeatures = [...(input.features ?? []), ...probedMissing];
 
-  const report = evaluateStellarCliCompatibility({
+  return evaluateStellarCliCompatibility({
     version,
     features: missingFeatures.length > 0 ? missingFeatures : undefined,
     lastTestedVersion: input.lastTestedVersion,
   });
-
-  for (const warning of report.warnings) {
-    if (input.onWarning) {
-      input.onWarning(warning);
-    } else {
-      defaultEmitWarning(warning);
-    }
-  }
-
-  return report;
 }
 
 function defaultEmitWarning(_warning: CompatibilityWarning): void {

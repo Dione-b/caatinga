@@ -11,7 +11,10 @@ export async function checkBinary(
   options: CheckBinaryOptions = {}
 ): Promise<void> {
   try {
-    await runCommand(binary, ["--version"], options);
+    await runCommand(binary, ["--version"], {
+      ...options,
+      ...(binary === "stellar" ? { skipStellarVersionCheck: true } : {}),
+    });
   } catch (error) {
     if (error instanceof CaatingaError) {
       throw error;

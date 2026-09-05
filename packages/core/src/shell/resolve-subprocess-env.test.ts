@@ -18,9 +18,9 @@ describe("resolveSubprocessEnv", () => {
 
     if (require("node:fs").existsSync(cargoBin)) {
       expect(env.PATH?.startsWith(cargoBin)).toBe(true);
-    } else {
-      expect(env.PATH).toContain("/usr/bin");
     }
+
+    expect(env.PATH).toContain("/usr/bin");
   });
 
   it("should_report_when_cargo_exists_but_cargo_bin_not_on_path", () => {
