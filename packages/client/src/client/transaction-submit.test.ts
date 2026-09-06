@@ -29,10 +29,39 @@ describe("normalizeSubmitResult", () => {
     const normalized = normalizeSubmitResult<{ value: number }>({
       result: { value: 42 },
       hash: "abc",
+      status: "SUCCESS",
     });
 
+    expect(normalized.status).toBe("confirmed");
     expect(normalized.result).toEqual({ value: 42 });
     expect(normalized.transactionHash).toBe("abc");
+  });
+
+  it("should_report_failed_lifecycle_status_and_diagnostics", () => {
+    const normalized = normalizeSubmitResult({
+      hash: "failed-hash",
+      getTransactionResponse: {
+        status: "FAILED",
+        resultXdr: "AAAA_RESULT",
+        diagnosticEvents: [{ type: "contract" }],
+      },
+    });
+
+    expect(normalized).toMatchObject({
+      status: "failed",
+      transactionHash: "failed-hash",
+      resultXdr: "AAAA_RESULT",
+      diagnosticEvents: [{ type: "contract" }],
+    });
+  });
+
+  it("should_report_pending_when_submission_has_not_reached_a_ledger", () => {
+    expect(
+      normalizeSubmitResult({
+        hash: "pending-hash",
+        sendTransactionResponse: { status: "PENDING" },
+      }).status
+    ).toBe("pending");
   });
 });
 
