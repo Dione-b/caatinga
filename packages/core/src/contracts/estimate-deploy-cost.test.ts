@@ -50,7 +50,7 @@ describe("estimateDeployCost", () => {
     const artifacts = createInitialArtifacts("app", { networks: ["testnet"] });
     artifacts.networks.testnet!.contracts.counter = {
       contractId: `C${"A".repeat(55)}`,
-      wasmHash: "abc",
+      wasmHash: "a".repeat(64),
       deployedAt: "2026-06-21T00:00:00.000Z",
       sourcePath: "./contracts/counter",
       wasmPath: "./contracts/counter/target/wasm32v1-none/release/counter.wasm",

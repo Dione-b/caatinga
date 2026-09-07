@@ -6,7 +6,7 @@
       "contracts": {
         "counter": {
           "contractId": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
-          "wasmHash": "abc123hash",
+          "wasmHash": "3f786850e387550fdab836ed7e6dc881de23001b3f786850e387550fdab836ed",
           "deployedAt": "2025-06-01T12:00:00.000Z",
           "sourcePath": "./contracts/counter",
           "wasmPath": "./contracts/counter.wasm",

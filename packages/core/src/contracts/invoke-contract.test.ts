@@ -81,7 +81,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -131,7 +131,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -173,7 +173,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -218,7 +218,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -264,7 +264,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",

@@ -1,9 +1,8 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
+import { STELLAR_ADDRESS_REGEX } from "../stellar-cli/strkey.js";
 import { assertSafeSourceAccount } from "./source-account.js";
-
-const STELLAR_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/;
 
 export async function resolveSourceAddress(options: {
   source: string;

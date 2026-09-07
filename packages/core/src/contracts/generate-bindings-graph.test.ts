@@ -51,7 +51,7 @@ const baseConfig: CaatingaConfig = {
 function deployedArtifact(contractId: string) {
   return {
     contractId,
-    wasmHash: "abc",
+    wasmHash: "a".repeat(64),
     deployedAt: "2026-05-11T12:00:00.000Z",
     sourcePath: "./contracts/x",
     wasmPath: "./rel/x.wasm",
