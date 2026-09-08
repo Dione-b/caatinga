@@ -398,7 +398,7 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
           networkPassphrase: "Test SDF Network ; September 2015",
           address: "GPUBLIC",
         });
-        return { txHash: `hash:${signed.signedTxXdr}`, result: 11 };
+        return { txHash: `hash:${signed.signedTxXdr}`, result: 11, status: "SUCCESS" };
       }
     );
     const prepare = vi.fn(async () => ({
