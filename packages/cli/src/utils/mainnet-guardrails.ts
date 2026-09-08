@@ -5,17 +5,32 @@ import type { NetworkConfig } from "@caatinga/core";
 import { CaatingaError, CaatingaErrorCode, requiresMainnetConfirmation } from "@caatinga/core";
 import { logger } from "./logger.js";
 
-export type MainnetOperationDetails = {
+/**
+ * Fields that identify what is about to be signed. `contractId` and
+ * `deployedWasmHash` describe the deployment being replaced or called, so they
+ * come from the artifacts file rather than from the local build — the hash of
+ * the WASM that will be uploaded is not known until the build/upload step runs.
+ */
+export type MainnetTargetDetails = {
+  contractId?: string;
+  deployedWasmHash?: string;
+};
+
+export type MainnetOperationDetails = MainnetTargetDetails & {
   operation: "deploy" | "upgrade" | "wire" | "invoke" | "rollback";
   networkName: string;
   networkConfig: NetworkConfig;
   source?: string;
   contractName?: string;
-  contractId?: string;
-  wasmHash?: string;
   target?: string;
-  method?: string;
   yes?: boolean;
+  /**
+   * Resolved only when the prompt is actually about to be shown, so reading
+   * artifacts costs nothing on non-mainnet networks or under --yes. Failures
+   * are swallowed: a missing artifact must not block the operation, it just
+   * leaves those lines off the banner.
+   */
+  resolveTargetDetails?: () => Promise<MainnetTargetDetails>;
 };
 
 export function isAssumeYesSet(): boolean {
@@ -23,9 +38,7 @@ export function isAssumeYesSet(): boolean {
   return envVal === "true" || envVal === "1" || envVal === "yes" || envVal === "y";
 }
 
-export async function confirmMainnetOperation(
-  details: MainnetOperationDetails
-): Promise<void> {
+export async function confirmMainnetOperation(details: MainnetOperationDetails): Promise<void> {
   const { networkName, networkConfig, operation, yes } = details;
 
   if (!requiresMainnetConfirmation(networkName, networkConfig)) {
@@ -49,6 +62,23 @@ export async function confirmMainnetOperation(
     );
   }
 
+  let resolved: MainnetTargetDetails = {
+    contractId: details.contractId,
+    deployedWasmHash: details.deployedWasmHash,
+  };
+
+  if (details.resolveTargetDetails) {
+    try {
+      const extra = await details.resolveTargetDetails();
+      resolved = {
+        contractId: resolved.contractId ?? extra.contractId,
+        deployedWasmHash: resolved.deployedWasmHash ?? extra.deployedWasmHash,
+      };
+    } catch {
+      // Best effort only — the banner degrades, the guardrail still fires.
+    }
+  }
+
   logger.info("");
   logger.info(chalk.bgRed.white.bold(" ⚠️  WARNING: MAINNET TRANSACTION "));
   logger.info(chalk.red(`You are about to execute an irreversible signed mainnet operation.`));
@@ -61,11 +91,12 @@ export async function confirmMainnetOperation(
   if (details.target) {
     logger.info(`  Target:      ${details.target}`);
   }
-  if (details.contractId) {
-    logger.info(`  Contract ID: ${details.contractId}`);
+  if (resolved.contractId) {
+    logger.info(`  Contract ID: ${chalk.yellow(resolved.contractId)}`);
   }
-  if (details.wasmHash) {
-    logger.info(`  WASM Hash:   ${details.wasmHash}`);
+  if (resolved.deployedWasmHash) {
+    const suffix = operation === "upgrade" ? " (will be replaced)" : "";
+    logger.info(`  Deployed WASM: ${resolved.deployedWasmHash}${suffix}`);
   }
   if (details.source) {
     logger.info(`  Source Acc:  ${details.source}`);

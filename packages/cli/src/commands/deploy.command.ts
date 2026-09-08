@@ -15,6 +15,7 @@ import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
+import { resolveDeployedTargetDetails } from "../utils/mainnet-target-details.js";
 import {
   assertZkVerifierDeployAllowed,
   resolveContractNamesForDeploy,
@@ -78,7 +79,10 @@ export function registerDeployCommand(program: Command): void {
           }
 
           const config = await loadConfig();
-          const { name: networkName, config: networkConfig } = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = resolveNetwork(
+            config,
+            options.network
+          );
 
           if (!options.dryRun) {
             await confirmMainnetOperation({
@@ -88,6 +92,10 @@ export function registerDeployCommand(program: Command): void {
               contractName,
               source: options.source,
               yes: options.yes,
+              // Only meaningful for a redeploy/--upgrade of a contract that is
+              // already recorded; a first deploy has nothing to show yet.
+              resolveTargetDetails: () =>
+                resolveDeployedTargetDetails({ networkName, contractName }),
             });
           }
 
