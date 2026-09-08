@@ -63,6 +63,30 @@ describe("normalizeSubmitResult", () => {
       }).status
     ).toBe("pending");
   });
+
+  it("should_report_failed_when_the_rpc_rejects_the_submission_with_ERROR", () => {
+    expect(
+      normalizeSubmitResult({
+        hash: "error-hash",
+        sendTransactionResponse: { status: "ERROR" },
+      }).status
+    ).toBe("failed");
+  });
+
+  it("should_report_pending_for_TRY_AGAIN_LATER_and_NOT_FOUND", () => {
+    for (const rpcStatus of ["TRY_AGAIN_LATER", "NOT_FOUND"]) {
+      expect(
+        normalizeSubmitResult({
+          hash: "unresolved-hash",
+          sendTransactionResponse: { status: rpcStatus },
+        }).status
+      ).toBe("pending");
+    }
+  });
+
+  it("should_report_pending_when_the_payload_carries_no_status_at_all", () => {
+    expect(normalizeSubmitResult({ txHash: "bare-hash", result: 1 }).status).toBe("pending");
+  });
 });
 
 describe("assertSubmitResultRecognized", () => {

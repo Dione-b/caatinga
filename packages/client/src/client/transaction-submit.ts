@@ -123,6 +123,29 @@ function hasNestedSendTransactionResponseHash(record: Record<string, unknown>): 
   return response !== null && typeof response === "object" && "hash" in response;
 }
 
+/**
+ * Maps a Soroban RPC lifecycle status onto the three states the client reports.
+ *
+ * `ERROR` is a definitive rejection by the RPC — the transaction was not
+ * accepted and will never land — so it is a failure, not something to keep
+ * waiting on. `TRY_AGAIN_LATER` and `NOT_FOUND` are genuinely unresolved: the
+ * submission may still reach a ledger, or the SDK's polling window expired
+ * before it did. Anything unrecognized (including a payload with no status at
+ * all, such as a custom binding adapter's `send()` result) is reported as
+ * pending rather than assumed successful.
+ */
+function toLifecycleStatus(rpcStatus: string | undefined): "confirmed" | "failed" | "pending" {
+  switch (rpcStatus) {
+    case "SUCCESS":
+      return "confirmed";
+    case "FAILED":
+    case "ERROR":
+      return "failed";
+    default:
+      return "pending";
+  }
+}
+
 export function normalizeSubmitResult<T>(raw: unknown): {
   status: "confirmed" | "failed" | "pending";
   transactionHash?: string;
@@ -153,12 +176,7 @@ export function normalizeSubmitResult<T>(raw: unknown): {
     candidate.getTransactionResponse?.status ??
     candidate.sendTransactionResponse?.status ??
     candidate.status;
-  const status =
-    transactionStatus === "SUCCESS"
-      ? "confirmed"
-      : transactionStatus === "FAILED"
-        ? "failed"
-        : "pending";
+  const status = toLifecycleStatus(transactionStatus);
   const resultXdr = candidate.getTransactionResponse?.resultXdr ?? candidate.resultXdr;
   const diagnosticEvents =
     candidate.getTransactionResponse?.diagnosticEvents ?? candidate.diagnosticEvents;
