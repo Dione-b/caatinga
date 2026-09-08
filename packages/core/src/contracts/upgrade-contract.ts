@@ -16,6 +16,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
 import { uploadWasm } from "./upload-wasm.js";
 import { hashWasm, resolveWasmArtifactPath } from "./wasm.js";
+import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type UpgradeContractOptions = {
@@ -70,6 +71,8 @@ export async function upgradeContractInPlace(
   const source = assertSafeSourceAccount(options.source);
   const upgradeMethod = options.upgradeMethod ?? DEFAULT_UPGRADE_METHOD;
   const wasmArg = options.wasmArg ?? DEFAULT_WASM_ARG;
+  assertSorobanSymbol(upgradeMethod, "upgradeMethod");
+  assertSorobanSymbol(wasmArg, "wasmArg");
 
   await checkBinary("stellar", "Install Stellar CLI before running ctg upgrade.");
 

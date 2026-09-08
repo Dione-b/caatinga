@@ -163,4 +163,20 @@ describe("upgradeContractInPlace", () => {
       })
     ).rejects.toMatchObject({ code: CaatingaErrorCode.ARTIFACT_NOT_FOUND });
   });
+
+  it("should_reject_flag_shaped_upgrade_symbols", async () => {
+    await seedProject(NEW_WASM, OLD_HASH);
+
+    await expect(
+      upgradeContractInPlace({
+        config: baseConfig,
+        contractName: "sticker",
+        networkName: "testnet",
+        source: "deployer",
+        cwd: tmpDir,
+        build: false,
+        upgradeMethod: "--help",
+      })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.INVOKE_FAILED });
+  });
 });

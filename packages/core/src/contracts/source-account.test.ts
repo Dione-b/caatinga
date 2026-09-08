@@ -42,6 +42,18 @@ describe("assertSafeSourceAccount", () => {
   });
 });
 
+it("should_reject_flag_shaped_source_alias", () => {
+  expect(() => assertSafeSourceAccount("--config-dir")).toThrowError(
+    expect.objectContaining({ code: CaatingaErrorCode.UNSAFE_SOURCE_ACCOUNT })
+  );
+  expect(() => assertSafeSourceAccount("-h")).toThrowError(
+    expect.objectContaining({ code: CaatingaErrorCode.UNSAFE_SOURCE_ACCOUNT })
+  );
+});
+
+it("should_allow_non_secret_alias_starting_with_S", () => {
+  expect(assertSafeSourceAccount("Staging")).toBe("Staging");
+});
 describe("resolveCliSource", () => {
   const previous = process.env.CAATINGA_SOURCE;
 

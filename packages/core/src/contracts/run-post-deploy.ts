@@ -15,6 +15,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { assertExpect } from "./verify-expect.js";
 import { resolvePlaceholders } from "./placeholder-engine.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
+import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type RunPostDeployHooksOptions = {
@@ -128,6 +129,8 @@ export async function runPostDeployHooks(
   await checkBinary("stellar", "Install Stellar CLI before running ctg wire.");
 
   for (const hook of hooks) {
+    assertSorobanSymbol(hook.method, "postDeploy method");
+
     if (!options.config.contracts[hook.contract]) {
       throw new CaatingaError(
         `Post-deploy hook references unknown contract "${hook.contract}".`,
