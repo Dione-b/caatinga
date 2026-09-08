@@ -8,6 +8,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { parseStellarCliVersion } from "./version.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 describe("checkStellarCliVersion", () => {
   beforeEach(() => {
@@ -35,6 +36,7 @@ describe("checkStellarCliVersion", () => {
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
       cwd: process.cwd(),
       skipStellarVersionCheck: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   });
 

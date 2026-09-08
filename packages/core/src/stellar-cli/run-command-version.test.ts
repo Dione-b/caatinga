@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const execaMock = vi.hoisted(() => vi.fn());
 const runCommandMock = vi.hoisted(() => vi.fn());
@@ -28,6 +29,7 @@ describe("checkStellarCliVersion", () => {
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
       cwd: process.cwd(),
       skipStellarVersionCheck: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   });
 
@@ -151,6 +153,7 @@ describe("runCommand Stellar CLI version gate", () => {
       env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
       reject: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   });
 });

@@ -24,6 +24,7 @@ import {
   isWasmOlderThanSources,
   resolveWasmArtifactPath,
 } from "./wasm.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type DeployContractOptions = {
   config: CaatingaConfig;
@@ -161,6 +162,7 @@ export async function deployContract(options: DeployContractOptions) {
       const result = await runCommand("stellar", stellarArgs, {
         cwd,
         failureCode: CaatingaErrorCode.DEPLOY_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
       });
       const output = result.all || `${result.stdout}\n${result.stderr}`;
       deployOutcome = {

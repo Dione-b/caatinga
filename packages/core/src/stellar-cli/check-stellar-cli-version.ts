@@ -7,6 +7,7 @@ import {
 } from "./compat.js";
 import { probeMissingStellarCliFeatures } from "./probe-stellar-cli-features.js";
 import { parseStellarCliVersion } from "./version.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type CheckStellarCliVersionOptions = {
   features?: readonly string[];
@@ -71,6 +72,7 @@ async function validateStellarCli(
     const result = await runCommand("stellar", ["--version"], {
       cwd: input.cwd,
       skipStellarVersionCheck: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
     rawOutput = result.all || result.stdout || result.stderr;
   } catch (error) {

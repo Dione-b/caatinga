@@ -1,6 +1,7 @@
 import semver from "semver";
 import { runCommand } from "../shell/run-command.js";
 import { STELLAR_CLI_MIN_VERSION } from "./version.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export const STELLAR_CLI_REQUIRED_FEATURES = [
   "contract-build",
@@ -54,6 +55,7 @@ async function probeFeatures(version: string, cwd: string): Promise<string[]> {
       await runCommand("stellar", FEATURE_COMMANDS[feature], {
         cwd,
         skipStellarVersionCheck: true,
+        timeout: VERSION_PROBE_TIMEOUT_MS,
       });
     } catch {
       missing.push(feature);

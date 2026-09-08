@@ -6,6 +6,7 @@ import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-ar
 import { parseWasmHash } from "../stellar-cli/parse-wasm-hash.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { hashWasm } from "./wasm.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type UploadWasmOptions = {
   wasmPath: string;
@@ -49,6 +50,7 @@ export async function uploadWasm(options: UploadWasmOptions): Promise<UploadWasm
     {
       cwd,
       failureCode: CaatingaErrorCode.UPLOAD_FAILED,
+      timeout: TRANSACTION_TIMEOUT_MS,
     }
   );
 
