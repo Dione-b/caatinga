@@ -42,6 +42,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/shell/run-command.test.ts",
     trigger: "runCommand(",
   },
+  [CaatingaErrorCode.COMMAND_TIMEOUT]: {
+    file: "packages/core/src/shell/run-command.test.ts",
+    trigger: "runCommand(",
+  },
   [CaatingaErrorCode.UNEXPECTED_ERROR]: {
     file: "packages/core/src/errors/to-caatinga-error.test.ts",
     trigger: "toCaatingaError(",

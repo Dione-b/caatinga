@@ -16,6 +16,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { resolveContract } from "./resolve-contract.js";
 import { uploadWasm } from "./upload-wasm.js";
 import { hashWasm, resolveWasmArtifactPath } from "./wasm.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type UpgradeContractOptions = {
   config: CaatingaConfig;
@@ -141,6 +142,7 @@ export async function upgradeContractInPlace(
         {
           cwd,
           failureCode: CaatingaErrorCode.INVOKE_FAILED,
+          timeout: TRANSACTION_TIMEOUT_MS,
         }
       );
       break;

@@ -15,6 +15,7 @@ import { assertSafeSourceAccount } from "./source-account.js";
 import { assertExpect } from "./verify-expect.js";
 import { resolvePlaceholders } from "./placeholder-engine.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type RunPostDeployHooksOptions = {
   config: CaatingaConfig;
@@ -210,6 +211,7 @@ export async function runPostDeployHooks(
             {
               cwd,
               failureCode: CaatingaErrorCode.INVOKE_FAILED,
+              timeout: TRANSACTION_TIMEOUT_MS,
             }
           );
           break;

@@ -13,6 +13,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { invokeContract, parseInvokeTarget } from "./invoke-contract.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const CONTRACT_ID = `C${"3".repeat(55)}`;
 
@@ -119,7 +120,11 @@ describe("invokeContract", () => {
         "--arg1",
         "x",
       ]),
-      { cwd: tmpDir, failureCode: CaatingaErrorCode.INVOKE_FAILED }
+      {
+        cwd: tmpDir,
+        failureCode: CaatingaErrorCode.INVOKE_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
+      }
     );
   });
 

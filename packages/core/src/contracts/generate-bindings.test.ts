@@ -25,6 +25,7 @@ vi.mock("../stellar-sdk/check-stellar-sdk-version.js", () => ({
 
 import { generateBindings } from "./generate-bindings.js";
 import { readBindingMarker } from "../bindings/binding-marker.js";
+import { BINDINGS_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const CONTRACT_ID = `C${"2".repeat(55)}`;
 
@@ -154,7 +155,11 @@ describe("generateBindings", () => {
         "--network",
         "testnet",
       ]),
-      { cwd: tmpDir, failureCode: CaatingaErrorCode.BINDINGS_FAILED }
+      {
+        cwd: tmpDir,
+        failureCode: CaatingaErrorCode.BINDINGS_FAILED,
+        timeout: BINDINGS_TIMEOUT_MS,
+      }
     );
   });
 

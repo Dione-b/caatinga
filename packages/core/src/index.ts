@@ -57,6 +57,12 @@ export { resolveNetwork, type ResolvedNetwork } from "./networks/resolve-network
 export { isMainnetNetwork, requiresMainnetConfirmation } from "./networks/mainnet-guardrails.js";
 
 export { runCommand, type RunCommandResult } from "./shell/run-command.js";
+export {
+  VERSION_PROBE_TIMEOUT_MS,
+  REGISTRY_TIMEOUT_MS,
+  BINDINGS_TIMEOUT_MS,
+  TRANSACTION_TIMEOUT_MS,
+} from "./shell/command-timeouts.js";
 export { resolveSubprocessEnv, isCargoBinMissingFromPath } from "./shell/resolve-subprocess-env.js";
 export { checkBinary } from "./shell/check-binary.js";
 export { parseContractId } from "./stellar-cli/parse-contract-id.js";
