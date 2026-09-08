@@ -42,6 +42,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/shell/run-command.test.ts",
     trigger: "runCommand(",
   },
+  [CaatingaErrorCode.COMMAND_TIMEOUT]: {
+    file: "packages/core/src/shell/run-command.test.ts",
+    trigger: "runCommand(",
+  },
   [CaatingaErrorCode.UNEXPECTED_ERROR]: {
     file: "packages/core/src/errors/to-caatinga-error.test.ts",
     trigger: "toCaatingaError(",
@@ -273,6 +277,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
   [CaatingaErrorCode.NETWORK_ARTIFACTS_MISSING]: {
     file: "packages/cli/src/commands/generate.command.test.ts",
     trigger: "--strict-network",
+  },
+  [CaatingaErrorCode.MAINNET_CONFIRMATION_REQUIRED]: {
+    file: "packages/cli/src/utils/mainnet-guardrails.test.ts",
+    trigger: "confirmMainnetOperation(",
   },
 };
 

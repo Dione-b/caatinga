@@ -6,6 +6,7 @@ import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { isMainnetNetwork } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
@@ -16,6 +17,7 @@ import { resolveContract } from "./resolve-contract.js";
 import { uploadWasm } from "./upload-wasm.js";
 import { hashWasm, resolveWasmArtifactPath } from "./wasm.js";
 import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type UpgradeContractOptions = {
   config: CaatingaConfig;
@@ -117,7 +119,10 @@ export async function upgradeContractInPlace(
     expectedHash: options.expectedHash,
   });
 
-  const retryDelaysMs = options.upgradeRetryDelaysMs ?? DEFAULT_UPGRADE_RETRY_DELAYS_MS;
+  const defaultRetryDelays = isMainnetNetwork(network.name, network.config)
+    ? []
+    : DEFAULT_UPGRADE_RETRY_DELAYS_MS;
+  const retryDelaysMs = options.upgradeRetryDelaysMs ?? defaultRetryDelays;
   const maxAttempts = retryDelaysMs.length + 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -140,6 +145,7 @@ export async function upgradeContractInPlace(
         {
           cwd,
           failureCode: CaatingaErrorCode.INVOKE_FAILED,
+          timeout: TRANSACTION_TIMEOUT_MS,
         }
       );
       break;

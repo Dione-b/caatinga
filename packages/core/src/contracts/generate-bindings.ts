@@ -11,6 +11,7 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { runCommand } from "../shell/run-command.js";
 import { checkStellarSdkVersion } from "../stellar-sdk/check-stellar-sdk-version.js";
 import { buildGenerateNetworkArgs } from "./build-generate-network-args.js";
+import { BINDINGS_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type GenerateBindingsOptions = {
   config: CaatingaConfig;
@@ -85,6 +86,7 @@ export async function generateBindings(options: GenerateBindingsOptions) {
     {
       cwd,
       failureCode: CaatingaErrorCode.BINDINGS_FAILED,
+      timeout: BINDINGS_TIMEOUT_MS,
     }
   );
 

@@ -7,6 +7,7 @@ import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { isMainnetNetwork } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
@@ -24,6 +25,7 @@ import {
   isWasmOlderThanSources,
   resolveWasmArtifactPath,
 } from "./wasm.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type DeployContractOptions = {
   config: CaatingaConfig;
@@ -153,7 +155,10 @@ export async function deployContract(options: DeployContractOptions) {
   ];
 
   let deployOutcome: { output: string; contractId: string } | undefined;
-  const retryDelaysMs = options.deployRetryDelaysMs ?? DEFAULT_DEPLOY_RETRY_DELAYS_MS;
+  const defaultRetryDelays = isMainnetNetwork(network.name, network.config)
+    ? []
+    : DEFAULT_DEPLOY_RETRY_DELAYS_MS;
+  const retryDelaysMs = options.deployRetryDelaysMs ?? defaultRetryDelays;
   const maxDeployAttempts = retryDelaysMs.length + 1;
 
   for (let attempt = 0; attempt < maxDeployAttempts; attempt++) {
@@ -161,6 +166,7 @@ export async function deployContract(options: DeployContractOptions) {
       const result = await runCommand("stellar", stellarArgs, {
         cwd,
         failureCode: CaatingaErrorCode.DEPLOY_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
       });
       const output = result.all || `${result.stdout}\n${result.stderr}`;
       deployOutcome = {

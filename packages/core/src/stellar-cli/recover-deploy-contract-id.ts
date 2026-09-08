@@ -4,6 +4,7 @@ import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js"
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const TX_HASH_REGEX = /Transaction hash is ([a-f0-9]{64})/i;
 
@@ -102,6 +103,7 @@ export async function resolveContractIdFromDeploySalt(options: {
     {
       cwd: options.cwd,
       skipStellarVersionCheck: true,
+      timeout: TRANSACTION_TIMEOUT_MS,
     }
   );
 

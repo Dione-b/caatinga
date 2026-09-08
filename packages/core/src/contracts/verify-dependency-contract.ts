@@ -3,6 +3,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { ResolvedNetwork } from "../networks/resolve-network.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export async function verifyDependencyContract(options: {
   dependencyName: string;
@@ -24,6 +25,7 @@ export async function verifyDependencyContract(options: {
       {
         cwd: options.cwd,
         failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
+        timeout: TRANSACTION_TIMEOUT_MS,
       }
     );
   } catch (error) {

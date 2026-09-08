@@ -32,11 +32,18 @@ export interface CaatingaClientConfig {
   contracts: Record<string, CaatingaContractRegistration>;
 }
 
+/**
+ * Terminal states after submission are read from the transaction's on-chain
+ * outcome: `confirmed` only on `SUCCESS`, `failed` on `FAILED`/`ERROR`, and
+ * `pending` when the outcome is genuinely unresolved. `pending` is not success —
+ * see docs/runtime-invoke-pipeline.md for the full RPC status mapping.
+ */
 export type CaatingaInvokeStatus =
   | "built"
   | "prepared"
   | "signed"
   | "submitted"
+  | "pending"
   | "confirmed"
   | "failed";
 
@@ -56,6 +63,10 @@ export interface CaatingaInvokeResult<T = unknown> {
   contractId: string;
   transactionHash?: string;
   result?: T;
+  /** Raw result XDR from the RPC, present on `failed` when it returned one. */
+  resultXdr?: string;
+  /** Soroban diagnostic events from the RPC, present on `failed` when returned. */
+  diagnosticEvents?: unknown[];
   xdr?: {
     unsigned?: string;
     prepared?: string;

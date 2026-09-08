@@ -1,43 +1,57 @@
-import { describe, expect, it, beforeAll } from "vitest";
-import { checkBinary } from "../shell/check-binary.js";
-import { checkStellarCliVersion } from "./check-stellar-cli-version.js";
-import {
-  probeMissingStellarCliFeatures,
-  STELLAR_CLI_REQUIRED_FEATURES,
-} from "./probe-stellar-cli-features.js";
-import { parseStellarCliVersion } from "./version.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-describe("probeMissingStellarCliFeatures (live Stellar CLI)", () => {
-  let stellarAvailable = false;
+const runCommandMock = vi.hoisted(() => vi.fn());
 
-  beforeAll(async () => {
-    try {
-      await checkBinary("stellar", "missing");
-      stellarAvailable = true;
-    } catch {
-      stellarAvailable = false;
-    }
+vi.mock("../shell/run-command.js", () => ({
+  runCommand: runCommandMock,
+}));
+
+import { STELLAR_CLI_REQUIRED_FEATURES } from "./probe-stellar-cli-features.js";
+
+describe("probeMissingStellarCliFeatures", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    runCommandMock.mockReset();
   });
 
-  it("should_report_no_missing_features_for_installed_cli", async () => {
-    if (!stellarAvailable) {
-      return;
-    }
+  async function loadProbe() {
+    return (await import("./probe-stellar-cli-features.js")).probeMissingStellarCliFeatures;
+  }
 
-    const result = await checkStellarCliVersion({ probeFeatures: true });
-    const missing = await probeMissingStellarCliFeatures(result.version);
+  it("returns the missing feature ids", async () => {
+    runCommandMock
+      .mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" })
+      .mockRejectedValueOnce(new Error("missing"))
+      .mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" });
+    const probe = await loadProbe();
 
-    expect(STELLAR_CLI_REQUIRED_FEATURES.every((feature) => !missing.includes(feature))).toBe(true);
-    expect(result.warnings.filter((w) => w.code === "STELLAR_CLI_MISSING_FEATURE")).toEqual([]);
+    await expect(probe("25.2.0", "/project")).resolves.toEqual(["contract-deploy"]);
   });
 
-  it("should_parse_version_from_stellar_binary", async () => {
-    if (!stellarAvailable) {
-      return;
-    }
+  it("reuses feature probes for the same version and working directory", async () => {
+    runCommandMock.mockResolvedValue({ stdout: "ok", stderr: "", all: "ok" });
+    const probe = await loadProbe();
 
-    const report = await checkStellarCliVersion({ probeFeatures: false });
-    expect(report.version).toMatch(/^\d+\.\d+\.\d+/);
-    expect(parseStellarCliVersion(`stellar ${report.version}`)).toBe(report.version);
+    await probe("25.2.0", "/project");
+    await probe("25.2.0", "/project");
+
+    expect(runCommandMock).toHaveBeenCalledTimes(STELLAR_CLI_REQUIRED_FEATURES.length);
+  });
+
+  it("does not share feature probes between working directories", async () => {
+    runCommandMock.mockResolvedValue({ stdout: "ok", stderr: "", all: "ok" });
+    const probe = await loadProbe();
+
+    await probe("25.2.0", "/project-a");
+    await probe("25.2.0", "/project-b");
+
+    expect(runCommandMock).toHaveBeenCalledTimes(STELLAR_CLI_REQUIRED_FEATURES.length * 2);
+  });
+
+  it("does not probe features below the minimum version", async () => {
+    const probe = await loadProbe();
+
+    await expect(probe("22.0.1", "/project")).resolves.toEqual(["contract-invoke-sign"]);
+    expect(runCommandMock).not.toHaveBeenCalled();
   });
 });

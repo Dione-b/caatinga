@@ -1,5 +1,6 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { runCommand } from "./run-command.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "./command-timeouts.js";
 
 type CheckBinaryOptions = {
   skipStellarVersionCheck?: boolean;
@@ -11,7 +12,11 @@ export async function checkBinary(
   options: CheckBinaryOptions = {}
 ): Promise<void> {
   try {
-    await runCommand(binary, ["--version"], options);
+    await runCommand(binary, ["--version"], {
+      timeout: VERSION_PROBE_TIMEOUT_MS,
+      ...options,
+      ...(binary === "stellar" ? { skipStellarVersionCheck: true } : {}),
+    });
   } catch (error) {
     if (error instanceof CaatingaError) {
       throw error;

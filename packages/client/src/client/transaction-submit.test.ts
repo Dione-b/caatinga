@@ -29,10 +29,63 @@ describe("normalizeSubmitResult", () => {
     const normalized = normalizeSubmitResult<{ value: number }>({
       result: { value: 42 },
       hash: "abc",
+      status: "SUCCESS",
     });
 
+    expect(normalized.status).toBe("confirmed");
     expect(normalized.result).toEqual({ value: 42 });
     expect(normalized.transactionHash).toBe("abc");
+  });
+
+  it("should_report_failed_lifecycle_status_and_diagnostics", () => {
+    const normalized = normalizeSubmitResult({
+      hash: "failed-hash",
+      getTransactionResponse: {
+        status: "FAILED",
+        resultXdr: "AAAA_RESULT",
+        diagnosticEvents: [{ type: "contract" }],
+      },
+    });
+
+    expect(normalized).toMatchObject({
+      status: "failed",
+      transactionHash: "failed-hash",
+      resultXdr: "AAAA_RESULT",
+      diagnosticEvents: [{ type: "contract" }],
+    });
+  });
+
+  it("should_report_pending_when_submission_has_not_reached_a_ledger", () => {
+    expect(
+      normalizeSubmitResult({
+        hash: "pending-hash",
+        sendTransactionResponse: { status: "PENDING" },
+      }).status
+    ).toBe("pending");
+  });
+
+  it("should_report_failed_when_the_rpc_rejects_the_submission_with_ERROR", () => {
+    expect(
+      normalizeSubmitResult({
+        hash: "error-hash",
+        sendTransactionResponse: { status: "ERROR" },
+      }).status
+    ).toBe("failed");
+  });
+
+  it("should_report_pending_for_TRY_AGAIN_LATER_and_NOT_FOUND", () => {
+    for (const rpcStatus of ["TRY_AGAIN_LATER", "NOT_FOUND"]) {
+      expect(
+        normalizeSubmitResult({
+          hash: "unresolved-hash",
+          sendTransactionResponse: { status: rpcStatus },
+        }).status
+      ).toBe("pending");
+    }
+  });
+
+  it("should_report_pending_when_the_payload_carries_no_status_at_all", () => {
+    expect(normalizeSubmitResult({ txHash: "bare-hash", result: 1 }).status).toBe("pending");
   });
 });
 

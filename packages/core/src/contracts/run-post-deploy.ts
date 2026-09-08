@@ -2,6 +2,7 @@ import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig, PostDeployHook } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
+import { isMainnetNetwork } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
@@ -15,6 +16,7 @@ import { assertExpect } from "./verify-expect.js";
 import { resolvePlaceholders } from "./placeholder-engine.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type RunPostDeployHooksOptions = {
   config: CaatingaConfig;
@@ -186,7 +188,10 @@ export async function runPostDeployHooks(
       });
       output = readResult.result?.trim() ?? "";
     } else {
-      const retryDelaysMs = options.hookRetryDelaysMs ?? DEFAULT_HOOK_RETRY_DELAYS_MS;
+      const defaultRetryDelays = isMainnetNetwork(network.name, network.config)
+        ? []
+        : DEFAULT_HOOK_RETRY_DELAYS_MS;
+      const retryDelaysMs = options.hookRetryDelaysMs ?? defaultRetryDelays;
       const maxHookAttempts = retryDelaysMs.length + 1;
       let result: { stdout: string; stderr: string; all: string } = undefined!;
 
@@ -209,6 +214,7 @@ export async function runPostDeployHooks(
             {
               cwd,
               failureCode: CaatingaErrorCode.INVOKE_FAILED,
+              timeout: TRANSACTION_TIMEOUT_MS,
             }
           );
           break;
