@@ -124,25 +124,54 @@ function hasNestedSendTransactionResponseHash(record: Record<string, unknown>): 
 }
 
 export function normalizeSubmitResult<T>(raw: unknown): {
+  status: "confirmed" | "failed" | "pending";
   transactionHash?: string;
   result?: T;
+  resultXdr?: string;
+  diagnosticEvents?: unknown[];
 } {
   const candidate = raw as {
+    status?: string;
     txHash?: string;
     transactionHash?: string;
     hash?: string;
     sendTransactionResponse?: {
       hash?: string;
+      status?: string;
+    };
+    getTransactionResponse?: {
+      status?: string;
+      resultXdr?: string;
+      diagnosticEvents?: unknown[];
     };
     result?: T;
+    resultXdr?: string;
+    diagnosticEvents?: unknown[];
   };
 
+  const transactionStatus =
+    candidate.getTransactionResponse?.status ??
+    candidate.sendTransactionResponse?.status ??
+    candidate.status;
+  const status =
+    transactionStatus === "SUCCESS"
+      ? "confirmed"
+      : transactionStatus === "FAILED"
+        ? "failed"
+        : "pending";
+  const resultXdr = candidate.getTransactionResponse?.resultXdr ?? candidate.resultXdr;
+  const diagnosticEvents =
+    candidate.getTransactionResponse?.diagnosticEvents ?? candidate.diagnosticEvents;
+
   return {
+    status,
     transactionHash:
       candidate.txHash ??
       candidate.transactionHash ??
       candidate.hash ??
       candidate.sendTransactionResponse?.hash,
     result: candidate.result,
+    ...(resultXdr !== undefined ? { resultXdr } : {}),
+    ...(diagnosticEvents !== undefined ? { diagnosticEvents } : {}),
   };
 }
