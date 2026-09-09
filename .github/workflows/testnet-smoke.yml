@@ -45,7 +45,7 @@ jobs:
 
       - name: Install Stellar CLI
         if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
-        uses: stellar/stellar-cli@v27.0.0
+        run: bash scripts/install-stellar-cli.sh 27.0.0
 
       # The install action puts ~/.local/bin on PATH itself; on a cache hit it is
       # skipped, so add the directory here too.
