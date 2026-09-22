@@ -16,7 +16,7 @@ Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). A
 | No global install | `npx ctg <command>` (`caatinga` is a legacy alias)                                           |
 | Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.2`), not a floating tag                        |
 | Fresh machine     | Node 22+, then check with `npx ctg doctor`. Install Rust, Stellar CLI manually.              |
-| Stellar CLI       | Hard floor **23.0.0**; last tested **27.0.0**; newer = advisory warning only                 |
+| Stellar CLI       | Hard floor **23.0.0**; last tested **28.0.0**; newer = advisory warning only                 |
 
 See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-cli-version-contract.md).
 
@@ -201,7 +201,7 @@ Advisory (non-fatal): `STELLAR_CLI_UNTESTED_VERSION`.
 10. **`caatinga.artifacts.json` is git-versioned** — commit after deploy.
 11. **Binding freshness** — `fresh` / `stale` / `missing` / `unknown` via `.caatinga-bindings.json`.
 12. **`doctor` deploy coverage is advisory** — never blocks exit code.
-13. **Stellar CLI** — hard floor 23.0.0, last tested 27.0.0.
+13. **Stellar CLI** — hard floor 23.0.0, last tested 28.0.0.
 14. **`ctg upgrade` vs `deploy --upgrade`** — in-place preserves `contractId`; redeploy creates a new instance.
 15. **Config graph validation** — `${contracts.*.contractId}` in `deployArgs` must be listed in `dependsOn`.
 16. **`doctor --strict`** — env drift + stale bindings only.

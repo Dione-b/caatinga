@@ -10,7 +10,7 @@ starter circuit and no frontend config.
 ## Requirements
 
 - Protocol 25+ on the target network (BLS12-381 host functions)
-- `soroban-sdk = "25.1.0"` and Rust `1.89.0` for the verifier contract
+- `soroban-sdk = "27.0.6"` and Rust `1.91.0` for the verifier contract
 
 ## Circuit inputs
 

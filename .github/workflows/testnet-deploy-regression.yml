@@ -27,7 +27,7 @@ jobs:
           cache: pnpm
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.91.0
         with:
           targets: wasm32v1-none
 
@@ -37,11 +37,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/bin/stellar
-          key: stellar-cli-27.0.0-${{ runner.os }}-${{ runner.arch }}
+          key: stellar-cli-28.0.0-${{ runner.os }}-${{ runner.arch }}
 
       - name: Install Stellar CLI
         if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
-        uses: stellar/stellar-cli@v27.0.0
+        uses: stellar/stellar-cli@v28.0.0
 
       # The install action puts ~/.local/bin on PATH itself; on a cache hit it is
       # skipped, so add the directory here too.
@@ -54,7 +54,7 @@ jobs:
         run: |
           version="$(stellar --version)"
           echo "$version"
-          [[ "$version" == *"27.0.0"* ]]
+          [[ "$version" == *"28.0.0"* ]]
 
       - name: Restore Stellar CLI config
         env:

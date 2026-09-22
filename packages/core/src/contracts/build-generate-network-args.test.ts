@@ -46,11 +46,7 @@ describe("buildGenerateNetworkArgs", () => {
   it("defaults an unrecognized passphrase to --network localnet and adds --allow-http for http RPCs", () => {
     expect(
       buildGenerateNetworkArgs(
-        network(
-          "local",
-          "http://localhost:8000/soroban/rpc",
-          "Standalone Network ; February 2017"
-        )
+        network("local", "http://localhost:8000/soroban/rpc", "Standalone Network ; February 2017")
       )
     ).toEqual([
       "--network",

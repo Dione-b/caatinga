@@ -11,6 +11,9 @@ import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
+import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
+import { resolveDeployedTargetDetails } from "../utils/mainnet-target-details.js";
+
 export function registerUpgradeCommand(program: Command): void {
   program
     .command("upgrade")
@@ -23,6 +26,7 @@ export function registerUpgradeCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign as contract admin (for example deployer)"
     )
+    .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
     .option(
       "--if-changed",
       "Skip upgrade when local WASM hash matches the artifact (upgrade when changed)"
@@ -40,6 +44,7 @@ export function registerUpgradeCommand(program: Command): void {
         options: {
           network?: string;
           source: string;
+          yes?: boolean;
           ifChanged?: boolean;
           expectedHash?: string;
           build?: boolean;
@@ -49,7 +54,20 @@ export function registerUpgradeCommand(program: Command): void {
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
-          const { name: networkName } = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = resolveNetwork(
+            config,
+            options.network
+          );
+
+          await confirmMainnetOperation({
+            operation: "upgrade",
+            networkName,
+            networkConfig,
+            contractName,
+            source: options.source,
+            yes: options.yes,
+            resolveTargetDetails: () => resolveDeployedTargetDetails({ networkName, contractName }),
+          });
 
           const result = await upgradeContractInPlace({
             config,

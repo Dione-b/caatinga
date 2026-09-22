@@ -20,6 +20,7 @@ vi.mock("../stellar-sdk/check-stellar-sdk-version.js", () => ({
     lastTestedVersion: "16.0.1",
     warnings: [],
   })),
+  emitStellarSdkWarningToStderr: vi.fn(),
 }));
 
 import { generateBindingsGraph } from "./generate-bindings-graph.js";

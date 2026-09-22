@@ -152,7 +152,7 @@ async function reportWasmDrift(networkName: string): Promise<void> {
 async function reportVersionMatrix(config: Awaited<ReturnType<typeof loadConfig>>): Promise<void> {
   logger.info("");
   logger.info("Version matrix (minimum):");
-  logger.info("  Stellar CLI: >= 23 (27 recommended)");
+  logger.info("  Stellar CLI: >= 23 (28 recommended)");
   logger.info("  @stellar/stellar-sdk: >= 13");
 
   const sdkVersions = await readContractSorobanSdkVersions(config);

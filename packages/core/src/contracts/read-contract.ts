@@ -10,6 +10,7 @@ import { parseInvokeTarget } from "./invoke-target.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveCliMethodArgs, resolveMethodArgs } from "./resolve-method-args.js";
 import { resolveCliSource } from "./source-account.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export { buildReadCallHint, isReadCallFailure, READ_CALL_FAILURE_REGEX } from "./invoke-target.js";
 
@@ -76,6 +77,7 @@ export async function readContract(options: ReadContractOptions) {
   const result = await runCommand("stellar", stellarArgs, {
     cwd,
     failureCode: CaatingaErrorCode.INVOKE_FAILED,
+    timeout: TRANSACTION_TIMEOUT_MS,
   });
 
   return {

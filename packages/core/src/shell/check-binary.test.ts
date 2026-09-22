@@ -8,8 +8,20 @@ vi.mock("./run-command.js", () => ({
 }));
 
 import { checkBinary } from "./check-binary.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "./command-timeouts.js";
 
 describe("checkBinary", () => {
+  it("skips the Stellar version gate because the real command validates it", async () => {
+    runCommand.mockResolvedValueOnce({ stdout: "stellar 25.2.0", stderr: "", all: "" });
+
+    await checkBinary("stellar", "hint");
+
+    expect(runCommand).toHaveBeenCalledWith("stellar", ["--version"], {
+      timeout: VERSION_PROBE_TIMEOUT_MS,
+      skipStellarVersionCheck: true,
+    });
+  });
+
   it("should_throw_RUST_NOT_FOUND_when_rustc_is_missing", async () => {
     runCommand.mockRejectedValueOnce(new Error("not found"));
 
@@ -17,6 +29,8 @@ describe("checkBinary", () => {
       code: CaatingaErrorCode.RUST_NOT_FOUND,
     });
 
-    expect(runCommand).toHaveBeenCalledWith("rustc", ["--version"], {});
+    expect(runCommand).toHaveBeenCalledWith("rustc", ["--version"], {
+      timeout: VERSION_PROBE_TIMEOUT_MS,
+    });
   });
 });

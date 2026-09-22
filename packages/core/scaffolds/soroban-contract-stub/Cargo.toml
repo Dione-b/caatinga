@@ -1,17 +1,17 @@
 [package]
 name = "app"
 version = "0.1.0"
-rust-version = "1.84.0"
+rust-version = "1.91.0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = "22.0.1"
+soroban-sdk = "27.0.6"
 
 [dev-dependencies]
-soroban-sdk = { version = "22.0.1", features = ["testutils"] }
+soroban-sdk = { version = "27.0.6", features = ["testutils"] }
 
 [profile.release]
 opt-level = "z"

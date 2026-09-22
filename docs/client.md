@@ -94,6 +94,32 @@ Minimal successful result:
 }
 ```
 
+`status` reflects the transaction's real on-chain outcome, so it must be checked
+before showing a success state:
+
+| `status`    | Meaning                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| `confirmed` | The transaction landed and succeeded (`SUCCESS`).                                        |
+| `failed`    | The transaction was rejected or failed on-chain (`FAILED`, `ERROR`).                     |
+| `pending`   | The outcome is unknown — still unresolved, or the polling window expired. Not a success. |
+
+```ts
+const res = await client.contract("token").invoke("transfer", { to, amount });
+
+if (res.status === "confirmed") {
+  showSuccess(res.transactionHash);
+} else if (res.status === "failed") {
+  showFailure(res.resultXdr, res.diagnosticEvents);
+} else {
+  showPending(res.transactionHash);
+}
+```
+
+On `failed`, `resultXdr` and `diagnosticEvents` carry the RPC's diagnosis when
+it returned them — no need to re-run with `debugRaw`. See
+[runtime-invoke-pipeline.md](./runtime-invoke-pipeline.md) for the full mapping
+from Soroban RPC statuses.
+
 If a contract ID is not passed explicitly, the client resolves it from:
 
 ```txt
