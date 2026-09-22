@@ -75,7 +75,7 @@ describe("writeArtifacts and readArtifacts", () => {
           contracts: {
             token: {
               contractId: "C".padEnd(56, "A"),
-              wasmHash: "hash-token",
+              wasmHash: "a".repeat(64),
               deployedAt: "2026-05-12T00:00:00.000Z",
               sourcePath: "./contracts/token",
               wasmPath: "./contracts/token.wasm",
@@ -83,7 +83,7 @@ describe("writeArtifacts and readArtifacts", () => {
             },
             marketplace: {
               contractId: "C".padEnd(56, "B"),
-              wasmHash: "hash-marketplace",
+              wasmHash: "b".repeat(64),
               deployedAt: "2026-05-12T00:00:00.000Z",
               sourcePath: "./contracts/marketplace",
               wasmPath: "./contracts/marketplace.wasm",

@@ -15,7 +15,7 @@ For a standard Soroban dApp without ZK, use [Template](./template-project.md) or
 Beyond the usual [Getting started prerequisites](../getting-started.md#prerequisites):
 
 - **Protocol 25+** on the target network
-- **Verifier contract:** `soroban-sdk = "25.1.0"`, Rust **1.89.0**
+- **Verifier contract:** `soroban-sdk = "27.0.6"`, Rust **1.91.0**
 - **Circom 2 + snarkjs** — installed on first `ctg zk build` into `~/.caatinga/zk-tools`
 
 See [ZK module — Requirements](../zk.md#requirements) for details.

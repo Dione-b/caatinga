@@ -13,6 +13,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { invokeContract, parseInvokeTarget } from "./invoke-contract.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const CONTRACT_ID = `C${"3".repeat(55)}`;
 
@@ -52,6 +53,14 @@ describe("parseInvokeTarget", () => {
       expect.objectContaining({ code: CaatingaErrorCode.INVOKE_TARGET_INVALID })
     );
   });
+  it("rejects flag-shaped method names", () => {
+    expect(() => parseInvokeTarget("counter.--help")).toThrow(
+      expect.objectContaining({ code: CaatingaErrorCode.INVOKE_FAILED })
+    );
+    expect(() => parseInvokeTarget("counter.bad-name")).toThrow(
+      expect.objectContaining({ code: CaatingaErrorCode.INVOKE_FAILED })
+    );
+  });
 });
 
 describe("invokeContract", () => {
@@ -81,7 +90,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -119,7 +128,11 @@ describe("invokeContract", () => {
         "--arg1",
         "x",
       ]),
-      { cwd: tmpDir, failureCode: CaatingaErrorCode.INVOKE_FAILED }
+      {
+        cwd: tmpDir,
+        failureCode: CaatingaErrorCode.INVOKE_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
+      }
     );
   });
 
@@ -131,7 +144,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -173,7 +186,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -218,7 +231,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -264,7 +277,7 @@ describe("invokeContract", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",

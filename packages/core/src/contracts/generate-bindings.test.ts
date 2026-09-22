@@ -21,10 +21,12 @@ vi.mock("../stellar-sdk/check-stellar-sdk-version.js", () => ({
     lastTestedVersion: "16.0.1",
     warnings: [],
   })),
+  emitStellarSdkWarningToStderr: vi.fn(),
 }));
 
 import { generateBindings } from "./generate-bindings.js";
 import { readBindingMarker } from "../bindings/binding-marker.js";
+import { BINDINGS_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const CONTRACT_ID = `C${"2".repeat(55)}`;
 
@@ -101,7 +103,7 @@ describe("generateBindings", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -126,7 +128,7 @@ describe("generateBindings", () => {
     expect(result.marker).toMatchObject({
       version: 1,
       contractId: CONTRACT_ID,
-      wasmHash: "abc",
+      wasmHash: "a".repeat(64),
       network: "testnet",
     });
     await expect(readBindingMarker(result.outputDir)).resolves.toEqual(result.marker);
@@ -154,7 +156,11 @@ describe("generateBindings", () => {
         "--network",
         "testnet",
       ]),
-      { cwd: tmpDir, failureCode: CaatingaErrorCode.BINDINGS_FAILED }
+      {
+        cwd: tmpDir,
+        failureCode: CaatingaErrorCode.BINDINGS_FAILED,
+        timeout: BINDINGS_TIMEOUT_MS,
+      }
     );
   });
 
@@ -166,7 +172,7 @@ describe("generateBindings", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -215,7 +221,7 @@ describe("generateBindings", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -251,7 +257,7 @@ describe("generateBindings", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",
@@ -294,7 +300,7 @@ describe("generateBindings", () => {
       contracts: {
         counter: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/counter",
           wasmPath: "./rel/counter.wasm",

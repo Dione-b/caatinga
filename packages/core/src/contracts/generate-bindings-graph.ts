@@ -37,17 +37,16 @@ export async function generateBindingsGraph(options: {
     }
   }
 
-  const results: GenerateBindingsGraphResult["results"] = [];
-  for (const contractName of targets) {
-    results.push(
-      await generateBindings({
+  const results = await Promise.all(
+    targets.map((contractName) =>
+      generateBindings({
         config: options.config,
         contractName,
         networkName: network.name,
         cwd,
       })
-    );
-  }
+    )
+  );
 
   return { network, results };
 }

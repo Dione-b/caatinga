@@ -111,6 +111,7 @@ describe("zk invoke command", () => {
       "--network",
       "mainnet",
       "--allow-dev-ceremony",
+      "--yes",
     ]);
 
     expect(assertDevCeremonyAllowedMock).toHaveBeenCalledWith(
@@ -119,6 +120,36 @@ describe("zk invoke command", () => {
     expect(invokeVerifierMock).toHaveBeenCalledWith(
       expect.objectContaining({ network: "mainnet" })
     );
+  });
+
+  it("blocks unattended mainnet invoke without --yes", async () => {
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkInvokeCommand(program);
+
+      await program.parseAsync([
+        "node",
+        "caatinga",
+        "zk",
+        "invoke",
+        "--source",
+        "alice",
+        "--network",
+        "mainnet",
+        "--allow-dev-ceremony",
+      ]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain(CaatingaErrorCode.MAINNET_CONFIRMATION_REQUIRED);
+      expect(invokeVerifierMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 
   it("rejects --embed-vk", async () => {

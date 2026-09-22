@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { CaatingaArtifacts } from "./artifact.schema.js";
+import { CaatingaArtifactsSchema, type CaatingaArtifacts } from "./artifact.schema.js";
 
 export async function writeArtifacts(
   artifacts: CaatingaArtifacts,
@@ -10,8 +10,13 @@ export async function writeArtifacts(
   const artifactsPath = path.resolve(cwd, "caatinga.artifacts.json");
   await mkdir(path.dirname(artifactsPath), { recursive: true });
 
+  // Re-validate before persisting: a malformed contractId/wasmHash written here
+  // would otherwise only surface as a hard read failure on the next readArtifacts
+  // call, after it's already the trusted record for signed transactions.
+  const validated = CaatingaArtifactsSchema.parse(artifacts);
+
   const tmpPath = `${artifactsPath}.${randomBytes(4).toString("hex")}.tmp`;
-  const payload = `${JSON.stringify(artifacts, null, 2)}\n`;
+  const payload = `${JSON.stringify(validated, null, 2)}\n`;
 
   try {
     await writeFile(tmpPath, payload, "utf8");

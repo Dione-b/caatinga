@@ -36,7 +36,7 @@ npx ctg init my-dapp
 
 **Symptom:** CLI refuses to run; version below 23.0.0.
 
-**Fix:** Upgrade Stellar CLI to ≥ 23.0.0 (27.0.0 recommended).
+**Fix:** Upgrade Stellar CLI to ≥ 23.0.0 (28.0.0 recommended).
 
 ```bash
 stellar --version

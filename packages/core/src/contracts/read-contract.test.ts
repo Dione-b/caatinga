@@ -13,6 +13,7 @@ vi.mock("../shell/run-command.js", () => ({
 }));
 
 import { readContract } from "./read-contract.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const CONTRACT_ID = `C${"4".repeat(55)}`;
 
@@ -56,7 +57,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",
@@ -91,7 +92,11 @@ describe("readContract", () => {
         "--",
         "version",
       ]),
-      { cwd: tmpDir, failureCode: CaatingaErrorCode.INVOKE_FAILED }
+      {
+        cwd: tmpDir,
+        failureCode: CaatingaErrorCode.INVOKE_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
+      }
     );
   });
 
@@ -104,7 +109,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",
@@ -147,7 +152,7 @@ describe("readContract", () => {
       contracts: {
         app: {
           contractId: CONTRACT_ID,
-          wasmHash: "abc",
+          wasmHash: "a".repeat(64),
           deployedAt: "2026-05-11T12:00:00.000Z",
           sourcePath: "./contracts/app",
           wasmPath: "./rel/app.wasm",

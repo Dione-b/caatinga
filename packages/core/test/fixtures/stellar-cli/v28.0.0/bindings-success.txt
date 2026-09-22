@@ -1,0 +1,5 @@
+ℹ️  Network: Test SDF Network ; September 2015
+🌎 Downloading contract spec: CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ℹ️  Embedding contract address: CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+✅ Generated!
+ℹ️  Run "npm install && npm run build" in "./src/contracts/generated/counter" to build the JavaScript NPM package.

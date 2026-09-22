@@ -46,7 +46,7 @@ async function writeDeployedCounter(tmpDir: string): Promise<void> {
     contracts: {
       counter: {
         contractId: CONTRACT_ID,
-        wasmHash: "abc",
+        wasmHash: "a".repeat(64),
         deployedAt: "2026-06-11T12:00:00.000Z",
         sourcePath: "./contracts/counter",
         wasmPath: "./rel/counter.wasm",
@@ -87,7 +87,7 @@ describe("collectProjectStatus", () => {
     expect(counter).toMatchObject({
       deployed: true,
       contractId: CONTRACT_ID,
-      wasmHash: "abc",
+      wasmHash: "a".repeat(64),
     });
 
     const token = testnet.contracts.find((entry) => entry.name === "token");
@@ -108,7 +108,7 @@ describe("collectProjectStatus", () => {
     await writeBindingMarker(outputDir, {
       version: 1,
       contractId: CONTRACT_ID,
-      wasmHash: "abc",
+      wasmHash: "a".repeat(64),
       network: "testnet",
       generatedAt: "2026-06-11T12:00:00.000Z",
     });

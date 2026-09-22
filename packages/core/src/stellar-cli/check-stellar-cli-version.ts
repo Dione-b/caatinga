@@ -1,4 +1,4 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { emitWarningToStderr } from "../shell/emit-warning-to-stderr.js";
 import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarCliCompatibility,
@@ -7,6 +7,7 @@ import {
 } from "./compat.js";
 import { probeMissingStellarCliFeatures } from "./probe-stellar-cli-features.js";
 import { parseStellarCliVersion } from "./version.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type CheckStellarCliVersionOptions = {
   features?: readonly string[];
@@ -16,41 +17,40 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
-type ValidationContext = {
-  cwd: string;
-  features?: readonly string[];
-  lastTestedVersion?: string;
-};
+let cachedVersionByCwd = new Map<string, Promise<string>>();
 
-const validationCache = new Map<string, Promise<CompatibilityReport>>();
+/** @internal — exposed for tests that need to invalidate the module-level cache. */
+export function _clearStellarCliVersionCache(): void {
+  cachedVersionByCwd = new Map();
+}
 
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
 ): Promise<CompatibilityReport> {
-  const context: ValidationContext = {
-    cwd: process.cwd(),
-    features: input.features,
-    lastTestedVersion: input.lastTestedVersion,
-  };
-  const cacheKey = JSON.stringify({
-    cwd: context.cwd,
-    features: context.features ?? [],
-    lastTestedVersion: context.lastTestedVersion,
-    probeFeatures: input.probeFeatures !== false,
-  });
+  const cwd = process.cwd();
 
-  let validation = validationCache.get(cacheKey);
-  if (!validation) {
-    validation = validateStellarCli(context, input.probeFeatures !== false);
-    validationCache.set(cacheKey, validation);
-    validation.catch(() => {
-      if (validationCache.get(cacheKey) === validation) {
-        validationCache.delete(cacheKey);
+  let versionPromise = cachedVersionByCwd.get(cwd);
+  if (!versionPromise) {
+    versionPromise = resolveStellarCliVersion(cwd);
+    cachedVersionByCwd.set(cwd, versionPromise);
+    versionPromise.catch(() => {
+      if (cachedVersionByCwd.get(cwd) === versionPromise) {
+        cachedVersionByCwd.delete(cwd);
       }
     });
   }
 
-  const report = await validation;
+  const version = await versionPromise;
+  const probedMissing =
+    input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version, cwd);
+  const missingFeatures = [...(input.features ?? []), ...probedMissing];
+
+  const report = evaluateStellarCliCompatibility({
+    version,
+    features: missingFeatures.length > 0 ? missingFeatures : undefined,
+    lastTestedVersion: input.lastTestedVersion,
+  });
+
   for (const warning of report.warnings) {
     if (input.onWarning) {
       input.onWarning(warning);
@@ -61,49 +61,32 @@ export async function checkStellarCliVersion(
   return report;
 }
 
-async function validateStellarCli(
-  input: ValidationContext,
-  probeFeatures: boolean
-): Promise<CompatibilityReport> {
-  let rawOutput: string;
-
-  try {
-    const result = await runCommand("stellar", ["--version"], {
-      cwd: input.cwd,
-      skipStellarVersionCheck: true,
-    });
-    rawOutput = result.all || result.stdout || result.stderr;
-  } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
-      throw new CaatingaError(
-        "Stellar CLI was not found.",
-        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
-        "Install Stellar CLI before running Caatinga-backed commands.",
-        error
-      );
-    }
-
-    throw error;
-  }
-
-  const version = parseStellarCliVersion(rawOutput);
-  const probedMissing = probeFeatures
-    ? await probeMissingStellarCliFeatures(version, input.cwd)
-    : [];
-  const missingFeatures = [...(input.features ?? []), ...probedMissing];
-
-  return evaluateStellarCliCompatibility({
-    version,
-    features: missingFeatures.length > 0 ? missingFeatures : undefined,
-    lastTestedVersion: input.lastTestedVersion,
+async function resolveStellarCliVersion(cwd: string): Promise<string> {
+  // runCommand already converts a missing "stellar" binary (ENOENT) into a
+  // typed CaatingaError(STELLAR_CLI_NOT_FOUND), so there is nothing to catch
+  // and re-wrap here.
+  const result = await runCommand("stellar", ["--version"], {
+    cwd,
+    skipStellarVersionCheck: true,
+    timeout: VERSION_PROBE_TIMEOUT_MS,
   });
+  const rawOutput = result.all || result.stdout || result.stderr;
+
+  return parseStellarCliVersion(rawOutput);
 }
 
-function defaultEmitWarning(warning: CompatibilityWarning): void {
-  const lines = [
-    `Warning: ${warning.message}`,
-    warning.remediation ? `  ${warning.remediation}` : undefined,
-  ].filter((line): line is string => Boolean(line));
+function defaultEmitWarning(_warning: CompatibilityWarning): void {
+  // Intentionally a no-op: library consumers and browser builds should not
+  // receive unsolicited stderr output. Supply an `onWarning` callback to
+  // handle warnings explicitly.
+}
 
-  process.stderr.write(`${lines.join("\n")}\n`);
+/**
+ * Writes a compatibility warning to stderr. Not used as the default —
+ * internal callers that run on a real terminal (e.g. `runCommand`) opt into
+ * this explicitly via `onWarning` so warnings stay visible there without
+ * forcing stderr output on every consumer of `checkStellarCliVersion`.
+ */
+export function emitStellarCliWarningToStderr(warning: CompatibilityWarning): void {
+  emitWarningToStderr(warning);
 }
