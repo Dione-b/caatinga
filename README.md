@@ -135,6 +135,12 @@ pnpm install && pnpm build && pnpm test
 pnpm dev init my-dapp   # run CLI from source
 ```
 
+## Contributors
+
+<a href="https://github.com/Dione-b/caatinga/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Dione-b/caatinga" alt="Caatinga contributors" />
+</a>
+
 ## License
 
 [MIT](./LICENSE)
