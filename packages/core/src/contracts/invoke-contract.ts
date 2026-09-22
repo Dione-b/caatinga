@@ -8,6 +8,7 @@ import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-ar
 import { assertSafeSourceAccount } from "./source-account.js";
 import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
 import { resolveCliMethodArgs } from "./resolve-method-args.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
 
@@ -66,6 +67,7 @@ export async function invokeContract(options: InvokeContractOptions) {
       {
         cwd,
         failureCode: CaatingaErrorCode.INVOKE_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
       }
     );
   } catch (error) {

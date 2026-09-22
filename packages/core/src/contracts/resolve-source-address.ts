@@ -2,6 +2,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { assertSafeSourceAccount } from "./source-account.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const STELLAR_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/;
 
@@ -19,6 +20,7 @@ export async function resolveSourceAddress(options: {
     result = await runCommand("stellar", ["keys", "address", source], {
       cwd,
       failureCode: CaatingaErrorCode.SOURCE_ADDRESS_UNRESOLVED,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   } catch (error) {
     if (error instanceof CaatingaError) {

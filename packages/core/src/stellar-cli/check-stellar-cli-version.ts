@@ -8,6 +8,7 @@ import {
 } from "./compat.js";
 import { probeMissingStellarCliFeatures } from "./probe-stellar-cli-features.js";
 import { parseStellarCliVersion } from "./version.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type CheckStellarCliVersionOptions = {
   features?: readonly string[];
@@ -17,41 +18,40 @@ export type CheckStellarCliVersionOptions = {
   probeFeatures?: boolean;
 };
 
-type ValidationContext = {
-  cwd: string;
-  features?: readonly string[];
-  lastTestedVersion?: string;
-};
+let cachedVersionByCwd = new Map<string, Promise<string>>();
 
-const validationCache = new Map<string, Promise<CompatibilityReport>>();
+/** @internal — exposed for tests that need to invalidate the module-level cache. */
+export function _clearStellarCliVersionCache(): void {
+  cachedVersionByCwd = new Map();
+}
 
 export async function checkStellarCliVersion(
   input: CheckStellarCliVersionOptions = {}
 ): Promise<CompatibilityReport> {
-  const context: ValidationContext = {
-    cwd: process.cwd(),
-    features: input.features,
-    lastTestedVersion: input.lastTestedVersion,
-  };
-  const cacheKey = JSON.stringify({
-    cwd: context.cwd,
-    features: context.features ?? [],
-    lastTestedVersion: context.lastTestedVersion,
-    probeFeatures: input.probeFeatures !== false,
-  });
+  const cwd = process.cwd();
 
-  let validation = validationCache.get(cacheKey);
-  if (!validation) {
-    validation = validateStellarCli(context, input.probeFeatures !== false);
-    validationCache.set(cacheKey, validation);
-    validation.catch(() => {
-      if (validationCache.get(cacheKey) === validation) {
-        validationCache.delete(cacheKey);
+  let versionPromise = cachedVersionByCwd.get(cwd);
+  if (!versionPromise) {
+    versionPromise = resolveStellarCliVersion(cwd);
+    cachedVersionByCwd.set(cwd, versionPromise);
+    versionPromise.catch(() => {
+      if (cachedVersionByCwd.get(cwd) === versionPromise) {
+        cachedVersionByCwd.delete(cwd);
       }
     });
   }
 
-  const report = await validation;
+  const version = await versionPromise;
+  const probedMissing =
+    input.probeFeatures === false ? [] : await probeMissingStellarCliFeatures(version, cwd);
+  const missingFeatures = [...(input.features ?? []), ...probedMissing];
+
+  const report = evaluateStellarCliCompatibility({
+    version,
+    features: missingFeatures.length > 0 ? missingFeatures : undefined,
+    lastTestedVersion: input.lastTestedVersion,
+  });
+
   for (const warning of report.warnings) {
     if (input.onWarning) {
       input.onWarning(warning);
@@ -62,16 +62,14 @@ export async function checkStellarCliVersion(
   return report;
 }
 
-async function validateStellarCli(
-  input: ValidationContext,
-  probeFeatures: boolean
-): Promise<CompatibilityReport> {
+async function resolveStellarCliVersion(cwd: string): Promise<string> {
   let rawOutput: string;
 
   try {
     const result = await runCommand("stellar", ["--version"], {
-      cwd: input.cwd,
+      cwd,
       skipStellarVersionCheck: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
     rawOutput = result.all || result.stdout || result.stderr;
   } catch (error) {
@@ -87,17 +85,7 @@ async function validateStellarCli(
     throw error;
   }
 
-  const version = parseStellarCliVersion(rawOutput);
-  const probedMissing = probeFeatures
-    ? await probeMissingStellarCliFeatures(version, input.cwd)
-    : [];
-  const missingFeatures = [...(input.features ?? []), ...probedMissing];
-
-  return evaluateStellarCliCompatibility({
-    version,
-    features: missingFeatures.length > 0 ? missingFeatures : undefined,
-    lastTestedVersion: input.lastTestedVersion,
-  });
+  return parseStellarCliVersion(rawOutput);
 }
 
 function defaultEmitWarning(_warning: CompatibilityWarning): void {

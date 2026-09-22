@@ -9,6 +9,7 @@ import {
   type SdkCompatibilityReport,
   type SdkCompatibilityWarning,
 } from "./compat.js";
+import { REGISTRY_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type CheckStellarSdkVersionOptions = {
   cwd?: string;
@@ -30,6 +31,7 @@ async function readInstalledSdkVersion(cwd: string): Promise<string | undefined>
 async function resolveRegistrySdkVersion(): Promise<string> {
   const result = await runCommand("npm", ["view", "@stellar/stellar-sdk", "version"], {
     skipStellarVersionCheck: true,
+    timeout: REGISTRY_TIMEOUT_MS,
   });
   return parseStellarSdkVersion(result.stdout || result.all);
 }
