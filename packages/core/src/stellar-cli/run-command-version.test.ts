@@ -55,6 +55,7 @@ describe("runCommand Stellar CLI version gate", () => {
     }));
     vi.doMock("./check-stellar-cli-version.js", () => ({
       checkStellarCliVersion: checkStellarCliVersionMock,
+      emitStellarCliWarningToStderr: vi.fn(),
     }));
   });
 
@@ -75,7 +76,9 @@ describe("runCommand Stellar CLI version gate", () => {
       all: "ok",
     });
 
-    expect(checkStellarCliVersionMock).toHaveBeenCalledWith();
+    expect(checkStellarCliVersionMock).toHaveBeenCalledWith({
+      onWarning: expect.any(Function),
+    });
     expect(execaMock).toHaveBeenCalledWith("stellar", ["contract", "build"], {
       cwd: undefined,
       env: expect.objectContaining({ PATH: expect.any(String) }),

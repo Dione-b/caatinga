@@ -1,7 +1,10 @@
 import { execa, type Options } from "execa";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { CaatingaErrorCodeValue } from "../errors/CaatingaErrorCode.js";
-import { checkStellarCliVersion } from "../stellar-cli/check-stellar-cli-version.js";
+import {
+  checkStellarCliVersion,
+  emitStellarCliWarningToStderr,
+} from "../stellar-cli/check-stellar-cli-version.js";
 import { resolveSubprocessEnv } from "./resolve-subprocess-env.js";
 
 export type RunCommandResult = {
@@ -25,7 +28,7 @@ export async function runCommand(
 ): Promise<RunCommandResult> {
   try {
     if (command === "stellar" && !options.skipStellarVersionCheck) {
-      await checkStellarCliVersion();
+      await checkStellarCliVersion({ onWarning: emitStellarCliWarningToStderr });
     }
 
     const result = await execa(command, args, {

@@ -101,6 +101,21 @@ async function validateStellarCli(
 
 function defaultEmitWarning(_warning: CompatibilityWarning): void {
   // Intentionally a no-op: library consumers and browser builds should not
-  // receive unsolicited stderr output.  Supply an `onWarning` callback to
+  // receive unsolicited stderr output. Supply an `onWarning` callback to
   // handle warnings explicitly.
+}
+
+/**
+ * Writes a compatibility warning to stderr. Not used as the default —
+ * internal callers that run on a real terminal (e.g. `runCommand`) opt into
+ * this explicitly via `onWarning` so warnings stay visible there without
+ * forcing stderr output on every consumer of `checkStellarCliVersion`.
+ */
+export function emitStellarCliWarningToStderr(warning: CompatibilityWarning): void {
+  const lines = [
+    `Warning: ${warning.message}`,
+    warning.remediation ? `  ${warning.remediation}` : undefined,
+  ].filter((line): line is string => Boolean(line));
+
+  process.stderr.write(`${lines.join("\n")}\n`);
 }

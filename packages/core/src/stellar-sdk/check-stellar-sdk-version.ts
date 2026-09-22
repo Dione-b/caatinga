@@ -73,6 +73,21 @@ export async function checkStellarSdkVersion(
 
 function defaultEmitWarning(_warning: SdkCompatibilityWarning): void {
   // Intentionally a no-op: library consumers and browser builds should not
-  // receive unsolicited stderr output.  Supply an `onWarning` callback to
+  // receive unsolicited stderr output. Supply an `onWarning` callback to
   // handle warnings explicitly.
+}
+
+/**
+ * Writes an SDK compatibility warning to stderr. Not used as the default —
+ * internal callers that run on a real terminal (e.g. `generateBindings`)
+ * opt into this explicitly via `onWarning` so warnings stay visible there
+ * without forcing stderr output on every consumer of `checkStellarSdkVersion`.
+ */
+export function emitStellarSdkWarningToStderr(warning: SdkCompatibilityWarning): void {
+  const lines = [
+    `Warning: ${warning.message}`,
+    warning.remediation ? `  ${warning.remediation}` : undefined,
+  ].filter((line): line is string => Boolean(line));
+
+  process.stderr.write(`${lines.join("\n")}\n`);
 }
