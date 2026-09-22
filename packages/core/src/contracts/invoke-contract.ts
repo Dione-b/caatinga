@@ -5,11 +5,11 @@ import { resolveNetwork } from "../networks/resolve-network.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
+import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "../stellar-cli/version.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { buildReadCallHint, isReadCallFailure, parseInvokeTarget } from "./invoke-target.js";
 import { resolveCliMethodArgs } from "./resolve-method-args.js";
-
-const INVOKE_SIGNING_FAILURE_REGEX = /xdr processing error: xdr value invalid/i;
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export type { InvokeTarget } from "./invoke-target.js";
 export { parseInvokeTarget } from "./invoke-target.js";
@@ -21,6 +21,8 @@ export type InvokeContractOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
+  /** When false, skip CLI identity alias resolution for string method args. */
+  resolveAliases?: boolean;
 };
 
 export async function invokeContract(options: InvokeContractOptions) {
@@ -44,6 +46,7 @@ export async function invokeContract(options: InvokeContractOptions) {
   const methodArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
     cwd,
+    resolveAliases: options.resolveAliases,
   });
 
   let result: Awaited<ReturnType<typeof runCommand>>;
@@ -66,6 +69,7 @@ export async function invokeContract(options: InvokeContractOptions) {
       {
         cwd,
         failureCode: CaatingaErrorCode.INVOKE_FAILED,
+        timeout: TRANSACTION_TIMEOUT_MS,
       }
     );
   } catch (error) {
@@ -85,14 +89,14 @@ export async function invokeContract(options: InvokeContractOptions) {
     if (
       error instanceof CaatingaError &&
       error.code === CaatingaErrorCode.INVOKE_FAILED &&
-      INVOKE_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
+      STELLAR_CLI_SIGNING_FAILURE_REGEX.test(`${error.message}\n${error.hint ?? ""}`)
     ) {
       throw new CaatingaError(
         error.message,
         error.code,
         [
           "Stellar CLI could not sign the invoke transaction (xdr value invalid).",
-          "Stellar CLI 22.x has a known invoke signing bug; upgrade to 23.0.0 or newer (27.0.0 recommended).",
+          "Stellar CLI 22.x has a known invoke signing bug; upgrade to 23.0.0 or newer (28.0.0 recommended).",
           "  stellar --version",
           "Then retry with a funded identity, for example:",
           "  stellar keys generate alice --fund --network testnet",

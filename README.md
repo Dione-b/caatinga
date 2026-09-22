@@ -89,8 +89,8 @@ See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
 ## Requirements
 
 - **Node.js** 22+
-- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on `PATH` (27.0.0 recommended)
-- **Rust** 1.84.0+ with the `wasm32v1-none` target
+- **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on `PATH` (28.0.0 recommended)
+- **Rust** 1.91.0+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)
 
 Run `ctg doctor` to check what is missing. Install prerequisites manually — see [Getting started](./docs/getting-started.md#prerequisites). See the [version contract](./docs/stellar-cli-version-contract.md).
@@ -117,11 +117,11 @@ my-dapp/
 
 ## Packages
 
-| Package            | Role                                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Package            | Role                                                                                                                                                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, upgrade, dev, doctor, generate, invoke, read, status, migrate, rollback, estimate, inspect, wire, sync-env, smoke, regression, ci, identity, zk, version |
-| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                        |
-| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                              |
+| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                                                                                                                           |
+| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                                                                                                                                 |
 
 Full export map: [Packages](./docs/packages.md). Public errors use stable `CAATINGA_*` codes — see [Errors](./docs/errors.md).
 

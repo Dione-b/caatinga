@@ -3,6 +3,7 @@ import { loadConfig, resolveNetwork } from "@caatinga/core";
 import { assertDevCeremonyAllowed, invokeVerifier, zkArtifactsDir } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 import { assertEmbedVkInvokeBlocked } from "../utils/zk-guardrails.js";
 
@@ -12,6 +13,7 @@ export function registerZkInvokeCommand(program: Command): void {
     .description("Serialize the proof and invoke the verifier contract")
     .option("--embed-vk", "Use the embedded VK path (experimental — not supported end-to-end yet)")
     .option("-n, --network <network>", "Configured network name (defaults to defaultNetwork)")
+    .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
     .option(
       "--allow-dev-ceremony",
       "Allow dev-ceremony ZK artifacts on mainnet (not for production)"
@@ -26,6 +28,7 @@ export function registerZkInvokeCommand(program: Command): void {
         options: {
           embedVk?: boolean;
           network?: string;
+          yes?: boolean;
           allowDevCeremony?: boolean;
           source: string;
         }
@@ -45,13 +48,28 @@ export function registerZkInvokeCommand(program: Command): void {
             throw new Error(`Verifier contract not configured for circuit "${name}"`);
           }
 
-          const { name: networkName } = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = resolveNetwork(
+            config,
+            options.network
+          );
 
+          // Runs after the ceremony gate so a blocked dev-ceremony invoke still
+          // reports CAATINGA_ZK_DEV_CEREMONY_BLOCKED rather than a confirmation error.
           await assertDevCeremonyAllowed({
             networkName,
             artifactsDir: zkArtifactsDir(name),
             allowDevCeremony: Boolean(options.allowDevCeremony),
             operation: `ctg zk invoke ${name}`,
+          });
+
+          await confirmMainnetOperation({
+            operation: "invoke",
+            networkName,
+            networkConfig,
+            contractName: name,
+            contractId: circuit.verifierContract,
+            source: options.source,
+            yes: options.yes,
           });
 
           const result = await invokeVerifier({

@@ -6,6 +6,7 @@ import {
   isLikelyPublicKeySource,
   tryRecoverContractIdFromDeployFailure,
 } from "./recover-deploy-contract-id.js";
+import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "./version.js";
 
 const runCommandMock = vi.hoisted(() => vi.fn());
 
@@ -173,5 +174,17 @@ describe("horizon recovery timeout", () => {
         horizonTimeoutMs: 10,
       })
     ).resolves.toBeNull();
+  });
+});
+
+describe("STELLAR_CLI_SIGNING_FAILURE_REGEX", () => {
+  it("should_match_the_signing_failure_both_the_invoke_and_recovery_paths_key_off", () => {
+    expect(
+      STELLAR_CLI_SIGNING_FAILURE_REGEX.test("error: xdr processing error: xdr value invalid")
+    ).toBe(true);
+  });
+
+  it("should_not_match_unrelated_stellar_cli_failures", () => {
+    expect(STELLAR_CLI_SIGNING_FAILURE_REGEX.test("error: simulation failed")).toBe(false);
   });
 });

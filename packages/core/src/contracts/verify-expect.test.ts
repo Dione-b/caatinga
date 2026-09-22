@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { assertExpect, parseExpectSpec, verifyExpect } from "./verify-expect.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { ExpectMatcherSchema } from "../config/config.schema.js";
+import type { ExpectMatcher } from "../config/config.schema.js";
 
 describe("verifyExpect", () => {
   it("should_pass_string_equals_when_output_matches", () => {
@@ -79,5 +81,24 @@ describe("verifyExpect", () => {
     expect(() => verifyExpect("x", { matcher: "matches", value: "[invalid" })).toThrow(
       CaatingaError
     );
+  });
+  it("should_handle_every_matcher_declared_by_the_schema", () => {
+    for (const matcher of ExpectMatcherSchema.options) {
+      expect(() => verifyExpect("1", { matcher, value: 1 })).not.toThrow();
+    }
+  });
+
+  it("should_list_every_schema_matcher_in_the_unknown_matcher_hint", () => {
+    let thrown: unknown;
+    try {
+      verifyExpect("x", { matcher: "notAMatcher" as ExpectMatcher });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(CaatingaError);
+    for (const matcher of ExpectMatcherSchema.options) {
+      expect((thrown as CaatingaError).hint).toContain(matcher);
+    }
   });
 });

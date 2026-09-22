@@ -8,7 +8,7 @@ Run through each item; `ctg doctor` covers several automatically.
 
 | #   | Check                                               | Command / doc                                                                                                |
 | --- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (27.0.0 recommended) | `ctg doctor`                                                                                                 |
+| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (28.0.0 recommended) | `ctg doctor`                                                                                                 |
 | 2   | `@stellar/stellar-sdk` within supported range       | `ctg doctor` (SDK diagnostic)                                                                                |
 | 3   | Signing identity funded and correct network         | `ctg doctor --source <alias> --network <net>`                                                                |
 | 4   | All configured contracts deployed on target network | `ctg status --network <net>`                                                                                 |
@@ -74,7 +74,7 @@ flowchart TD
   status --> commit
 ```
 
-1. Pin Stellar CLI `27.0.0` and `@stellar/stellar-sdk ^16.0.1` in CI and locally.
+1. Pin Stellar CLI `28.0.0` and `@stellar/stellar-sdk ^16.0.1` in CI and locally.
 2. Run `ctg doctor --strict` on every PR that touches contracts.
 3. Estimate fees before mainnet deploys.
 4. Use `deploy --if-changed` on testnet/staging to skip unchanged WASM.

@@ -33,3 +33,58 @@ describe("runCommand failureCode", () => {
     });
   });
 });
+
+describe("runCommand timeout", () => {
+  beforeEach(() => {
+    execaMock.mockReset();
+  });
+
+  it("should_pass_the_timeout_through_to_execa", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" } as never);
+
+    await runCommand("node", ["-v"], { skipStellarVersionCheck: true, timeout: 1234 });
+
+    expect(execaMock).toHaveBeenCalledWith(
+      "node",
+      ["-v"],
+      expect.objectContaining({ timeout: 1234 })
+    );
+  });
+
+  it("should_leave_the_timeout_undefined_when_not_requested", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "ok", stderr: "", all: "ok" } as never);
+
+    await runCommand("node", ["-v"], { skipStellarVersionCheck: true });
+
+    expect(execaMock).toHaveBeenCalledWith(
+      "node",
+      ["-v"],
+      expect.objectContaining({ timeout: undefined })
+    );
+  });
+
+  it("should_surface_COMMAND_TIMEOUT_when_execa_reports_a_timed_out_run", async () => {
+    execaMock.mockRejectedValueOnce({ timedOut: true, all: "" });
+
+    await expect(
+      runCommand("npm", ["view", "pkg"], { skipStellarVersionCheck: true, timeout: 60_000 })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.COMMAND_TIMEOUT,
+      hint: expect.stringContaining("60s"),
+    });
+  });
+
+  it("should_prefer_COMMAND_TIMEOUT_over_a_configured_failureCode", async () => {
+    execaMock.mockRejectedValueOnce({ timedOut: true, all: "" });
+
+    await expect(
+      runCommand("stellar", ["contract", "deploy"], {
+        skipStellarVersionCheck: true,
+        failureCode: CaatingaErrorCode.DEPLOY_FAILED,
+        timeout: 300_000,
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.COMMAND_TIMEOUT,
+    });
+  });
+});

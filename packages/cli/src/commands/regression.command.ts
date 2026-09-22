@@ -10,6 +10,7 @@ import {
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 
 export function registerRegressionCommand(program: Command): void {
   program
@@ -17,6 +18,7 @@ export function registerRegressionCommand(program: Command): void {
     .description("Run build → deploy (if changed) → generate → smoke regression recipe")
     .requiredOption("-s, --source <source>", "Stellar CLI identity alias for deploy and smoke")
     .option("-n, --network <network>", "Configured network name")
+    .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
     .option("--skip-test", "Skip pnpm test before build")
     .option("--skip-build", "Skip ctg build")
     .option("--skip-deploy", "Skip deploy step")
@@ -26,6 +28,7 @@ export function registerRegressionCommand(program: Command): void {
       (options: {
         source: string;
         network?: string;
+        yes?: boolean;
         skipTest?: boolean;
         skipBuild?: boolean;
         skipDeploy?: boolean;
@@ -35,6 +38,18 @@ export function registerRegressionCommand(program: Command): void {
         runCliAction(async () => {
           const config = await loadConfig();
           const network = resolveNetwork(config, options.network);
+
+          // Confirm before the test/build steps so an unattended mainnet run fails
+          // fast instead of after several minutes of work.
+          if (!options.skipDeploy) {
+            await confirmMainnetOperation({
+              operation: "deploy",
+              networkName: network.name,
+              networkConfig: network.config,
+              source: options.source,
+              yes: options.yes,
+            });
+          }
 
           if (!options.skipTest) {
             logger.info("Running tests...");
