@@ -48,6 +48,7 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
           });
           return {
             sendTransactionResponse: { hash: "hash:AAAA_SIGNED", status: "PENDING" },
+            getTransactionResponse: { status: "SUCCESS" },
             get result() {
               return 1;
             },

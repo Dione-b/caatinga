@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { VERSION_PROBE_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 const execaMock = vi.hoisted(() => vi.fn());
 const runCommandMock = vi.hoisted(() => vi.fn());
@@ -26,16 +27,24 @@ describe("checkStellarCliVersion", () => {
     expect(report.status).toBe("supported");
     expect(report.version).toBe("25.2.0");
     expect(runCommandMock).toHaveBeenCalledWith("stellar", ["--version"], {
+      cwd: process.cwd(),
       skipStellarVersionCheck: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   });
 
-  it("normalizes missing stellar binary to CAATINGA_STELLAR_CLI_NOT_FOUND", async () => {
+  it("propagates the typed error runCommand throws for a missing stellar binary", async () => {
     vi.doMock("../shell/run-command.js", () => ({
       runCommand: runCommandMock,
     }));
     const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
-    runCommandMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
+    runCommandMock.mockRejectedValueOnce(
+      new CaatingaError(
+        "Stellar CLI was not found.",
+        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+        "Install Stellar CLI before running Caatinga-backed commands."
+      )
+    );
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
       code: CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
@@ -52,13 +61,18 @@ describe("runCommand Stellar CLI version gate", () => {
     vi.doMock("execa", () => ({
       execa: execaMock,
     }));
-    vi.doMock("./check-stellar-cli-version.js", () => ({
-      checkStellarCliVersion: checkStellarCliVersionMock,
-    }));
+    vi.doMock("./check-stellar-cli-version.js", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("./check-stellar-cli-version.js")>();
+      return {
+        ...actual,
+        checkStellarCliVersion: checkStellarCliVersionMock,
+      };
+    });
   });
 
   it("checks the Stellar CLI version before running stellar commands", async () => {
     const { runCommand } = await import("../shell/run-command.js");
+    const { emitStellarCliWarningToStderr } = await import("./check-stellar-cli-version.js");
     checkStellarCliVersionMock.mockResolvedValueOnce({
       version: "25.2.0",
       status: "supported",
@@ -74,7 +88,9 @@ describe("runCommand Stellar CLI version gate", () => {
       all: "ok",
     });
 
-    expect(checkStellarCliVersionMock).toHaveBeenCalledWith();
+    expect(checkStellarCliVersionMock).toHaveBeenCalledWith({
+      onWarning: emitStellarCliWarningToStderr,
+    });
     expect(execaMock).toHaveBeenCalledWith("stellar", ["contract", "build"], {
       cwd: undefined,
       env: expect.objectContaining({ PATH: expect.any(String) }),
@@ -146,10 +162,11 @@ describe("runCommand Stellar CLI version gate", () => {
 
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock).toHaveBeenCalledWith("stellar", ["--version"], {
-      cwd: undefined,
+      cwd: process.cwd(),
       env: expect.objectContaining({ PATH: expect.any(String) }),
       all: true,
       reject: true,
+      timeout: VERSION_PROBE_TIMEOUT_MS,
     });
   });
 });

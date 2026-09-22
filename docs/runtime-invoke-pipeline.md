@@ -85,7 +85,36 @@ For read-only calls (`simulate` / `read`), only steps 1–4 run; signing and sub
 ```
 built → prepared → signed → submitted → confirmed
                                       → failed
+                                      → pending
 ```
+
+The terminal status is read from the transaction's real on-chain outcome —
+`getTransactionResponse.status`, falling back to `sendTransactionResponse.status`
+— never assumed from the fact that submission returned:
+
+| Soroban RPC status     | `CaatingaInvokeResult.status` |
+| ---------------------- | ----------------------------- |
+| `SUCCESS`              | `confirmed`                   |
+| `FAILED`               | `failed`                      |
+| `ERROR`                | `failed`                      |
+| `TRY_AGAIN_LATER`      | `pending`                     |
+| `NOT_FOUND`            | `pending`                     |
+| absent or unrecognized | `pending`                     |
+
+`ERROR` is a definitive rejection by the RPC — the transaction was never
+accepted and will not land — so it is reported as a failure rather than as
+something to keep waiting on. `pending` means the outcome is genuinely unknown:
+the submission may still reach a ledger, or the SDK's polling window expired
+before it did. Treat it as "check the transaction hash", not as success.
+
+A payload with no status field at all also reports `pending`. This is reachable
+only through a custom binding adapter's `send()` result — the SDK's
+`signAndSend` always populates `sendTransactionResponse` and
+`getTransactionResponse`.
+
+On `failed`, the result carries `resultXdr` and `diagnosticEvents` when the RPC
+returned them, so the on-chain failure can be decoded without re-running the
+call with `debugRaw`.
 
 ### Error Codes
 

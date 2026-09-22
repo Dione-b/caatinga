@@ -1,8 +1,10 @@
 import type { ContractConfig } from "./config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { resolveDeployOrder } from "../contracts/resolve-deploy-order.js";
+import { CONTRACT_ID_PLACEHOLDER_SOURCE } from "../contracts/placeholder-engine.js";
 
-const CONTRACT_ID_PLACEHOLDER = /^\$\{contracts\.([A-Za-z0-9_-]+)\.contractId\}$/;
+/** Whole-value form of the shared placeholder grammar. */
+const CONTRACT_ID_PLACEHOLDER = new RegExp(`^${CONTRACT_ID_PLACEHOLDER_SOURCE}$`);
 
 function parseContractIdPlaceholder(value: string): string | undefined {
   return value.match(CONTRACT_ID_PLACEHOLDER)?.[1];

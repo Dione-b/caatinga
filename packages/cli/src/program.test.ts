@@ -7,6 +7,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createProgram } from "./program.js";
 import chalk from "chalk";
 
+// Keep the release-channel advisory (npm dist-tags lookup) out of these tests.
+vi.mock("./commands/doctor-cli-version.js", () => ({
+  reportCliVersionChannel: vi.fn().mockResolvedValue(undefined),
+}));
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe("createProgram", () => {

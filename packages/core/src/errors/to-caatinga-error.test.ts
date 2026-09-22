@@ -26,4 +26,15 @@ describe("toCaatingaError", () => {
     expect(result.message).toBe("Verifier returned false.");
     expect(result.hint).toBe("Check your proof inputs.");
   });
+
+  it.each([
+    ["ZK_VK_REQUIRED", CaatingaErrorCode.ZK_VK_REQUIRED],
+    ["ZK_INVOKE_FAILED", CaatingaErrorCode.ZK_INVOKE_FAILED],
+    ["ZK_DOWNLOAD_FAILED", CaatingaErrorCode.ZK_DOWNLOAD_FAILED],
+    ["ZK_UNSUPPORTED_PLATFORM", CaatingaErrorCode.ZK_UNSUPPORTED_PLATFORM],
+  ])("should_map_ZkError_%s", (sourceCode, expectedCode) => {
+    const result = toCaatingaError(Object.assign(new Error("zk failure"), { code: sourceCode }));
+
+    expect(result.code).toBe(expectedCode);
+  });
 });

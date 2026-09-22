@@ -6,8 +6,8 @@ This document covers environment setup and PR expectations. Repository layout, b
 
 - [Node.js](https://nodejs.org/) 22 or newer
 - [pnpm](https://pnpm.io/) 9.15.4 (declared in `package.json#packageManager`)
-- [Rust](https://www.rust-lang.org/tools/install) 1.84.0+ with the `wasm32v1-none` target
-- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0 or newer (27.0.0 recommended)
+- [Rust](https://www.rust-lang.org/tools/install) 1.91.0+ with the `wasm32v1-none` target
+- [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) 23.0.0 or newer (28.0.0 recommended)
 
 ## Setup
 

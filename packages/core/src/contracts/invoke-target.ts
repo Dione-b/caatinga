@@ -1,4 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
 
 export type InvokeTarget = {
   contractName: string;
@@ -17,6 +18,8 @@ export function parseInvokeTarget(target: string): InvokeTarget {
       "Use the format contract.method, for example counter.increment."
     );
   }
+
+  assertSorobanSymbol(method, "method");
 
   return { contractName, method };
 }

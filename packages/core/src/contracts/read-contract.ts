@@ -10,6 +10,7 @@ import { parseInvokeTarget } from "./invoke-target.js";
 import { resolveDeployArgs } from "./resolve-deploy-args.js";
 import { resolveCliMethodArgs, resolveMethodArgs } from "./resolve-method-args.js";
 import { resolveCliSource } from "./source-account.js";
+import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 
 export { buildReadCallHint, isReadCallFailure, READ_CALL_FAILURE_REGEX } from "./invoke-target.js";
 
@@ -22,6 +23,8 @@ export type ReadContractOptions = {
   cwd?: string;
   /** Resolve record-style args through deploy placeholder + alias resolution. */
   namedArgs?: Record<string, string | number | boolean>;
+  /** When false, skip CLI identity alias resolution for string method args. */
+  resolveAliases?: boolean;
 };
 
 export async function readContract(options: ReadContractOptions) {
@@ -45,6 +48,7 @@ export async function readContract(options: ReadContractOptions) {
   let cliArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
     cwd,
+    resolveAliases: options.resolveAliases,
   });
 
   if (options.namedArgs) {
@@ -55,7 +59,12 @@ export async function readContract(options: ReadContractOptions) {
       source,
       cwd,
     });
-    const methodArgs = await resolveMethodArgs({ args: resolved, source, cwd });
+    const methodArgs = await resolveMethodArgs({
+      args: resolved,
+      source,
+      cwd,
+      resolveAliases: options.resolveAliases,
+    });
     cliArgs = formatNamedCliArgs(methodArgs);
   }
 
@@ -76,6 +85,7 @@ export async function readContract(options: ReadContractOptions) {
   const result = await runCommand("stellar", stellarArgs, {
     cwd,
     failureCode: CaatingaErrorCode.INVOKE_FAILED,
+    timeout: TRANSACTION_TIMEOUT_MS,
   });
 
   return {

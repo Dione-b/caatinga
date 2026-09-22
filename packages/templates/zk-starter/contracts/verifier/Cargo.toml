@@ -2,16 +2,16 @@
 name = "verifier"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.89.0"
+rust-version = "1.91.0"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = "25.1.0"
+soroban-sdk = "27.0.6"
 
 [dev-dependencies]
-soroban-sdk = { version = "25.1.0", features = ["testutils"] }
+soroban-sdk = { version = "27.0.6", features = ["testutils"] }
 ark-bls12-381 = "0.4.0"
 ark-serialize = "0.4.2"
 ark-ff = "0.4.2"

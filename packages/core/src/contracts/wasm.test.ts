@@ -194,8 +194,8 @@ describe("isMissingRustWasmTargetError", () => {
   });
 
   it("should_return_false_when_the_phrase_matches_but_the_target_is_not_named", () => {
-    expect(
-      isMissingRustWasmTargetError(buildFailure({ message: "linker `cc` not found" }))
-    ).toBe(false);
+    expect(isMissingRustWasmTargetError(buildFailure({ message: "linker `cc` not found" }))).toBe(
+      false
+    );
   });
 });
