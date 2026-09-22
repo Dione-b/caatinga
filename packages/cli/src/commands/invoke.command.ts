@@ -15,6 +15,10 @@ export function registerInvokeCommand(program: Command): void {
       "-s, --source <source>",
       "Stellar CLI identity alias that can sign (for example alice)"
     )
+    .option(
+      "--no-resolve-aliases",
+      "Pass string args literally; skip CLI identity alias resolution"
+    )
     .option("-y, --yes", "Automatically confirm mainnet transactions without interactive prompt")
     .action(
       (
@@ -23,6 +27,7 @@ export function registerInvokeCommand(program: Command): void {
         options: {
           network?: string;
           source: string;
+          resolveAliases?: boolean;
           yes?: boolean;
         }
       ) =>
@@ -45,6 +50,7 @@ export function registerInvokeCommand(program: Command): void {
             args,
             networkName: options.network,
             source: options.source,
+            resolveAliases: options.resolveAliases,
           });
 
           logger.success("Invoke complete");

@@ -73,10 +73,29 @@ describe("read command", () => {
         args: [],
         networkName: "testnet",
         source: undefined,
+        resolveAliases: true,
       });
       const output = logSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(output).toContain("Read complete");
       expect(output).toContain("1");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("forwards --no-resolve-aliases to core", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createReadProgram().parseAsync([
+        "node",
+        "caatinga",
+        "read",
+        "app.version",
+        "--no-resolve-aliases",
+      ]);
+
+      expect(readContract).toHaveBeenCalledWith(expect.objectContaining({ resolveAliases: false }));
     } finally {
       logSpy.mockRestore();
     }

@@ -21,6 +21,8 @@ export type InvokeContractOptions = {
   networkName?: string;
   source?: string;
   cwd?: string;
+  /** When false, skip CLI identity alias resolution for string method args. */
+  resolveAliases?: boolean;
 };
 
 export async function invokeContract(options: InvokeContractOptions) {
@@ -44,6 +46,7 @@ export async function invokeContract(options: InvokeContractOptions) {
   const methodArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
     cwd,
+    resolveAliases: options.resolveAliases,
   });
 
   let result: Awaited<ReturnType<typeof runCommand>>;

@@ -23,6 +23,8 @@ export type ReadContractOptions = {
   cwd?: string;
   /** Resolve record-style args through deploy placeholder + alias resolution. */
   namedArgs?: Record<string, string | number | boolean>;
+  /** When false, skip CLI identity alias resolution for string method args. */
+  resolveAliases?: boolean;
 };
 
 export async function readContract(options: ReadContractOptions) {
@@ -46,6 +48,7 @@ export async function readContract(options: ReadContractOptions) {
   let cliArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
     cwd,
+    resolveAliases: options.resolveAliases,
   });
 
   if (options.namedArgs) {
@@ -56,7 +59,12 @@ export async function readContract(options: ReadContractOptions) {
       source,
       cwd,
     });
-    const methodArgs = await resolveMethodArgs({ args: resolved, source, cwd });
+    const methodArgs = await resolveMethodArgs({
+      args: resolved,
+      source,
+      cwd,
+      resolveAliases: options.resolveAliases,
+    });
     cliArgs = formatNamedCliArgs(methodArgs);
   }
 

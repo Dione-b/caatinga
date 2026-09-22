@@ -27,6 +27,10 @@ export function registerReadCommand(program: Command): void {
     )
     .option("--quiet", "Suppress full output; print summary only when combined with --summary")
     .option("--summary", "Print compact summary for large array payloads")
+    .option(
+      "--no-resolve-aliases",
+      "Pass string args literally; skip CLI identity alias resolution"
+    )
     .action(
       (
         target: string,
@@ -37,6 +41,7 @@ export function registerReadCommand(program: Command): void {
           expect?: string;
           quiet?: boolean;
           summary?: boolean;
+          resolveAliases?: boolean;
         }
       ) =>
         runCliAction(async () => {
@@ -57,6 +62,7 @@ export function registerReadCommand(program: Command): void {
             args,
             networkName: options.network,
             source: options.source,
+            resolveAliases: options.resolveAliases,
           });
 
           const output = result.result?.trim() ?? "";
