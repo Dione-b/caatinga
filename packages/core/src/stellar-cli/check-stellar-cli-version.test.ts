@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 
 const runCommandMock = vi.hoisted(() => vi.fn());
 
@@ -167,8 +167,14 @@ describe("checkStellarCliVersion", () => {
     });
   });
 
-  it("normalizes missing stellar binary to CAATINGA_STELLAR_CLI_NOT_FOUND", async () => {
-    runCommandMock.mockRejectedValueOnce(Object.assign(new Error("not found"), { code: "ENOENT" }));
+  it("propagates the typed error runCommand throws for a missing stellar binary", async () => {
+    runCommandMock.mockRejectedValueOnce(
+      new CaatingaError(
+        "Stellar CLI was not found.",
+        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+        "Install Stellar CLI before running Caatinga-backed commands."
+      )
+    );
     const checkStellarCliVersion = await loadCheckStellarCliVersion();
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
@@ -269,7 +275,11 @@ describe("checkStellarCliVersion memoization", () => {
     const { checkStellarCliVersion } = await import("./check-stellar-cli-version.js");
 
     memoRunCommandMock.mockRejectedValueOnce(
-      Object.assign(new Error("spawn ENOENT"), { code: "ENOENT" })
+      new CaatingaError(
+        "Stellar CLI was not found.",
+        CaatingaErrorCode.STELLAR_CLI_NOT_FOUND,
+        "Install Stellar CLI before running Caatinga-backed commands."
+      )
     );
 
     await expect(checkStellarCliVersion()).rejects.toMatchObject({
