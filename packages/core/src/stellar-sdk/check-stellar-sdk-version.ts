@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { emitWarningToStderr } from "../shell/emit-warning-to-stderr.js";
 import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarSdkCompatibility,
@@ -84,10 +85,5 @@ function defaultEmitWarning(_warning: SdkCompatibilityWarning): void {
  * without forcing stderr output on every consumer of `checkStellarSdkVersion`.
  */
 export function emitStellarSdkWarningToStderr(warning: SdkCompatibilityWarning): void {
-  const lines = [
-    `Warning: ${warning.message}`,
-    warning.remediation ? `  ${warning.remediation}` : undefined,
-  ].filter((line): line is string => Boolean(line));
-
-  process.stderr.write(`${lines.join("\n")}\n`);
+  emitWarningToStderr(warning);
 }

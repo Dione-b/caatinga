@@ -107,6 +107,32 @@ describe("checkStellarCliVersion", () => {
     );
   });
 
+  it("writes formatted warning lines to stderr via emitStellarCliWarningToStderr", async () => {
+    runCommandMock.mockResolvedValueOnce({
+      stdout: "stellar 99.0.0",
+      stderr: "",
+      all: "stellar 99.0.0",
+    });
+    const { checkStellarCliVersion, emitStellarCliWarningToStderr } =
+      await import("./check-stellar-cli-version.js");
+    const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    try {
+      const report = await checkStellarCliVersion({ onWarning: emitStellarCliWarningToStderr });
+
+      expect(report.status).toBe("untested");
+      expect(stderrSpy).toHaveBeenCalledTimes(1);
+      const written = stderrSpy.mock.calls[0][0];
+      expect(written).toContain("Warning:");
+      expect(written).toContain(report.warnings[0].message);
+      if (report.warnings[0].remediation) {
+        expect(written).toContain(report.warnings[0].remediation);
+      }
+    } finally {
+      stderrSpy.mockRestore();
+    }
+  });
+
   it("silently drops warnings when no onWarning hook is provided", async () => {
     runCommandMock.mockResolvedValueOnce({
       stdout: "stellar 28.0.0",

@@ -53,14 +53,18 @@ describe("runCommand Stellar CLI version gate", () => {
     vi.doMock("execa", () => ({
       execa: execaMock,
     }));
-    vi.doMock("./check-stellar-cli-version.js", () => ({
-      checkStellarCliVersion: checkStellarCliVersionMock,
-      emitStellarCliWarningToStderr: vi.fn(),
-    }));
+    vi.doMock("./check-stellar-cli-version.js", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("./check-stellar-cli-version.js")>();
+      return {
+        ...actual,
+        checkStellarCliVersion: checkStellarCliVersionMock,
+      };
+    });
   });
 
   it("checks the Stellar CLI version before running stellar commands", async () => {
     const { runCommand } = await import("../shell/run-command.js");
+    const { emitStellarCliWarningToStderr } = await import("./check-stellar-cli-version.js");
     checkStellarCliVersionMock.mockResolvedValueOnce({
       version: "25.2.0",
       status: "supported",
@@ -77,7 +81,7 @@ describe("runCommand Stellar CLI version gate", () => {
     });
 
     expect(checkStellarCliVersionMock).toHaveBeenCalledWith({
-      onWarning: expect.any(Function),
+      onWarning: emitStellarCliWarningToStderr,
     });
     expect(execaMock).toHaveBeenCalledWith("stellar", ["contract", "build"], {
       cwd: undefined,

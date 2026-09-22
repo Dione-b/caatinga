@@ -1,4 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { emitWarningToStderr } from "../shell/emit-warning-to-stderr.js";
 import { runCommand } from "../shell/run-command.js";
 import {
   evaluateStellarCliCompatibility,
@@ -112,10 +113,5 @@ function defaultEmitWarning(_warning: CompatibilityWarning): void {
  * forcing stderr output on every consumer of `checkStellarCliVersion`.
  */
 export function emitStellarCliWarningToStderr(warning: CompatibilityWarning): void {
-  const lines = [
-    `Warning: ${warning.message}`,
-    warning.remediation ? `  ${warning.remediation}` : undefined,
-  ].filter((line): line is string => Boolean(line));
-
-  process.stderr.write(`${lines.join("\n")}\n`);
+  emitWarningToStderr(warning);
 }
