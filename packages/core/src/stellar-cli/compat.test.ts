@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { parseStellarCliVersion } from "./version.js";
+import { STELLAR_CLI_LAST_TESTED_VERSION as CANONICAL_LAST_TESTED_VERSION } from "./version.js";
 import {
   STELLAR_CLI_LAST_TESTED_VERSION,
   STELLAR_CLI_MIN_VERSION,
@@ -11,6 +12,10 @@ describe("evaluateStellarCliCompatibility", () => {
   it("declares the hard floor and the advisory last-tested version", () => {
     expect(STELLAR_CLI_MIN_VERSION).toBe("23.0.0");
     expect(STELLAR_CLI_LAST_TESTED_VERSION).toBe("28.0.0");
+  });
+
+  it("re-exports the canonical last-tested version from version.ts", () => {
+    expect(STELLAR_CLI_LAST_TESTED_VERSION).toBe(CANONICAL_LAST_TESTED_VERSION);
   });
 
   it("returns supported with no warnings for the last-tested version", () => {
