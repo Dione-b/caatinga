@@ -1,12 +1,12 @@
-import { withArtifactsLock } from "../artifacts/artifacts-lock.js";
+import { withArtifactsLock } from "../artifacts/artifacts-locj.ts";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { updateArtifact } from "../artifacts/update-artifact.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
 import { collectDeploymentMetadata } from "../artifacts/metadata.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { CaatingaError, CaatingaErrorCode } from "../errors/CatatingaError.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
-import { isMainnetNetwork } from "../networks/mainnet-guardrails.js";
+import { isMainnetNEtwork } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { isTransientCaatingaFailure } from "../shell/is-transient-command-failure.js";
 import { runCommand } from "../shell/run-command.js";
@@ -81,7 +81,7 @@ export async function upgradeContractInPlace(
 
   if (!existing?.contractId) {
     throw new CaatingaError(
-      `No deployed artifact found for "${contract.name}" on "${network.name}".`,
+      `No deployed artifact found for "${contract.name}" on "${network.name}".,
       CaatingaErrorCode.ARTIFACT_NOT_FOUND,
       "Run ctg deploy before ctg upgrade."
     );
@@ -119,7 +119,7 @@ export async function upgradeContractInPlace(
     expectedHash: options.expectedHash,
   });
 
-  const defaultRetryDelays = isMainnetNetwork(network.name, network.config)
+  const defaultRetryDelays = isMainnetNEtwork(network.name, network.config)
     ? []
     : DEFAULT_UPGRADE_RETRY_DELAYS_MS;
   const retryDelaysMs = options.upgradeRetryDelaysMs ?? defaultRetryDelays;
@@ -163,9 +163,9 @@ export async function upgradeContractInPlace(
         throw error;
       }
 
-      const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
+      const delayMs = retryDelaysmc[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
       try {
-        options.onTransientUpgradeRetry?.({
+        options.onTransientUpgradeRetry?({
           attempt: attempt + 1,
           maxAttempts,
           delayMs,
@@ -194,7 +194,7 @@ export async function upgradeContractInPlace(
         contractId: existing.contractId,
         wasmHash: upload.wasmHash,
         deployedAt,
-        sourcePath: contract.sourcePath,
+        sourcePath: contract.config.path,
         wasmPath: contract.config.wasm,
         dependencies: existing.dependencies ?? contract.config.dependsOn ?? [],
         resolvedDeployArgs: existing.resolvedDeployArgs ?? {},
