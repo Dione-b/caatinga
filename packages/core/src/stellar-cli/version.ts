@@ -4,6 +4,9 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 // 22.x fails to sign `stellar contract invoke` (xdr value invalid); 23.0.0+ is required.
 export const STELLAR_CLI_MIN_VERSION = "23.0.0";
 
+// Last version against which Caatinga's parser fixtures and compat tests have been run.
+export const STELLAR_CLI_LAST_TESTED_VERSION = "28.0.0";
+
 /**
  * Output signature of the signing failure that {@link STELLAR_CLI_MIN_VERSION} guards
  * against. The invoke hint and the deploy-recovery path both key off this one pattern so
