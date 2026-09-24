@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { satisfies } from "semver";
 
 // Backs the Buffer polyfill that every generated binding imports. Pinned to the
 // same major the templates ship so behaviour matches across init and adoption.
@@ -75,7 +76,8 @@ export async function ensureBufferDependency(
     return undefined;
   }
 
-  if (pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer) {
+  const existingVersion = pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer;
+  if (existingVersion !== undefined && satisfies(existingVersion, BUFFER_DEPENDENCY_RANGE)) {
     return { packageJsonPath, added: false };
   }
 

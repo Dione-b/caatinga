@@ -72,10 +72,12 @@ export async function inspectContract(
   }
 
   let localHash: string | undefined;
+  let localWasmPath = artifact.wasmPath;
   try {
-    const wasmPath = await resolveWasmArtifactPath(contract.wasmPath, {
+    const wasmPath = await resolveWasmArtifactPath(artifact.wasmPath || contract.wasmPath, {
       sourcePath: contract.sourcePath,
     });
+    localWasmPath = wasmPath;
     localHash = await hashWasm(wasmPath);
   } catch {
     localHash = undefined;
@@ -92,7 +94,7 @@ export async function inspectContract(
     },
     onChain: { reachable, detail },
     localWasm: {
-      path: contract.config.wasm,
+      path: localWasmPath,
       hash: localHash,
       matchesArtifact: Boolean(localHash && localHash === artifact.wasmHash),
     },

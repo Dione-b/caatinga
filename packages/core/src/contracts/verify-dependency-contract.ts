@@ -16,9 +16,8 @@ export async function verifyDependencyContract(options: {
       "stellar",
       [
         "contract",
-        "info",
-        "interface",
-        "--contract-id",
+        "fetch",
+        "--id",
         options.contractId,
         ...buildStellarNetworkArgs(options.network),
       ],
@@ -36,7 +35,8 @@ export async function verifyDependencyContract(options: {
       throw new CaatingaError(
         `Dependency "${options.dependencyName}" is not deployed on "${options.network.name}" (contract ID ${options.contractId}).`,
         CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-        "Deploy the dependency on this network, fix caatinga.artifacts.json, or omit --verify-deps.",
+        error.hint ??
+          "Deploy the dependency on this network, fix caatinga.artifacts.json, or omit --verify-deps.",
         error.cause
       );
     }
