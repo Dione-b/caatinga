@@ -1,3 +1,4 @@
+import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
@@ -68,13 +69,19 @@ export async function inspectContract(
     detail = "Contract interface reachable on network.";
   } catch (error) {
     reachable = false;
-    detail = error instanceof CaatingaError ? error.message : "Contract not reachable on network.";
+    detail =
+      error instanceof CaatingaError
+        ? [error.message, error.hint].filter(Boolean).join("\n")
+        : error instanceof Error
+          ? error.message
+          : "Contract not reachable on network.";
   }
 
   let localHash: string | undefined;
-  let localWasmPath = artifact.wasmPath;
+  const configuredWasmPath = path.resolve(cwd, artifact.wasmPath || contract.wasmPath);
+  let localWasmPath = configuredWasmPath;
   try {
-    const wasmPath = await resolveWasmArtifactPath(artifact.wasmPath || contract.wasmPath, {
+    const wasmPath = await resolveWasmArtifactPath(configuredWasmPath, {
       sourcePath: contract.sourcePath,
     });
     localWasmPath = wasmPath;
