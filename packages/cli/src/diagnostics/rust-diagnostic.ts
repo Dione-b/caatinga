@@ -1,11 +1,37 @@
-import { CURRENT_RUST_WASM_TARGET } from "@caatinga/core/runtime/requirements";
+import { CURRENT_RUST_WASM_TARGET, RUST_MIN_VERSION } from "@caatinga/core/runtime/requirements";
 import { isCargoBinMissingFromPath, runCommand } from "@caatinga/core";
+import { compareSemverVersions } from "../utils/semver-compare.js";
 import type { Diagnostic } from "./types.js";
+
+/**
+ * Matches the version token in `rustc --version` output, e.g.
+ * `rustc 1.91.0 (f8297e351 2025-10-28)`.
+ */
+const RUSTC_VERSION_PATTERN = /\brustc\s+(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/;
+
+/** Extracts the toolchain version from `rustc --version` output, if present. */
+export function parseRustcVersion(output: string): string | undefined {
+  return RUSTC_VERSION_PATTERN.exec(output)?.[1];
+}
 
 export async function rustDiagnostic(): Promise<Diagnostic> {
   try {
     const result = await runCommand("rustc", ["--version"]);
-    return { ok: true, label: result.stdout || result.all || "Rust installed" };
+    const output = result.stdout || result.all || "";
+    const version = parseRustcVersion(output);
+
+    // `RUST_MIN_VERSION` is the minimum toolchain the Soroban wasm target is
+    // built and tested against; flag older versions with an actionable fix
+    // instead of reporting a bare "Rust installed".
+    if (version !== undefined && compareSemverVersions(version, RUST_MIN_VERSION) === -1) {
+      return {
+        ok: false,
+        label: `Rust ${version} is older than the required ${RUST_MIN_VERSION}`,
+        fix: `Update Rust to ${RUST_MIN_VERSION} or newer: rustup update stable`,
+      };
+    }
+
+    return { ok: true, label: output || "Rust installed" };
   } catch {
     return {
       ok: false,

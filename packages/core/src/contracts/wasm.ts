@@ -2,17 +2,18 @@ import { createHash } from "node:crypto";
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import {
+  CURRENT_RUST_WASM_TARGET,
+  LEGACY_RUST_WASM_TARGET,
+  toCurrentWasmTargetPath,
+} from "./wasm-targets.js";
 
-export const LEGACY_RUST_WASM_TARGET = "wasm32-unknown-unknown";
-export const CURRENT_RUST_WASM_TARGET = "wasm32v1-none";
-
-export function toCurrentWasmTargetPath(wasmPath: string): string {
-  if (!wasmPath.includes(LEGACY_RUST_WASM_TARGET)) {
-    return wasmPath;
-  }
-
-  return wasmPath.replaceAll(LEGACY_RUST_WASM_TARGET, CURRENT_RUST_WASM_TARGET);
-}
+// The target constants now live in the dependency-free `./wasm-targets.js` so
+// constant-only consumers (notably the `@caatinga/core/runtime/requirements`
+// entry point) do not pull this module's `node:crypto` / `node:fs/promises`
+// imports into their bundle. Re-exported here so existing importers of
+// `contracts/wasm.js` keep working unchanged.
+export { CURRENT_RUST_WASM_TARGET, LEGACY_RUST_WASM_TARGET, toCurrentWasmTargetPath };
 
 const MISSING_WASM_TARGET_HINT_SUBSTRINGS = [
   "not installed",
