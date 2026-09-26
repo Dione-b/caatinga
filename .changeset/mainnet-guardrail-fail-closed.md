@@ -4,11 +4,22 @@
 
 Fail-closed mainnet guardrail for `requireConfirmation`.
 
-**B18:** `requireConfirmation: false` on mainnet silently disabled both the interactive prompt and the `[MAINNET GUARDRAIL]` warning on `deploy` / `upgrade` / `invoke` / `wire` / `rollback`. A config copied from testnet could therefore bypass the mainnet guardrail.
+**B18:** `requireConfirmation: false` on mainnet silently disabled the
+interactive prompt and the `[MAINNET GUARDRAIL]` warning on
+`deploy` / `upgrade` / `invoke` / `wire` / `rollback`. A config copied
+from testnet could therefore bypass the mainnet guardrail.
 
 **Fix:**
 
-- `requiresMainnetConfirmation` now always returns `true` on mainnet (by name or by canonical passphrase), regardless of `networkConfig.requireConfirmation`.
-- The only way to skip the prompt on mainnet is to set `CAATINGA_ASSUME_YES` to a truthy value (`true`, `1`, `yes`, `y`, case-insensitive) — matching the existing CLI guardrail in `packages/cli/src/utils/mainnet-guardrails.ts`.
-- Falsy values (`false`, `0`, `no`, empty string, whitespace) fail closed.
-- Non-mainnet networks continue to honour `requireConfirmation` unchanged.
+- `requiresMainnetConfirmation` now unconditionally returns `true` on
+  mainnet (by name or by canonical passphrase), ignoring
+  `networkConfig.requireConfirmation`.
+- Non-mainnet networks only require confirmation when
+  `requireConfirmation: true` — otherwise the previous behavior is
+  preserved.
+- `@caatinga/core` deliberately does **not** consult
+  `CAATINGA_ASSUME_YES`. The opt-out remains a CLI-layer concern: the CLI
+  honours `--yes` / `CAATINGA_ASSUME_YES` and continues to emit the
+  `[MAINNET GUARDRAIL]` audit log before skipping the interactive prompt.
+  Handling the env var in core would make the CLI's check unreachable
+  dead code and would suppress the audit log during CI runs.
