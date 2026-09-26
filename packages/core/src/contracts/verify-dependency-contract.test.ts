@@ -66,7 +66,16 @@ describe("verifyDependencyContract", () => {
 
     expect(runCommand).toHaveBeenCalledWith(
       "stellar",
-      ["contract", "fetch", "--id", tokenId, "--network", "testnet"],
+      [
+        "contract",
+        "fetch",
+        "--id",
+        tokenId,
+        "--out-file",
+        expect.stringMatching(/caatinga-contract-fetch-.+\/contract\.wasm$/),
+        "--network",
+        "testnet",
+      ],
       expect.objectContaining({
         cwd: "/tmp/app",
         failureCode: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
@@ -92,6 +101,7 @@ describe("verifyDependencyContract", () => {
     ).rejects.toMatchObject({
       code: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
       message: expect.stringContaining("token"),
+      hint: expect.stringMatching(/Deploy the dependency[\s\S]*contract not found on ledger/),
     });
   });
 });

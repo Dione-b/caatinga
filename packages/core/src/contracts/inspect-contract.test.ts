@@ -70,7 +70,7 @@ describe("inspectContract", () => {
 
     const result = await inspectContract({ config, contractName: "token", cwd: "/tmp/app" });
 
-    expect(resolveWasmArtifactPath).toHaveBeenCalledWith(artifactWasmPath, {
+    expect(resolveWasmArtifactPath).toHaveBeenCalledWith("/tmp/app/deploy/mainnet-wasm/token.wasm", {
       sourcePath: "/tmp/app/contracts/token",
     });
     expect(result.localWasm).toEqual({
