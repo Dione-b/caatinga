@@ -52,6 +52,24 @@ describe("ensureBufferDependency", () => {
     expect(result?.added).toBe(false);
   });
 
+  it("should_update_an_existing_buffer_dependency_outside_the_supported_range", async () => {
+    const cwd = await scaffold({ name: "app", dependencies: { buffer: "^1.0.0" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(true);
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+    expect(pkg.dependencies.buffer).toBe("^6.0.3");
+  });
+
+  it("should_not_throw_for_non_semver_workspace_protocols", async () => {
+    const cwd = await scaffold({ name: "app", dependencies: { buffer: "workspace:*" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(true);
+  });
+
   it("should_return_undefined_when_no_package_json_is_found", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-buffer-dep-none-"));
     await mkdir(path.join(tmpDir, "frontend", "src", "contracts"), { recursive: true });

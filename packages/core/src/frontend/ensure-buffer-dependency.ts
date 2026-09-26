@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { intersects, validRange } from "semver";
 
 // Backs the Buffer polyfill that every generated binding imports. Pinned to the
 // same major the templates ship so behaviour matches across init and adoption.
@@ -75,7 +76,14 @@ export async function ensureBufferDependency(
     return undefined;
   }
 
-  if (pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer) {
+  const existingVersion = pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer;
+  // package.json may contain npm ranges (for example `^6.0.3`) rather than
+  // concrete versions. `satisfies` treats those ranges as invalid versions;
+  // normalize them first and only compare valid ranges. Non-npm protocols
+  // such as `workspace:*` are intentionally treated as needing the direct
+  // dependency instead of throwing.
+  const existingRange = existingVersion === undefined ? null : validRange(existingVersion);
+  if (existingRange && intersects(existingRange, BUFFER_DEPENDENCY_RANGE)) {
     return { packageJsonPath, added: false };
   }
 
