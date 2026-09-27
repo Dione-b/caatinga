@@ -90,7 +90,7 @@ See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
 
 - **Node.js** 22+
 - **[Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli)** 23.0.0+ on `PATH` (28.0.0 recommended)
-- **Rust** 1.91.0+ with the `wasm32v1-none` target
+- **Rust** 1.91.1+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity (e.g. `alice`)
 
 Run `ctg doctor` to check what is missing. Install prerequisites manually — see [Getting started](./docs/getting-started.md#prerequisites). See the [version contract](./docs/stellar-cli-version-contract.md).
