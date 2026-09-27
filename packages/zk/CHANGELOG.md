@@ -1,5 +1,14 @@
 ## Breaking changes policy
 
+## 3.10.1
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [84a5940]
+- Updated dependencies [fd55695]
+  - @caatinga/core@3.10.1
+
 ## 3.10.0
 
 ### Patch Changes

@@ -1,5 +1,34 @@
 ## Breaking changes policy
 
+## 3.10.1
+
+### Patch Changes
+
+- `ctg doctor` now fails the Rust check when the installed toolchain is older than `RUST_MIN_VERSION` (1.91.0), suggesting `rustup update stable`. The wasm target constants moved to a dependency-free module so `@caatinga/core/runtime/requirements` no longer pulls in `node:crypto` / `node:fs`.
+- 84a5940: Fail-closed mainnet guardrail for `requireConfirmation`.
+
+  **B18:** `requireConfirmation: false` on mainnet silently disabled the
+  interactive prompt and the `[MAINNET GUARDRAIL]` warning on
+  `deploy` / `upgrade` / `invoke` / `wire` / `rollback`. A config copied
+  from testnet could therefore bypass the mainnet guardrail.
+
+  **Fix:**
+
+  - `requiresMainnetConfirmation` now unconditionally returns `true` on
+    mainnet (by name or by canonical passphrase), ignoring
+    `networkConfig.requireConfirmation`.
+  - Non-mainnet networks only require confirmation when
+    `requireConfirmation: true` — otherwise the previous behavior is
+    preserved.
+  - `@caatinga/core` deliberately does **not** consult
+    `CAATINGA_ASSUME_YES`. The opt-out remains a CLI-layer concern: the CLI
+    honours `--yes` / `CAATINGA_ASSUME_YES` and continues to emit the
+    `[MAINNET GUARDRAIL]` audit log before skipping the interactive prompt.
+    Handling the env var in core would make the CLI's check unreachable
+    dead code and would suppress the audit log during CI runs.
+
+- fd55695: `ctg upgrade` now stores the contract's relative `sourcePath` in `caatinga.artifacts.json`, matching `ctg deploy`, instead of an absolute local path.
+
 ## 3.10.0
 
 ## 3.9.2

@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 3.10.1
+
+### Patch Changes
+
+- `ctg doctor` now fails the Rust check when the installed toolchain is older than `RUST_MIN_VERSION` (1.91.0), suggesting `rustup update stable`. The wasm target constants moved to a dependency-free module so `@caatinga/core/runtime/requirements` no longer pulls in `node:crypto` / `node:fs`.
+- Updated dependencies
+- Updated dependencies [84a5940]
+- Updated dependencies [fd55695]
+  - @caatinga/core@3.10.1
+  - @caatinga/zk@3.10.1
+
 ## 3.10.0
 
 ### Minor Changes
