@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { describeCliSource, loadConfig, runSmokeReads } from "@caatinga/core";
+import { describeCliSource, loadConfig, resolveNetwork, runSmokeReads } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -10,12 +10,14 @@ export function registerSmokeCommand(program: Command): void {
     .option("-n, --network <network>", "Configured network name")
     .option(
       "-s, --source <source>",
-      "Stellar CLI identity alias for simulation context (defaults to CAATINGA_SOURCE, otherwise alice)"
+      "Stellar CLI identity alias for simulation context (defaults to CAATINGA_SOURCE, otherwise alice; required on mainnet)"
     )
     .action((options: { network?: string; source?: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
-        const resolvedSource = describeCliSource(options.source);
+        const resolvedSource = describeCliSource(options.source, {
+          network: resolveNetwork(config, options.network),
+        });
         if (resolvedSource.origin !== "explicit") {
           logger.info(`Using source identity "${resolvedSource.source}".`);
         }

@@ -1,14 +1,20 @@
 import type { NetworkConfig } from "../config/config.schema.js";
-import { WELL_KNOWN_NETWORKS } from "../networks/networks.js";
+import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js";
 import type { ResolvedNetwork } from "../networks/resolve-network.js";
 
-function matchesWellKnownNetwork(name: string, config: NetworkConfig): boolean {
-  const known = WELL_KNOWN_NETWORKS[name];
-  if (!known) {
-    return false;
+/**
+ * Returns the Stellar CLI `--network` shorthand for a config that exactly
+ * matches a well-known network whose built-in CLI entry has a working RPC.
+ * Mainnet never qualifies: the CLI's `mainnet` entry has no RPC URL, so the
+ * configured `rpcUrl` must always be passed explicitly.
+ */
+function stellarCliShorthandFor(config: NetworkConfig): string | undefined {
+  const metadata = NETWORK_METADATA_BY_PASSPHRASE[config.networkPassphrase];
+  if (!metadata?.stellarCliShorthand || !metadata.stellarCliBuiltinRpc) {
+    return undefined;
   }
 
-  return known.rpcUrl === config.rpcUrl && known.networkPassphrase === config.networkPassphrase;
+  return metadata.rpcUrl === config.rpcUrl ? metadata.sdkName : undefined;
 }
 
 function buildRpcNetworkArgs(config: NetworkConfig): string[] {
@@ -16,19 +22,10 @@ function buildRpcNetworkArgs(config: NetworkConfig): string[] {
 }
 
 export function buildStellarNetworkArgsFromConfig(config: NetworkConfig): string[] {
-  for (const [name, known] of Object.entries(WELL_KNOWN_NETWORKS)) {
-    if (known.rpcUrl === config.rpcUrl && known.networkPassphrase === config.networkPassphrase) {
-      return ["--network", name];
-    }
-  }
-
-  return buildRpcNetworkArgs(config);
+  const shorthand = stellarCliShorthandFor(config);
+  return shorthand ? ["--network", shorthand] : buildRpcNetworkArgs(config);
 }
 
 export function buildStellarNetworkArgs(network: ResolvedNetwork): string[] {
-  if (matchesWellKnownNetwork(network.name, network.config)) {
-    return ["--network", network.name];
-  }
-
   return buildStellarNetworkArgsFromConfig(network.config);
 }

@@ -76,4 +76,39 @@ describe("zk-guardrails", () => {
       })
     ).rejects.toMatchObject({ code: "ZK_DEV_CEREMONY_BLOCKED" });
   });
+
+  it("should_block_zk_build_on_a_custom_named_mainnet_by_passphrase", async () => {
+    await expect(
+      assertZkBuildNetworkAllowed({
+        networkName: "pubnet",
+        networkConfig: zkConfig.networks.mainnet,
+        allowDevCeremony: false,
+      })
+    ).rejects.toMatchObject({ code: "ZK_DEV_CEREMONY_BLOCKED" });
+  });
+
+  it("should_block_verifier_deploy_on_a_custom_named_mainnet_by_passphrase", async () => {
+    await mkdir(tmpArtifacts, { recursive: true });
+    await writeDevCeremonyManifest(tmpArtifacts);
+
+    await expect(
+      assertZkVerifierDeployAllowed({
+        config: zkConfig,
+        contractNames: ["verifier"],
+        networkName: "production",
+        networkConfig: zkConfig.networks.mainnet,
+        allowDevCeremony: false,
+      })
+    ).rejects.toMatchObject({ code: "ZK_DEV_CEREMONY_BLOCKED" });
+  });
+
+  it("should_allow_zk_build_on_testnet_with_its_config", async () => {
+    await expect(
+      assertZkBuildNetworkAllowed({
+        networkName: "testnet",
+        networkConfig: zkConfig.networks.testnet,
+        allowDevCeremony: false,
+      })
+    ).resolves.toBeUndefined();
+  });
 });

@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { isMainnetNetwork, type NetworkConfig } from "@caatinga/core";
 import { ZkError } from "../errors/ZkError.js";
 
 export const DEV_CEREMONY_TYPE = "dev-single-party" as const;
@@ -10,7 +11,15 @@ export type DevCeremonyManifest = {
   generatedAt: string;
 };
 
-export function isProductionNetwork(networkName: string): boolean {
+/**
+ * Whether dev-ceremony artifacts must be blocked on this network. Pass the
+ * network config whenever it is available so a mainnet network with a custom
+ * name (e.g. `pubnet`) is detected by its passphrase, not just by name.
+ */
+export function isProductionNetwork(networkName: string, networkConfig?: NetworkConfig): boolean {
+  if (networkConfig) {
+    return isMainnetNetwork(networkName, networkConfig);
+  }
   return networkName === "mainnet";
 }
 
@@ -47,6 +56,8 @@ export async function readDevCeremonyManifest(
 
 export type AssertDevCeremonyAllowedOptions = {
   networkName: string;
+  /** Resolved network config; enables passphrase-based mainnet detection. */
+  networkConfig?: NetworkConfig;
   artifactsDir: string;
   allowDevCeremony: boolean;
   operation: string;
@@ -55,7 +66,7 @@ export type AssertDevCeremonyAllowedOptions = {
 export async function assertDevCeremonyAllowed(
   options: AssertDevCeremonyAllowedOptions
 ): Promise<void> {
-  if (!isProductionNetwork(options.networkName)) {
+  if (!isProductionNetwork(options.networkName, options.networkConfig)) {
     return;
   }
 

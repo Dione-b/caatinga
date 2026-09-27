@@ -11,6 +11,13 @@ type NetworkMetadata = {
   label: string;
   /** Whether the Stellar CLI accepts the sdkName as a --network shorthand. */
   stellarCliShorthand: boolean;
+  /**
+   * Whether the Stellar CLI's built-in entry for that shorthand ships a usable
+   * RPC URL. Its `mainnet` entry is "Bring Your Own" RPC, so passing
+   * `--network mainnet` fails (or silently uses a locally added network)
+   * instead of the configured `rpcUrl`.
+   */
+  stellarCliBuiltinRpc: boolean;
 };
 
 /**
@@ -25,6 +32,7 @@ export const NETWORK_METADATA_BY_PASSPHRASE: Record<string, NetworkMetadata> = {
     horizonUrl: "https://horizon-testnet.stellar.org",
     label: "Stellar Testnet",
     stellarCliShorthand: true,
+    stellarCliBuiltinRpc: true,
   },
   "Public Global Stellar Network ; September 2015": {
     sdkName: "mainnet",
@@ -32,12 +40,14 @@ export const NETWORK_METADATA_BY_PASSPHRASE: Record<string, NetworkMetadata> = {
     horizonUrl: "https://horizon.stellar.org",
     label: "Stellar Mainnet",
     stellarCliShorthand: true,
+    stellarCliBuiltinRpc: false,
   },
   "Test SDF Future Network ; October 2022": {
     sdkName: "futurenet",
     rpcUrl: "https://rpc-futurenet.stellar.org",
     label: "Stellar Futurenet",
     stellarCliShorthand: false,
+    stellarCliBuiltinRpc: false,
   },
 };
 
