@@ -58,6 +58,21 @@ describe("createDefaultBindingAdapter", () => {
     });
   });
 
+  it("forwards method options to zero-argument generated methods", async () => {
+    class Client {
+      increment(options?: { restore?: boolean }) {
+        return options;
+      }
+    }
+
+    const adapter = createDefaultBindingAdapter({ Client });
+    const methodOptions = { restore: true };
+
+    await expect(
+      adapter.callMethod({ client: new Client(), method: "increment", methodOptions })
+    ).resolves.toBe(methodOptions);
+  });
+
   it("throws when generated binding does not export Client", () => {
     const adapter = createDefaultBindingAdapter({});
 

@@ -16,7 +16,7 @@ export function splitInvokeArgsAndOptions(
 ) {
   const looksLikeOptions =
     argsOrOptions !== undefined &&
-    ("debugXdr" in argsOrOptions || "debugRaw" in argsOrOptions) &&
+    ("debugXdr" in argsOrOptions || "debugRaw" in argsOrOptions || "restore" in argsOrOptions) &&
     maybeOptions === undefined;
 
   if (looksLikeOptions) {
@@ -25,6 +25,7 @@ export function splitInvokeArgsAndOptions(
       args: undefined,
       debugXdr: options.debugXdr ?? false,
       debugRaw: options.debugRaw ?? false,
+      restore: options.restore ?? false,
     };
   }
 
@@ -32,6 +33,7 @@ export function splitInvokeArgsAndOptions(
     args: argsOrOptions as Record<string, unknown> | undefined,
     debugXdr: maybeOptions?.debugXdr ?? false,
     debugRaw: maybeOptions?.debugRaw ?? false,
+    restore: maybeOptions?.restore ?? false,
   };
 }
 

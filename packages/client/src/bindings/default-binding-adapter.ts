@@ -43,7 +43,7 @@ export function createDefaultBindingAdapter(binding: BindingWithClient): Caating
       });
     },
 
-    async callMethod({ client, method, args }) {
+    async callMethod({ client, method, args, methodOptions }) {
       const candidate = client as Record<string, unknown>;
       const fn = candidate[method];
 
@@ -55,7 +55,15 @@ export function createDefaultBindingAdapter(binding: BindingWithClient): Caating
         );
       }
 
-      return args ? fn.call(client, args) : fn.call(client);
+      if (args !== undefined && methodOptions !== undefined) {
+        return fn.call(client, args, methodOptions);
+      }
+
+      if (args !== undefined) {
+        return fn.call(client, args);
+      }
+
+      return methodOptions !== undefined ? fn.call(client, methodOptions) : fn.call(client);
     }
   };
 }
