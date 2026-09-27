@@ -194,7 +194,7 @@ export async function upgradeContractInPlace(
         contractId: existing.contractId,
         wasmHash: upload.wasmHash,
         deployedAt,
-        sourcePath: contract.sourcePath,
+        sourcePath: contract.config.path,
         wasmPath: contract.config.wasm,
         dependencies: existing.dependencies ?? contract.config.dependsOn ?? [],
         resolvedDeployArgs: existing.resolvedDeployArgs ?? {},

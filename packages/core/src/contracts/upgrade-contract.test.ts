@@ -127,6 +127,24 @@ describe("upgradeContractInPlace", () => {
     expect(invokeCall?.[1]).toContain(NEW_HASH);
   });
 
+  it("should_store_relative_source_path_in_artifact", async () => {
+    await seedProject(NEW_WASM, OLD_HASH);
+
+    await upgradeContractInPlace({
+      config: baseConfig,
+      contractName: "sticker",
+      networkName: "testnet",
+      source: "deployer",
+      cwd: tmpDir,
+    });
+
+    const saved = JSON.parse(await readFile(path.join(tmpDir, "caatinga.artifacts.json"), "utf8"));
+    const sourcePath = saved.networks.testnet.contracts.sticker.sourcePath;
+    expect(sourcePath).toBe("./contracts/sticker");
+    expect(path.isAbsolute(sourcePath)).toBe(false);
+    expect(JSON.stringify(saved)).not.toContain(tmpDir);
+  });
+
   it("should_skip_when_if_changed_and_hash_matches", async () => {
     await seedProject(NEW_WASM, NEW_HASH);
 
