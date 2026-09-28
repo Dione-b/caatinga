@@ -1,5 +1,17 @@
 ## Breaking changes policy
 
+## 3.11.0
+
+### Minor Changes
+
+- 88ba40f: `frontend.env` accepts a `network` source key (writes the resolved network name). The `react-vite-counter` and `zk-starter` templates now read network name, RPC and passphrase from `VITE_CAATINGA_*` (written to `.env.local` by `ctg deploy` / `ctg sync-env`) for the client, the wallet network and the artifacts lookup, defaulting to testnet when unset (#229).
+- e31535a: New `CAATINGA_WALLET_NETWORK_MISMATCH`: wallet adapters may implement optional `getNetworkPassphrase()`, and `invoke()` fails fast before building/signing when the wallet is on another network than the app. The Freighter and Stellar Wallets Kit adapters implement it; wallets that cannot report their network are not blocked (#230).
+
+### Patch Changes
+
+- 17c6027: `ctg estimate deploy` now simulates against the selected network and reads fees from the simulated envelope (`fee` minus `resource_fee` for inclusion), so estimates are produced and no longer double-count (#225).
+- cae6cac: Point package `homepage` to https://caatinga.xyz.
+
 ## 3.10.3
 
 ### Patch Changes

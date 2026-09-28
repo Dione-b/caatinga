@@ -1,5 +1,21 @@
 ## Breaking changes policy
 
+## 3.11.0
+
+### Patch Changes
+
+- d2a9ed2: `ctg ci run` now re-runs the installed `ctg` binary for doctor and smoke instead of `./dist/index.js` / `pnpm dev`, so it works in user projects; a failing step stops the recipe and its exit code is propagated (#232).
+- 17c6027: `ctg estimate deploy` now simulates against the selected network and reads fees from the simulated envelope (`fee` minus `resource_fee` for inclusion), so estimates are produced and no longer double-count (#225).
+- cae6cac: Point package `homepage` to https://caatinga.xyz.
+- c8bd84b: `ctg identity export` now writes only the base64 archive to stdout; status goes to stderr, so `ctg identity export > id.b64` round-trips through `ctg identity import` (#227).
+- 88ba40f: `frontend.env` accepts a `network` source key (writes the resolved network name). The `react-vite-counter` and `zk-starter` templates now read network name, RPC and passphrase from `VITE_CAATINGA_*` (written to `.env.local` by `ctg deploy` / `ctg sync-env`) for the client, the wallet network and the artifacts lookup, defaulting to testnet when unset (#229).
+- Updated dependencies [17c6027]
+- Updated dependencies [cae6cac]
+- Updated dependencies [88ba40f]
+- Updated dependencies [e31535a]
+  - @caatinga/core@3.11.0
+  - @caatinga/zk@3.11.0
+
 ## 3.10.3
 
 ### Patch Changes

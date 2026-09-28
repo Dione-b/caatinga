@@ -1,5 +1,16 @@
 ## Breaking changes policy
 
+## 3.11.0
+
+### Patch Changes
+
+- cae6cac: Point package `homepage` to https://caatinga.xyz.
+- Updated dependencies [17c6027]
+- Updated dependencies [cae6cac]
+- Updated dependencies [88ba40f]
+- Updated dependencies [e31535a]
+  - @caatinga/core@3.11.0
+
 ## 3.10.3
 
 ### Patch Changes

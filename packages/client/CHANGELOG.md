@@ -1,5 +1,21 @@
 ## Breaking changes policy
 
+## 3.11.0
+
+### Minor Changes
+
+- e31535a: New `CAATINGA_WALLET_NETWORK_MISMATCH`: wallet adapters may implement optional `getNetworkPassphrase()`, and `invoke()` fails fast before building/signing when the wallet is on another network than the app. The Freighter and Stellar Wallets Kit adapters implement it; wallets that cannot report their network are not blocked (#230).
+
+### Patch Changes
+
+- fae498d: Freighter adapter now handles freighter-api v4 `{ error }` responses: a missing address throws `CAATINGA_WALLET_NOT_CONNECTED` and a failed or rejected signature throws `CAATINGA_XDR_SIGN_FAILED`, both carrying Freighter's message (#231).
+- cae6cac: Point package `homepage` to https://caatinga.xyz.
+- Updated dependencies [17c6027]
+- Updated dependencies [cae6cac]
+- Updated dependencies [88ba40f]
+- Updated dependencies [e31535a]
+  - @caatinga/core@3.11.0
+
 ## 3.10.3
 
 ### Patch Changes
