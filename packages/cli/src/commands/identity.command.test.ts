@@ -69,7 +69,15 @@ describe("identity command temp archive handling", () => {
   async function runImport(archivePath: string, targetDir: string): Promise<void> {
     await createProgram()
       .exitOverride()
-      .parseAsync(["node", "caatinga", "identity", "import", archivePath, "--path", targetDir]);
+      .parseAsync([
+        "node",
+        "caatinga",
+        "identity",
+        "import",
+        archivePath,
+        "--path",
+        targetDir,
+      ]);
   }
 
   it("should_write_the_archive_into_a_0700_directory_under_an_unpredictable_name", async () => {
