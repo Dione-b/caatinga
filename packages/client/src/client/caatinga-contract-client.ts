@@ -59,6 +59,7 @@ export class CaatingaContractClient {
     maybeOptions?: CaatingaInvokeOptions
   ): Promise<CaatingaInvokeResult<T>> {
     const { args, debugXdr, debugRaw } = splitInvokeArgsAndOptions(argsOrOptions, maybeOptions);
+    await this.assertWalletNetwork(method);
     const { contractId, transaction } = await this.createTransaction(method, args);
     const xdr = await buildTransactionXdr({
       contractName: this.contractName,
@@ -180,6 +181,40 @@ export class CaatingaContractClient {
   ): Promise<T> {
     const result = await this.simulate<T>(method, argsOrOptions, maybeOptions);
     return result.result;
+  }
+
+  /**
+   * Fails before building or signing when the wallet reports a different network than
+   * the app, instead of a generic sign/submit failure later. Wallets that cannot report
+   * their network (adapter method missing, returns undefined, or throws) are not blocked.
+   */
+  private async assertWalletNetwork(method: string): Promise<void> {
+    const { wallet, network } = this.config;
+    if (!wallet.getNetworkPassphrase) {
+      return;
+    }
+
+    let walletPassphrase: string | undefined;
+    try {
+      walletPassphrase = await withWalletTimeout(
+        "getNetworkPassphrase",
+        this.config.walletTimeout,
+        () => wallet.getNetworkPassphrase!()
+      );
+    } catch (error) {
+      if (error instanceof CaatingaError && error.code === CaatingaErrorCode.WALLET_TIMEOUT) {
+        throw error;
+      }
+      return;
+    }
+
+    if (walletPassphrase && walletPassphrase !== network.networkPassphrase) {
+      throw new CaatingaError(
+        `Wallet is on a different network than the app for "${this.contractName}.${method}".`,
+        CaatingaErrorCode.WALLET_NETWORK_MISMATCH,
+        `Switch the wallet to "${network.name}" (${network.networkPassphrase}); it is on "${walletPassphrase}".`
+      );
+    }
   }
 
   private async createTransaction(method: string, args?: Record<string, unknown>) {

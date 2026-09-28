@@ -206,6 +206,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/client/caatinga-contract-client.test.ts",
     trigger: 'client.contract("counter").buildXdr(',
   },
+  [CaatingaErrorCode.WALLET_NETWORK_MISMATCH]: {
+    file: "packages/client/src/client/caatinga-contract-client.test.ts",
+    trigger: 'createCaatingaClient(config).contract("counter").invoke(',
+  },
   [CaatingaErrorCode.WALLET_TIMEOUT]: {
     file: "packages/client/src/client/create-caatinga-client.test.ts",
     trigger: 'client.contract("counter").invoke(',
