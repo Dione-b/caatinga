@@ -18,7 +18,7 @@
     "url": "git+https://github.com/Dione-b/caatinga.git",
     "directory": "packages/client"
   },
-  "homepage": "https://dione-b.github.io/caatinga/",
+  "homepage": "https://caatinga.xyz",
   "author": "Caatinga contributors",
   "license": "MIT",
   "engines": {

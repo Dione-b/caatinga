@@ -2,6 +2,7 @@
   "name": "@caatinga/zk",
   "version": "3.10.3",
   "description": "Zero-knowledge proof serialization bridge for Stellar/Soroban",
+  "homepage": "https://caatinga.xyz",
   "type": "module",
   "engines": {
     "node": ">=22"

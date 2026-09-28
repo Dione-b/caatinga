@@ -97,7 +97,7 @@ Run `ctg doctor` to check what is missing. Install prerequisites manually — se
 
 ## Documentation
 
-- **Docs site:** [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/)
+- **Docs site:** [caatinga.xyz](https://caatinga.xyz)
 - [Getting started](./docs/getting-started.md) — install, scaffold, CLI-to-browser flow
 - [Cheatsheet](./docs/cheatsheet.md) · [CLI reference](./docs/cli.md) · [Troubleshooting](./docs/troubleshooting.md)
 - [Client](./docs/client.md) · [Wallets](./docs/wallets.md) · [Errors](./docs/errors.md)
@@ -124,6 +124,18 @@ my-dapp/
 | `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                                                                                                                                 |
 
 Full export map: [Packages](./docs/packages.md). Public errors use stable `CAATINGA_*` codes — see [Errors](./docs/errors.md).
+
+## Community & education
+
+Caatinga is used in hands-on Stellar developer education and building settings:
+
+- **Stellar Summit São Paulo**: Caatinga presented to builders
+- **Stellar 37 Degrees** (Rio de Janeiro): developer and community engagement
+- **Stellar Pulso Hackathon**: deployment tooling for hackathon teams
+- **Give Impacta Colombia** (Medellín): mentoring blockchain developers
+- **NearX Labs postgraduate program**: part of the curriculum; students building on Soroban use it as their deployment tooling
+
+Running a workshop, hackathon, or course with Caatinga? Open a PR adding it here.
 
 ## Contributing
 
