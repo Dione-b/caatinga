@@ -343,6 +343,60 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     });
   });
 
+  it("should_throw_WALLET_NETWORK_MISMATCH_before_signing_when_wallet_is_on_another_network", async () => {
+    const config = createClientConfig({
+      wallet: {
+        getPublicKey: vi.fn(async () => "GPUBLIC"),
+        signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+        getNetworkPassphrase: vi.fn(async () => "Public Global Stellar Network ; September 2015"),
+      },
+    });
+
+    await expect(
+      createCaatingaClient(config).contract("counter").invoke("increment")
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.WALLET_NETWORK_MISMATCH,
+      hint: expect.stringContaining("Public Global Stellar Network"),
+    });
+    expect(config.wallet.getPublicKey).not.toHaveBeenCalled();
+    expect(config.wallet.signTransaction).not.toHaveBeenCalled();
+  });
+
+  it("should_invoke_when_wallet_reports_the_app_network", async () => {
+    const config = createClientConfig({
+      wallet: {
+        getPublicKey: vi.fn(async () => "GPUBLIC"),
+        signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+        getNetworkPassphrase: vi.fn(async () => "Test SDF Network ; September 2015"),
+      },
+    });
+
+    await expect(
+      createCaatingaClient(config).contract("counter").invoke("increment")
+    ).resolves.toMatchObject({ status: "confirmed" });
+  });
+
+  it("should_not_block_invoke_when_wallet_cannot_report_its_network", async () => {
+    for (const getNetworkPassphrase of [
+      vi.fn(async () => undefined),
+      vi.fn(async () => {
+        throw new Error("module does not support getNetwork");
+      }),
+    ]) {
+      const config = createClientConfig({
+        wallet: {
+          getPublicKey: vi.fn(async () => "GPUBLIC"),
+          signTransaction: vi.fn(async () => "AAAA_SIGNED"),
+          getNetworkPassphrase,
+        },
+      });
+
+      await expect(
+        createCaatingaClient(config).contract("counter").invoke("increment")
+      ).resolves.toMatchObject({ status: "confirmed" });
+    }
+  });
+
   it("should_throw_XDR_SIGN_FAILED_when_signTransaction_returns_empty_string", async () => {
     const config = createClientConfig({
       wallet: {

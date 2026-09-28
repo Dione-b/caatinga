@@ -55,6 +55,8 @@ export interface StellarWalletsKitAdapter extends CaatingaWalletAdapter {
   /** Id of the wallet currently selected in the kit, or undefined before any selection. */
   getWalletId(): string | undefined;
   getSupportedWallets(): Promise<ISupportedWallet[]>;
+  /** Passphrase the selected wallet is on, or undefined when its module cannot report it. */
+  getNetworkPassphrase(): Promise<string | undefined>;
   disconnect(): Promise<void>;
 }
 
@@ -140,6 +142,16 @@ export function createStellarWalletsKitAdapter(
         ...(address ? { address } : {}),
       });
       return result.signedTxXdr;
+    },
+
+    async getNetworkPassphrase() {
+      // Not every SWK module can report its network; unknown must not block signing.
+      try {
+        const { networkPassphrase } = await StellarWalletsKit.getNetwork();
+        return networkPassphrase || undefined;
+      } catch {
+        return undefined;
+      }
     },
 
     async disconnect() {

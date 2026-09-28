@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   getAddress: vi.fn(),
   fetchAddress: vi.fn(),
   signTransaction: vi.fn(),
+  getNetwork: vi.fn(),
   setWallet: vi.fn(),
   refreshSupportedWallets: vi.fn(),
   disconnect: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock("@creit.tech/stellar-wallets-kit/sdk", () => ({
     getAddress: mocks.getAddress,
     fetchAddress: mocks.fetchAddress,
     signTransaction: mocks.signTransaction,
+    getNetwork: mocks.getNetwork,
     refreshSupportedWallets: mocks.refreshSupportedWallets,
     disconnect: mocks.disconnect,
     // Mirrors the real kit: throws `{code: -3}` until a wallet is selected.
@@ -133,6 +135,23 @@ describe("createStellarWalletsKitAdapter", () => {
       address: "GPUBLIC",
     });
     expect(signed).toBe("AAAA_SIGNED");
+  });
+
+  it("reports the selected wallet's network passphrase", async () => {
+    mocks.getNetwork.mockResolvedValue({
+      network: "PUBLIC",
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    });
+
+    await expect(createStellarWalletsKitAdapter().getNetworkPassphrase()).resolves.toBe(
+      "Public Global Stellar Network ; September 2015"
+    );
+  });
+
+  it("reports an unknown network when the wallet module cannot tell", async () => {
+    mocks.getNetwork.mockRejectedValue({ code: -3, message: "Please set the wallet first" });
+
+    await expect(createStellarWalletsKitAdapter().getNetworkPassphrase()).resolves.toBeUndefined();
   });
 
   it("signs without an address before any connect", async () => {

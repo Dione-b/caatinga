@@ -252,11 +252,15 @@ export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
 
   signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
+
+  /** Optional: the wallet's current network passphrase, or undefined if unknown. */
+  getNetworkPassphrase?(): Promise<string | undefined>;
 }
 ```
 
 Contract:
 
+- **Network check (optional):** if the adapter implements `getNetworkPassphrase`, `invoke()` compares it with `network.networkPassphrase` before building and signing, and throws `CAATINGA_WALLET_NETWORK_MISMATCH` when they differ. `undefined` or a rejection means "unknown" and does not block. The Freighter and Stellar Wallets Kit adapters implement it.
 - **Reject on dismissal:** `getPublicKey` and `signTransaction` must reject when the user cancels or dismisses the wallet UI. Do not leave the promise pending indefinitely.
 - **Adapter timeouts:** Your adapter may apply its own timeout before rejecting.
 - **Caatinga timeout:** Caatinga does not impose a default timeout. Pass optional `walletTimeout`

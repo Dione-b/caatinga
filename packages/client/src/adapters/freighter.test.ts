@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CaatingaErrorCode } from "@caatinga/core/browser";
 
-const mocks = vi.hoisted(() => ({ getAddress: vi.fn(), signTransaction: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  getAddress: vi.fn(),
+  signTransaction: vi.fn(),
+  getNetworkDetails: vi.fn(),
+}));
 
 vi.mock("@stellar/freighter-api", () => mocks);
 
@@ -14,6 +18,30 @@ describe("freighterWalletAdapter", () => {
   beforeEach(() => {
     mocks.getAddress.mockReset();
     mocks.signTransaction.mockReset();
+    mocks.getNetworkDetails.mockReset();
+  });
+
+  it("should_report_freighters_network_passphrase", async () => {
+    mocks.getNetworkDetails.mockResolvedValue({
+      network: "PUBLIC",
+      networkUrl: "https://horizon.stellar.org",
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    });
+
+    await expect(freighterWalletAdapter.getNetworkPassphrase?.()).resolves.toBe(
+      "Public Global Stellar Network ; September 2015"
+    );
+  });
+
+  it("should_report_an_unknown_network_when_freighter_returns_an_error", async () => {
+    mocks.getNetworkDetails.mockResolvedValue({
+      network: "",
+      networkUrl: "",
+      networkPassphrase: "",
+      error: { code: -1, message: "Freighter is locked" },
+    });
+
+    await expect(freighterWalletAdapter.getNetworkPassphrase?.()).resolves.toBeUndefined();
   });
 
   it("should_return_the_address_when_freighter_grants_access", async () => {

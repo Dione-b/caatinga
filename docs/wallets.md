@@ -11,11 +11,17 @@ export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
 
   signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
+
+  /** Optional: the wallet's current network passphrase, or undefined if unknown. */
+  getNetworkPassphrase?(): Promise<string | undefined>;
 }
 ```
 
 Rules every adapter must follow:
 
+- **Network check (optional):** implement `getNetworkPassphrase` to let `invoke()` fail fast with
+  `CAATINGA_WALLET_NETWORK_MISMATCH` when the wallet is on another network than the app. Return
+  `undefined` when the wallet cannot tell; that never blocks signing.
 - **Reject on dismissal:** `getPublicKey` and `signTransaction` must reject when the user cancels
   or dismisses the wallet UI. Never leave the promise pending indefinitely.
 - **Adapter timeouts:** an adapter may apply its own timeout before rejecting.

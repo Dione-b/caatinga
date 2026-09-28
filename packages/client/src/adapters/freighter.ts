@@ -1,5 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
-import { getAddress, signTransaction } from "@stellar/freighter-api";
+import { getAddress, getNetworkDetails, signTransaction } from "@stellar/freighter-api";
 import type { CaatingaWalletAdapter } from "../types.js";
 
 /**
@@ -31,5 +31,10 @@ export const freighterWalletAdapter: CaatingaWalletAdapter = {
       );
     }
     return response.signedTxXdr;
+  },
+
+  async getNetworkPassphrase() {
+    const response = await getNetworkDetails();
+    return response.error ? undefined : response.networkPassphrase || undefined;
   },
 };
