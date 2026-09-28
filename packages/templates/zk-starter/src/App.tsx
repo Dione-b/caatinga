@@ -5,10 +5,11 @@ import { CircuitCard } from "./components/CircuitCard";
 import { ContractNotDeployed } from "./components/ContractNotDeployed";
 import { WalletButton } from "./components/WalletButton";
 import { WalletModal } from "./components/WalletModal";
+import { appNetwork } from "./network.js";
 import { stellarWalletAdapter } from "./wallet.js";
 
 const artifacts = artifactsJson as CaatingaArtifacts;
-const verifierContractId = artifacts.networks?.testnet?.contracts?.verifier?.contractId;
+const verifierContractId = artifacts.networks?.[appNetwork.name]?.contracts?.verifier?.contractId;
 const isDeployed = Boolean(verifierContractId);
 
 function AppBody() {
@@ -35,7 +36,7 @@ function AppBody() {
               <p className="eyebrow">Get started</p>
               <h2 id="connect-title">Connect your wallet</h2>
             </div>
-            <span className="network-pill">testnet</span>
+            <span className="network-pill">{appNetwork.name}</span>
           </div>
           <p>
             Connect a Stellar wallet to verify Groth16 proofs on the deployed verifier contract.

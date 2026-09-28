@@ -4,10 +4,12 @@ import {
   WalletNetwork,
   type StellarWalletsKitMetadata,
 } from "@caatinga/client/stellar-wallets-kit";
+import { appNetwork } from "./network.js";
 import { requestWalletSelection } from "./wallet-modal-controller.js";
 
 const baseWalletAdapter = createStellarWalletsKitAdapter({
-  network: WalletNetwork.TESTNET,
+  // SWK network ids are the network passphrases.
+  network: appNetwork.networkPassphrase as WalletNetwork,
   walletConnectMetadata: getWalletConnectMetadata(),
 });
 

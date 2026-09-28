@@ -16,7 +16,7 @@ export type SyncFrontendEnvResult = {
   entries: Array<{ key: string; value: string }>;
 };
 
-const NETWORK_ENV_KEYS = new Set(["rpcUrl", "networkPassphrase"]);
+const NETWORK_ENV_KEYS = new Set(["network", "rpcUrl", "networkPassphrase"]);
 const WASM_HASH_PATTERN = /^(.+)\.wasmHash$/;
 
 function formatEnvValue(value: string): string {
@@ -114,7 +114,9 @@ export async function syncFrontendEnv(
   for (const [sourceKey, envKey] of Object.entries(frontend.env)) {
     let value: string | undefined;
 
-    if (sourceKey === "rpcUrl") {
+    if (sourceKey === "network") {
+      value = network.name;
+    } else if (sourceKey === "rpcUrl") {
       value = network.config.rpcUrl;
     } else if (sourceKey === "networkPassphrase") {
       value = network.config.networkPassphrase;
@@ -122,7 +124,7 @@ export async function syncFrontendEnv(
       throw new CaatingaError(
         `Unsupported frontend env source key "${sourceKey}".`,
         CaatingaErrorCode.INVALID_CONFIG,
-        "Use rpcUrl or networkPassphrase for network values."
+        "Use network, rpcUrl or networkPassphrase for network values."
       );
     } else {
       const wasmHashMatch = sourceKey.match(WASM_HASH_PATTERN);
@@ -183,7 +185,9 @@ export async function computeFrontendEnvEntries(
   for (const [sourceKey, envKey] of Object.entries(frontend.env)) {
     let value: string | undefined;
 
-    if (sourceKey === "rpcUrl") {
+    if (sourceKey === "network") {
+      value = network.name;
+    } else if (sourceKey === "rpcUrl") {
       value = network.config.rpcUrl;
     } else if (sourceKey === "networkPassphrase") {
       value = network.config.networkPassphrase;
@@ -191,7 +195,7 @@ export async function computeFrontendEnvEntries(
       throw new CaatingaError(
         `Unsupported frontend env source key "${sourceKey}".`,
         CaatingaErrorCode.INVALID_CONFIG,
-        "Use rpcUrl or networkPassphrase for network values."
+        "Use network, rpcUrl or networkPassphrase for network values."
       );
     } else {
       const wasmHashMatch = sourceKey.match(WASM_HASH_PATTERN);

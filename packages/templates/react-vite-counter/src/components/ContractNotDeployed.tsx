@@ -1,3 +1,5 @@
+import { appNetwork } from "../network.js";
+
 export function ContractNotDeployed() {
   return (
     <section className="counter-panel" aria-labelledby="not-deployed-title">
@@ -6,7 +8,7 @@ export function ContractNotDeployed() {
           <p className="eyebrow">Get started</p>
           <h2 id="not-deployed-title">Contract not deployed</h2>
         </div>
-        <span className="network-pill">testnet</span>
+        <span className="network-pill">{appNetwork.name}</span>
       </div>
       <p>
         The counter contract has no on-chain ID yet, so the frontend can&apos;t read or update it.
@@ -16,11 +18,11 @@ export function ContractNotDeployed() {
       </p>
       <pre className="counter-error" role="note">
         {`npx ctg build    counter
-npx ctg deploy   counter --network testnet --source <identity>
+npx ctg deploy   counter --network ${appNetwork.name} --source <identity>
 npm run dev
 
 # If bindings generation failed after deploy:
-npx ctg generate counter --network testnet`}
+npx ctg generate counter --network ${appNetwork.name}`}
       </pre>
     </section>
   );

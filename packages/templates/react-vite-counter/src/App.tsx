@@ -5,10 +5,11 @@ import { ContractNotDeployed } from "./components/ContractNotDeployed";
 import { CounterCard } from "./components/CounterCard";
 import { WalletButton } from "./components/WalletButton";
 import { WalletModal } from "./components/WalletModal";
+import { appNetwork } from "./network.js";
 import { stellarWalletAdapter } from "./wallet.js";
 
 const artifacts = artifactsJson as CaatingaArtifacts;
-const counterContractId = artifacts.networks?.testnet?.contracts?.counter?.contractId;
+const counterContractId = artifacts.networks?.[appNetwork.name]?.contracts?.counter?.contractId;
 const isDeployed = Boolean(counterContractId);
 
 function AppBody() {
@@ -35,7 +36,7 @@ function AppBody() {
               <p className="eyebrow">Get started</p>
               <h2 id="connect-title">Connect your wallet</h2>
             </div>
-            <span className="network-pill">testnet</span>
+            <span className="network-pill">{appNetwork.name}</span>
           </div>
           <p>Connect a Stellar wallet to read and update the counter contract.</p>
         </section>

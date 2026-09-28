@@ -1,3 +1,5 @@
+import { appNetwork } from "../network.js";
+
 export function ContractNotDeployed() {
   return (
     <section className="counter-panel" aria-labelledby="not-deployed-title">
@@ -6,7 +8,7 @@ export function ContractNotDeployed() {
           <p className="eyebrow">Get started</p>
           <h2 id="not-deployed-title">Verifier not deployed</h2>
         </div>
-        <span className="network-pill">testnet</span>
+        <span className="network-pill">{appNetwork.name}</span>
       </div>
       <p>
         The Groth16 verifier has no on-chain ID yet. Build and deploy first — the dApp reads the
@@ -16,8 +18,8 @@ export function ContractNotDeployed() {
       <pre className="counter-error" role="note">
         {`npx ctg build verifier
 npx ctg zk build main
-npx ctg deploy verifier --network testnet --source <identity>
-npx ctg generate verifier --network testnet
+npx ctg deploy verifier --network ${appNetwork.name} --source <identity>
+npx ctg generate verifier --network ${appNetwork.name}
 npm run dev`}
       </pre>
     </section>
