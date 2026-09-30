@@ -4,7 +4,7 @@
 
 Caatinga is Deployment Orchestration + Versioned Artifacts for Soroban: local, graph-aware deploy orchestration and portable, Git-versioned artifacts (`caatinga.artifacts.json`) for TypeScript teams. Build/deploy/invoke shell out to Stellar CLI; `ctg generate` runs `npx @stellar/stellar-sdk generate`.
 
-Human docs: [dione-b.github.io/caatinga](https://dione-b.github.io/caatinga/). Authoritative command/API detail: [CLI](./cli.md), [Config](./config.md), [Client](./client.md), [Errors](./errors.md), [Cheatsheet](./cheatsheet.md).
+Human docs: [caatinga.xyz](https://caatinga.xyz). Authoritative command/API detail: [CLI](./cli.md), [Config](./config.md), [Client](./client.md), [Errors](./errors.md), [Cheatsheet](./cheatsheet.md).
 
 ## Install & release
 

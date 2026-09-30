@@ -1,4 +1,4 @@
-import type { CaatingaConfig } from "@caatinga/core";
+import type { CaatingaConfig, NetworkConfig } from "@caatinga/core";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import {
   assertDevCeremonyAllowed,
@@ -29,9 +29,13 @@ export function resolveContractNamesForDeploy(
 
 export async function assertZkBuildNetworkAllowed(options: {
   networkName: string;
+  networkConfig?: NetworkConfig;
   allowDevCeremony: boolean;
 }): Promise<void> {
-  if (!isProductionNetwork(options.networkName) || options.allowDevCeremony) {
+  if (
+    !isProductionNetwork(options.networkName, options.networkConfig) ||
+    options.allowDevCeremony
+  ) {
     return;
   }
 
@@ -46,6 +50,7 @@ export async function assertZkVerifierDeployAllowed(options: {
   config: CaatingaConfig;
   contractNames: string[];
   networkName: string;
+  networkConfig?: NetworkConfig;
   allowDevCeremony: boolean;
 }): Promise<void> {
   for (const contractName of options.contractNames) {
@@ -53,6 +58,7 @@ export async function assertZkVerifierDeployAllowed(options: {
     for (const circuitName of circuitNames) {
       await assertDevCeremonyAllowed({
         networkName: options.networkName,
+        networkConfig: options.networkConfig,
         artifactsDir: zkArtifactsDir(circuitName),
         allowDevCeremony: options.allowDevCeremony,
         operation: `ctg deploy ${contractName}`,

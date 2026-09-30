@@ -67,20 +67,26 @@ describe("estimateDeployCost", () => {
     }
   });
 
-  it("should_return_fee_breakdown_when_simulate_succeeds", async () => {
+  /**
+   * Shape of `stellar tx decode --output json` for the envelope `stellar tx simulate`
+   * returned when deploying the counter template on testnet (stellar 27.0.0):
+   * `fee` = inclusion (100) + resource (65756).
+   */
+  const decodedSimulatedEnvelope = JSON.stringify({
+    tx: { tx: { fee: 65856, ext: { v1: { resource_fee: "65756" } } } },
+  });
+
+  function mockStellar(decoded: string = decodedSimulatedEnvelope): void {
     runCommand.mockImplementation(async (_cmd: string, args: string[]) => {
-      if (args.includes("--build-only")) {
-        return { stdout: "AAAA", stderr: "", all: "AAAA" };
-      }
-      if (args[0] === "tx") {
-        return {
-          stdout: "inclusion fee: 100\nresource fee: 5000",
-          stderr: "",
-          all: "inclusion fee: 100\nresource fee: 5000",
-        };
-      }
+      if (args.includes("--build-only")) return { stdout: "AAAA", stderr: "", all: "AAAA" };
+      if (args[1] === "simulate") return { stdout: "SIMULATED\n", stderr: "", all: "SIMULATED" };
+      if (args[1] === "decode") return { stdout: decoded, stderr: "", all: decoded };
       return { stdout: "", stderr: "", all: "" };
     });
+  }
+
+  it("should_return_fee_breakdown_when_simulate_succeeds", async () => {
+    mockStellar();
 
     const result = await estimateDeployCost({
       config: baseConfig,
@@ -90,9 +96,32 @@ describe("estimateDeployCost", () => {
       cwd: tmpDir,
     });
 
-    expect(result.totalFeeStroops).toBe(5100);
+    expect(result.simulation).toEqual({ ok: true });
     expect(result.inclusionFeeStroops).toBe(100);
-    expect(result.resourceFeeStroops).toBe(5000);
+    expect(result.resourceFeeStroops).toBe(65756);
+    expect(result.totalFeeStroops).toBe(65856);
+    expect(runCommand).toHaveBeenCalledWith(
+      "stellar",
+      ["tx", "decode", "--output", "json", "SIMULATED"],
+      expect.anything()
+    );
+  });
+
+  it("should_simulate_against_the_selected_network", async () => {
+    mockStellar();
+
+    await estimateDeployCost({
+      config: baseConfig,
+      contractName: "counter",
+      networkName: "testnet",
+      source: "alice",
+      cwd: tmpDir,
+    });
+
+    const simulateCall = runCommand.mock.calls.find(([, args]) => args[1] === "simulate");
+    const simulateArgs = simulateCall?.[1] as string[];
+    expect(simulateArgs.slice(4, 6)).toEqual(["--network", "testnet"]);
+    expect(simulateArgs.at(-1)).toBe("AAAA");
   });
 
   it("should_throw_ESTIMATE_FAILED_when_build_only_fails", async () => {
@@ -140,7 +169,7 @@ describe("estimateDeployCost", () => {
   it("should_mark_unparseable_simulation_output_as_unavailable", async () => {
     runCommand.mockImplementation(async (_cmd: string, args: string[]) => {
       if (args.includes("--build-only")) return { stdout: "AAAA", stderr: "", all: "AAAA" };
-      return { stdout: "completed", stderr: "", all: "completed" };
+      return { stdout: "inclusion fee: 100\nresource fee: 5000", stderr: "", all: "" };
     });
 
     const result = await estimateDeployCost({

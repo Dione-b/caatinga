@@ -30,7 +30,12 @@ function secureArchivePath(dir: string): string {
 }
 
 async function tarDirectory(sourceDir: string, outputFile: string): Promise<void> {
-  await execa("tar", ["-czf", outputFile, "-C", sourceDir, "."], { stdio: "inherit" });
+  // stdout carries the base64 archive, so tar must not write to it.
+  await execa("tar", ["-czf", outputFile, "-C", sourceDir, "."], {
+    stdin: "ignore",
+    stdout: "ignore",
+    stderr: "inherit",
+  });
 }
 
 async function assertNoPathTraversal(archiveFile: string, targetDir: string): Promise<void> {
@@ -39,10 +44,7 @@ async function assertNoPathTraversal(archiveFile: string, targetDir: string): Pr
 
   for (const rawEntry of stdout.split("\n")) {
     const line = rawEntry.trim();
-    const entry = line.replace(
-      /^\S+\s+\S+\s+\d+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+/,
-      ""
-    );
+    const entry = line.replace(/^\S+\s+\S+\s+\d+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+/, "");
     if (!entry) {
       continue;
     }
@@ -102,8 +104,8 @@ export function registerIdentityCommand(program: Command): void {
           await tarDirectory(source, tmpArchive);
           const archive = await readFile(tmpArchive);
           process.stdout.write(archive.toString("base64"));
-          logger.info("");
-          logger.success(`Exported ${source} (${archive.length} bytes, base64 above)`);
+          // Status goes to stderr so `ctg identity export > id.b64` yields a clean archive.
+          logger.successToStderr(`Exported ${source} (${archive.length} bytes, base64 on stdout)`);
         });
       })
     );

@@ -11,6 +11,10 @@ export const logger = {
   success(message: string) {
     console.log(`${chalk.green("✔")} ${chalk.green(message)}`);
   },
+  /** Like `success`, for commands whose stdout is machine-readable output. */
+  successToStderr(message: string) {
+    console.error(`${chalk.green("✔")} ${chalk.green(message)}`);
+  },
   warn(message: string) {
     console.warn(`${chalk.yellow("⚠")} ${chalk.yellow(message)}`);
   },

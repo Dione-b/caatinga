@@ -26,6 +26,24 @@ describe("buildStellarNetworkArgs", () => {
     ).toEqual(["--network", "testnet"]);
   });
 
+  it("should_pass_explicit_rpc_args_for_well_known_mainnet", () => {
+    // The Stellar CLI's built-in `mainnet` entry has no RPC URL ("Bring Your
+    // Own"), so `--network mainnet` would ignore the configured rpcUrl.
+    const mainnet = {
+      rpcUrl: "https://mainnet.sorobanrpc.com",
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    };
+    const expected = [
+      "--rpc-url",
+      "https://mainnet.sorobanrpc.com",
+      "--network-passphrase",
+      "Public Global Stellar Network ; September 2015",
+    ];
+
+    expect(buildStellarNetworkArgs({ name: "mainnet", config: mainnet })).toEqual(expected);
+    expect(buildStellarNetworkArgsFromConfig(mainnet)).toEqual(expected);
+  });
+
   it("should_use_rpc_url_for_custom_network_names", () => {
     expect(
       buildStellarNetworkArgs({

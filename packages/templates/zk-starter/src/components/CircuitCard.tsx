@@ -6,6 +6,7 @@ import { caatingaClient } from "../caatinga.js";
 import { LoadingModal } from "./LoadingModal.js";
 import { fetchZkProofBundle, ZkArtifactsError } from "../zk/fetch-artifacts.js";
 import { toBindingVerifyProofArgs } from "../zk/binding-args.js";
+import { appNetwork } from "../network.js";
 
 function multiplySignals(a: string, b: string): string {
   return (BigInt(a) * BigInt(b)).toString();
@@ -107,7 +108,7 @@ export function CircuitCard() {
           <p className="eyebrow">Multiplier circuit</p>
           <h2 id="circuit-title">Groth16 proof</h2>
         </div>
-        <span className="network-pill">testnet</span>
+        <span className="network-pill">{appNetwork.name}</span>
       </div>
 
       <p>

@@ -133,6 +133,7 @@ export function registerDeployCommand(program: Command): void {
             config,
             contractNames,
             networkName,
+            networkConfig,
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 

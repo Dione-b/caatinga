@@ -1,6 +1,6 @@
 {
   "name": "@caatinga/core",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "description": "Core config, artifacts, command orchestration, and error primitives for Caatinga/Soroban toolkit",
   "keywords": [
     "stellar",
@@ -16,7 +16,7 @@
     "url": "git+https://github.com/Dione-b/caatinga.git",
     "directory": "packages/core"
   },
-  "homepage": "https://dione-b.github.io/caatinga/",
+  "homepage": "https://caatinga.xyz",
   "author": "Caatinga contributors",
   "license": "MIT",
   "engines": {

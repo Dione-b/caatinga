@@ -60,7 +60,7 @@ Root config:
 | `framework`      | `"vite-react"`           | no       | `"vite-react"` | Official templates are Vite + React only; no Next.js or Astro adapter yet.     |
 | `bindingsOutput` | string (min 1)           | yes      | —              | path for generated bindings                                                    |
 | `envFile`        | string (min 1)           | no       | —              | frontend env file written by `ctg sync-env`                                    |
-| `env`            | `Record<string, string>` | no       | —              | maps config contract keys (or `rpcUrl` / `networkPassphrase`) to env var names |
+| `env`            | `Record<string, string>` | no       | —              | maps config contract keys (or `network` / `rpcUrl` / `networkPassphrase`) to env var names; `network` writes the resolved network name |
 
 `postDeploy` (optional root field):
 

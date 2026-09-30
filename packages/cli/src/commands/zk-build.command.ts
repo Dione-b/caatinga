@@ -30,6 +30,7 @@ export function registerZkBuildCommand(program: Command): void {
 
           await assertZkBuildNetworkAllowed({
             networkName: config.defaultNetwork,
+            networkConfig: config.networks[config.defaultNetwork],
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 

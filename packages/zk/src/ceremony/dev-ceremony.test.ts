@@ -20,6 +20,38 @@ describe("dev-ceremony", () => {
     expect(isProductionNetwork("testnet")).toBe(false);
   });
 
+  it("should_identify_a_custom_named_network_with_the_public_passphrase_as_production", () => {
+    const pubnet = {
+      rpcUrl: "https://rpc.example.com",
+      networkPassphrase: "Public Global Stellar Network ; September 2015",
+    };
+    const testnet = {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    };
+
+    expect(isProductionNetwork("pubnet", pubnet)).toBe(true);
+    expect(isProductionNetwork("testnet", testnet)).toBe(false);
+  });
+
+  it("should_block_a_custom_named_mainnet_when_dev_manifest_exists", async () => {
+    await mkdir(tmpRoot, { recursive: true });
+    await writeDevCeremonyManifest(tmpRoot);
+
+    await expect(
+      assertDevCeremonyAllowed({
+        networkName: "production",
+        networkConfig: {
+          rpcUrl: "https://rpc.example.com",
+          networkPassphrase: "Public Global Stellar Network ; September 2015",
+        },
+        artifactsDir: tmpRoot,
+        allowDevCeremony: false,
+        operation: "ctg deploy verifier",
+      })
+    ).rejects.toMatchObject({ code: "ZK_DEV_CEREMONY_BLOCKED" });
+  });
+
   it("should_write_and_read_dev_ceremony_manifest", async () => {
     await mkdir(tmpRoot, { recursive: true });
     await writeDevCeremonyManifest(tmpRoot);

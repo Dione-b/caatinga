@@ -2,16 +2,13 @@ import { createCaatingaClient } from "@caatinga/client";
 import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import artifactsJson from "../caatinga.artifacts.json";
 import * as Counter from "./contracts/generated/counter";
+import { appNetwork } from "./network.js";
 import { stellarWalletAdapter } from "./wallet.js";
 
 const artifacts = artifactsJson as CaatingaArtifacts;
 
 export const caatingaClient = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
+  network: appNetwork,
   artifacts,
   wallet: stellarWalletAdapter,
   contracts: {

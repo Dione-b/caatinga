@@ -1,5 +1,43 @@
 # counter-web
 
+## 0.0.30
+
+### Patch Changes
+
+- Updated dependencies [17c6027]
+- Updated dependencies [fae498d]
+- Updated dependencies [cae6cac]
+- Updated dependencies [88ba40f]
+- Updated dependencies [e31535a]
+  - @caatinga/core@3.11.0
+  - @caatinga/client@3.11.0
+
+## 0.0.29
+
+### Patch Changes
+
+- Updated dependencies [292986b]
+  - @caatinga/core@3.10.3
+  - @caatinga/client@3.10.3
+
+## 0.0.28
+
+### Patch Changes
+
+- Updated dependencies [d419145]
+  - @caatinga/core@3.10.2
+  - @caatinga/client@3.10.2
+
+## 0.0.27
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [84a5940]
+- Updated dependencies [fd55695]
+  - @caatinga/core@3.10.1
+  - @caatinga/client@3.10.1
+
 ## 0.0.26
 
 ### Patch Changes

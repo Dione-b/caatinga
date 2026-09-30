@@ -16,6 +16,12 @@ export interface CaatingaNetwork {
 export interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
   signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
+  /**
+   * Passphrase of the network the wallet is currently on, or `undefined` when the
+   * wallet cannot report it. When provided, `invoke` refuses to sign if it differs
+   * from `config.network.networkPassphrase` (`CAATINGA_WALLET_NETWORK_MISMATCH`).
+   */
+  getNetworkPassphrase?(): Promise<string | undefined>;
 }
 
 export interface CaatingaContractRegistration {

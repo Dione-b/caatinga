@@ -21,6 +21,13 @@ export default defineConfig({
   },
   frontend: {
     framework: "vite-react",
+    // Written on `ctg deploy` / `ctg sync-env`; read by src/network.ts.
+    envFile: ".env.local",
+    env: {
+      network: "VITE_CAATINGA_NETWORK",
+      rpcUrl: "VITE_CAATINGA_RPC_URL",
+      networkPassphrase: "VITE_CAATINGA_NETWORK_PASSPHRASE",
+    },
     bindingsOutput: "./src/contracts/generated",
   },
   postDeployRead: [

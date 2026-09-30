@@ -38,16 +38,28 @@ function formatConstructorCliArgsForEstimate(resolved: Record<string, DeployArgV
   return args.length > 0 ? ["--", ...args] : [];
 }
 
-function parseFeeStroops(output: string): { inclusion?: number; resource?: number } {
-  const inclusionMatch = output.match(/inclusion[_\s-]*fee[:\s]+(\d+)/i);
-  const resourceMatch = output.match(/resource[_\s-]*fee[:\s]+(\d+)/i);
-  const totalMatch = output.match(/total[_\s-]*fee[:\s]+(\d+)/i);
+type DecodedEnvelope = {
+  tx?: { tx?: { fee?: number | string; ext?: { v1?: { resource_fee?: number | string } } } };
+};
 
-  return {
-    inclusion: inclusionMatch ? Number(inclusionMatch[1]) : undefined,
-    resource: resourceMatch ? Number(resourceMatch[1]) : undefined,
-    ...(totalMatch && !resourceMatch ? { resource: Number(totalMatch[1]) } : {}),
-  };
+/**
+ * `stellar tx simulate` prints the assembled envelope (base64 XDR), not a fee summary.
+ * Its `fee` is inclusion + resource fee; `ext.v1.resource_fee` is the resource part.
+ */
+function parseFeeStroops(decodedJson: string): { inclusion?: number; resource?: number } {
+  let decoded: DecodedEnvelope;
+  try {
+    decoded = JSON.parse(decodedJson) as DecodedEnvelope;
+  } catch {
+    return {};
+  }
+  const tx = decoded.tx?.tx;
+  const total = tx?.fee === undefined ? NaN : Number(tx.fee);
+  const resource = tx?.ext?.v1?.resource_fee === undefined ? NaN : Number(tx.ext.v1.resource_fee);
+  if (!Number.isFinite(total) || !Number.isFinite(resource) || resource > total) {
+    return {};
+  }
+  return { inclusion: total - resource, resource };
 }
 
 export async function estimateDeployCost(
@@ -111,8 +123,16 @@ export async function estimateDeployCost(
     throw error;
   }
 
-  const simulateArgs = ["tx", "simulate", "--source-account", source, buildOutput];
+  const simulateArgs = [
+    "tx",
+    "simulate",
+    "--source-account",
+    source,
+    ...buildStellarNetworkArgs(network),
+    buildOutput,
+  ];
   let simulateOutput = "";
+  let decodedOutput = "";
   let simulationError: string | undefined;
 
   try {
@@ -121,22 +141,30 @@ export async function estimateDeployCost(
       failureCode: CaatingaErrorCode.ESTIMATE_FAILED,
       timeout: TRANSACTION_TIMEOUT_MS,
     });
-    simulateOutput = simulateResult.all || `${simulateResult.stdout}\n${simulateResult.stderr}`;
+    simulateOutput = simulateResult.stdout.trim();
+    const decodeResult = await runCommand(
+      "stellar",
+      ["tx", "decode", "--output", "json", simulateOutput],
+      { cwd, failureCode: CaatingaErrorCode.ESTIMATE_FAILED }
+    );
+    decodedOutput = decodeResult.stdout.trim();
   } catch (error) {
     simulationError = error instanceof Error ? error.message : String(error);
-    simulateOutput = "";
   }
 
-  const parsed = parseFeeStroops(simulateOutput);
+  const parsed = parseFeeStroops(decodedOutput);
   const resourceFeeStroops = parsed.resource;
   const inclusionFeeStroops = parsed.inclusion;
   const totalFeeStroops =
-    inclusionFeeStroops === undefined ? undefined : inclusionFeeStroops + (resourceFeeStroops ?? 0);
+    inclusionFeeStroops === undefined || resourceFeeStroops === undefined
+      ? undefined
+      : inclusionFeeStroops + resourceFeeStroops;
   const simulation =
     simulationError || inclusionFeeStroops === undefined
       ? {
           ok: false as const,
-          error: simulationError ?? "Simulation output did not contain a parseable inclusion fee.",
+          error:
+            simulationError ?? "Simulation output did not contain a parseable transaction fee.",
         }
       : { ok: true as const };
   const rawOutput = [buildOutput, simulateOutput, simulation.ok ? "" : simulation.error]
@@ -153,7 +181,7 @@ export async function estimateDeployCost(
     simulation,
     advisory: simulation.ok
       ? "Advisory estimate only — actual fees may differ under network congestion or contract complexity."
-      : "Fee estimate unavailable — simulation did not produce a parseable inclusion fee.",
+      : "Fee estimate unavailable — simulation did not produce a parseable transaction fee.",
     rawOutput,
   };
 }

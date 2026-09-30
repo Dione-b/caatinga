@@ -57,6 +57,7 @@ export function registerZkInvokeCommand(program: Command): void {
           // reports CAATINGA_ZK_DEV_CEREMONY_BLOCKED rather than a confirmation error.
           await assertDevCeremonyAllowed({
             networkName,
+            networkConfig,
             artifactsDir: zkArtifactsDir(name),
             allowDevCeremony: Boolean(options.allowDevCeremony),
             operation: `ctg zk invoke ${name}`,

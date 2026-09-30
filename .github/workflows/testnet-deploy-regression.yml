@@ -27,7 +27,7 @@ jobs:
           cache: pnpm
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.91.0
+        uses: dtolnay/rust-toolchain@1.91.1
         with:
           targets: wasm32v1-none
 

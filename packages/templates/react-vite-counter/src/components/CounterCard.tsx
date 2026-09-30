@@ -3,6 +3,7 @@ import { caatingaClient } from "../caatinga.js";
 import { formatCaatingaError } from "@caatinga/core/browser";
 import { useWallet } from "@caatinga/client/react";
 import { LoadingModal } from "./LoadingModal.js";
+import { appNetwork } from "../network.js";
 
 export function CounterCard() {
   const { publicKey } = useWallet();
@@ -75,7 +76,7 @@ export function CounterCard() {
           <p className="eyebrow">Counter Contract</p>
           <h2 id="counter-title">Counter</h2>
         </div>
-        <span className="network-pill">testnet</span>
+        <span className="network-pill">{appNetwork.name}</span>
       </div>
 
       <div className="counter-value">{formattedCount}</div>

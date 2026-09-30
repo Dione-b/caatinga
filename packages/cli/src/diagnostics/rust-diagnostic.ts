@@ -1,4 +1,8 @@
-import { CURRENT_RUST_WASM_TARGET, RUST_MIN_VERSION } from "@caatinga/core/runtime/requirements";
+import {
+  CURRENT_RUST_WASM_TARGET,
+  RUST_BLOCKED_VERSIONS,
+  RUST_MIN_VERSION,
+} from "@caatinga/core/runtime/requirements";
 import { isCargoBinMissingFromPath, runCommand } from "@caatinga/core";
 import { compareSemverVersions } from "../utils/semver-compare.js";
 import type { Diagnostic } from "./types.js";
@@ -14,6 +18,14 @@ export function parseRustcVersion(output: string): string | undefined {
   return RUSTC_VERSION_PATTERN.exec(output)?.[1];
 }
 
+/** Whether `stellar contract build` rejects this toolchain version. */
+function isBlockedRustVersion(version: string): boolean {
+  const [major, minor, patch] = version.split(/[.-]/);
+  return RUST_BLOCKED_VERSIONS.some(
+    (blocked) => blocked === `${major}.${minor}` || blocked === `${major}.${minor}.${patch}`
+  );
+}
+
 export async function rustDiagnostic(): Promise<Diagnostic> {
   try {
     const result = await runCommand("rustc", ["--version"]);
@@ -23,6 +35,16 @@ export async function rustDiagnostic(): Promise<Diagnostic> {
     // `RUST_MIN_VERSION` is the minimum toolchain the Soroban wasm target is
     // built and tested against; flag older versions with an actionable fix
     // instead of reporting a bare "Rust installed".
+    // Checked before the minimum so an in-range but rejected release (1.91.0)
+    // gets the specific reason rather than passing.
+    if (version !== undefined && isBlockedRustVersion(version)) {
+      return {
+        ok: false,
+        label: `Rust ${version} is rejected by stellar contract build`,
+        fix: `Use Rust ${RUST_MIN_VERSION} or newer: rustup update stable`,
+      };
+    }
+
     if (version !== undefined && compareSemverVersions(version, RUST_MIN_VERSION) === -1) {
       return {
         ok: false,

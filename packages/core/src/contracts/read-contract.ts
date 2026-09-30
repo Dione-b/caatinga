@@ -44,7 +44,7 @@ export async function readContract(options: ReadContractOptions) {
 
   await checkBinary("stellar", "Install Stellar CLI before running ctg read.");
 
-  const source = resolveCliSource(options.source);
+  const source = resolveCliSource(options.source, { network });
   let cliArgs = await resolveCliMethodArgs(options.args ?? [], {
     source,
     cwd,

@@ -79,6 +79,10 @@ describe("zk invoke command", () => {
 
     expect(assertDevCeremonyAllowedMock).toHaveBeenCalledWith({
       networkName: "testnet",
+      networkConfig: {
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        networkPassphrase: "Test SDF Network ; September 2015",
+      },
       artifactsDir: ".artifacts/zk/main",
       allowDevCeremony: false,
       operation: "ctg zk invoke main",

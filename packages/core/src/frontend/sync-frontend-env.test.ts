@@ -90,6 +90,35 @@ describe("syncFrontendEnv", () => {
     expect(contents).toContain('VITE_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"');
   });
 
+  it("writes the resolved network name for the network source key", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-sync-env-"));
+    tempDirs.push(cwd);
+    await writeArtifacts(
+      {
+        project: "stellar-album",
+        version: 1,
+        networks: { testnet: { contracts: {}, dependencyGraph: {} } },
+      },
+      cwd
+    );
+
+    const result = await syncFrontendEnv({
+      config: {
+        ...config,
+        frontend: {
+          framework: "vite-react",
+          bindingsOutput: "./frontend/src/contracts",
+          envFile: "./frontend/.env.local",
+          env: { network: "VITE_CAATINGA_NETWORK" },
+        },
+      },
+      cwd,
+    });
+
+    expect(result.entries).toEqual([{ key: "VITE_CAATINGA_NETWORK", value: "testnet" }]);
+    expect(await readFile(result.envFile, "utf8")).toBe("VITE_CAATINGA_NETWORK=testnet\n");
+  });
+
   it("writes wasmHash values when source key uses .wasmHash suffix", async () => {
     const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-sync-env-"));
     tempDirs.push(cwd);

@@ -1,5 +1,55 @@
 ## Breaking changes policy
 
+## 3.11.0
+
+### Patch Changes
+
+- d2a9ed2: `ctg ci run` now re-runs the installed `ctg` binary for doctor and smoke instead of `./dist/index.js` / `pnpm dev`, so it works in user projects; a failing step stops the recipe and its exit code is propagated (#232).
+- 17c6027: `ctg estimate deploy` now simulates against the selected network and reads fees from the simulated envelope (`fee` minus `resource_fee` for inclusion), so estimates are produced and no longer double-count (#225).
+- cae6cac: Point package `homepage` to https://caatinga.xyz.
+- c8bd84b: `ctg identity export` now writes only the base64 archive to stdout; status goes to stderr, so `ctg identity export > id.b64` round-trips through `ctg identity import` (#227).
+- 88ba40f: `frontend.env` accepts a `network` source key (writes the resolved network name). The `react-vite-counter` and `zk-starter` templates now read network name, RPC and passphrase from `VITE_CAATINGA_*` (written to `.env.local` by `ctg deploy` / `ctg sync-env`) for the client, the wallet network and the artifacts lookup, defaulting to testnet when unset (#229).
+- Updated dependencies [17c6027]
+- Updated dependencies [cae6cac]
+- Updated dependencies [88ba40f]
+- Updated dependencies [e31535a]
+  - @caatinga/core@3.11.0
+  - @caatinga/zk@3.11.0
+
+## 3.10.3
+
+### Patch Changes
+
+- 292986b: Mainnet fixes from the readiness audit:
+
+  - **Mainnet commands use the configured RPC** (#224). Configs matching the well-known mainnet network were passed to the Stellar CLI as `--network mainnet`, whose built-in entry has no RPC URL ("Bring Your Own"), so `read`, `invoke`, `deploy`, `upgrade` and friends failed on mainnet or silently used a locally added network. Mainnet now always gets explicit `--rpc-url` / `--network-passphrase` from `caatinga.config.ts`. Testnet keeps the `--network testnet` shorthand.
+  - **No implicit `alice` on mainnet** (#226). `ctg read` and `ctg smoke` no longer fall back to the built-in `alice` identity on mainnet (by name or passphrase); pass `--source` or set `CAATINGA_SOURCE`, otherwise `CAATINGA_SOURCE_ACCOUNT_REQUIRED` is raised. `describeCliSource` / `resolveCliSource` accept an optional `{ network }`.
+  - **ZK dev-ceremony block detects mainnet by passphrase** (#228). `ctg zk build`, `ctg zk invoke` and verifier `ctg deploy` now block single-party dev-ceremony artifacts on a mainnet network with a custom name (e.g. `pubnet`). `isProductionNetwork` and `assertDevCeremonyAllowed` accept an optional network config.
+
+- Updated dependencies [292986b]
+  - @caatinga/core@3.10.3
+  - @caatinga/zk@3.10.3
+
+## 3.10.2
+
+### Patch Changes
+
+- d419145: `ctg doctor` now fails the Rust check for toolchains that `stellar contract build` refuses (1.81.x, 1.82.x, 1.83.x and 1.91.0) instead of reporting them as OK, and `RUST_MIN_VERSION` is raised to 1.91.1. Templates and scaffolds declare `rust-version = "1.91.1"`. Exposes `RUST_BLOCKED_VERSIONS` from `@caatinga/core/runtime/requirements`.
+- Updated dependencies [d419145]
+  - @caatinga/core@3.10.2
+  - @caatinga/zk@3.10.2
+
+## 3.10.1
+
+### Patch Changes
+
+- `ctg doctor` now fails the Rust check when the installed toolchain is older than `RUST_MIN_VERSION` (1.91.0), suggesting `rustup update stable`. The wasm target constants moved to a dependency-free module so `@caatinga/core/runtime/requirements` no longer pulls in `node:crypto` / `node:fs`.
+- Updated dependencies
+- Updated dependencies [84a5940]
+- Updated dependencies [fd55695]
+  - @caatinga/core@3.10.1
+  - @caatinga/zk@3.10.1
+
 ## 3.10.0
 
 ### Minor Changes

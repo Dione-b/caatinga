@@ -27,7 +27,7 @@ Caatinga Doctor
 
 ✓ Node.js 22
 ✓ Stellar CLI 28.0.0
-✓ Rust 1.91.0
+✓ Rust 1.91.1
 ✓ wasm32v1-none target installed
 ✓ caatinga.config.ts found
 ✓ caatinga.artifacts.json found

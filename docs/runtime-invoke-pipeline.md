@@ -39,11 +39,15 @@ const val = await client.myContract.read("balance", { address });
 interface CaatingaWalletAdapter {
   getPublicKey(): Promise<string>;
   signTransaction(input: { xdr: string; networkPassphrase: string }): Promise<string>;
+
+  /** Optional: the wallet's current network passphrase, or undefined if unknown. */
+  getNetworkPassphrase?(): Promise<string | undefined>;
 }
 ```
 
 **Contract rules:**
 
+- Optional `getNetworkPassphrase()`: when it resolves to a passphrase different from the configured network, `invoke()` throws `CAATINGA_WALLET_NETWORK_MISMATCH` before building the transaction.
 - `getPublicKey()` must resolve to a valid Ed25519 public key (G-prefixed Stellar address).
 - `signTransaction()` must resolve to a Base64-encoded signed XDR string.
 - Both methods **must reject** (not leave the promise pending) when the user cancels or when the wallet is not connected.

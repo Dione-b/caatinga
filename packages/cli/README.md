@@ -17,7 +17,7 @@ Run `ctg doctor` on a fresh machine to verify prerequisites. Manual requirements
 
 - Node.js `>=22`
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli/stellar-cli) `>=23.0.0` on `PATH` (28.0.0 recommended)
-- Rust 1.91.0+ with the `wasm32v1-none` target
+- Rust 1.91.1+ with the `wasm32v1-none` target
 - A funded local Stellar CLI identity for `deploy` and `invoke` (e.g. `alice`)
 
 ## Quick start
