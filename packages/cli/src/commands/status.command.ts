@@ -39,7 +39,10 @@ export function registerStatusCommand(program: Command): void {
     .description("Show deployed contracts and binding freshness per network")
     .option("-n, --network <network>", "Configured network name")
     .option("--json", "Print machine-readable JSON instead of the table")
-    .option("--strict", "Exit with code 1 when any deployed contract has stale or missing bindings")
+    .option(
+      "--strict",
+      "Exit with code 1 when any deployed contract has bindings that are not fresh (stale, missing, or unknown)"
+    )
     .action((options: { network?: string; json?: boolean; strict?: boolean }) =>
       runCliAction(async () => {
         const config = await loadConfig();

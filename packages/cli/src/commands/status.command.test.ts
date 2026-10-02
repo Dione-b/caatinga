@@ -153,6 +153,47 @@ describe("status command", () => {
     }
   });
 
+  it("exits_with_code_1_when_strict_and_deployed_bindings_are_unknown", async () => {
+    process.exitCode = undefined;
+    collectProjectStatusMock.mockResolvedValue({
+      ...status,
+      networks: [
+        {
+          ...status.networks[0],
+          contracts: [
+            {
+              ...status.networks[0].contracts[0],
+              bindings: {
+                ...status.networks[0].contracts[0].bindings,
+                status: "unknown",
+                reason: "binding marker could not be read",
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status", "--strict"]);
+
+      expect(process.exitCode).toBe(1);
+    } finally {
+      logSpy.mockRestore();
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("documents_every_non_fresh_status_in_the_strict_help", () => {
+    const strict = createStatusProgram()
+      .commands.find((command) => command.name() === "status")
+      ?.options.find((option) => option.long === "--strict");
+
+    expect(strict?.description).toMatch(/not fresh \(stale, missing, or unknown\)/);
+  });
+
   it("does_not_exit_when_strict_and_only_undeployed_contracts_are_stale", async () => {
     process.exitCode = undefined;
     collectProjectStatusMock.mockResolvedValue({
