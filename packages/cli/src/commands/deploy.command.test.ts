@@ -216,6 +216,28 @@ describe("deploy command", () => {
     }
   });
 
+  it("runs_wiring_on_full_deploy_when_only_postDeployRead_is_configured", async () => {
+    const configWithReadHooks: CaatingaConfig = {
+      ...config,
+      postDeployRead: [{ contract: "counter", method: "get", args: {}, kind: "read" }],
+    };
+    loadConfigMock.mockResolvedValue(configWithReadHooks);
+    runPostDeployHooksMock.mockResolvedValue([{ contract: "counter", method: "get" }]);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createDeployProgram().parseAsync(["node", "caatinga", "deploy", "--source", "alice"]);
+
+      expect(runPostDeployHooksMock).toHaveBeenCalledWith(
+        expect.objectContaining({ config: configWithReadHooks, source: "alice" })
+      );
+      const logOutput = logSpy.mock.calls.map((call) => call[0]).join("\n");
+      expect(logOutput).toContain("Wire complete");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
   it("skips bindings when project has no frontend configured", async () => {
     const minimalConfig: CaatingaConfig = {
       project: "minimal-app",
