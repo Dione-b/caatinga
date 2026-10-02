@@ -21,12 +21,21 @@ restore_archive() {
   local archive_flags="$1"
   tar "$archive_flags" "$payload_file" -C "$extract_dir"
 
-  if [[ ! -d "$extract_dir/.config" ]]; then
-    echo "Decoded CAATINGA_CI_STELLAR_CONFIG_B64 archive must contain a .config/ directory." >&2
-    exit 1
+  # Layout 1: `.config/stellar` (+ legacy `.config/soroban`), built by hand.
+  if [[ -d "$extract_dir/.config" ]]; then
+    cp -R "$extract_dir/.config/." "$config_root/"
+    return
   fi
 
-  cp -R "$extract_dir/.config/." "$config_root/"
+  # Layout 2: the contents of the Stellar config directory, as written by `ctg identity export`.
+  if [[ -d "$extract_dir/identity" || -f "$extract_dir/config.toml" ]]; then
+    mkdir -p "${config_root}/stellar"
+    cp -R "$extract_dir/." "${config_root}/stellar/"
+    return
+  fi
+
+  echo "Decoded CAATINGA_CI_STELLAR_CONFIG_B64 archive must contain a .config/ directory or a Stellar config directory (identity/ or config.toml), as produced by 'ctg identity export'." >&2
+  exit 1
 }
 
 if tar -tzf "$payload_file" >/dev/null 2>&1; then
@@ -42,6 +51,8 @@ if [[ -f "${config_root}/stellar/config.toml" ]]; then
   chmod 600 "${config_root}/stellar/config.toml"
 fi
 
-if [[ -d "${config_root}/soroban/identity" ]]; then
-  find "${config_root}/soroban/identity" -type f -name '*.toml' -exec chmod 600 {} +
-fi
+for identity_dir in "${config_root}/stellar/identity" "${config_root}/soroban/identity"; do
+  if [[ -d "$identity_dir" ]]; then
+    find "$identity_dir" -type f -name '*.toml' -exec chmod 600 {} +
+  fi
+done
