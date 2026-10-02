@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
+import { CURRENT_ARTIFACTS_SCHEMA_VERSION } from "../artifacts/artifact.schema.js";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { createProjectFromTemplate } from "./create-project-from-template.js";
 
@@ -74,7 +75,7 @@ describe("createProjectFromTemplate", () => {
       >;
     };
     expect(artifacts.project).toBe("my-dapp");
-    expect(artifacts.version).toBe(1);
+    expect(artifacts.version).toBe(CURRENT_ARTIFACTS_SCHEMA_VERSION);
     expect(artifacts.networks.testnet).toBeDefined();
     expect(artifacts.networks.testnet.contracts).toEqual({});
     expect(artifacts.networks.testnet.dependencyGraph).toEqual({});
@@ -159,6 +160,59 @@ describe("createProjectFromTemplate", () => {
     expect(artifacts.networks.testnet.contracts).toEqual({});
     expect(artifacts.networks.testnet.dependencyGraph).toEqual({});
   });
+
+  it("should_migrate_v1_template_artifacts_to_the_current_schema", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));
+    const templateDir = path.join(tmpDir, "template");
+    const targetDir = path.join(tmpDir, "my-dapp");
+    await mkdir(templateDir);
+    await writeFile(
+      path.join(templateDir, "caatinga.template.json"),
+      JSON.stringify({
+        name: "v1-artifacts-template",
+        version: "0.1.0",
+        caatinga: { compatibleCore: "^3.0.0", templateVersion: 1 },
+        frontend: { framework: "vite-react", packageManager: "npm" },
+        contracts: { path: "contracts", default: "counter" },
+        files: { config: "caatinga.config.ts", artifacts: "caatinga.artifacts.json" },
+      }),
+      "utf8"
+    );
+    await writeFile(path.join(templateDir, "caatinga.config.ts"), "export default {};\n", "utf8");
+    await writeFile(
+      path.join(templateDir, "caatinga.artifacts.json"),
+      JSON.stringify({
+        project: "__PROJECT_NAME__",
+        version: 1,
+        networks: { testnet: { contracts: {}, dependencyGraph: {} } },
+      }),
+      "utf8"
+    );
+
+    await createProjectFromTemplate({ projectName: "my-dapp", targetDir, templateDir });
+
+    const artifacts = JSON.parse(
+      await readFile(path.join(targetDir, "caatinga.artifacts.json"), "utf8")
+    ) as { project: string; version: number; networks: Record<string, unknown> };
+
+    expect(artifacts.project).toBe("my-dapp");
+    expect(artifacts.version).toBe(CURRENT_ARTIFACTS_SCHEMA_VERSION);
+    expect(artifacts.networks.testnet).toEqual({ contracts: {}, dependencyGraph: {} });
+  });
+
+  it.each(["react-vite-counter", "zk-starter"])(
+    "should_ship_%s_artifacts_on_the_current_schema",
+    async (template) => {
+      const artifacts = JSON.parse(
+        await readFile(
+          path.resolve(__dirname, "../../../templates", template, "caatinga.artifacts.json"),
+          "utf8"
+        )
+      ) as { version: number };
+
+      expect(artifacts.version).toBe(CURRENT_ARTIFACTS_SCHEMA_VERSION);
+    }
+  );
 
   it("should_fail_when_template_manifest_is_missing", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-init-"));

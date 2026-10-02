@@ -1,6 +1,6 @@
 {
   "project": "__PROJECT_NAME__",
-  "version": 1,
+  "version": 2,
   "networks": {
     "testnet": {
       "contracts": {},
