@@ -42,8 +42,11 @@ export function walletStubViteAliases(stubsDir: string): Record<string, string> 
   };
 }
 
+// `packages: []` keeps pnpm 9 from aborting with "packages field missing or empty":
+// it treats any directory holding pnpm-workspace.yaml as a workspace root.
 export function walletStubPnpmWorkspaceYaml(): string {
-  return `allowBuilds:
+  return `packages: []
+allowBuilds:
   esbuild: true
 
 ignoredOptionalDependencies:

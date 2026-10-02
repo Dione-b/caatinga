@@ -227,7 +227,7 @@ export default defineConfig({
 Also apply install overrides:
 
 - npm `package.json`: merge `walletStubOverrides("./src/stubs")` into `overrides`
-- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`, then add `packages: []` at the top. The helper omits it, but pnpm 9 aborts on a `pnpm-workspace.yaml` without a `packages` field (both official templates include it)
+- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`. Its output starts with `packages: []`, which pnpm 9 requires; `@caatinga/client` 3.11.0 and earlier omit that line, so add it at the top on those versions
 
 Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `ctg init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
 
