@@ -10,7 +10,7 @@ This document details the specifications, behaviors, and transition rules for co
 
 - **Definition:** The initial upload and instantiation of a Soroban smart contract.
 - **Behavior:**
-  - Compiles the WASM binary (if necessary).
+  - Hashes the existing WASM file (deploy never builds; run `ctg build` first — a missing WASM fails with `CAATINGA_ARTIFACT_NOT_FOUND`).
   - Deploys the binary on-chain via the Stellar CLI.
   - Registers the new `contractId` and `wasmHash` inside `caatinga.artifacts.json`.
   - Resolves initialization arguments (`resolvedDeployArgs`).
@@ -21,10 +21,11 @@ This document details the specifications, behaviors, and transition rules for co
 - **Definition:** The update of a contract's backing WebAssembly byte-code on-chain without altering its address (`contractId`).
 - **Behavior:**
   - Uploads the new WASM binary to the network to obtain a new `wasmHash`.
-  - Invokes the contract's defined upgrade method (e.g., `upgrade`) with the new WASM hash using administrator authorization.
-  - Pushes the previous `contractId` and `wasmHash` version to the contract's `history` block in the artifacts file.
+  - Invokes the contract's `upgrade(new_wasm_hash)` entrypoint with the new WASM hash using administrator authorization (the method name is fixed in the CLI).
+  - Builds first unless `--no-build` is passed.
+  - Keeps the same `contractId` and appends the previous `wasmHash` to the contract's `history` block (reason `upgrade`, `upgradeType: "in-place"`).
   - Updates the active `wasmHash` and compilation metadata under the current contract entry.
-- **Triggers:** `ctg upgrade <contractName> --method <upgradeMethodName>`
+- **Triggers:** `ctg upgrade <contractName> --source <identity>` (see [CLI — upgrade](./cli.md))
 
 ### Redeploy
 
@@ -43,7 +44,7 @@ This document details the specifications, behaviors, and transition rules for co
   - Restores the matching contract state (contract ID, WASM hash, metadata) to the active contract entry.
   - Appends the superseded active instance to the `history` with reason `"rollback"`.
   - _Note:_ Rollback updates the local artifacts state registry. On-chain state restoration (e.g., re-running an on-chain upgrade to the old WASM hash) is an application concern.
-- **Triggers:** `ctg rollback <contractName> --target <previousContractId>`
+- **Triggers:** `ctg rollback <contractName> --to <previousContractId>`
 
 ---
 
@@ -53,12 +54,21 @@ This document details the specifications, behaviors, and transition rules for co
 
 - **Purpose:** Bypasses state check optimizations.
 - **Behavior:**
-  - By default, Caatinga skips deployment or builds if the local WASM hash matches the registry (`ifChanged` strategy).
-  - Activating `--force` overrides this check, forcing a fresh compile, upload, and deployment transaction, pushing the current registry state to the history.
+  - By default, `ctg deploy` skips any contract that already has a `contractId` in the artifacts for that network (`[skipped]`), regardless of the WASM hash.
+  - `--force` redeploys anyway: it uploads and instantiates the current WASM (no compile step) and pushes the previous instance to `history`.
 
 ### If Changed (`--if-changed`)
 
 - **Purpose:** Optimizes CI/CD pipelines and local DX by avoiding redundant deploy transactions.
 - **Behavior:**
   - Compares the SHA-256 hash of the compiled WASM binary with the `wasmHash` stored in the current network scope of `caatinga.artifacts.json`.
-  - If the hashes match, the deployment is skipped, returning the existing deployment information without sending transactions to the network.
+  - If the hashes match, the deployment is skipped (`[skipped] unchanged`) without sending transactions to the network.
+  - If they differ, Caatinga redeploys a **new instance** (new `contractId`) and records the previous one in `history`. Use `ctg upgrade --if-changed` for in-place replacement.
+
+### Dry run (`--dry-run`)
+
+- Estimates the deploy fee via simulation without submitting (same as `ctg estimate deploy`).
+
+### Mainnet confirmation (`-y, --yes`)
+
+- On mainnet (or a network with `requireConfirmation: true`), `deploy` and `upgrade` prompt before submitting. `-y, --yes` skips the prompt for CI.

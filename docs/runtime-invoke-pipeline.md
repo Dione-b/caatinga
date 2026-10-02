@@ -17,17 +17,25 @@ The Caatinga Runtime lives in `@caatinga/client` and is responsible for the enti
 
 ### Minimal API
 
-The runtime exposes a single `createCaatingaClient(config)` factory that returns a typed proxy client per contract name:
+The runtime exposes a single `createCaatingaClient(config)` factory. `client.contract(name)` returns
+the client for one configured contract:
 
 ```ts
 const client = createCaatingaClient(config);
+const token = client.contract("token");
 
 // State-changing call (sign + submit):
-await client.myContract.invoke("transfer", { to, amount });
+await token.invoke("transfer", { to, amount });
 
-// Read-only call (simulate only):
-const val = await client.myContract.read("balance", { address });
+// Read-only call (simulate only, returns the decoded value):
+const val = await token.read<bigint>("balance", { address });
+
+// Read-only call with metadata ({ status: "simulated", result, contractId, ... }):
+const sim = await token.simulate<bigint>("balance", { address });
 ```
+
+See [Client](./client.md) for the full config, including the `as CaatingaArtifacts` cast for the
+imported artifacts JSON.
 
 ---
 
@@ -55,7 +63,7 @@ interface CaatingaWalletAdapter {
 
 ### Built-in Adapters
 
-Adapters for Freighter, Stellar Wallets Kit, and SWKKit are available in `packages/client/src/adapters/`.
+Two adapters ship in `packages/client/src/adapters/`: Freighter (`@caatinga/client/freighter`) and Stellar Wallets Kit (`@caatinga/client/stellar-wallets-kit`). See [Wallets](./wallets.md).
 
 ---
 
@@ -66,23 +74,28 @@ The full lifecycle of a state-changing transaction is:
 ```
 invoke()
   │
-  ├─ 1. getPublicKey()     ← wallet adapter
-  ├─ 2. createClient()     ← binding adapter (Stellar SDK contract client)
-  ├─ 3. callMethod()       ← binding adapter (assembles the AssembledTransaction)
+  ├─ 1. getNetworkPassphrase() ← wallet adapter (optional; mismatch → WALLET_NETWORK_MISMATCH)
+  ├─ 2. getPublicKey()     ← wallet adapter
+  ├─ 3. createClient()     ← binding adapter (Stellar SDK contract client)
+  ├─ 4. callMethod()       ← binding adapter (assembles the AssembledTransaction)
   │
-  ├─ 4. buildXdr()         ← prepares & simulates via RPC (Soroban prepareTransaction)
+  ├─ 5. buildXdr()         ← prepares & simulates via RPC (Soroban prepareTransaction)
   │       └─ simulate  ──→ rpcUrl (Soroban RPC)
   │
-  ├─ 5. signTransaction()  ← wallet adapter (user approves in wallet UI)
+  ├─ 6. signTransaction()  ← wallet adapter (user approves in wallet UI)
   │
-  ├─ 6. submitTransaction() ← Stellar SDK signAndSend() via RPC
+  ├─ 7. submitTransaction() ← Stellar SDK signAndSend() via RPC
   │       └─ submit    ──→ rpcUrl (Soroban RPC)
   │       └─ watch     ──→ polls until COMPLETE or FAILED
   │
-  └─ 7. normalizeSubmitResult() → CaatingaInvokeResult<T>
+  └─ 8. normalizeSubmitResult() → CaatingaInvokeResult<T>
 ```
 
-For read-only calls (`simulate` / `read`), only steps 1–4 run; signing and submission are skipped.
+Read-only calls (`simulate` / `read`) do **not** require a connected wallet. They skip the network
+check, signing, and submission, and simulate with `prepareReadTransaction` using this source account,
+in order: the per-call `sourceAccount` option, the connected wallet's public key (if available),
+`CaatingaClientConfig.readSourceAccount`, then a built-in default account. `simulate` returns
+`{ status: "simulated", result, ... }`; `read` returns only `result`.
 
 ### Status Progression
 
@@ -122,10 +135,15 @@ call with `debugRaw`.
 
 ### Error Codes
 
-| Situation                              | CaatingaErrorCode      |
-| -------------------------------------- | ---------------------- |
-| Wallet not connected / key unavailable | `WALLET_NOT_CONNECTED` |
-| User dismissed signing                 | `XDR_SIGN_FAILED`      |
-| Empty or invalid signed XDR            | `XDR_SIGN_FAILED`      |
-| Simulation failure                     | `XDR_PREPARE_FAILED`   |
-| Submission/network failure             | `XDR_SUBMIT_FAILED`    |
+| Situation                                                         | CaatingaErrorCode         |
+| ----------------------------------------------------------------- | ------------------------- |
+| Wallet not connected / key unavailable                            | `WALLET_NOT_CONNECTED`    |
+| User dismissed signing                                            | `XDR_SIGN_FAILED`         |
+| Empty or invalid signed XDR                                       | `XDR_SIGN_FAILED`         |
+| Simulation failure                                                | `XDR_PREPARE_FAILED`      |
+| Submission/network failure                                        | `XDR_SUBMIT_FAILED`       |
+| Wallet did not answer within `walletTimeout`                      | `WALLET_TIMEOUT`          |
+| Wallet on a different network                                     | `WALLET_NETWORK_MISMATCH` |
+| Extra non-invoker auth signatures needed                          | `MULTI_AUTH_REQUIRED`     |
+| Simulation returned no result value                               | `READ_RESULT_MISSING`     |
+| Contract returned an error result, or submit payload unrecognized | `XDR_RESULT_FAILED`       |

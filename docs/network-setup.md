@@ -6,17 +6,27 @@ This guide describes how to configure Stellar and Soroban networks inside a Caat
 
 ## 1. Network Configuration in `caatinga.config.ts`
 
-Networks are declared inside the `networks` block of the configuration file. Each network can specify the RPC endpoint, network passphrase (which acts as a secure chain identifier), and optionally a friendbot URL for account funding.
+Networks are declared inside the `networks` block of the configuration file. Each network specifies
+the Soroban RPC endpoint and the network passphrase (which acts as a chain identifier). Unknown keys
+are dropped during config validation, and a missing or misspelled `networkPassphrase` fails with
+`CAATINGA_INVALID_CONFIG`.
 
-Here is the standard schema:
+Here is the schema:
 
 ```ts
 export type NetworkConfig = {
-  rpcUrl: string;
-  passphrase: string;
-  friendbotUrl?: string;
+  rpcUrl: string; // Soroban RPC URL
+  networkPassphrase: string;
+  requireConfirmation?: boolean; // prompt before mutating commands (always on for mainnet)
 };
 ```
+
+Mainnet always asks for interactive confirmation before `deploy`, `upgrade`, `invoke`, `wire`,
+`rollback`, `regression`, and `zk invoke`; pass `-y, --yes` to skip the prompt in CI. Set
+`requireConfirmation: true` to get the same prompt on any other network.
+
+Caatinga does not fund accounts. Create and fund a testnet identity with
+`stellar keys generate alice --fund --network testnet`.
 
 ---
 
@@ -27,15 +37,14 @@ export type NetworkConfig = {
 Use this for public staging, testing integrations, and deploying release candidates.
 
 - **Passphrase:** `Test SDF Network ; September 2015`
-- **friendbotUrl:** Available (allows funding accounts with 10,000 test XLM).
+- **Funding:** Friendbot via `stellar keys generate <alias> --fund --network testnet`.
 
 ```ts
 networks: {
   testnet: {
-    rpcUrl: "https://soroban-testnet.stellar.org:443",
-    passphrase: "Test SDF Network ; September 2015",
-    friendbotUrl: "https://friendbot.stellar.org"
-  }
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
 }
 ```
 
@@ -43,15 +52,17 @@ networks: {
 
 Use this only for production releases.
 
-- **Passphrase:** `Public Global Stellar Network ; October 2015`
-- **friendbotUrl:** None (requires real assets).
+- **Passphrase:** `Public Global Stellar Network ; September 2015`
+- **Funding:** None (requires real assets).
+- **RPC:** SDF does not run a public mainnet Soroban RPC. Use a provider you trust; the example
+  below is the default hint Caatinga prints. Mainnet commands always use the configured `rpcUrl`.
 
 ```ts
 networks: {
   mainnet: {
-    rpcUrl: "https://mainnet.stellar.org:443",
-    passphrase: "Public Global Stellar Network ; October 2015"
-  }
+    rpcUrl: "https://mainnet.sorobanrpc.com",
+    networkPassphrase: "Public Global Stellar Network ; September 2015",
+  },
 }
 ```
 
@@ -60,15 +71,15 @@ networks: {
 Use this for testing bleeding-edge Protocol features.
 
 - **Passphrase:** `Test SDF Future Network ; October 2022`
-- **friendbotUrl:** Available.
+- Stellar CLI has no `--network futurenet` shorthand, so Caatinga always passes the explicit RPC URL
+  and passphrase from this config.
 
 ```ts
 networks: {
   futurenet: {
-    rpcUrl: "https://rpc-futurenet.stellar.org:443",
-    passphrase: "Test SDF Future Network ; October 2022",
-    friendbotUrl: "https://friendbot-futurenet.stellar.org"
-  }
+    rpcUrl: "https://rpc-futurenet.stellar.org",
+    networkPassphrase: "Test SDF Future Network ; October 2022",
+  },
 }
 ```
 
@@ -76,15 +87,14 @@ networks: {
 
 Use this for rapid offline development.
 
-- **Setup Command:** Run a local Stellar Quickstart Docker container.
-- **Passphrase:** `Standalone Network ; Simple comparison`
+- **Setup Command:** Run a local Stellar Quickstart Docker container (`--local`).
+- **Passphrase:** `Standalone Network ; February 2017`
 
 ```ts
 networks: {
   local: {
     rpcUrl: "http://localhost:8000/soroban/rpc",
-    passphrase: "Standalone Network ; Simple comparison",
-    friendbotUrl: "http://localhost:8000/friendbot"
-  }
+    networkPassphrase: "Standalone Network ; February 2017",
+  },
 }
 ```

@@ -20,9 +20,12 @@ npx ctg deploy --network testnet --source alice
 
 ## Upgrade path
 
+`token` has no `upgrade(new_wasm_hash)` entrypoint, so use a redeploy-style upgrade. Redeploy the
+whole graph so `vault` picks up the new token `contractId`:
+
 ```bash
-npx ctg build token
-npx ctg upgrade token --network testnet --source alice
+npx ctg build
+npx ctg deploy --network testnet --source alice --upgrade
 ```
 
 ## Wire and smoke
