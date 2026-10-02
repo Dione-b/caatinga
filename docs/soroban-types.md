@@ -26,11 +26,19 @@ Generated bindings expose `Symbol` parameters as TypeScript `string`. The compil
 Validate user-facing strings before passing them to contract methods that expect `Symbol`:
 
 ```ts
-import { assertSorobanSymbol } from "@caatinga/core/browser";
+// ASCII letters, digits, and underscores; 1–32 characters.
+const SOROBAN_SYMBOL = /^[A-Za-z0-9_]{1,32}$/;
 
-assertSorobanSymbol(userInput, "label");
+if (!SOROBAN_SYMBOL.test(userInput)) {
+  throw new Error(`"${userInput}" is not a valid Soroban Symbol`);
+}
 await client.contract("token").invoke("mint", { label: userInput });
 ```
+
+`@caatinga/core/browser` exported an `assertSorobanSymbol` helper for this through 3.9.2; it was
+removed in 3.10.1. Caatinga still runs the same check internally on contract **method names**
+(`ctg invoke`, `ctg read`, `ctg upgrade`, and post-deploy hooks), failing with `CAATINGA_INVOKE_FAILED`, but it
+does not validate `Symbol` argument values for you.
 
 Caatinga does not rewrite the generated binding types (it only patches packaging and a browser `Buffer` polyfill). Add validation at your app boundary or normalize inputs (for example replace spaces with underscores) when that fits your contract design.
 
