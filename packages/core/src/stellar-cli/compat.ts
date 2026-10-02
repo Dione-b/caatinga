@@ -2,7 +2,11 @@ import semver from "semver";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { STELLAR_CLI_LAST_TESTED_VERSION, STELLAR_CLI_MIN_VERSION } from "./version.js";
 
-export { STELLAR_CLI_LAST_TESTED_VERSION, STELLAR_CLI_MIN_VERSION, parseStellarCliVersion } from "./version.js";
+export {
+  STELLAR_CLI_LAST_TESTED_VERSION,
+  STELLAR_CLI_MIN_VERSION,
+  parseStellarCliVersion,
+} from "./version.js";
 
 export type CompatibilityStatus = "supported" | "untested" | "unsupported";
 

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ContractArtifactHistoryEntrySchema,
-  ContractArtifactSchema,
-} from "./artifact.schema.js";
+import { ContractArtifactHistoryEntrySchema, ContractArtifactSchema } from "./artifact.schema.js";
 
 /** A well-formed contract strkey: `C` + 55 base32 (A-Z2-7) characters. */
 const VALID_CONTRACT_ID = `C${"A".repeat(55)}`;
@@ -45,11 +42,15 @@ describe("ContractArtifactSchema contractId/wasmHash validation", () => {
   });
 
   it("rejects a contractId with the wrong prefix (G instead of C)", () => {
-    expect(() => ContractArtifactSchema.parse(baseArtifact({ contractId: `G${"A".repeat(55)}` }))).toThrow();
+    expect(() =>
+      ContractArtifactSchema.parse(baseArtifact({ contractId: `G${"A".repeat(55)}` }))
+    ).toThrow();
   });
 
   it("rejects a contractId of the wrong length", () => {
-    expect(() => ContractArtifactSchema.parse(baseArtifact({ contractId: `C${"A".repeat(54)}` }))).toThrow();
+    expect(() =>
+      ContractArtifactSchema.parse(baseArtifact({ contractId: `C${"A".repeat(54)}` }))
+    ).toThrow();
     expect(() => ContractArtifactSchema.parse(baseArtifact({ contractId: "C123" }))).toThrow();
   });
 
@@ -73,7 +74,9 @@ describe("ContractArtifactSchema contractId/wasmHash validation", () => {
   });
 
   it("rejects a wasmHash of the wrong length", () => {
-    expect(() => ContractArtifactSchema.parse(baseArtifact({ wasmHash: "a".repeat(63) }))).toThrow();
+    expect(() =>
+      ContractArtifactSchema.parse(baseArtifact({ wasmHash: "a".repeat(63) }))
+    ).toThrow();
     expect(() => ContractArtifactSchema.parse(baseArtifact({ wasmHash: "abc" }))).toThrow();
   });
 
