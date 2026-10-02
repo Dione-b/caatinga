@@ -24,12 +24,12 @@ npx ctg doctor
 
 ## What gets generated
 
-| Path / file               | Purpose                                                            |
-| ------------------------- | ------------------------------------------------------------------ |
-| `caatinga.config.ts`      | Contract `app`, networks — **no** `frontend` block                 |
-| `caatinga.artifacts.json` | Empty testnet entry until deploy                                   |
-| `contracts/app/`          | Soroban stub: `hello()`, `version()`                               |
-| `package.json`            | Scripts: `build`, `deploy`, `doctor`, `read:hello`, `read:version` |
+| Path / file               | Purpose                                                                    |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `caatinga.config.ts`      | Contract `app`, networks — **no** `frontend` block                         |
+| `caatinga.artifacts.json` | Empty testnet entry until deploy                                           |
+| `contracts/app/`          | Soroban stub: `hello()`, `version()`                                       |
+| `package.json`            | Scripts: `build`, `deploy`, `doctor`, `test`, `read:hello`, `read:version` |
 
 **Not included:** `src/`, Vite, React, wallet stubs, or TypeScript bindings.
 
@@ -79,17 +79,17 @@ Soroban `Symbol` parameters are generated as TypeScript `string` values with hos
    }
    ```
 
-2. **Bindings** — `npx ctg deploy app` generates bindings automatically, or recover with:
+2. **Bindings** — `app` is already deployed, so `ctg deploy` would skip it and generate nothing. Generate bindings from the existing artifacts:
 
    ```bash
    npx ctg generate app --network testnet
    ```
 
-3. **Packages** — install `@caatinga/client`, `@caatinga/core`, and a wallet adapter (`@creit.tech/stellar-wallets-kit` or custom). See [Client](../client.md) and [Wallets](../wallets.md).
+3. **Packages** — install `@caatinga/client`, `@caatinga/core`, `@stellar/stellar-sdk` (required by the generated bindings), and a wallet adapter (`@creit.tech/stellar-wallets-kit` or custom). See [Client](../client.md) and [Wallets](../wallets.md).
 
-4. **Wiring** — keep a dedicated `src/caatinga.ts` with **static imports** of artifacts and generated bindings. Import that module from your UI. See [Project layout](../client.md#project-layout).
+4. **Wiring** — keep a dedicated `src/caatinga.ts` with **static imports** of artifacts and generated bindings (cast the JSON with `artifactsJson as CaatingaArtifacts`, type from `@caatinga/core/browser`). Import that module from your UI. See [Project layout](../client.md#project-layout).
 
-5. **Wallet stubs** — if you use Stellar Wallets Kit with Vite/webpack, apply helpers from `@caatinga/client/vite` (`walletStubViteAliases`, `walletStubOverrides`). Copy stub files from `react-vite-counter` or follow [Wallets — custom Vite projects](../wallets.md#custom-vite-projects).
+5. **Wallet stubs** — if you use Stellar Wallets Kit with Vite/webpack, apply helpers from `@caatinga/client/vite` (`walletStubViteAliases`, `walletStubOverrides`). Copy stub files from `react-vite-counter` or follow [Wallets — Adding SWK to a custom Vite app](../wallets.md#adding-swk-to-a-custom-vite-app).
 
 6. **Read vs invoke in the browser** — use `client.contract("app").read()` for getters; `invoke()` only for state-changing methods. See [Read and Simulate](../client.md#read-and-simulate).
 

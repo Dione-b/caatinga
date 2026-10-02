@@ -16,7 +16,7 @@ Subject: Quick question about your Caatinga usage
 Hi [name],
 
 I noticed you [starred @caatinga/cli / downloaded the package / opened an issue].
-I'm the maintainer and trying to understand real-world usage before v1.0.
+I'm the maintainer and trying to understand real-world usage of the v1.0 stable contract (npm 3.x).
 
 Would you have 5 minutes for three questions?
 
@@ -46,5 +46,6 @@ Thanks,
 ## What not to promise
 
 - Do not promise features on a specific date in outreach.
-- Do not imply mainnet readiness beyond the alpha status.
+- Do not imply mainnet readiness beyond what [production-readiness.md](../production-readiness.md) documents, and do not
+  present experimental surfaces (`ctg zk *`, `@caatinga/zk`) as stable.
 - Do not request private keys or deployment secrets.

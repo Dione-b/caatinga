@@ -31,6 +31,7 @@ Monorepo pnpm gerenciado por Turbo. Quatro pacotes principais sob `packages/`.
 ```
 @caatinga/cli ──────> @caatinga/core ──────> stellar CLI (subprocess externo)
                            │
+                           ├── exports ──> @caatinga/core/runtime/requirements (constantes Node/Rust, sem deps)
                            └── exports ──> @caatinga/core/browser (só errors + tipos de artifact)
                                                   │
                        @caatinga/client ──────────┘────> wallet extension (Freighter / Stellar Wallets Kit)
@@ -43,7 +44,7 @@ packages/templates ────> consumido por `ctg init`
 ### Regras de fronteira
 
 - **CLI depende de core. Nunca o inverso.**
-- **Apenas `@caatinga/core` fala com o binário `stellar`.** Todo uso de `execa` fica em core.
+- **Apenas `@caatinga/core` fala com o binário `stellar`.** A CLI só usa `execa` para ferramentas auxiliares (`npm`, `tar`, `pnpm`, re-invocação do próprio `ctg`).
 - `@caatinga/client` consome o subpath browser-safe `@caatinga/core/browser` (sem `execa`, sem módulos Node) para manter bundles Vite/webpack enxutos.
 - `@caatinga/client` não detém estado de wallet — compõe um adapter.
 
@@ -51,7 +52,7 @@ packages/templates ────> consumido por `ctg init`
 
 | Pacote               | Responsabilidade                                                                                                                                                                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@caatinga/cli`      | Parsing de argumentos, UX de terminal, diagnósticos `doctor`, delegação ao core. Sem orquestração de subprocess fora das APIs do core.                                                                                                            |
+| `@caatinga/cli`      | Parsing de argumentos, UX de terminal, diagnósticos `doctor`, delegação ao core. Orquestração da CLI Stellar sempre via APIs do core.                                                                                                             |
 | `@caatinga/core`     | Carrega `caatinga.config.ts`, valida schemas, resolve redes/contratos, lê/escreve `caatinga.artifacts.json`, roda a CLI Stellar via camada única de shell.                                                                                        |
 | `@caatinga/client`   | Client de browser/Node sobre bindings gerados, artifacts e wallet adapters. `invoke()`, `buildXdr()`, debug XDR explícito. Subpaths: `./react` (WalletProvider/useWallet), `./vite` (helpers de bundler), `./freighter`, `./stellar-wallets-kit`. |
 | `@caatinga/zk`       | Serialização de provas ZK, workflow Circom Groth16, args de binding para verificação on-chain. Subpath `./browser` para helpers de binding no browser.                                                                                            |
@@ -82,7 +83,14 @@ Cada subdiretório de `packages/core/src/` é uma camada com responsabilidade is
 | **config**                 | —                                                                                                                                                                                                    | Carrega e valida `caatinga.config.ts`.                                                            |
 | **templates**              | —                                                                                                                                                                                                    | Valida manifest `caatinga.template.json` (semver core ↔ template).                                |
 | **errors**                 | —                                                                                                                                                                                                    | Códigos `CAATINGA_*` centralizados (`CaatingaErrorCode`).                                         |
-| **runtime / release / ci** | —                                                                                                                                                                                                    | Utilidades de runtime, fluxo de release, checagens de CI.                                         |
+| **bindings**               | `binding-freshness.ts`, `binding-marker.ts`, `patch-generated-binding-package.ts`                                                                                                                    | Marcador e frescor dos bindings gerados; ajustes no pacote gerado.                                |
+| **stellar-sdk**            | `version.ts`, `compat.ts`, `check-stellar-sdk-version.ts`                                                                                                                                            | Contrato de versão do `@stellar/stellar-sdk` usado na geração de bindings.                        |
+| **frontend**               | `sync-frontend-env.ts`, `evaluate-env-drift.ts`, `bindings-config-hint.ts`, `ensure-buffer-dependency.ts`                                                                                            | Sync de env do frontend (`ctg sync-env`) e detecção de drift.                                     |
+| **scaffold**               | `create-minimal-project.ts`, `create-zk-project.ts`                                                                                                                                                  | Scaffolds `init --minimal` e ZK.                                                                  |
+| **soroban**                | `assert-soroban-symbol.ts`                                                                                                                                                                           | Validação de símbolos Soroban.                                                                    |
+| **public-api**             | `tier1-client-exports.ts`                                                                                                                                                                            | Manifesto dos exports Tier 1 (ver `docs/public-api.md`).                                          |
+| **compat / recovery**      | — (só testes)                                                                                                                                                                                        | Snapshots de exports e cenários de recuperação de deploy.                                         |
+| **runtime / release / ci** | `runtime/requirements.ts`                                                                                                                                                                            | Requisitos de toolchain (subpath `./runtime/requirements`), testes de release, checagens de CI.   |
 
 ### O que pode e o que não pode abstrair
 
@@ -167,7 +175,7 @@ createCaatingaClient(...)
                                    → transaction-submit
 ```
 
-- `client/build-xdr.ts` + opções de debug expõem o XDR explicitamente para depuração.
+- `xdr/build-xdr.ts` (em `packages/client/src/`) + opções de debug expõem o XDR explicitamente para depuração.
 - `bindings/default-binding-adapter.ts` casa os bindings TypeScript gerados com o client.
 - `client/invoke-args.ts` resolve argumentos de invocação.
 
@@ -204,13 +212,15 @@ const next = await client.contract("counter").invoke<number>("increment");
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `ctg init <dir>`                                             | Cria projeto a partir de template (valida manifest).                                                       |
 | `ctg doctor [--network] [--source]`                          | Checa Node, Stellar CLI, Rust, config, artifacts, rede e identidade de source. Exibe warnings.             |
-| `ctg build [contract]`                                       | Compila WASM do contrato (default: `counter`).                                                             |
+| `ctg build [contract]`                                       | Compila WASM do contrato; sem nome, compila todos os contratos configurados.                               |
 | `ctg deploy [contract] --source <id> --network <net>`        | Faz deploy, grava `contractId` nos artifacts e gera bindings automaticamente (`--no-generate` para pular). |
 | `ctg generate [contract] --network <net>`                    | (Re)gera bindings TypeScript; sem nome, regenera todos os contratos implantados.                           |
 | `ctg status [--network <net>] [--json]`                      | Tabela por rede: contratos implantados, hashes e frescor dos bindings.                                     |
 | `ctg invoke <contract.method> --source <id> --network <net>` | Invoca método do contrato que altera estado.                                                               |
 | `ctg read <contract.method> [--network <net>]`               | Simula método read-only (sem assinatura).                                                                  |
-| `ctg dev`                                                    | Proxy opinativo sobre Vite + validação (MVP).                                                              |
+| `ctg dev`                                                    | Oculto/reservado; não faz parte da superfície suportada.                                                   |
+
+Outros comandos (`upgrade`, `rollback`, `estimate`, `inspect`, `migrate`, `wire`, `sync-env`, `smoke`, `regression`, `ci`, `identity`, `version`, `zk`): ver [`docs/cli.md`](../cli.md).
 
 **Flags comuns:**
 
@@ -236,8 +246,8 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 
 ## 8. Estado e roadmap
 
-- **Status:** alpha. Linha atual **`3.5.1`** no npm **`latest`** e **`next`**. Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `ctg read`, post-deploy hooks (`ctg wire`), frontend env sync (`ctg sync-env`), `${source.address}` placeholder, `buildRoot` para workspaces Cargo, retry de falhas transientes (TxBadSeq), guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `zk-*`, cerimônia dev com guardrails em mainnet), `ctg status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`ctg build` sem argumento), overrides de dependências nos templates.
-- **Client:** single-invoker wallet signing até v1.0; multisig / `signAuthEntry` fora do escopo alpha.
+- **Status:** contrato estável v1.0 na linha npm `3.x` (ver `README.md` e [`public-api.md`](../public-api.md)). Versões atuais: `npm view @caatinga/cli dist-tags`. Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `ctg read`, post-deploy hooks (`ctg wire`), frontend env sync (`ctg sync-env`), `${source.address}` placeholder, `buildRoot` para workspaces Cargo, retry de falhas transientes (TxBadSeq), guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `ctg zk init|build|prove|invoke` (experimentais), cerimônia dev com guardrails em mainnet), `ctg status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`ctg build` sem argumento), overrides de dependências nos templates.
+- **Client:** single-invoker wallet signing até v1.0; multisig / `signAuthEntry` fora do escopo atual.
 - **Distribuição:** dist-tag `latest` em todos os pacotes publicados; `next` segue candidatos pré-release.
 - **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.

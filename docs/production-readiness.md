@@ -6,29 +6,29 @@ Use this checklist before deploying to mainnet or handing a project to a product
 
 Run through each item; `ctg doctor` covers several automatically.
 
-| #   | Check                                               | Command / doc                                                                                                |
-| --- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (28.0.0 recommended) | `ctg doctor`                                                                                                 |
-| 2   | `@stellar/stellar-sdk` within supported range       | `ctg doctor` (SDK diagnostic)                                                                                |
-| 3   | Signing identity funded and correct network         | `ctg doctor --source <alias> --network <net>`                                                                |
-| 4   | All configured contracts deployed on target network | `ctg status --network <net>`                                                                                 |
-| 5   | Bindings fresh (marker matches artifacts)           | `ctg doctor --strict-bindings` / `ctg status --strict`                                                       |
-| 5b  | Frontend env matches artifacts                      | `ctg doctor --strict-env` / `ctg sync-env --network <net>`                                                   |
-| 5c  | Post-deploy read checks pass                        | `ctg smoke --network <net> --source <alias>`                                                                 |
-| 6   | Deploy cost estimated                               | `ctg estimate deploy <contract> --network <net>`                                                             |
-| 7   | Artifacts schema migrated (if using history)        | `ctg migrate artifacts`                                                                                      |
-| 8   | Signing strategy documented for your team           | [Signing strategy](./signing-strategy.md)                                                                    |
-| 9   | Stellar CLI and SDK versions pinned in CI           | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md) |
-| 9b  | CI identity exported and rotated safely             | `CAATINGA_CI_STELLAR_CONFIG_B64` built per [Testing](./internal/testing.md#stellar-cli-config-blob-format)   |
-| 10  | Upgrade/rollback plan understood                    | [Contract upgrade](./tutorials/contract-upgrade.md)                                                          |
-| 10b | Deploy regression workflow green on testnet         | `ctg regression` or `.github/workflows/testnet-deploy-regression.yml`                                        |
+| #   | Check                                                             | Command / doc                                                                                                                                     |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Node 22+, Stellar CLI ≥ 23.0.0 (28.0.0 recommended)               | `ctg doctor`                                                                                                                                      |
+| 2   | `@stellar/stellar-sdk` within supported range                     | `ctg doctor` (SDK diagnostic)                                                                                                                     |
+| 3   | Signing identity exists, is funded, and targets the right network | `ctg doctor --source <alias> --network <net>` (keystore + network config only); check funding with `stellar keys address <alias>` and an explorer |
+| 4   | All configured contracts deployed on target network               | `ctg status --network <net>`                                                                                                                      |
+| 5   | Bindings fresh (marker matches artifacts)                         | `ctg doctor --strict-bindings` / `ctg status --strict`                                                                                            |
+| 5b  | Frontend env matches artifacts                                    | `ctg doctor --strict-env` / `ctg sync-env --network <net>`                                                                                        |
+| 5c  | Post-deploy read checks pass                                      | `ctg smoke --network <net> --source <alias>`                                                                                                      |
+| 6   | Deploy cost estimated                                             | `ctg estimate deploy <contract> --network <net> --source <alias>`                                                                                 |
+| 7   | Artifacts schema migrated (if using history)                      | `ctg migrate artifacts`                                                                                                                           |
+| 8   | Signing strategy documented for your team                         | [Signing strategy](./signing-strategy.md)                                                                                                         |
+| 9   | Stellar CLI and SDK versions pinned in CI                         | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md)                                      |
+| 9b  | CI identity exported and rotated safely                           | `CAATINGA_CI_STELLAR_CONFIG_B64` built per [Testing](./internal/testing.md#stellar-cli-config-blob-format)                                        |
+| 10  | Upgrade/rollback plan understood                                  | [Contract upgrade](./tutorials/contract-upgrade.md)                                                                                               |
+| 10b | Deploy regression workflow green on testnet                       | `ctg regression` or `.github/workflows/testnet-deploy-regression.yml`                                                                             |
 
 ## What Caatinga provides today
 
 - **Diagnostics:** `ctg doctor` — toolchain, config, artifacts, binding freshness, deploy coverage, env drift, WASM drift advisories, version matrix.
 - **Verification:** `ctg smoke`, `ctg read --expect`, `ctg regression` — post-deploy read checks with expect DSL.
 - **State inspection:** `ctg status`, `ctg inspect <contract>` — per-network deploy and binding state.
-- **Cost estimation:** `ctg estimate deploy` — pre-deploy fee breakdown (advisory).
+- **Cost estimation:** `ctg estimate deploy` (or `ctg deploy --dry-run`) — pre-deploy fee breakdown simulated against the selected network (advisory).
 - **Artifact history (v2):** prior `contractId`s on redeploy (`deploy --upgrade` / `--force`); prior `wasmHash`es on in-place upgrade (`ctg upgrade`).
 - **In-place upgrade:** `ctg upgrade <contract>` — upload WASM + invoke admin-gated `upgrade()`; preserves `contractId`. See [Contract upgrade](./tutorials/contract-upgrade.md).
 - **Rollback (logical):** `ctg rollback <contract> --to <contractId>` — restore artifact entry after **redeploy** upgrades (on-chain orphan warning applies). In-place WASM rollback is not supported yet.

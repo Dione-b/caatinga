@@ -304,7 +304,7 @@ npx ctg read counter.get --network testnet --expect '{"matcher":"reachable"}'
 npx ctg read token.list --network testnet --expect '{"matcher":"isArray"}' --summary
 ```
 
-Full schema and config examples: [Config — postDeploy and smoke](./config.md#postdeploy-hooks-and-smoke).
+Full schema and config examples: [Config — postDeploy and smoke](./config.md#example-postdeploy-postdeployread-and-smoke).
 
 ## ZK commands
 

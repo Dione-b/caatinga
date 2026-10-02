@@ -1,5 +1,7 @@
 # Dogfood Backlog (Sprint 41–42)
 
+_Historical snapshot (Sprint 41–42, pre-v1.0 RC); may not match current CLI behavior. See [CLI reference](./cli.md)._
+
 Issues found during dogfooding with **public APIs only**. Core changes are deferred until after v1.0 RC unless marked critical.
 
 | ID     | Sprint | Severity | Description   | Workaround | Core change? |
@@ -20,9 +22,10 @@ From the repository root after `pnpm build && pnpm pack:packages`:
 ```bash
 mkdir -p /tmp/caatinga-dogfood && cd /tmp/caatinga-dogfood
 npm init -y
-npm install /path/to/caatinga/packed/caatinga-core-3.8.0.tgz \
-  /path/to/caatinga/packed/caatinga-client-3.8.0.tgz \
-  /path/to/caatinga/packed/caatinga-cli-3.8.0.tgz
+npm install /path/to/caatinga/packed/caatinga-core-*.tgz \
+  /path/to/caatinga/packed/caatinga-zk-*.tgz \
+  /path/to/caatinga/packed/caatinga-client-*.tgz \
+  /path/to/caatinga/packed/caatinga-cli-*.tgz
 npx ctg init my-dapp --template react-vite-counter
 ```
 

@@ -13,7 +13,7 @@ See [Getting started](./getting-started.md#prerequisites) for manual install ins
 ```bash
 ctg init <dir>                    # template (default: react-vite-counter)
 ctg init <dir> -t <template>      # explicit template (e.g. react-vite-counter)
-ctg init <dir> --minimal          # CLI + Soroban stub (no frontend)
+ctg init <dir> --minimal          # CLI + Soroban stub (no frontend); --empty is an alias
 ctg zk init <dir>                 # zk-starter template
 ctg zk init <dir> --minimal       # ZK-only scaffold (no frontend)
 ctg zk init                       # add ZK files to current project
@@ -70,6 +70,7 @@ npx ctg wire --network testnet --source alice   # re-run postDeploy hooks only
 npx ctg sync-env --network testnet              # rewrite frontend.envFile only
 npx ctg smoke --network testnet --source alice  # read-only checks from config
 npx ctg regression --network testnet --source alice  # test → build → deploy --if-changed → generate → smoke
+#   ↳ the test step runs `pnpm test` (even in npm projects); skip it with --skip-test
 ```
 
 ## CI and regression
@@ -85,51 +86,62 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 
 ## Commands
 
-| Command                        | What it does                                                         |
-| ------------------------------ | -------------------------------------------------------------------- |
-| `ctg init <dir>`               | Scaffold a project from a template                                   |
-| `ctg doctor`                   | Check Node, Stellar CLI, Rust, config, artifacts, network, identity  |
-| `ctg build [contract]`         | Compile contract WASM; omit name to build all configured contracts   |
-| `ctg deploy [contract]`        | Deploy (graph-aware), record artifacts, auto-generate bindings       |
-| `ctg upgrade <contract>`       | In-place WASM upgrade on existing `contractId` (upload + invoke)     |
-| `ctg wire`                     | Run configured `postDeploy` hooks against deployed contracts         |
-| `ctg sync-env`                 | Write configured frontend env vars from deploy artifacts             |
-| `ctg generate [contract]`      | (Re)generate TypeScript bindings from deployed contract IDs          |
-| `ctg status`                   | Table of deployed contracts + binding freshness per network          |
-| `ctg smoke`                    | Run configured read-only smoke checks with expect DSL                |
-| `ctg regression`               | Full pipeline: test → build → deploy --if-changed → generate → smoke |
-| `ctg ci run`                   | CI helper: `doctor` then `smoke`                                     |
-| `ctg identity export\|import`  | Export/import Stellar CLI config as base64 tarball                   |
-| `ctg invoke <contract.method>` | Call a contract method from the CLI                                  |
-| `ctg read <contract.method>`   | Simulate a read-only contract method (no signing)                    |
+| Command                                     | What it does                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `ctg init <dir>`                            | Scaffold a project from a template (`--minimal` / `--empty`: no frontend)                 |
+| `ctg doctor`                                | Check Node, Stellar CLI, Rust, config, artifacts, network, identity                       |
+| `ctg build [contract]`                      | Compile contract WASM; omit name to build all configured contracts                        |
+| `ctg deploy [contract]`                     | Deploy (graph-aware), record artifacts, auto-generate bindings                            |
+| `ctg upgrade <contract>`                    | In-place WASM upgrade on existing `contractId` (upload + invoke)                          |
+| `ctg wire`                                  | Run configured `postDeploy` hooks against deployed contracts                              |
+| `ctg sync-env`                              | Write configured frontend env vars from deploy artifacts                                  |
+| `ctg generate [contract]`                   | (Re)generate TypeScript bindings from deployed contract IDs                               |
+| `ctg status`                                | Table of deployed contracts + binding freshness per network                               |
+| `ctg smoke`                                 | Run configured read-only smoke checks with expect DSL                                     |
+| `ctg regression`                            | Full pipeline: test (`pnpm test`) → build → deploy --if-changed → generate → smoke        |
+| `ctg ci run`                                | CI helper: `doctor` then `smoke`                                                          |
+| `ctg identity export\|import`               | Export/import Stellar CLI config as base64 tarball                                        |
+| `ctg invoke <contract.method>`              | Call a contract method from the CLI                                                       |
+| `ctg read <contract.method>`                | Simulate a read-only contract method (no signing)                                         |
+| `ctg estimate deploy <contract>`            | Advisory deploy fee estimate, simulated against the network (needs `--source`)            |
+| `ctg inspect <contract>`                    | Compare deployed on-chain state with local artifacts                                      |
+| `ctg rollback <contract> --to <contractId>` | Restore a historical `contractId` in artifacts (after redeploy upgrades)                  |
+| `ctg migrate artifacts`                     | Upgrade `caatinga.artifacts.json` to the current schema version                           |
+| `ctg version`                               | Print the installed `@caatinga/cli` version and npm dist-tag advisory                     |
+| `ctg zk init\|build\|prove\|invoke`         | ZK scaffold, circuit build + dev setup, proof, verifier invoke — see [ZK module](./zk.md) |
 
 ## Flags
 
-| Flag                    | Commands                                                                       | Description                                                    |
-| ----------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `--network <name>`      | doctor, deploy, upgrade, generate, status, invoke, wire, smoke, regression, ci | Network from `caatinga.config.ts`                              |
-| `--source <identity>`   | doctor, deploy, upgrade, invoke, wire, smoke, regression, ci, zk invoke        | Local Stellar CLI identity that signs (never a `G...` address) |
-| `--force`               | deploy                                                                         | Redeploy even when artifacts already hold a contract ID        |
-| `--upgrade`             | deploy                                                                         | Redeploy with upgrade history (new `contractId`)               |
-| `--if-changed`          | deploy, upgrade, regression                                                    | Skip when local WASM hash matches artifact                     |
-| `--expected-hash`       | upgrade                                                                        | Fail before upload if local WASM hash differs                  |
-| `--no-build`            | upgrade                                                                        | Skip `ctg build` before upload                                 |
-| `--generate`            | upgrade                                                                        | Regenerate bindings after successful in-place upgrade          |
-| `--sync-env`            | upgrade                                                                        | Sync frontend env after successful in-place upgrade            |
-| `--no-generate`         | deploy                                                                         | Skip automatic bindings generation (CI without binding needs)  |
-| `--no-wire`             | deploy                                                                         | Skip automatic `postDeploy` hooks after a full graph deploy    |
-| `--no-sync-env`         | deploy                                                                         | Skip automatic frontend env sync after a full graph deploy     |
-| `--no-deps`             | deploy                                                                         | Deploy a single contract without its `dependsOn` graph         |
-| `--verify-deps`         | deploy                                                                         | Confirm dependency contract IDs exist on-chain first           |
-| `--no-stale-check`      | deploy                                                                         | Skip the WASM-older-than-sources warning                       |
-| `--strict-network`      | generate                                                                       | Fail when network has no artifacts block                       |
-| `--strict`              | status, doctor, ci run                                                         | status: fail on stale bindings; doctor/ci: strict env+bindings |
-| `--strict-env`          | doctor                                                                         | Fail when frontend env file drifts from artifacts              |
-| `--strict-bindings`     | doctor                                                                         | Fail when bindings are stale or missing                        |
-| `--all-networks`        | doctor                                                                         | Report deploy/bindings matrix for every configured network     |
-| `--expect <dsl>`        | read                                                                           | Assert stdout with postDeploy expect DSL                       |
-| `--quiet` / `--summary` | read                                                                           | Compact output for large array payloads                        |
-| `--json`                | status                                                                         | Machine-readable output for scripts                            |
+| Flag                    | Commands                                                                                       | Description                                                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `--network <name>`      | all except init, build, identity, migrate, version, zk init/build/prove                        | Network from `caatinga.config.ts`                                                                                    |
+| `--source <identity>`   | doctor, deploy, upgrade, invoke, read, wire, smoke, regression, ci, estimate deploy, zk invoke | Local Stellar CLI identity that signs (never a `G...` address); read/smoke need it (or `CAATINGA_SOURCE`) on mainnet |
+| `-y, --yes`             | deploy, upgrade, invoke, wire, regression, rollback, zk invoke                                 | Skip the interactive mainnet confirmation (CI)                                                                       |
+| `--force`               | deploy                                                                                         | Redeploy even when artifacts already hold a contract ID                                                              |
+| `--upgrade`             | deploy                                                                                         | Redeploy with upgrade history (new `contractId`)                                                                     |
+| `--if-changed`          | deploy, upgrade                                                                                | Skip when local WASM hash matches artifact (regression always deploys if-changed)                                    |
+| `--dry-run`             | deploy                                                                                         | Estimate deploy cost without submitting (`estimate deploy`)                                                          |
+| `--expected-hash`       | upgrade                                                                                        | Fail before upload if local WASM hash differs                                                                        |
+| `--no-build`            | upgrade                                                                                        | Skip `ctg build` before upload                                                                                       |
+| `--generate`            | upgrade                                                                                        | Regenerate bindings after successful in-place upgrade                                                                |
+| `--sync-env`            | upgrade                                                                                        | Sync frontend env after successful in-place upgrade                                                                  |
+| `--no-generate`         | deploy                                                                                         | Skip automatic bindings generation (CI without binding needs)                                                        |
+| `--no-wire`             | deploy                                                                                         | Skip automatic `postDeploy` hooks after a full graph deploy                                                          |
+| `--no-sync-env`         | deploy                                                                                         | Skip automatic frontend env sync after a full graph deploy                                                           |
+| `--no-deps`             | deploy                                                                                         | Deploy a single contract without its `dependsOn` graph                                                               |
+| `--verify-deps`         | deploy                                                                                         | Confirm dependency contract IDs exist on-chain first                                                                 |
+| `--no-stale-check`      | deploy                                                                                         | Skip the WASM-older-than-sources warning                                                                             |
+| `--strict-network`      | generate                                                                                       | Fail when network has no artifacts block                                                                             |
+| `--strict`              | status, doctor, ci run                                                                         | status: fail on stale bindings; doctor/ci: strict env+bindings                                                       |
+| `--strict-env`          | doctor                                                                                         | Fail when frontend env file drifts from artifacts                                                                    |
+| `--strict-bindings`     | doctor                                                                                         | Fail when bindings are stale or missing                                                                              |
+| `--all-networks`        | doctor                                                                                         | Report deploy/bindings matrix for every configured network                                                           |
+| `--expect <dsl>`        | read                                                                                           | Assert stdout with postDeploy expect DSL                                                                             |
+| `--quiet` / `--summary` | read                                                                                           | Compact output for large array payloads                                                                              |
+| `--no-resolve-aliases`  | read, invoke                                                                                   | Pass string args literally; skip identity alias resolution                                                           |
+| `--skip-<step>`         | regression                                                                                     | Skip a step: `test`, `build`, `deploy`, `generate`, or `smoke`                                                       |
+| `--skip-smoke`          | ci run                                                                                         | Run doctor only                                                                                                      |
+| `--json`                | status                                                                                         | Machine-readable output for scripts                                                                                  |
 
 ## Binding freshness
 

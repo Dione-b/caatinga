@@ -25,8 +25,10 @@ Any exception must be called out in release notes and package changelogs.
 
 - `alpha`
 - `beta`
-- `latest` — currently `3.9.2` for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
-- `next` — currently `3.9.1` (pre-release candidates until promoted to `latest`)
+- `latest` — current stable line for `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, and `@caatinga/zk`
+- `next` — pre-release candidates until promoted to `latest`
+
+Check the current values with `npm view @caatinga/cli dist-tags` instead of relying on hardcoded versions.
 
 ## Semver note
 
@@ -35,6 +37,23 @@ publish history, so `3.x` is where v1 lives: breaking changes to the Tier 1 surf
 bump and will land on an explicit `4.0.0` (see [`public-api.md`](../public-api.md) and
 [`release/v1.0.0.md`](./release/v1.0.0.md)). Surfaces outside Tier 1 — notably the experimental
 `ctg zk *` commands — are not covered. Pin exact versions in production CI regardless.
+
+## Cutting a release
+
+Versioning uses [Changesets](https://github.com/changesets/changesets). `.changeset/config.json`
+puts all four public packages in a single **`fixed`** group, so they always bump to the same
+version (internal ranges are updated automatically).
+
+1. Add a changeset with each user-facing change: `pnpm changeset` (files land in `.changeset/`).
+2. Apply pending changesets: `pnpm exec changeset version`. This bumps every package
+   `package.json` and writes the package `CHANGELOG.md` files. Run `pnpm install` and commit
+   `pnpm-lock.yaml` with the bump.
+3. Validate locally: `pnpm pre:publish` (`scripts/pre-publish.sh`; pass `-- --tag <tag>`,
+   default `next`) and `pnpm ci:publish-matrix`.
+4. Publish (operator, manual): `pnpm publish -r --access public --no-git-checks --tag next`.
+5. Promote to `latest` without republishing: `bash scripts/promote-latest.sh <version> --otp <code>`.
+
+See [`release/publish-checklist.md`](./release/publish-checklist.md) for the full checklist.
 
 ## Release Gate
 

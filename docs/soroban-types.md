@@ -1,6 +1,6 @@
 # Soroban types in TypeScript bindings
 
-Stellar CLI TypeScript bindings map Soroban host types to familiar JavaScript types. Most mappings are intuitive, but **`Symbol` is a common footgun**.
+TypeScript bindings generated with `npx @stellar/stellar-sdk generate` (what `ctg generate` runs) map Soroban host types to familiar JavaScript types. Most mappings are intuitive, but **`Symbol` is a common footgun**.
 
 ## Symbol vs string
 
@@ -32,7 +32,7 @@ assertSorobanSymbol(userInput, "label");
 await client.contract("token").invoke("mint", { label: userInput });
 ```
 
-Caatinga does not rewrite Stellar CLI binding output. Add validation at your app boundary or normalize inputs (for example replace spaces with underscores) when that fits your contract design.
+Caatinga does not rewrite the generated binding types (it only patches packaging and a browser `Buffer` polyfill). Add validation at your app boundary or normalize inputs (for example replace spaces with underscores) when that fits your contract design.
 
 ## Other common mappings
 

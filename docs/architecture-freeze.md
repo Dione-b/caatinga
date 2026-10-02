@@ -15,7 +15,7 @@ The following architectural designs are frozen and cannot be modified:
 
 ### 2. Package Boundaries
 
-- **Orchestration Engine (`@caatinga/core`):** The only package permitted to execute subprocesses (via `execa` in `run-command.ts`) and interact with Node.js filesystem APIs.
+- **Orchestration Engine (`@caatinga/core`):** The only package permitted to orchestrate Stellar CLI subprocesses (via `execa` in `run-command.ts`) and interact with Node.js filesystem APIs. The CLI may shell out only for auxiliary tooling (`npm`, `tar`, `pnpm`, self re-invocation).
 - **Integration SDK (`@caatinga/client`):** Consumes exclusively browser-safe subpaths (`@caatinga/core/browser`), containing only types and error definitions. No Node.js runtime code may bleed into this package.
 
 ### 3. Artifact Schema (`caatinga.artifacts.json`)

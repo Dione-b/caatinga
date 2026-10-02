@@ -2,7 +2,7 @@
 
 | Package            | Role                                                               |
 | ------------------ | ------------------------------------------------------------------ |
-| `@caatinga/cli`    | End-user CLI (`caatinga` binary)                                   |
+| `@caatinga/cli`    | End-user CLI (`ctg` binary, legacy alias `caatinga`)               |
 | `@caatinga/core`   | Config, artifacts, Stellar CLI orchestration, verification helpers |
 | `@caatinga/client` | Browser/client interop over generated bindings                     |
 | `@caatinga/zk`     | ZK proof serialization and Circom Groth16 workflow helpers         |
@@ -18,7 +18,7 @@ Monorepo development:
 ```bash
 pnpm install
 pnpm build
-pnpm dev -- init my-app
+pnpm dev init my-app
 ```
 
 The last command runs the CLI from source via `tsx` in `packages/cli`.

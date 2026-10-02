@@ -8,12 +8,12 @@ While package names on npm (`@caatinga/core`, `@caatinga/client`) remain unchang
 
 ## Terminology Mapping
 
-| Package/Module Name           | Generic Term | Conceptual Term          | Responsibility Description                                                                                                                                                |
-| :---------------------------- | :----------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@caatinga/core`              | `core`       | **Orchestration Engine** | The engine that compiles contracts, topological-sorts the dependency graph, resolves configuration variables, and executes deploy lifecycle hooks.                        |
-| `@caatinga/client`            | `client`     | **Integration SDK**      | The frontend/consumer library that provides wallet session bindings, wraps type-safe generated contract clients, and interacts with browser wallet adapters.              |
-| `packages/templates`          | `templates`  | **Project Scaffolds**    | Pre-configured starter application templates (minimal, react-vite, zk) used to initialize projects.                                                                       |
-| `@caatinga/client` (internal) | `runtime`    | **Transaction Pipeline** | The sequential execution pipeline: simulating transactions, signing via client-side wallets, submitting to the Horizon/Stellar network, and watching confirmation status. |
+| Package/Module Name           | Generic Term | Conceptual Term          | Responsibility Description                                                                                                                                   |
+| :---------------------------- | :----------- | :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@caatinga/core`              | `core`       | **Orchestration Engine** | The engine that compiles contracts, topological-sorts the dependency graph, resolves configuration variables, and executes deploy lifecycle hooks.           |
+| `@caatinga/client`            | `client`     | **Integration SDK**      | The frontend/consumer library that provides wallet session bindings, wraps type-safe generated contract clients, and interacts with browser wallet adapters. |
+| `packages/templates`          | `templates`  | **Project Scaffolds**    | Official starter templates (`react-vite-counter`, `zk-starter`); the minimal scaffold comes from `ctg init --minimal`, not a template.                       |
+| `@caatinga/client` (internal) | `runtime`    | **Transaction Pipeline** | The sequential execution pipeline: simulating transactions, signing via client-side wallets, submitting via Soroban RPC, and watching confirmation status.   |
 
 ---
 
