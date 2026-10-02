@@ -1,3 +1,6 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import type { CaatingaArtifacts } from "../artifacts/artifact.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { ResolvedNetwork } from "../networks/resolve-network.js";
@@ -11,15 +14,18 @@ export async function verifyDependencyContract(options: {
   network: ResolvedNetwork;
   cwd?: string;
 }): Promise<void> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-contract-fetch-"));
+  const outFile = path.join(tempDir, "contract.wasm");
   try {
     await runCommand(
       "stellar",
       [
         "contract",
-        "info",
-        "interface",
-        "--contract-id",
+        "fetch",
+        "--id",
         options.contractId,
+        "--out-file",
+        outFile,
         ...buildStellarNetworkArgs(options.network),
       ],
       {
@@ -36,12 +42,19 @@ export async function verifyDependencyContract(options: {
       throw new CaatingaError(
         `Dependency "${options.dependencyName}" is not deployed on "${options.network.name}" (contract ID ${options.contractId}).`,
         CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-        "Deploy the dependency on this network, fix caatinga.artifacts.json, or omit --verify-deps.",
+        [
+          "Deploy the dependency on this network, fix caatinga.artifacts.json, or omit --verify-deps.",
+          error.hint ? `Stellar CLI diagnostics:\n${error.hint}` : undefined,
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
         error.cause
       );
     }
 
     throw error;
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
   }
 }
 
