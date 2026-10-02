@@ -1,4 +1,6 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   walletStubOverrides,
@@ -35,4 +37,26 @@ describe("wallet stub helpers", () => {
     expect(walletStubPnpmWorkspaceYaml()).toContain('ws: "^8.21.0"');
     expect(walletStubPnpmWorkspaceYaml()).toContain('axios: "^1.17.1"');
   });
+
+  it("should_declare_empty_packages_for_pnpm_9", () => {
+    expect(walletStubPnpmWorkspaceYaml().startsWith("packages: []\n")).toBe(true);
+  });
+
+  it.each(["react-vite-counter", "zk-starter"])(
+    "should_match_the_%s_template_pnpm_workspace",
+    async (template) => {
+      const templateYaml = await readFile(
+        fileURLToPath(
+          new URL(`../../../templates/${template}/pnpm-workspace.yaml`, import.meta.url)
+        ),
+        "utf8"
+      );
+      const withoutComments = templateYaml
+        .split("\n")
+        .filter((line) => !line.startsWith("#"))
+        .join("\n");
+
+      expect(walletStubPnpmWorkspaceYaml()).toBe(withoutComments);
+    }
+  );
 });
