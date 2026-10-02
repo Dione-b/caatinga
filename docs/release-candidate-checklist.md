@@ -1,12 +1,14 @@
 # Release Candidate Checklist (v1.0)
 
+_Historical snapshot (v1.0 / `@caatinga/*@3.8.0` milestone); may not match current CLI behavior. See [CLI reference](./cli.md)._
+
 This document defines the acceptance criteria that must be satisfied before Caatinga v1.0 contract freeze. **Status: v1.0 released** — npm `@caatinga/*@3.8.0` with `latest` dist-tag; git tag `v1.0.0`.
 
 ---
 
 ## Schema Freeze
 
-- [x] `caatinga.artifacts.json` schema is versioned (`schema_version: 2`) and has a migration path from v1
+- [x] `caatinga.artifacts.json` schema is versioned (`version: 2`) and has a migration path from v1
 - [x] `caatinga.config.ts` schema is validated by Zod with explicit error messages
 - [x] `caatinga.template.json` manifest is versioned (`templateVersion: 1`)
 - [x] All schema-breaking changes require an explicit migration or a new schema version increment
@@ -26,7 +28,7 @@ This document defines the acceptance criteria that must be satisfied before Caat
 - [x] All commands and their flags are documented in `docs/cli.md`
 - [x] Exit codes `0` (success) and `1` (failure) are consistent across all commands
 - [x] `ctg --help` shows all commands grouped by category
-- [x] `ctg version` outputs `@caatinga/cli@<version>` and the runtime Node.js version
+- [x] `ctg version` outputs `@caatinga/cli: <version>` plus an npm dist-tag advisory
 
 ## Reliability Criteria
 

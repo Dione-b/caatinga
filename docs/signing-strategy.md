@@ -4,7 +4,7 @@ Caatinga does not store private keys or run silent signing. This document descri
 
 ## CLI signing (`--source`)
 
-All state-changing CLI commands (`deploy`, `upgrade`, `invoke`, `zk invoke`) require `--source`:
+All state-changing CLI commands (`deploy`, `upgrade`, `invoke`, `wire`, `regression`, `zk invoke`) and `estimate deploy` require `--source`. `read` and `smoke` fall back to `CAATINGA_SOURCE`, then `alice`, but require `--source` (or `CAATINGA_SOURCE`) on mainnet:
 
 - **Value:** a **local Stellar CLI identity alias** (e.g. `alice`), not a public `G...` address or seed phrase.
 - **Mechanism:** Caatinga passes `--source-account <alias>` to Stellar CLI; the CLI loads the key from its local keystore.
@@ -16,7 +16,7 @@ ctg deploy counter --network testnet --source alice
 ctg upgrade counter --network testnet --source alice   # admin-gated in-place WASM upgrade
 ```
 
-Run `ctg doctor --source alice` to verify the identity exists and can sign on the selected network.
+Run `ctg doctor --source alice` to verify the identity exists in the local Stellar CLI keystore (`stellar keys public-key alice`). Doctor does not check funding or signing rights on the selected network.
 
 ## Browser signing (`@caatinga/client`)
 

@@ -20,15 +20,17 @@ npm install
 npx ctg doctor --network testnet --source alice
 ```
 
-Expected shape:
+Expected shape (abbreviated — doctor also prints advisory sections such as deploy coverage, bindings, and the version matrix):
 
 ```txt
 Caatinga Doctor
 
-✓ Node.js 22
+✓ Node.js 22.x.x
 ✓ Stellar CLI 28.0.0
-✓ Rust 1.91.1
+✓ @stellar/stellar-sdk 16.x.x
+✓ rustc 1.91.1 (<commit> <date>)
 ✓ wasm32v1-none target installed
+✓ Project dependencies installed
 ✓ caatinga.config.ts found
 ✓ caatinga.artifacts.json found
 ✓ network testnet found

@@ -62,13 +62,13 @@ The adapter wraps SWK 2.x static methods and adds:
 
 Exported types from `@caatinga/client/stellar-wallets-kit`:
 
-| Type                                | Purpose                                          |
-| ----------------------------------- | ------------------------------------------------ |
-| `StellarWalletsKitAdapter`          | Return type of `createStellarWalletsKitAdapter`  |
-| `StellarWalletsKitAdapterOptions`   | Options for adapter creation (network, metadata) |
-| `StellarWalletsKitMetadata`         | WalletConnect metadata shape                     |
-| `StellarWalletsKitOpenModalOptions` | Options for `openModal()`                        |
-| `WalletNetwork`                     | Enum of supported network passphrases            |
+| Type                                | Purpose                                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `StellarWalletsKitAdapter`          | Return type of `createStellarWalletsKitAdapter`                                                                                   |
+| `StellarWalletsKitAdapterOptions`   | Options for adapter creation: `network`, `selectedWalletId` (default Freighter), `modules`, `walletConnectMetadata`, `initParams` |
+| `StellarWalletsKitMetadata`         | WalletConnect metadata shape                                                                                                      |
+| `StellarWalletsKitOpenModalOptions` | Options for `openModal()`                                                                                                         |
+| `WalletNetwork`                     | Enum of supported network passphrases                                                                                             |
 
 ### Freighter (single wallet)
 
@@ -79,6 +79,8 @@ npm install @caatinga/client @stellar/freighter-api
 ```ts
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
 ```
+
+Since 3.11.0 the adapter maps freighter-api v4 `{ error }` responses to Caatinga errors: a missing address throws `CAATINGA_WALLET_NOT_CONNECTED`, and a failed or rejected signature throws `CAATINGA_XDR_SIGN_FAILED`.
 
 Both peer dependencies are optional: install only the one your app uses.
 
@@ -225,7 +227,7 @@ export default defineConfig({
 Also apply install overrides:
 
 - npm `package.json`: merge `walletStubOverrides("./src/stubs")` into `overrides`
-- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`
+- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`, then add `packages: []` at the top. The helper omits it, but pnpm 9 aborts on a `pnpm-workspace.yaml` without a `packages` field (both official templates include it)
 
 Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `ctg init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
 

@@ -13,17 +13,21 @@
 | Wallet    | Stellar Wallets Kit (multi-wallet selector) |
 | Team size | Maintainer reference implementation         |
 
+`examples/counter-web` is a **UI-only** example. It has no `caatinga.config.ts` or `caatinga.artifacts.json`: `src/caatinga.ts` inlines a stub `CaatingaArtifacts` object with a placeholder `contractId`, and `src/contracts/generated/counter.ts` is a checked-in stand-in binding. To invoke on-chain, deploy from a Caatinga project and copy its artifacts and bindings in (see the [example README](../../examples/counter-web/README.md)). For the real artifacts-driven flow, scaffold the `react-vite-counter` template with `ctg init`.
+
 ## Problem
 
 A TypeScript developer needs a working browser dApp that:
 
-- Reads `contractId` from committed artifacts (not hardcoded).
+- Resolves `contractId` through a `CaatingaArtifacts` object (here an inline stub; in a real project, the committed `caatinga.artifacts.json`).
 - Uses generated bindings for type-safe calls.
 - Connects a wallet and invokes `increment` / reads `get`.
 
 Without Caatinga, each step (deploy ID tracking, binding generation, wallet wiring) is manual and drifts across teammates.
 
 ## Setup timeline (approximate)
+
+Times below are for the full flow with the `react-vite-counter` template, which produces the artifacts and bindings that counter-web expects to be copied in.
 
 | Step                          | Time           | Notes                                                                                                                                                   |
 | ----------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -34,19 +38,21 @@ Without Caatinga, each step (deploy ID tracking, binding generation, wallet wiri
 
 ## What worked
 
-- `ctg deploy` wrote `caatinga.artifacts.json` and regenerated bindings in one step.
+- In the template project, `ctg deploy` wrote `caatinga.artifacts.json` and regenerated bindings in one step.
 - `@caatinga/client/react` eliminated hand-rolled wallet context.
-- `ctg status` confirmed deploy + binding freshness before `npm run dev`.
+- In the template project, `ctg status` showed the recorded deploy and binding freshness before `npm run dev`.
 - `CAATINGA_*` errors surfaced missing artifacts clearly in the browser UI.
 
 ## What broke or required workarounds
 
 - **WalletConnect:** requires `VITE_WALLETCONNECT_PROJECT_ID` in `.env` — not auto-generated.
-- **Checked-in stub binding:** the monorepo example ships a stand-in `counter.ts` for CI; real projects must use `ctg generate` output.
+- **Checked-in stubs:** the monorepo example ships a stand-in `counter.ts` binding and inline artifacts with a placeholder `contractId` so CI can build it; real projects must use `ctg generate` output and the artifacts `ctg deploy` writes.
 - **Single-invoker only:** contracts needing delegated auth are out of scope for this example.
 - **No mainnet:** example targets testnet only.
 
 ## Commands used
+
+Run from a Caatinga project (for example one scaffolded from `react-vite-counter`), not from `examples/counter-web`:
 
 ```bash
 ctg build counter

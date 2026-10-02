@@ -67,12 +67,12 @@ git commit -m "chore: add caatinga workspace with stellar-build skills"
 Caatinga keeps `caatinga.artifacts.json` and the `.caatinga-bindings.json` freshness markers
 consistent. If agents run raw `stellar-cli` for build, deploy, or type generation, that state
 drifts. To steer the agents, you can add a directive to stellar-build's learned profile at
-`~/.stellar/profile.md` (or a project-local context file):
+`~/.stellar-build/profile.md` (or a project-local context file):
 
 ```md
 This project uses @caatinga/cli as the Soroban lifecycle orchestrator. Do not run raw
 stellar-cli for build, deploy, or binding generation. Route every network state change
-(testnet, futurenet, mainnet) through `caatinga` commands so that caatinga.artifacts.json
+(testnet, futurenet, mainnet) through `ctg` commands so that caatinga.artifacts.json
 and the .caatinga-bindings.json freshness markers stay consistent.
 ```
 

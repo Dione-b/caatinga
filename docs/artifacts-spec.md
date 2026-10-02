@@ -9,7 +9,7 @@ This document details the public API contract and schema for `caatinga.artifacts
 The root of `caatinga.artifacts.json` is a JSON object with the following fields:
 
 - **`project`** (string): The unique name of the Caatinga project.
-- **`version`** (number): The schema version. Currently `2`.
+- **`version`** (number): The schema version. `2` (v1 files are still readable).
 - **`networks`** (object): A dictionary of network deployment scopes keyed by network name (e.g., `local`, `testnet`, `mainnet`).
 
 ### Network Scope Object
@@ -23,8 +23,8 @@ Each entry under `networks` contains:
 
 Each contract entry contains:
 
-- **`contractId`** (string): The public, deployed contract address on the Stellar/Soroban network.
-- **`wasmHash`** (string): The SHA-256 hash of the compiled WASM binary deployed for this contract.
+- **`contractId`** (string): The public, deployed contract address on the Stellar/Soroban network. Must be a contract strkey: `C` followed by 55 base32 characters (A-Z2-7), 56 characters total.
+- **`wasmHash`** (string): The SHA-256 hash of the compiled WASM binary deployed for this contract, as 64 lowercase hex characters.
 - **`deployedAt`** (string): ISO-8601 Datetime string representing when the contract was deployed.
 - **`sourcePath`** (string): Relative path to the Rust contract folder inside the repository.
 - **`wasmPath`** (string): Relative path to the target WASM file compiled.
@@ -32,21 +32,36 @@ Each contract entry contains:
 - **`resolvedDeployArgs`** (object): A dictionary containing primitive argument values (`string`, `number`, `boolean`) passed during deployment with resolved placeholder variables.
 - **`upgradeStrategy`** (string, optional): The strategy configured for redeploying/updating. One of: `in-place` or `redeploy`.
 - **`history`** (array, optional): A chronological record of historical contract deployments superseded by the current one.
+- **`metadata`** (object, optional): Build provenance recorded by deploy/upgrade. See [Metadata Object](#metadata-object).
 
 ### History Entry Object
 
 Each item in the `history` array represents a superseded deployment:
 
-- **`contractId`** (string): The historic contract address.
-- **`wasmHash`** (string): The historic WASM hash.
+- **`contractId`** (string): The historic contract address (contract strkey, same format as above).
+- **`wasmHash`** (string): The historic WASM hash (64 lowercase hex characters).
 - **`deployedAt`** (string): ISO-8601 Datetime representing the original deployment time.
 - **`supersededAt`** (string): ISO-8601 Datetime representing when this deployment was replaced.
 - **`reason`** (string, optional): One of: `upgrade`, `rollback`, or `force-redeploy`.
 - **`upgradeType`** (string, optional): One of: `in-place` or `new-contract`.
+- **`metadata`** (object, optional): The metadata of the superseded deployment, when it was recorded.
+
+### Metadata Object
+
+All fields are optional strings:
+
+- **`gitCommit`**: `git rev-parse HEAD` at deploy time, when available.
+- **`rustcVersion`**: `rustc --version` output, when available.
+- **`caatingaVersion`**: The `@caatinga/core` version that wrote the entry.
+- **`network`**: The network name the deploy targeted.
+- **`timestamp`**: ISO-8601 Datetime when the metadata was collected.
+- **`checksum`**: The WASM hash of the deployed binary.
 
 ---
 
 ## Example `caatinga.artifacts.json`
+
+The `contractId`, `wasmHash`, and `token_address` values below are truncated placeholders; real files must use full 56-character contract strkeys and 64-character hex hashes, or validation fails with `CAATINGA_ARTIFACT_INVALID`.
 
 ```json
 {

@@ -64,12 +64,12 @@ flowchart LR
 
 - **prerequisites**: Install Node, Rust, Stellar CLI, and a funded Testnet identity manually.
 - **init**: Scaffold `react-vite-counter` (contract `counter` + Vite UI).
-- **doctor**: Environment and credentials check.
+- **doctor**: Toolchain, config, network entry, and `--source` identity check.
 - **build**: Rust → WASM (no network).
 - **deploy**: Upload, instantiate, record `contractId`.
 - **read**: Read-only simulation of `counter.get` (no fee / no signature).
 - **invoke**: State-changing call to `counter.increment` (signs + fees).
-- **status**: Compare artifacts with the network.
+- **status**: Summarize local artifacts and binding freshness (`ctg inspect` checks on-chain).
 - **redeploy**: New instance; prior ID kept in history.
 
 <details>
@@ -115,7 +115,10 @@ Prepare the machine: Node.js 22+, Rust with the WASM target, Stellar CLI, and a 
 
 ```bash
 node --version
-npx ctg doctor --network testnet --source alice
+rustc --version
+rustup target list --installed
+stellar --version
+stellar keys generate alice --fund --network testnet
 ```
 
 ### Expected Result
@@ -127,7 +130,9 @@ npx ctg doctor --network testnet --source alice
 
 <details>
 <summary>Speaker Notes</summary>
-Before the workshop, ensure every participant has installed Rust, the WASM target, and Stellar CLI manually. Doctor verifies everything is in place.
+Before the workshop, ensure every participant has installed Rust, the WASM target, and Stellar CLI manually. The version commands above confirm the toolchain.
+`ctg doctor` runs after scaffold (step 3): before `ctg init` it also reports `caatinga.config.ts` / `caatinga.artifacts.json` not found and ends with `Status: blocked`.
+Skip `stellar keys generate` if `alice` already exists.
 Stress that `alice` is an identity alias — public and secret keys are rejected on purpose.
 </details>
 
@@ -168,13 +173,13 @@ npm install
 
 A new directory `my-dapp` with:
 
-| Path                      | Purpose                                                    |
-| ------------------------- | ---------------------------------------------------------- |
-| `contracts/counter/`      | Rust / Soroban counter (`get`, `increment`)                |
-| `caatinga.config.ts`      | Declares contract `counter` and networks (intent)          |
-| `caatinga.artifacts.json` | Empty network slots until the first successful deploy      |
-| `src/`                    | Vite + React app (optional for this session)               |
-| `package.json`            | Scripts for `build`, `deploy`, `dev`, and Caatinga helpers |
+| Path                      | Purpose                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| `contracts/counter/`      | Rust / Soroban counter (`get`, `increment`)                                                     |
+| `caatinga.config.ts`      | Declares contract `counter` and networks (intent)                                               |
+| `caatinga.artifacts.json` | Empty network slots until the first successful deploy                                           |
+| `src/`                    | Vite + React app (optional for this session)                                                    |
+| `package.json`            | Frontend scripts (`dev`, `build`) plus `caatinga:build`, `caatinga:deploy`, `caatinga:generate` |
 
 <details>
 <summary>Speaker Notes</summary>
@@ -225,7 +230,7 @@ Verify you have:
 
 ### Purpose
 
-Run diagnostics so config, binaries, network connectivity, and credentials are ready before you build or deploy.
+Run diagnostics so config, binaries, the configured network entry, and the `--source` identity are ready before you build or deploy.
 
 ### Command
 
@@ -237,13 +242,14 @@ npx ctg doctor --network testnet --source alice
 
 - Checks pass for Node.js, Stellar CLI, Rust, and WASM.
 - `caatinga.config.ts` loads successfully.
-- Identity `alice` resolves with a positive balance.
+- `network testnet found` (a config lookup, not a connectivity test).
+- `source identity alice found` (the alias exists in Stellar CLI; doctor does not check its balance).
 - An untested Stellar CLI version warning (if any) is usually advisory.
 
 <details>
 <summary>Speaker Notes</summary>
 Doctor is the safety net. Always run it before deploy in a live room.
-It checks machine tools and Stellar-specific state, including whether `alice` has enough XLM.
+It checks machine tools, the project config, and that the `alice` alias exists locally. It does not query the network or the account balance — fund with `stellar keys generate alice --fund --network testnet` if needed.
 </details>
 
 ### What changed?
@@ -475,33 +481,36 @@ From `caatinga.artifacts.json` (`networks.testnet.contracts.counter.contractId`)
 
 ### Purpose
 
-Compare local artifacts with what the network reports for the deployed contract.
+Summarize what local artifacts record for each contract and whether generated bindings are fresh. `status` reads local files only; use `ctg inspect` for an on-chain check.
 
 ### Command
 
 ```bash
 npx ctg status --network testnet
+npx ctg inspect counter --network testnet
 ```
 
 ### Expected Result
 
-- Contract `counter` shown as deployed on `testnet` with the active ID from local artifacts.
+- `status` prints a table with contract `counter` on `testnet`: shortened contract ID and WASM hash from local artifacts, `DEPLOYED ✓`, and the bindings state.
+- `inspect` prints `On-chain: reachable` for the recorded contract ID.
 
 <details>
 <summary>Speaker Notes</summary>
-Status confirms the locally recorded contract ID exists on-chain and surfaces the WASM hash it is running.
+Status is a local view: artifacts plus binding markers, no RPC call. Inspect is the command that asks the network whether the recorded contract ID is reachable.
 </details>
 
 ### What changed?
 
 - No files changed.
-- Network status query completed.
+- `status` read local artifacts; `inspect` queried the network read-only.
 
 ### ✅ Checkpoint
 
 Verify you have:
 
-- [ ] Local artifacts and network status agree for `counter`
+- [ ] `status` shows `counter` as deployed with fresh bindings
+- [ ] `inspect` reports `On-chain: reachable` for `counter`
 
 ---
 
@@ -579,7 +588,7 @@ Mention that on-chain counter state resets because this is a new instance.
     "testnet": {
       "contracts": {
         "counter": {
-          "contractId": "CC7Y6EXAMPLENEWCONTRACTID0000000000000000000000000000000",
+          "contractId": "CC7Y6EXAMPLENEWCONTRACTIDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
           "wasmHash": "9a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890",
           "deployedAt": "2026-07-30T15:20:00Z",
           "history": [
@@ -700,7 +709,10 @@ Copy-paste loop for the session (same agenda as [Canonical Workflow](#canonical-
 
 ```bash
 node --version
-npx ctg doctor --network testnet --source alice
+rustc --version
+rustup target list --installed
+stellar --version
+stellar keys generate alice --fund --network testnet
 
 npx ctg init my-dapp
 cd my-dapp
@@ -713,6 +725,7 @@ npx ctg read counter.get --network testnet
 npx ctg invoke counter.increment --network testnet --source alice
 npx ctg read counter.get --network testnet
 npx ctg status --network testnet
+npx ctg inspect counter --network testnet
 
 npx ctg build counter
 npx ctg deploy counter --upgrade --network testnet --source alice

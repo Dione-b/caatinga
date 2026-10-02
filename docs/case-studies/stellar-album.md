@@ -24,7 +24,7 @@ npm install
 ctg doctor --source deployer --network testnet   # verify prerequisites
 ctg build
 ctg deploy --source deployer --network testnet
-ctg generate --network testnet
+# ctg generate --network testnet   # optional: deploy already generates bindings; rerun only to recover
 cd frontend && npm install && npm run dev
 ```
 

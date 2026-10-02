@@ -3,6 +3,7 @@
 ## Contents
 
 - [Default CI](#default-ci)
+- [Deploy regression (testnet)](#deploy-regression-testnet)
 - [Live testnet smoke (release gate)](#live-testnet-smoke-release-gate)
 - [Smoke script exit codes](#smoke-script-exit-codes)
 - [Smoke secrets handling](#smoke-secrets-handling)
@@ -15,13 +16,17 @@ Default CI does not require testnet access, Freighter, or private keys. Tests us
 
 ## Default CI
 
-The default GitHub Actions workflow runs typecheck, docs check, build, and tests. No testnet access required.
+The default GitHub Actions workflow (`.github/workflows/ci.yml`) runs, in the `ci` job: `pnpm lint`, `pnpm check:versions`,
+`pnpm typecheck`, `pnpm docs:check`, `pnpm check:template-imports`, `pnpm build`, and `pnpm test`, with Stellar CLI
+`28.0.0` installed. A separate `stellar-cli-matrix` job installs Stellar CLI `23.3.0` (minimum supported) and runs the
+parser fixture matrix and live capability probe tests. No testnet access required.
 
 ## Deploy regression (testnet)
 
 Workflow: `.github/workflows/testnet-deploy-regression.yml` — triggers: weekly schedule (Monday), `workflow_dispatch`.
 
-Typical steps: `ctg deploy --if-changed` → `ctg generate --strict-network` → `ctg doctor --strict-bindings` → `ctg smoke`.
+Steps (on a copy of the `react-vite-counter` template): `ctg build counter` → `ctg deploy counter --if-changed` →
+`ctg generate counter --strict-network` → `ctg doctor --strict-bindings`. The workflow does not run `ctg smoke`.
 
 Local equivalent:
 
@@ -77,7 +82,10 @@ local machines.
 
 Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
 
-Before tagging `v1.0.0`, verify three consecutive successful scheduled runs (see [v1.0.0 observability plan](./release/v1.0.0.md#observability-plan)).
+Before promoting a release to `latest`, confirm recent scheduled smoke runs are green (see the
+[v1.0.0 observability plan](./release/v1.0.0.md#observability-plan) for the original criteria).
+
+### Stellar CLI fixtures
 
 Stellar CLI fixtures live under:
 
@@ -91,16 +99,18 @@ New Stellar CLI version fixtures should include the CLI semver in the filename, 
 
 See [Stellar CLI Version Contract](../stellar-cli-version-contract.md) for the supported version range and upgrade process.
 
-When adding parser behavior:
+### Adding parser behavior
 
-CI runs `pnpm check:fixtures` (`scripts/check-fixture-references.sh`) to fail on orphaned files under `packages/core/test/fixtures/stellar-cli/`.
+`pnpm check:fixtures` (`scripts/check-fixture-references.sh`) fails on orphaned files under
+`packages/core/test/fixtures/stellar-cli/`. It is not a step in `ci.yml`; it runs as part of `pnpm ci:publish-matrix`
+and `pnpm pre:publish`, so run it locally when you add or remove fixtures.
 
 1. Add the raw CLI output fixture.
 2. Add a parser test that reads the fixture.
 3. Include at least one failure fixture.
 4. Assert the public `CAATINGA_*` error code.
 
-When adding `@caatinga/client` behavior:
+### Adding `@caatinga/client` behavior
 
 1. Use mocked generated bindings.
 2. Use mocked wallet adapters.

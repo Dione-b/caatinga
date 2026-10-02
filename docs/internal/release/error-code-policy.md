@@ -16,4 +16,4 @@ Every documented code must include meaning, likely cause, suggested fix, CI hand
 
 ## CLI exit behavior
 
-The Caatinga CLI sets `process.exitCode = 1` on failure (including unhandled `program.parseAsync` rejections) and formats failures with `printError`: the `Error:` line uses stderr, while the blank line, `Code:`, and optional `Hint:` use the logger info channel (stdout in the stock CLI). Automation should parse process output for the `Code:` line and must not assume a synchronous `process.exit(1)` — the process may exit non-zero after the event loop drains while still printing the code.
+The Caatinga CLI sets `process.exitCode = 1` on failure (including unhandled `program.parseAsync` rejections) and formats failures with `printError`, which writes the whole block (`✖ Error` header, message, `Code:`, and optional `Hint:`) to stderr via `console.error`. Automation should parse stderr for the `Code:` line and must not assume a synchronous `process.exit(1)` — the process may exit non-zero after the event loop drains while still printing the code.

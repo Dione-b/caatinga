@@ -57,13 +57,24 @@ ctg deploy <contract> --network testnet --source alice
 
 `ctg build` alone does not create deployment records.
 
+**Symptom:** `deploy` fails with `WASM output was not found at <path>`.
+
+**Cause:** The contract has not been compiled, or `wasm` in `caatinga.config.ts` points somewhere else (for example when `CARGO_TARGET_DIR` is set).
+
+**Fix:**
+
+```bash
+ctg build <contract>
+ctg deploy <contract> --network testnet --source alice
+```
+
 ---
 
 ## 5. `CAATINGA_PLACEHOLDER_BINDING`
 
 **Symptom:** Browser shows binding error before wallet opens.
 
-**Cause:** `ctg generate` was not run after deploy.
+**Cause:** `ctg deploy` generates bindings automatically, so this usually means the deploy ran with `--no-generate`, binding generation failed (check the deploy output), or the dev server was not restarted after bindings changed.
 
 **Fix:**
 
@@ -149,6 +160,13 @@ ctg deploy counter --network testnet --source alice
 
 Never pass `G...` addresses or secret keys as `--source`.
 
+**Mainnet `read` / `smoke`:** these commands fall back to `CAATINGA_SOURCE`, then `alice`, but never fall back to `alice` on mainnet. Pass `--source <alias>` or set `CAATINGA_SOURCE`:
+
+```bash
+ctg read counter.get --network mainnet --source my-mainnet-key
+CAATINGA_SOURCE=my-mainnet-key ctg smoke --network mainnet
+```
+
 ---
 
 ## 12. `CAATINGA_RUST_TARGET_NOT_FOUND`
@@ -185,9 +203,11 @@ ctg generate counter --network testnet
 
 ---
 
-## 15. `CAATINGA_DOCTOR_PARTIAL_DEPLOY` (advisory)
+## 15. Doctor reports missing deploy coverage (advisory)
 
-**Symptom:** Doctor lists contracts missing from artifacts.
+**Symptom:** `ctg doctor --network <network>` prints a `Deploy coverage (<network>):` section with `✗` next to contracts that have no `contractId` in artifacts. This is advisory and does not make doctor fail.
+
+`CAATINGA_DOCTOR_PARTIAL_DEPLOY` is a reserved public code; it is not currently emitted.
 
 **Fix:** Deploy missing contracts:
 
@@ -198,9 +218,41 @@ ctg doctor --network testnet
 
 ---
 
+## 16. `CAATINGA_MAINNET_CONFIRMATION_REQUIRED`
+
+**Symptom:** `deploy`, `upgrade`, `invoke`, `wire`, `regression`, `rollback`, or `zk invoke` against mainnet fails in CI or another non-interactive shell, or aborts after you decline the prompt.
+
+**Cause:** Mainnet transactions require interactive confirmation. Without a TTY there is no prompt to answer.
+
+**Fix:** Confirm explicitly for unattended runs:
+
+```bash
+ctg deploy counter --network mainnet --source my-mainnet-key --yes
+# or
+CAATINGA_ASSUME_YES=true ctg deploy counter --network mainnet --source my-mainnet-key
+```
+
+---
+
+## 17. Doctor rejects the Rust toolchain
+
+**Symptom:** `ctg doctor` reports `Rust <version> is rejected by stellar contract build` (Rust 1.81–1.83 or 1.91.0) or `Rust <version> is older than the required 1.91.1`.
+
+**Cause:** `stellar contract build` refuses those toolchains.
+
+**Fix:** Use Rust 1.91.1 or newer:
+
+```bash
+rustup update stable
+rustc --version
+ctg doctor
+```
+
+---
+
 ## Security fixes
 
-**Applies to versions before the fix landed on `main` (3.9.2 and earlier are affected; check `npm view @caatinga/cli dist-tags` for the current patched version).**
+**Fixed in 3.10.1 and later; 3.9.2 and earlier are affected (check `npm view @caatinga/cli dist-tags` for the current version).**
 
 - **`ctg identity import` tar path traversal.** Import previously extracted attacker-controlled tarballs without checking entry paths, so a crafted archive could write files outside the target Stellar config directory. Import now lists archive entries first and refuses the import if any entry would resolve outside the target directory. Only import archives from a source you trust — the check blocks path traversal, not a malicious archive's legitimate-looking contents.
 - **Unverified `circom` downloads (`ensureCircom`).** The ZK toolchain downloaded and executed a platform `circom` binary from GitHub with no integrity check, so a compromised release asset or on-path tamperer could get an arbitrary binary run and cached for reuse. Every `circom` binary — freshly downloaded or read from `~/.caatinga/zk-tools` cache — is now verified against a pinned SHA-256 before use. A mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` (see [errors.md](./errors.md#zk)) instead of running an unverified binary.

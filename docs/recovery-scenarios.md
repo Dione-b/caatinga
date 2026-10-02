@@ -6,13 +6,16 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 ## Interrupted deploy
 
-| Symptom                          | What happened                                                                      | Recovery                                                                                                              |
-| -------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Deploy stopped mid-graph         | Earlier contracts in `dependsOn` order may already be in `caatinga.artifacts.json` | Re-run `ctg deploy --network <network> --source <identity>` — already-deployed contracts are skipped unless `--force` |
-| CLI killed during artifact write | Atomic write (`write temp → rename`) prevents truncated JSON                       | If file is corrupt, restore from Git or run `ctg migrate artifacts` after fixing JSON                                 |
-| Transient testnet error          | Retry logs appear: `Deploy hit a transient testnet error`                          | Wait for automatic retries or re-run deploy                                                                           |
+| Symptom                          | What happened                                                                       | Recovery                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Deploy stopped mid-graph         | Earlier contracts in `dependsOn` order may already be in `caatinga.artifacts.json`  | Re-run `ctg deploy --network <network> --source <identity>` — already-deployed contracts are skipped unless `--force`     |
+| CLI killed during artifact write | Atomic write (`write temp → rename`) prevents truncated JSON                        | If file is corrupt, restore from Git or run `ctg migrate artifacts` after fixing JSON                                     |
+| Transient RPC error              | Retry logs appear: `Deploy hit a transient RPC error (attempt …)`                   | Wait for automatic retries or re-run deploy. On mainnet there are no automatic retries: check state, then re-run          |
+| Artifacts lock timeout           | `CAATINGA_ARTIFACTS_LOCK_TIMEOUT`: another run holds `caatinga.artifacts.json.lock` | Wait for the other `deploy`/`upgrade` to finish. If none is running, remove the `.lock` file named in the error and retry |
 
-**Doctor:** `ctg doctor --network testnet` lists partial deploy coverage (`CAATINGA_DOCTOR_PARTIAL_DEPLOY` advisory).
+**Doctor:** `ctg doctor --network testnet` lists partial deploy coverage in its advisory `Deploy coverage (<network>):` section (`✗` per missing contract). No error code is printed; `CAATINGA_DOCTOR_PARTIAL_DEPLOY` is reserved.
+
+**Artifacts lock:** `deploy` and `upgrade` serialize writes through `caatinga.artifacts.json.lock`, which records the owner PID. A lock left by a killed run is reclaimed automatically when that PID is gone; the timeout (15s) only fires when the owner is alive or unknown.
 
 ---
 

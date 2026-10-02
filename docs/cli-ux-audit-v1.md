@@ -1,11 +1,13 @@
 # CLI UX Audit (Sprint 45 — pre-v1.0)
 
+_Historical snapshot (audit of 2026-07-06, pre-v1.0); may not match current CLI behavior. See [CLI reference](./cli.md)._
+
 Final review checklist before v1.0 contract freeze. Compare live `--help` output against [cli.md](./cli.md).
 
 ## Global
 
 - [x] `ctg --help` groups commands by domain
-- [x] `ctg version` prints `@caatinga/cli@<version>` and Node.js version
+- [x] `ctg version` prints `@caatinga/cli: <version>` plus an npm dist-tag advisory
 - [x] Exit codes: `0` success, `1` failure (all commands)
 - [x] Errors use `[CAATINGA_*]` prefix via `formatCaatingaError`
 
@@ -15,7 +17,7 @@ Final review checklist before v1.0 contract freeze. Compare live `--help` output
 | --------------- | --------------------------------------------------------- | ----------- |
 | `--network`     | deploy, upgrade, generate, invoke, read, doctor, smoke, … | Yes         |
 | `--source`      | deploy, upgrade, invoke, wire                             | Yes         |
-| `--force`       | deploy, upgrade                                           | Yes         |
+| `--force`       | deploy (and `zk init`)                                    | Yes         |
 | `-v, --version` | global                                                    | Yes         |
 
 ## Command review

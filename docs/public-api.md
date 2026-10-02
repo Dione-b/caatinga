@@ -21,13 +21,15 @@ Published binaries: `ctg` and `caatinga` (legacy alias; same entrypoint).
 | Domain                 | Commands                                                        |
 | ---------------------- | --------------------------------------------------------------- |
 | Scaffolding & Setup    | `init`, `identity`                                              |
-| Build                  | `build`                                                         |
+| Build                  | `build`, `generate`                                             |
 | Deployment & Lifecycle | `deploy`, `upgrade`, `rollback`, `wire`                         |
-| Query & Execution      | `read`, `invoke`, `estimate`, `dev`                             |
+| Query & Execution      | `read`, `invoke`, `estimate`                                    |
 | Status & Diagnostics   | `status`, `inspect`, `doctor`, `sync-env`, `migrate`, `version` |
 | Automation & CI        | `smoke`, `regression`, `ci`                                     |
 
 All commands, flags, exit codes (`0` / `1`), and `CAATINGA_*` error codes are documented in [cli.md](./cli.md) and [errors.md](./errors.md).
+
+`ctg dev` is registered as a hidden, reserved command and is not part of the supported surface.
 
 ZK commands (`ctg zk init`, `zk build`, `zk prove`, `zk invoke`) are **experimental** — see [scope.md](./scope.md).
 
@@ -94,6 +96,14 @@ Exported from `@caatinga/core` for power users and CI. **Additive changes are mi
 ### Invoke / read
 
 `invokeContract`, `readContract`, `estimateDeployCost`, `inspectContract`, `verifyExpect`, `runSmokeReads`
+
+### Runtime requirements (`@caatinga/core/runtime/requirements`)
+
+Dependency-free subpath for toolchain checks: `NODE_MIN_MAJOR`, `RUST_MIN_VERSION`, `RUST_BLOCKED_VERSIONS`, `CURRENT_RUST_WASM_TARGET`. Values move with supported toolchains (minor releases).
+
+### ZK helpers (`@caatinga/zk`)
+
+Published with root (`.`) and browser-safe (`@caatinga/zk/browser`) entrypoints. Like the `ctg zk` commands, this package is **experimental** — see [scope.md](./scope.md).
 
 ### Networks / config / templates
 

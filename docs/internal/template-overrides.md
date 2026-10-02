@@ -39,9 +39,10 @@ npm ls ws
 
 When editing overrides, update **all** of:
 
-- [`packages/client/src/vite/wallet-stubs.ts`](../../packages/client/src/vite/wallet-stubs.ts) — `walletStubOverrides()`, `walletStubPnpmWorkspaceYaml()`
+- [`packages/client/src/vite/wallet-stubs.ts`](../../packages/client/src/vite/wallet-stubs.ts) — `walletStubOverrides()`, `walletStubPnpmWorkspaceYaml()`, `walletStubViteAliases()` (Vite `resolve.alias` entries pointing stubbed packages at `src/stubs/`)
 - [`packages/templates/react-vite-counter/package.json`](../../packages/templates/react-vite-counter/package.json) + [`pnpm-workspace.yaml`](../../packages/templates/react-vite-counter/pnpm-workspace.yaml)
 - [`packages/templates/zk-starter/package.json`](../../packages/templates/zk-starter/package.json) + [`pnpm-workspace.yaml`](../../packages/templates/zk-starter/pnpm-workspace.yaml)
+- the Vite alias layer in each template's `vite.config.ts` ([`react-vite-counter`](../../packages/templates/react-vite-counter/vite.config.ts), [`zk-starter`](../../packages/templates/zk-starter/vite.config.ts)), which must keep wiring `resolve.alias` to `walletStubViteAliases(stubsDir)`; when a stub is added or removed, update the alias map in `wallet-stubs.ts` and the stub files under each template's `src/stubs/`
 
 `pnpm build` copies `packages/templates/` into `@caatinga/cli/templates` automatically.
 

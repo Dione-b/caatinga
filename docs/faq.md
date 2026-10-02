@@ -100,7 +100,7 @@ Patch releases still move quickly, so pin an exact version in CI rather than a f
 
 ### 11. What does the `ctg init` command do?
 
-The `ctg init` command creates a new Caatinga project from a template. By default, it uses the `react-vite-counter` template, but it also supports minimal templates (`--minimal`) or an empty project (`--empty`).
+The `ctg init` command creates a new Caatinga project from a template. By default, it uses the `react-vite-counter` template (select another with `-t, --template <name>`). `--minimal` scaffolds a CLI + Soroban contract project without a frontend template; `--empty` is an alias for `--minimal`.
 
 Example:
 
@@ -131,8 +131,8 @@ The deployment automatically performs several steps:
 - generates TypeScript bindings (by default);
 - when run without specifying a contract, it also runs:
 
-  - `wire`;
-  - `sync-env`.
+  - `wire` (when a `postDeploy` array is configured);
+  - `sync-env` (when both `frontend.envFile` and `frontend.env` are configured).
 
 Thus, a single command can set up the entire application after deployment.
 
@@ -159,7 +159,7 @@ Caatinga:
 - resolves dependencies (`dependsOn`);
 - determines the correct order of deployment;
 - executes `postDeploy` hooks;
-- synchronizes frontend environment variables;
+- synchronizes frontend environment variables (when `frontend.envFile` and `frontend.env` are set);
 - automatically generates bindings.
 
 This is the recommended mode for applications with multiple contracts.
@@ -221,8 +221,7 @@ It checks:
 - project configuration;
 - artifacts;
 - bindings;
-- Stellar identity;
-- network connectivity.
+- Stellar identity.
 
 It is the recommended command to run before making any changes to the deployment state.
 
@@ -239,7 +238,7 @@ The information displayed includes:
 - the network being used;
 - support for JSON output (`--json`).
 
-With `--strict`, the command returns exit code `1` if there are stale or missing bindings.
+With `--strict`, the command returns exit code `1` if any deployed contract has a binding status other than `fresh` (including stale, missing, or `unknown`).
 
 ---
 
@@ -426,13 +425,15 @@ postDeploy: [
 
 `sync-env` synchronizes deployment information from the artifacts into a frontend `.env` file.
 
-Information that can be exported includes:
+It requires both `frontend.envFile` and `frontend.env` in `caatinga.config.ts`. The supported `frontend.env` source keys are:
 
-- Contract ID;
-- WASM Hash;
-- RPC URL;
-- Network Passphrase;
-- Deployment date.
+- `network` (resolved network name);
+- `rpcUrl`;
+- `networkPassphrase`;
+- `<contract>` (contract ID);
+- `<contract>.wasmHash` (WASM hash).
+
+It runs automatically only after a full-graph `ctg deploy` (no contract name, without `--no-sync-env`); otherwise run `ctg sync-env` yourself.
 
 This eliminates the need to manually update environment variables after each deployment.
 
@@ -552,6 +553,8 @@ It requires only two methods:
 
 - `getPublicKey()`
 - `signTransaction()`
+
+An optional `getNetworkPassphrase()` lets the client reject a wallet on the wrong network with `CAATINGA_WALLET_NETWORK_MISMATCH`.
 
 Any wallet that implements this interface can be used by the client.
 

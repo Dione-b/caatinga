@@ -83,6 +83,8 @@ Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLe
 
 `postDeployRead` (optional): same shape as `postDeploy`; always simulated (`kind: "read"`). Use a read-only identity separate from write hooks when testnet state accumulates.
 
+Auto-wiring after a full-graph `ctg deploy` (no contract name, without `--no-wire`) only runs when a `postDeploy` array is present in the config (it may be empty). A config with only `postDeployRead` is not wired automatically; run `ctg wire` after deploying.
+
 `smoke` (optional):
 
 | Field            | Type    | Notes                                             |
@@ -90,22 +92,25 @@ Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLe
 | `smoke.reads`    | array   | read checks for `ctg smoke`                       |
 | `useFreshSymbol` | boolean | inject ephemeral `symbol` arg (UUID) on each read |
 
-Each `smoke.reads` / `postDeployRead` entry uses the same fields as `postDeploy` (`contract`, `method`, `args`, `source`, `expect`, optional `kind`).
+Each `smoke.reads` entry takes `contract`, `method`, `args`, `source`, and `expect` (no `kind`; smoke reads are always simulated). `postDeployRead` entries use the same fields as `postDeploy`, including optional `kind`.
+
+When `smoke.reads` is absent or empty, `ctg smoke` falls back to the `postDeployRead` entries. If neither is configured, `ctg smoke` fails with "No smoke reads configured."
 
 When `useFreshSymbol` is `true`, Caatinga adds a `symbol` argument with a fresh UUID to each smoke read so testnet writes do not reuse shared keys. See [Testnet hygiene](./internal/testnet-hygiene.md).
 
 `NetworkConfig` (each value in `networks`):
 
-| Field               | Type               | Required | Notes |
-| ------------------- | ------------------ | -------- | ----- |
-| `rpcUrl`            | string (valid URL) | yes      |       |
-| `networkPassphrase` | string (min 1)     | yes      |       |
+| Field                 | Type               | Required | Notes                                                                                                                           |
+| --------------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `rpcUrl`              | string (valid URL) | yes      |                                                                                                                                 |
+| `networkPassphrase`   | string (min 1)     | yes      |                                                                                                                                 |
+| `requireConfirmation` | boolean            | no       | prompt before mutating commands on this network; mainnet always confirms regardless of this value; `-y, --yes` skips the prompt |
 
 `ZkConfig` (optional root `zk` field):
 
-| Field         | Type                              | Required | Notes                      |
-| ------------- | --------------------------------- | -------- | -------------------------- |
-| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes      | at least one circuit entry |
+| Field         | Type                              | Required | Notes                         |
+| ------------- | --------------------------------- | -------- | ----------------------------- |
+| `zk.circuits` | `Record<string, ZkCircuitConfig>` | yes      | circuit name → circuit config |
 
 `ZkCircuitConfig` (each value in `zk.circuits`):
 
@@ -214,28 +219,32 @@ After a deploy, each contract is recorded under
 
 `ContractArtifact` fields:
 
-| Field                | Type                                          | Required | Default | Notes                                    |
-| -------------------- | --------------------------------------------- | -------- | ------- | ---------------------------------------- |
-| `contractId`         | string (min 1)                                | yes      | —       | deployed on-chain ID                     |
-| `wasmHash`           | string (min 1)                                | yes      | —       | hash of the deployed WASM                |
-| `deployedAt`         | ISO 8601 datetime string                      | yes      | —       |                                          |
-| `sourcePath`         | string (min 1)                                | yes      | —       |                                          |
-| `wasmPath`           | string (min 1)                                | yes      | —       |                                          |
-| `dependencies`       | `string[]`                                    | no       | `[]`    | resolved dependency contract names       |
-| `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | deploy args after placeholder resolution |
-| `upgradeStrategy`    | `"in-place"` \| `"redeploy"`                  | no       | —       | set by `ctg upgrade` or redeploy         |
-| `history`            | `ContractArtifactHistoryEntry[]`              | no       | —       | prior IDs / WASM hashes (schema v2)      |
+| Field                | Type                                          | Required | Default | Notes                                      |
+| -------------------- | --------------------------------------------- | -------- | ------- | ------------------------------------------ |
+| `contractId`         | string (contract strkey)                      | yes      | —       | `C` + 55 base32 chars (A-Z2-7), 56 total   |
+| `wasmHash`           | string (64 lowercase hex)                     | yes      | —       | hash of the deployed WASM                  |
+| `deployedAt`         | ISO 8601 datetime string                      | yes      | —       |                                            |
+| `sourcePath`         | string (min 1)                                | yes      | —       |                                            |
+| `wasmPath`           | string (min 1)                                | yes      | —       |                                            |
+| `dependencies`       | `string[]`                                    | no       | `[]`    | resolved dependency contract names         |
+| `resolvedDeployArgs` | `Record<string, string \| number \| boolean>` | no       | `{}`    | deploy args after placeholder resolution   |
+| `upgradeStrategy`    | `"in-place"` \| `"redeploy"`                  | no       | —       | set by `ctg upgrade` or redeploy           |
+| `history`            | `ContractArtifactHistoryEntry[]`              | no       | —       | prior IDs / WASM hashes (schema v2)        |
+| `metadata`           | `ContractMetadata`                            | no       | —       | build provenance written by deploy/upgrade |
 
-`ContractArtifactHistoryEntry` fields (optional on each history row):
+`ContractArtifactHistoryEntry` fields (`contractId`, `wasmHash`, `deployedAt`, and `supersededAt` are required; `reason`, `upgradeType`, and `metadata` are optional):
 
 | Field          | Type                                              | Notes                                                    |
 | -------------- | ------------------------------------------------- | -------------------------------------------------------- |
-| `contractId`   | string                                            | prior on-chain ID (same as active for in-place upgrades) |
-| `wasmHash`     | string                                            | prior WASM hash                                          |
+| `contractId`   | string (contract strkey)                          | prior on-chain ID (same as active for in-place upgrades) |
+| `wasmHash`     | string (64 lowercase hex)                         | prior WASM hash                                          |
 | `deployedAt`   | ISO 8601                                          | when that version was active                             |
 | `supersededAt` | ISO 8601                                          | when replaced                                            |
 | `reason`       | `"upgrade"` \| `"rollback"` \| `"force-redeploy"` | why it was superseded                                    |
 | `upgradeType`  | `"in-place"` \| `"new-contract"`                  | in-place = same ID, new WASM; new-contract = redeploy    |
+| `metadata`     | `ContractMetadata`                                | metadata of the superseded version, when recorded        |
+
+`ContractMetadata` fields (all optional strings): `gitCommit`, `rustcVersion`, `caatingaVersion`, `network`, `timestamp`, `checksum`. Deploy and upgrade collect them when available.
 
 See [Contract upgrade](./tutorials/contract-upgrade.md) for when to use `ctg upgrade` vs `deploy --upgrade`.
 
