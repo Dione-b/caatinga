@@ -92,7 +92,7 @@ plain `-v`/`--version` flag stays offline and prints only the version.
 
 ## `ctg deploy`
 
-Flags: `--source` (required), `--network`, `--force`, `--upgrade`, `--if-changed`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony`
+Flags: `--source` (required), `--network`, `-y, --yes`, `--force`, `--upgrade`, `--if-changed`, `--dry-run`, `--no-deps`, `--verify-deps`, `--no-stale-check`, `--no-generate`, `--no-wire`, `--no-sync-env`, `--allow-dev-ceremony`
 
 Deploys one contract (or the full configured graph when `contract` is omitted) and records contract IDs in `caatinga.artifacts.json`. Transient testnet failures retry with backoff before `CAATINGA_DEPLOY_FAILED`.
 
@@ -104,6 +104,8 @@ Behavior:
 - `--verify-deps` confirms each dependency's contract ID exists on-chain before resolving deploy args
 - Without `--force`, an existing `contractId` prints `[skipped]` and does not call Stellar CLI
 - Before deploy, Caatinga warns if sources look newer than the WASM (skip with `--no-stale-check`)
+- `--dry-run` estimates the deploy fee without submitting (same as `ctg estimate deploy`; uses the first configured contract when `contract` is omitted)
+- On mainnet, deploy asks for interactive confirmation; `-y, --yes` skips the prompt (for CI)
 
 After a successful deploy:
 
@@ -114,7 +116,7 @@ Use `deploy --upgrade` (alias for `--force` with upgrade history reason) when yo
 contract instance** and artifact history keyed by prior `contractId`. For admin-gated in-place WASM
 replacement on the **existing** `contractId`, use `ctg upgrade` instead.
 
-## `ctg upgrade <contract> --source <identity> [--network testnet] [--if-changed] [--expected-hash <hash>] [--no-build] [--generate] [--sync-env]`
+## `ctg upgrade <contract> --source <identity> [--network testnet] [-y] [--if-changed] [--expected-hash <hash>] [--no-build] [--generate] [--sync-env]`
 
 Upgrades a deployed contract **in-place**: build (unless `--no-build`), `stellar contract upload`,
 then `stellar contract invoke … upgrade --new_wasm_hash <hash>` on the artifact's current
@@ -131,7 +133,39 @@ fails, the CLI hints to use `ctg deploy --upgrade` for redeploy-style upgrades. 
 failures exit with `CAATINGA_UPLOAD_FAILED`; missing hash in CLI output uses
 `CAATINGA_WASM_HASH_NOT_FOUND`.
 
-## `ctg wire [--network testnet] --source <identity>`
+## `ctg estimate deploy <contract> --source <identity> [--network testnet]`
+
+Estimates the fee for deploying one contract without submitting anything. Caatinga builds the
+deploy transaction for `--source`, simulates it against the selected network, and prints the
+inclusion fee, resource fee, and total in stroops. The estimate is **advisory**: when simulation
+fails, the command prints the reason and exits without an estimate instead of failing.
+`ctg deploy --dry-run` runs the same estimate.
+
+## `ctg inspect <contract> [--network testnet]`
+
+Compares a deployed contract with its local artifact record. Prints the artifact's contract ID,
+WASM hash, deploy time, and history entry count; whether the contract interface is reachable on
+the network (with Stellar CLI diagnostics when it is not); whether the local WASM hash matches the
+artifact; and the configured dependencies. Requires Stellar CLI and an existing artifact for the
+contract on that network (otherwise `CAATINGA_ARTIFACT_NOT_FOUND`).
+
+## `ctg rollback <contract> --to <contractId> [--network testnet] [-y]`
+
+Logical rollback: restores a previous contract ID from the contract's `history[]` in
+`caatinga.artifacts.json` and makes it the active ID. **On-chain state is unchanged** — newer
+deployments stay on the network as orphaned contracts. Re-run `ctg generate` and `ctg sync-env`
+afterwards so bindings and the frontend env point at the restored ID.
+
+`--to` must be a `C...` contract ID (56 chars) or a 64-char hex ID that exists in the artifact
+history; otherwise the command fails with `CAATINGA_ROLLBACK_TARGET_NOT_FOUND`. On mainnet it asks
+for confirmation unless `-y` is passed.
+
+## `ctg migrate artifacts`
+
+Upgrades `caatinga.artifacts.json` to the current schema version in place (no-op when it is
+already current). See [Artifacts versioning](./artifacts-versioning.md).
+
+## `ctg wire [--network testnet] --source <identity> [-y]`
 
 Runs every `postDeploy` and `postDeployRead` hook from `caatinga.config.ts` in order. Each hook
 calls a deployed contract method with resolved placeholders (`${contracts.*.contractId}`,
@@ -191,7 +225,7 @@ Runs read-only smoke checks from `smoke.reads` or `postDeployRead` in config, us
 
 When `smoke.useFreshSymbol` is `true`, each read gets an ephemeral `symbol` arg for testnet writes that should not pollute shared state.
 
-## `ctg regression --source <identity> [--network testnet] [--skip-test] [--skip-build] [--skip-deploy] [--skip-generate] [--skip-smoke]`
+## `ctg regression --source <identity> [--network testnet] [-y] [--skip-test] [--skip-build] [--skip-deploy] [--skip-generate] [--skip-smoke]`
 
 Orchestrates the recommended pipeline: `pnpm test` → `ctg build` → `ctg deploy --if-changed` → `ctg generate` → `ctg smoke`.
 
@@ -215,13 +249,16 @@ would resolve outside the target directory (tar path traversal) — treat this t
 untrusted archive: only import files from a source you trust, since the check blocks path
 traversal but not a malicious archive's legitimate-looking contents.
 
-## `ctg invoke <contract.method> --source <identity> [--network testnet] [args...]`
+## `ctg invoke <contract.method> --source <identity> [--network testnet] [-y] [--no-resolve-aliases] [args...]`
 
-Invokes a deployed contract method that **mutates state** or must be signed and submitted. Extra args are forwarded to the Stellar implicit contract CLI. CLI identity aliases in named args (for example `--owner alice`) are resolved to `G...` addresses before invoke.
+Invokes a deployed contract method that **mutates state** or must be signed and submitted.
+Extra args are forwarded to the Stellar implicit contract CLI. CLI identity aliases in named args
+(for example `--owner alice`) are resolved to `G...` addresses before invoke (see `ctg read` below
+for escaping plain strings). On mainnet, invoke asks for confirmation unless `-y` is passed.
 
 If Stellar CLI reports that the target is a read-only method, Caatinga suggests `ctg read` (or `client.read()` / `client.simulate()` in browser code) instead of `force: true`.
 
-## `ctg read <contract.method> [--network testnet] [--source alice] [--expect <dsl>] [--quiet] [--summary] [args...]`
+## `ctg read <contract.method> [--network testnet] [--source alice] [--expect <dsl>] [--quiet] [--summary] [--no-resolve-aliases] [args...]`
 
 Simulates a read-only contract method with `stellar contract invoke --send=no`. `--source` is optional; Caatinga resolves `CAATINGA_SOURCE` or defaults to `alice` for the simulation account.
 
@@ -274,9 +311,10 @@ Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full refere
 
 | Command                                       | Purpose                                                                  |
 | --------------------------------------------- | ------------------------------------------------------------------------ |
+| `ctg zk init [project]`                       | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)             |
 | `ctg zk build [circuit] [--embed-vk]`         | Compile Circom and run **dev** trusted setup (`--embed-vk` experimental) |
-| `ctg zk prove [circuit]`                      | Generate `proof.json` and `public.json`                                  |
-| `ctg zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK)                                |
+| `ctg zk prove [circuit] [--debug]`            | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`) |
+| `ctg zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt     |
 | `ctg zk invoke [circuit] --network <name>`    | Target a configured network (not only `defaultNetwork`)                  |
 
 Shared ZK flags:
