@@ -73,6 +73,30 @@ describe("CaatingaErrorCode", () => {
     expect(CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY).toBe("CAATINGA_DOCTOR_PARTIAL_DEPLOY");
   });
 
+  it("should_not_emit_reserved_codes_from_production_source", async () => {
+    // Reserved codes are documented as "not emitted". Emitting one is a deliberate change that
+    // must also update docs/errors.md and this list (#283).
+    const reservedCodes = ["DOCTOR_PARTIAL_DEPLOY"] as const;
+    const violations: string[] = [];
+
+    for (const filePath of listRepoSourceFiles(repoRoot)) {
+      if (filePath.endsWith(".test.ts") || filePath.endsWith("CaatingaErrorCode.ts")) {
+        continue;
+      }
+      const content = await readFile(filePath, "utf8");
+      for (const code of reservedCodes) {
+        if (
+          content.includes(`CaatingaErrorCode.${code}`) ||
+          content.includes(CaatingaErrorCode[code])
+        ) {
+          violations.push(`${path.relative(repoRoot, filePath)}: ${code}`);
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
   it("should_not_construct_public_errors_with_inline_unprefixed_codes", async () => {
     const violations: string[] = [];
 
