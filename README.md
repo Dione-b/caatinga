@@ -27,7 +27,9 @@ ctg build counter
 ctg deploy counter --network testnet --source alice
 ```
 
-`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip). Run `ctg doctor` to verify prerequisites.
+`deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip).
+
+**Templates:** `ctg init` scaffolds `react-vite-counter` (React + Vite + wallet) by default; pass `--minimal` for a contract-only project. For zero-knowledge dApps, `ctg zk init my-zk-dapp` scaffolds the `zk-starter` template (Circom Groth16 circuit + Soroban verifier). See [Templates](./docs/templates.md) and [ZK](./docs/zk.md).
 
 **Docs:** start at [Getting started](./docs/getting-started.md). Optional walkthrough: [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md).
 
@@ -76,8 +78,8 @@ See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
           │                                        ▲          │
           ▼                                        │          ▼
   ┌────────────────┐    ┌──────────────────┐  ┌─────────────────────────┐
-  │ ctg build │ →  │ ctg deploy  │→ │ bindings auto-generated │
-  │  (Stellar CLI) │    │ (graph-aware)    │  │ + freshness markers     │
+  │   ctg build    │ →  │    ctg deploy    │→ │ bindings auto-generated │
+  │  (Stellar CLI) │    │  (graph-aware)   │  │ + freshness markers     │
   └────────────────┘    └──────────────────┘  └─────────────────────────┘
                                                           │
                               browser                     ▼
@@ -117,11 +119,12 @@ my-dapp/
 
 ## Packages
 
-| Package            | Role                                                                                                                                                                                                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, upgrade, dev, doctor, generate, invoke, read, status, migrate, rollback, estimate, inspect, wire, sync-env, smoke, regression, ci, identity, zk, version |
-| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                                                                                                                           |
-| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                                                                                                                                 |
+| Package            | Role                                                                                                                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@caatinga/cli`    | `caatinga` / `ctg` command — init, build, deploy, upgrade, doctor, generate, invoke, read, status, migrate, rollback, estimate, inspect, wire, sync-env, smoke, regression, ci, identity, zk, version |
+| `@caatinga/core`   | Config, shell orchestration, Stellar CLI adapters, error catalog                                                                                                                                      |
+| `@caatinga/client` | Browser/Node contract client, wallet adapters, React hooks                                                                                                                                            |
+| `@caatinga/zk`     | ZK proof serialization and Circom Groth16 workflow helpers                                                                                                                                            |
 
 Full export map: [Packages](./docs/packages.md). Public errors use stable `CAATINGA_*` codes — see [Errors](./docs/errors.md).
 
