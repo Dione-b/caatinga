@@ -57,9 +57,12 @@ rather than the root `@caatinga/core` package entry.
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
+import artifactsJson from "../caatinga.artifacts.json";
 
+// JSON imports widen `version` to number; the cast restores the artifacts schema type.
+const artifacts = artifactsJson as CaatingaArtifacts;
 const wallet = createStellarWalletsKitAdapter();
 
 const client = createCaatingaClient({

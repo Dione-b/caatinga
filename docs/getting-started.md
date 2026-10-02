@@ -21,7 +21,7 @@ Manual install: [Rust](https://rustup.rs) + `rustup target add wasm32v1-none`, [
 ```bash
 npm install -g @caatinga/cli
 ctg --help
-ctg --help   # standard command; caatinga is a legacy alias
+caatinga --help   # legacy alias for ctg
 ```
 
 Use `npx ctg` (or `npx caatinga`) instead of a global install if you prefer. Pin an exact version for reproducible installs — see [Public API](./public-api.md).
@@ -30,7 +30,7 @@ From the repository:
 
 ```bash
 pnpm install && pnpm build
-pnpm --filter @caatinga/cli dev init my-dapp
+pnpm dev init my-dapp   # builds @caatinga/core first, then runs the CLI from source
 ```
 
 ## Choose your scaffold
@@ -103,28 +103,42 @@ For CI: `ctg smoke`, `ctg regression`, or `ctg ci run`. See [Cheatsheet](./cheat
 After deploy, install client packages (match the CLI version when possible):
 
 ```bash
-npm install @caatinga/client @caatinga/core @creit.tech/stellar-wallets-kit
+npm install @caatinga/client @caatinga/core @stellar/stellar-sdk @creit.tech/stellar-wallets-kit
 ```
 
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
-import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+import {
+  createStellarWalletsKitAdapter,
+  WalletNetwork,
+} from "@caatinga/client/stellar-wallets-kit";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
+import artifactsJson from "../caatinga.artifacts.json";
+
+const network = {
+  name: "testnet",
+  rpcUrl: "https://soroban-testnet.stellar.org",
+  networkPassphrase: "Test SDF Network ; September 2015",
+};
 
 const client = createCaatingaClient({
-  network: {
-    name: "testnet",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: "Test SDF Network ; September 2015",
-  },
-  artifacts,
-  wallet: createStellarWalletsKitAdapter(),
+  network,
+  // JSON imports widen `version` to number; the cast restores the artifacts schema type.
+  artifacts: artifactsJson as CaatingaArtifacts,
+  wallet: createStellarWalletsKitAdapter({
+    network: network.networkPassphrase as WalletNetwork,
+  }),
   contracts: { counter: { binding: Counter } },
 });
 
 await client.contract("counter").read<number>("get");
 await client.contract("counter").invoke<number>("increment");
 ```
+
+The snippet hardcodes testnet for brevity. The Template scaffold reads the network from
+`VITE_CAATINGA_NETWORK`, `VITE_CAATINGA_RPC_URL`, and `VITE_CAATINGA_NETWORK_PASSPHRASE`, which
+`ctg deploy` and `ctg sync-env` write to `.env.local`, so the app follows the network you deployed
+to (see `src/network.ts`).
 
 See [Client](./client.md) and [Wallets](./wallets.md). React apps can use `WalletProvider` / `useWallet` from `@caatinga/client/react`.
