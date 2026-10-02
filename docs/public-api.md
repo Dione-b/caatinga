@@ -4,6 +4,11 @@ This document is the authoritative tier list for Caatinga v1.0. **Breaking chang
 
 **Exception (3.9.0):** `ctg setup` was removed from the Tier 1 CLI surface while remaining on the `3.x` line. The break is documented in `@caatinga/cli` CHANGELOG 3.9.0; substitute with `ctg doctor` plus manual toolchain install. Future Tier 1 removals still target `4.0.0` unless similarly called out.
 
+**Exception (3.10.1):** `assertSorobanSymbol` was removed from `@caatinga/core/browser` (#154, #201)
+while remaining on the `3.x` line, and the release notes did not call it out. Caatinga still applies
+the same check internally to contract method names; in app code, validate `Symbol` inputs with the
+inline pattern shown in [Soroban types](./soroban-types.md#what-to-do-in-app-code).
+
 See also: [Architecture freeze](./architecture-freeze.md), [v1.0.0 Interface Contract](./internal/release/v1.0.0.md), [Errors](./errors.md).
 
 ---
@@ -58,7 +63,6 @@ Subpaths:
 
 - `CaatingaError`, `CaatingaErrorCode`, `toCaatingaError`, `formatCaatingaError`
 - Types: `CaatingaArtifacts`, `ContractArtifact`, `ContractMetadata`
-- `assertSorobanSymbol`
 
 ### Config (authoring)
 
