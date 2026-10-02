@@ -17,6 +17,7 @@ import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 import { resolveDeployedTargetDetails } from "../utils/mainnet-target-details.js";
+import { hasPostDeployHooks } from "../utils/post-deploy-hooks.js";
 import {
   assertZkVerifierDeployAllowed,
   resolveContractNamesForDeploy,
@@ -176,12 +177,7 @@ export function registerDeployCommand(program: Command): void {
 
           const isFullDeploy = !contractName;
 
-          if (
-            isFullDeploy &&
-            options.wire !== false &&
-            config.postDeploy &&
-            (config.postDeploy.length > 0 || (config.postDeployRead?.length ?? 0) > 0)
-          ) {
+          if (isFullDeploy && options.wire !== false && hasPostDeployHooks(config)) {
             try {
               const wireResults = await runPostDeployHooks({
                 config,

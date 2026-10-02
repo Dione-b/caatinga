@@ -131,7 +131,7 @@ The deployment automatically performs several steps:
 - generates TypeScript bindings (by default);
 - when run without specifying a contract, it also runs:
 
-  - `wire` (when a `postDeploy` array is configured);
+  - `wire` (when `postDeploy` or `postDeployRead` declares at least one hook);
   - `sync-env` (when both `frontend.envFile` and `frontend.env` are configured).
 
 Thus, a single command can set up the entire application after deployment.
