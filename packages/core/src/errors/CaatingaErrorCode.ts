@@ -60,6 +60,10 @@ export const CaatingaErrorCode = {
   ZK_INVOKE_FAILED: "CAATINGA_ZK_INVOKE_FAILED",
   ZK_DOWNLOAD_FAILED: "CAATINGA_ZK_DOWNLOAD_FAILED",
   ZK_UNSUPPORTED_PLATFORM: "CAATINGA_ZK_UNSUPPORTED_PLATFORM",
+  /**
+   * Reserved: kept for compatibility, not emitted by any command. Doctor reports partial deploy
+   * coverage as an advisory section only (see docs/internal/release/error-code-policy.md).
+   */
   DOCTOR_PARTIAL_DEPLOY: "CAATINGA_DOCTOR_PARTIAL_DEPLOY",
   ROLLBACK_TARGET_NOT_FOUND: "CAATINGA_ROLLBACK_TARGET_NOT_FOUND",
   ESTIMATE_FAILED: "CAATINGA_ESTIMATE_FAILED",
