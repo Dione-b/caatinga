@@ -19,7 +19,7 @@ Run through each item; `ctg doctor` covers several automatically.
 | 7   | Artifacts schema migrated (if using history)                      | `ctg migrate artifacts`                                                                                                                           |
 | 8   | Signing strategy documented for your team                         | [Signing strategy](./signing-strategy.md)                                                                                                         |
 | 9   | Stellar CLI and SDK versions pinned in CI                         | [Stellar CLI contract](./stellar-cli-version-contract.md), [SDK contract](./stellar-sdk-version-contract.md)                                      |
-| 9b  | CI identity exported and rotated safely                           | `CAATINGA_CI_STELLAR_CONFIG_B64` built per [Testing](./internal/testing.md#stellar-cli-config-blob-format)                                        |
+| 9b  | CI identity exported and rotated safely                           | `ctg identity export` → `CAATINGA_CI_STELLAR_CONFIG_B64` (see [Testing](./internal/testing.md#stellar-cli-config-blob-format))                    |
 | 10  | Upgrade/rollback plan understood                                  | [Contract upgrade](./tutorials/contract-upgrade.md)                                                                                               |
 | 10b | Deploy regression workflow green on testnet                       | `ctg regression` or `.github/workflows/testnet-deploy-regression.yml`                                                                             |
 

@@ -237,10 +237,9 @@ restoring Stellar CLI identity secrets. `--strict` is forwarded to `doctor` only
 
 ## `ctg identity export [--path ~/.config/stellar]`
 
-Exports the Stellar CLI config directory as a base64 tarball on stdout, for moving an identity to
-another machine with `ctg identity import`. The archive holds the directory's contents without a
-`.config/` prefix, so it is **not** a valid `CAATINGA_CI_STELLAR_CONFIG_B64` for the CI restore
-script — build that secret as described in
+Exports the Stellar CLI config directory as a base64 tarball on stdout. Use it to move an identity
+to another machine with `ctg identity import`, or as `CAATINGA_CI_STELLAR_CONFIG_B64` for the CI
+restore script — see
 [Testing — Stellar CLI config blob](./internal/testing.md#stellar-cli-config-blob-format).
 
 ## `ctg identity import <archive-file> [--path ~/.config/stellar]`
