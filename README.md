@@ -29,7 +29,10 @@ ctg deploy counter --network testnet --source alice
 
 `deploy` writes the contract ID to `caatinga.artifacts.json` and generates TypeScript bindings (pass `--no-generate` to skip).
 
-**Templates:** `ctg init` scaffolds `react-vite-counter` (React + Vite + wallet) by default; pass `--minimal` for a contract-only project. For zero-knowledge dApps, `ctg zk init my-zk-dapp` scaffolds the `zk-starter` template (Circom Groth16 circuit + Soroban verifier). See [Templates](./docs/templates.md) and [ZK](./docs/zk.md).
+**Templates** ([docs](./docs/templates.md)):
+
+- `ctg init` scaffolds `react-vite-counter` (React + Vite + wallet) by default; pass `--minimal` for a contract-only project.
+- `ctg zk init my-zk-dapp` scaffolds `zk-starter` (Circom Groth16 circuit + Soroban verifier). See [ZK](./docs/zk.md).
 
 **Docs:** start at [Getting started](./docs/getting-started.md). Optional walkthrough: [From Zero to Testnet](./docs/tutorials/from-zero-to-testnet.md).
 
