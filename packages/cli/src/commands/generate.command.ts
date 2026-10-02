@@ -100,7 +100,7 @@ export function registerGenerateCommand(program: Command): void {
           if (addedBuffer?.bufferDependency) {
             logger.info("");
             logger.info(
-              `Added "buffer" to ${addedBuffer.bufferDependency.packageJsonPath} (backs the Buffer polyfill in the bindings).`
+              `Set "buffer" to ^6 in ${addedBuffer.bufferDependency.packageJsonPath} (backs the Buffer polyfill in the bindings).`
             );
             logger.info(
               "Run your package manager's install (e.g. npm install) before npm run dev."
