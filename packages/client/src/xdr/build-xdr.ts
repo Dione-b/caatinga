@@ -1,5 +1,6 @@
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import type { CaatingaXdrBuildResult } from "../types.js";
+import { toSimulationError } from "../client/transaction-simulate.js";
 
 interface XdrTransactionLike {
   toXDR?: () => string;
@@ -27,15 +28,12 @@ export async function buildXdr(input: {
       try {
         preparedTransaction = await transaction.prepare();
       } catch (error) {
-        if (error instanceof CaatingaError) {
-          throw error;
-        }
-
-        throw new CaatingaError(
-          `Failed to prepare XDR for "${input.contractName}.${input.method}".`,
-          CaatingaErrorCode.XDR_PREPARE_FAILED,
-          `RPC: ${input.rpcUrl}. Check connectivity, simulation errors, and binding compatibility.`,
-          error
+        throw toSimulationError(
+          error,
+          input.contractName,
+          input.method,
+          input.rpcUrl,
+          "prepare"
         );
       }
     } else {

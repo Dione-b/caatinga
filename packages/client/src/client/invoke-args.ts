@@ -33,12 +33,18 @@ export function splitInvokeArgsAndOptions(
   argsOrOptions?: Record<string, unknown> | CaatingaInvokeOptions,
   maybeOptions?: CaatingaInvokeOptions
 ) {
-  if (maybeOptions === undefined && isOptionsObject(argsOrOptions, INVOKE_OPTION_KEYS)) {
+  const looksLikeOptions =
+    argsOrOptions !== undefined &&
+    ("debugXdr" in argsOrOptions || "debugRaw" in argsOrOptions || "restore" in argsOrOptions) &&
+    maybeOptions === undefined;
+
+  if (looksLikeOptions) {
     const options = argsOrOptions as CaatingaInvokeOptions;
     return {
       args: undefined,
       debugXdr: options.debugXdr ?? false,
       debugRaw: options.debugRaw ?? false,
+      restore: options.restore ?? false,
     };
   }
 
@@ -46,6 +52,7 @@ export function splitInvokeArgsAndOptions(
     args: argsOrOptions as Record<string, unknown> | undefined,
     debugXdr: maybeOptions?.debugXdr ?? false,
     debugRaw: maybeOptions?.debugRaw ?? false,
+    restore: maybeOptions?.restore ?? false,
   };
 }
 

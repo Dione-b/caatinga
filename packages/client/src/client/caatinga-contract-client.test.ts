@@ -40,14 +40,14 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
   };
 
   class Client {
-    public readonly clientInput?: { publicKey?: string };
+    async increment(options?: {
+      restore?: boolean;
+      signTransaction?: (xdr: string) => Promise<{ signedTxXdr: string }>;
+    }) {
+      if (options?.restore) {
+        await options.signTransaction?.("AAAA_RESTORE");
+      }
 
-    constructor(input?: { publicKey?: string }) {
-      this.clientInput = input;
-      lastClientInput = input;
-    }
-
-    increment() {
       return {
         toXDR() {
           return "AAAA_UNSIGNED";
@@ -135,6 +135,10 @@ function createClientConfig(overrides: Record<string, unknown> = {}) {
           return Promise.reject(new Error("simulation failed"));
         },
       };
+    }
+
+    missingAccount() {
+      return Promise.reject(new Error("ACCOUNT_NOT_FOUND"));
     }
 
     failingSubmit() {
@@ -252,6 +256,33 @@ describe("CaatingaContractClient (via createCaatingaClient)", () => {
     const client = createCaatingaClient(createClientConfig());
 
     await expect(client.contract("counter").read<number>("get")).resolves.toBe(42);
+  });
+
+  it("should_forward_opt_in_state_restoration_and_wallet_signer_to_generated_binding", async () => {
+    const signTransaction = vi.fn(async () => "AAAA_SIGNED");
+    const client = createCaatingaClient(
+      createClientConfig({
+        wallet: {
+          getPublicKey: vi.fn(async () => "GPUBLIC"),
+          signTransaction,
+        },
+      })
+    );
+
+    await client.contract("counter").invoke("increment", { restore: true });
+
+    expect(signTransaction).toHaveBeenCalledWith({
+      xdr: "AAAA_RESTORE",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    });
+  });
+
+  it("should_classify_missing_account_during_generated_method_construction", async () => {
+    const client = createCaatingaClient(createClientConfig());
+
+    await expect(client.contract("counter").simulate("missingAccount")).rejects.toMatchObject({
+      code: CaatingaErrorCode.SIMULATION_ACCOUNT_NOT_FOUND,
+    });
   });
 
   it("should_forward_read_args_and_include_raw_when_debugRaw_is_enabled", async () => {

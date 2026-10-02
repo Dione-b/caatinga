@@ -19,8 +19,11 @@ import {
   splitInvokeArgsAndOptions,
   splitReadArgsAndOptions,
 } from "./invoke-args.js";
-import { assertReadSourceAccount, normalizeReadSourceAccount } from "./read-source.js";
-import { prepareReadTransaction, readSimulationResult } from "./transaction-simulate.js";
+import {
+  prepareReadTransaction,
+  readSimulationResult,
+  toSimulationError,
+} from "./transaction-simulate.js";
 import { normalizeSubmitResult, submitTransaction } from "./transaction-submit.js";
 import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
 
@@ -60,9 +63,15 @@ export class CaatingaContractClient {
     argsOrOptions?: Record<string, unknown> | CaatingaInvokeOptions,
     maybeOptions?: CaatingaInvokeOptions
   ): Promise<CaatingaInvokeResult<T>> {
-    const { args, debugXdr, debugRaw } = splitInvokeArgsAndOptions(argsOrOptions, maybeOptions);
-    await this.assertWalletNetwork(method);
-    const { contractId, transaction } = await this.createTransaction(method, args);
+    const { args, debugXdr, debugRaw, restore } = splitInvokeArgsAndOptions(
+      argsOrOptions,
+      maybeOptions
+    );
+    const { contractId, transaction } = await this.createTransaction(
+      method,
+      args,
+      restore ? this.createRestoreMethodOptions(method) : undefined
+    );
     const xdr = await buildTransactionXdr({
       contractName: this.contractName,
       method,
@@ -196,44 +205,10 @@ export class CaatingaContractClient {
     return result.result;
   }
 
-  /**
-   * Fails before building or signing when the wallet reports a different network than
-   * the app, instead of a generic sign/submit failure later. Wallets that cannot report
-   * their network (adapter method missing, returns undefined, or throws) are not blocked.
-   */
-  private async assertWalletNetwork(method: string): Promise<void> {
-    const { wallet, network } = this.config;
-    if (!wallet || !wallet.getNetworkPassphrase) {
-      return;
-    }
-
-    let walletPassphrase: string | undefined;
-    try {
-      walletPassphrase = await withWalletTimeout(
-        "getNetworkPassphrase",
-        this.config.walletTimeout,
-        () => wallet.getNetworkPassphrase!()
-      );
-    } catch (error) {
-      if (error instanceof CaatingaError && error.code === CaatingaErrorCode.WALLET_TIMEOUT) {
-        throw error;
-      }
-      return;
-    }
-
-    if (walletPassphrase && walletPassphrase !== network.networkPassphrase) {
-      throw new CaatingaError(
-        `Wallet is on a different network than the app for "${this.contractName}.${method}".`,
-        CaatingaErrorCode.WALLET_NETWORK_MISMATCH,
-        `Switch the wallet to "${network.name}" (${network.networkPassphrase}); it is on "${walletPassphrase}".`
-      );
-    }
-  }
-
   private async createTransaction(
     method: string,
     args?: Record<string, unknown>,
-    options: { readOnly?: boolean; sourceAccount?: string } = {}
+    methodOptions?: Record<string, unknown>
   ) {
     const contractId = resolveContractId({
       artifacts: this.config.artifacts,
@@ -285,6 +260,23 @@ export class CaatingaContractClient {
         "Connect the wallet and grant account access, then retry.",
         error
       );
+    }
+    const client = this.bindingAdapter.createClient({
+      contractId,
+      publicKey,
+      rpcUrl: this.config.network.rpcUrl,
+      networkPassphrase: this.config.network.networkPassphrase,
+    });
+    let transaction: unknown;
+    try {
+      transaction = await this.bindingAdapter.callMethod({
+        client,
+        method,
+        args,
+        methodOptions,
+      });
+    } catch (error) {
+      throw toSimulationError(error, this.contractName, method, this.config.network.rpcUrl);
     }
 
     if (typeof publicKey !== "string" || publicKey.trim().length === 0) {
@@ -363,5 +355,44 @@ export class CaatingaContractClient {
     }
 
     return typeof publicKey === "string" && publicKey.trim().length > 0 ? publicKey : undefined;
+  }
+
+  private createRestoreMethodOptions(method: string): Record<string, unknown> {
+    return {
+      restore: true,
+      signTransaction: async (xdr: string) => {
+        let signedTxXdr: string;
+        try {
+          signedTxXdr = await withWalletTimeout("signTransaction", this.config.walletTimeout, () =>
+            this.config.wallet.signTransaction({
+              xdr,
+              networkPassphrase: this.config.network.networkPassphrase,
+            })
+          );
+        } catch (error) {
+          if (error instanceof CaatingaError) {
+            throw error;
+          }
+
+          throw new CaatingaError(
+            `Failed to sign the state restoration transaction for "${this.contractName}.${method}".`,
+            CaatingaErrorCode.XDR_SIGN_FAILED,
+            "Approve the RestoreFootprint transaction in the wallet and retry.",
+            error
+          );
+        }
+
+        if (typeof signedTxXdr !== "string" || signedTxXdr.trim().length === 0) {
+          throw new CaatingaError(
+            `Failed to sign the state restoration transaction for "${this.contractName}.${method}".`,
+            CaatingaErrorCode.XDR_SIGN_FAILED,
+            "Wallet returned an empty or invalid signed XDR for RestoreFootprint.",
+            signedTxXdr
+          );
+        }
+
+        return { signedTxXdr };
+      },
+    };
   }
 }
