@@ -2,6 +2,7 @@ import { cp, lstat, mkdir, readFile, readdir, stat, writeFile } from "node:fs/pr
 import path from "node:path";
 import { z } from "zod";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { migrateArtifactsToV2 } from "../artifacts/migrate-artifacts.js";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { createInitialArtifacts, writeArtifacts } from "../artifacts/write-artifacts.js";
 import {
@@ -56,7 +57,9 @@ export async function createProjectFromTemplate(options: CreateProjectFromTempla
 
 async function ensureArtifacts(targetDir: string, projectName: string): Promise<void> {
   try {
-    const artifacts = await readArtifacts(targetDir);
+    // Templates may ship an older schema (e.g. custom templates via CAATINGA_TEMPLATES_DIR);
+    // a fresh project always starts on the current artifacts schema.
+    const { artifacts } = migrateArtifactsToV2(await readArtifacts(targetDir));
     await writeArtifacts({ ...artifacts, project: projectName }, targetDir);
   } catch (error) {
     if (error instanceof CaatingaError && error.code === CaatingaErrorCode.ARTIFACT_NOT_FOUND) {
