@@ -76,7 +76,7 @@ npx ctg regression --network testnet --source alice  # test → build → deploy
 ## CI and regression
 
 ```bash
-npx ctg doctor --network testnet --strict-bindings   # fail on stale bindings
+npx ctg doctor --network testnet --strict-bindings   # fail unless bindings are fresh
 npx ctg status --network testnet --strict            # after deploy --no-generate
 npx ctg ci run --network testnet --source alice --strict  # doctor + smoke in CI
 ctg identity export > stellar-config.b64             # move an identity to another machine
@@ -132,9 +132,9 @@ See [Production readiness](./production-readiness.md) and [Testing](./internal/t
 | `--verify-deps`         | deploy                                                                                         | Confirm dependency contract IDs exist on-chain first                                                                 |
 | `--no-stale-check`      | deploy                                                                                         | Skip the WASM-older-than-sources warning                                                                             |
 | `--strict-network`      | generate                                                                                       | Fail when network has no artifacts block                                                                             |
-| `--strict`              | status, doctor, ci run                                                                         | status: fail on stale bindings; doctor/ci: strict env+bindings                                                       |
+| `--strict`              | status, doctor, ci run                                                                         | status: fail unless deployed bindings are fresh; doctor/ci: strict env+bindings                                      |
 | `--strict-env`          | doctor                                                                                         | Fail when frontend env file drifts from artifacts                                                                    |
-| `--strict-bindings`     | doctor                                                                                         | Fail when bindings are stale or missing                                                                              |
+| `--strict-bindings`     | doctor                                                                                         | Fail when bindings are not fresh (stale, missing, unknown)                                                           |
 | `--all-networks`        | doctor                                                                                         | Report deploy/bindings matrix for every configured network                                                           |
 | `--expect <dsl>`        | read                                                                                           | Assert stdout with postDeploy expect DSL                                                                             |
 | `--quiet` / `--summary` | read                                                                                           | Compact output for large array payloads                                                                              |

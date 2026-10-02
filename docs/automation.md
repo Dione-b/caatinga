@@ -30,7 +30,7 @@ Doctor makes no RPC calls: it does not check connectivity, balances, or on-chain
 | `-s, --source`      | none (identity check skipped) | Stellar CLI identity to check             |
 | `--all-networks`    | `false`                       | Run checks across all configured networks |
 | `--strict-env`      | `false`                       | Fail when env vars are missing or stale   |
-| `--strict-bindings` | `false`                       | Fail when bindings are stale              |
+| `--strict-bindings` | `false`                       | Fail when bindings are not fresh          |
 | `--strict`          | `false`                       | Enable all strict checks                  |
 
 ### Exit Codes

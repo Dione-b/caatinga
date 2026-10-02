@@ -90,7 +90,9 @@ export async function reportBindingCoverage(
   const stale = coverage.lines.some((line) => line.status !== "fresh");
   if (stale && strictBindings) {
     logger.info("");
-    logger.info("Strict: stale or missing bindings block readiness.");
+    logger.info(
+      "Strict: bindings that are not fresh (stale, missing, or unknown) block readiness."
+    );
   }
 
   return stale && strictBindings;
@@ -194,7 +196,7 @@ export function registerDoctorCommand(program: Command): void {
     .option("-s, --source <source>", "Stellar CLI identity alias to validate")
     .option("--all-networks", "Report deploy and bindings coverage for every configured network")
     .option("--strict-env", "Fail when frontend env file drifts from artifacts")
-    .option("--strict-bindings", "Fail when bindings are stale or missing")
+    .option("--strict-bindings", "Fail when bindings are not fresh (stale, missing, or unknown)")
     .option("--strict", "Enable --strict-env and --strict-bindings")
     .action((options: DoctorOptions) =>
       runCliAction(async () => {
