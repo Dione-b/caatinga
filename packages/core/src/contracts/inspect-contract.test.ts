@@ -8,12 +8,14 @@ const resolveContract = vi.hoisted(() => vi.fn());
 const resolveWasmArtifactPath = vi.hoisted(() => vi.fn());
 const hashWasm = vi.hoisted(() => vi.fn());
 const verifyDependencyContract = vi.hoisted(() => vi.fn());
+const runCommand = vi.hoisted(() => vi.fn());
 
 vi.mock("../artifacts/read-artifacts.js", () => ({ readArtifacts }));
 vi.mock("../shell/check-binary.js", () => ({ checkBinary }));
 vi.mock("./resolve-contract.js", () => ({ resolveContract }));
 vi.mock("./wasm.js", () => ({ hashWasm, resolveWasmArtifactPath }));
 vi.mock("./verify-dependency-contract.js", () => ({ verifyDependencyContract }));
+vi.mock("../shell/run-command.js", () => ({ runCommand }));
 
 import { inspectContract } from "./inspect-contract.js";
 
@@ -115,24 +117,25 @@ describe("inspectContract", () => {
     });
   });
 
-  it("includes inspection diagnostics without deploy-only guidance in detail", async () => {
-    verifyDependencyContract.mockRejectedValue(
+  it("includes Stellar CLI diagnostics without deploy-only guidance in detail", async () => {
+    // Run the real probe so the test covers the error chain inspect receives.
+    const actual = await vi.importActual<typeof import("./verify-dependency-contract.js")>(
+      "./verify-dependency-contract.js"
+    );
+    verifyDependencyContract.mockImplementation(actual.verifyDependencyContract);
+    runCommand.mockRejectedValue(
       new CaatingaError(
-        'Dependency "token" is not deployed on "mainnet".',
+        `Command failed: stellar contract fetch --id ${contractId}`,
         CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-        "Deploy the dependency or omit --verify-deps.\n\nStellar CLI diagnostics:\ncontract not found on ledger",
-        new CaatingaError(
-          "Command failed: stellar contract fetch",
-          CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-          "contract not found on ledger"
-        )
+        "error: contract not found on ledger"
       )
     );
 
     const result = await inspectContract({ config, contractName: "token", cwd: "/tmp/app" });
 
-    expect(result.onChain.detail).toContain('Dependency "token" is not deployed on "mainnet".');
-    expect(result.onChain.detail).toContain("contract not found on ledger");
+    expect(result.onChain.reachable).toBe(false);
+    expect(result.onChain.detail).toContain('Dependency "token" is not deployed on "mainnet"');
+    expect(result.onChain.detail).toContain("error: contract not found on ledger");
     expect(result.onChain.detail).not.toContain("omit --verify-deps");
   });
 });

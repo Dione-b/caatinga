@@ -83,14 +83,13 @@ describe("verifyDependencyContract", () => {
     );
   });
 
-  it("should_throw_DEPENDENCY_CONTRACT_NOT_FOUND_when_stellar_contract_info_fails", async () => {
-    runCommand.mockRejectedValue(
-      new CaatingaError(
-        "Command failed: stellar contract fetch",
-        CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
-        "contract not found on ledger"
-      )
+  it("should_throw_DEPENDENCY_CONTRACT_NOT_FOUND_when_stellar_contract_fetch_fails", async () => {
+    const commandError = new CaatingaError(
+      "Command failed: stellar contract fetch",
+      CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
+      "contract not found on ledger"
     );
+    runCommand.mockRejectedValue(commandError);
 
     await expect(
       verifyDependencyContract({
@@ -102,6 +101,7 @@ describe("verifyDependencyContract", () => {
       code: CaatingaErrorCode.DEPENDENCY_CONTRACT_NOT_FOUND,
       message: expect.stringContaining("token"),
       hint: expect.stringMatching(/Deploy the dependency[\s\S]*contract not found on ledger/),
+      cause: commandError,
     });
   });
 });

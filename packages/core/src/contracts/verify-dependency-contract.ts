@@ -17,6 +17,9 @@ export async function verifyDependencyContract(options: {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-contract-fetch-"));
   const outFile = path.join(tempDir, "contract.wasm");
   try {
+    // `fetch --out-file` keeps the WASM bytes off stdout (#133). It fails for
+    // built-in Stellar Asset Contracts, which have no WASM; those cannot be
+    // artifact dependencies today, so every probed contract is a deployed WASM.
     await runCommand(
       "stellar",
       [
@@ -48,7 +51,9 @@ export async function verifyDependencyContract(options: {
         ]
           .filter(Boolean)
           .join("\n\n"),
-        error.cause
+        // Keep the runCommand error so callers such as `inspect` can surface the
+        // raw CLI output from its hint without the deploy-only guidance above.
+        error
       );
     }
 
