@@ -127,4 +127,52 @@ describe("regression command", () => {
     expect(deployContractGraphMock).not.toHaveBeenCalled();
     expect(generateBindingsGraphMock).toHaveBeenCalled();
   });
+
+  it("logs resolved network and origin from config when --network is omitted", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createProgram().parseAsync([
+        "node",
+        "caatinga",
+        "regression",
+        "--source",
+        "alice",
+        "--skip-test",
+        "--skip-build",
+        "--skip-deploy",
+      ]);
+
+      expect(process.exitCode).toBeUndefined();
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("Network: testnet (config)");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("logs resolved network and origin from flag when --network is passed", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createProgram().parseAsync([
+        "node",
+        "caatinga",
+        "regression",
+        "--source",
+        "alice",
+        "--network",
+        "testnet",
+        "--skip-test",
+        "--skip-build",
+        "--skip-deploy",
+      ]);
+
+      expect(process.exitCode).toBeUndefined();
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("Network: testnet (flag)");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });

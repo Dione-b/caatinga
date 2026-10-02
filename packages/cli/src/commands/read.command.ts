@@ -6,6 +6,7 @@ import {
   parseExpectSpec,
   readContract,
   resolveNetwork,
+  formatNetworkOrigin,
   summarizeReadOutput,
 } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
@@ -47,9 +48,12 @@ export function registerReadCommand(program: Command): void {
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
+          const network = resolveNetwork(config, options.network);
+
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
 
           const resolvedSource = describeCliSource(options.source, {
-            network: resolveNetwork(config, options.network),
+            network,
           });
           if (resolvedSource.origin !== "explicit") {
             const originLabel =
@@ -76,7 +80,6 @@ export function registerReadCommand(program: Command): void {
 
           logger.success("Read complete");
           logger.info("");
-          logger.info(`Network: ${result.network.name}`);
           logger.info(`Contract: ${result.target.contractName}`);
           logger.info(`Method: ${result.target.method}`);
 

@@ -1,5 +1,11 @@
 import { Command } from "commander";
-import { describeCliSource, loadConfig, resolveNetwork, runSmokeReads } from "@caatinga/core";
+import {
+  describeCliSource,
+  formatNetworkOrigin,
+  loadConfig,
+  resolveNetwork,
+  runSmokeReads,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -15,8 +21,10 @@ export function registerSmokeCommand(program: Command): void {
     .action((options: { network?: string; source?: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const network = resolveNetwork(config, options.network);
+        logger.info(`Network: ${formatNetworkOrigin(network)}`);
         const resolvedSource = describeCliSource(options.source, {
-          network: resolveNetwork(config, options.network),
+          network,
         });
         if (resolvedSource.origin !== "explicit") {
           logger.info(`Using source identity "${resolvedSource.source}".`);

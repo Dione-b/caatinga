@@ -8,7 +8,7 @@ vi.mock("execa", () => ({ execa: vi.fn() }));
 vi.mock("@caatinga/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@caatinga/core")>()),
   loadConfig: vi.fn(async () => ({})),
-  resolveNetwork: vi.fn(() => ({ name: "testnet" })),
+  resolveNetwork: vi.fn(() => ({ name: "testnet", origin: "config" })),
 }));
 
 const execaMock = vi.mocked(execa);

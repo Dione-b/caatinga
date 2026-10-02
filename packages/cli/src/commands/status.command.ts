@@ -1,8 +1,10 @@
 import { Command } from "commander";
 import {
   collectProjectStatus,
+  formatNetworkOrigin,
   frontendBindingsConfigHint,
   loadConfig,
+  resolveNetwork,
   type ContractStatusEntry,
 } from "@caatinga/core";
 import { npxCli } from "../utils/cli-name.js";
@@ -41,6 +43,12 @@ export function registerStatusCommand(program: Command): void {
     .action((options: { network?: string; json?: boolean; strict?: boolean }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const requestedNetwork = options.network
+          ? resolveNetwork(config, options.network)
+          : undefined;
+        // Without --network, status reports every network recorded in the
+        // artifacts, so there is no single origin to report (#244). Only
+        // label the origin when the request came from the --network flag.
         const status = await collectProjectStatus({
           config,
           networkName: options.network,
@@ -53,7 +61,14 @@ export function registerStatusCommand(program: Command): void {
 
           for (const network of status.networks) {
             logger.info("");
-            logger.info(`Network: ${network.network}`);
+            // Origin is only known when the network came from the --network flag;
+            // without it status reports every network recorded in the artifacts.
+            logger.info(
+              `Network: ${formatNetworkOrigin({
+                name: network.network,
+                origin: requestedNetwork?.origin,
+              })}`
+            );
 
             const lines = renderTable(
               ["CONTRACT", "CONTRACT ID", "WASM HASH", "DEPLOYED", "BINDINGS", "DEPS"],

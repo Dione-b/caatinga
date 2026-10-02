@@ -249,6 +249,163 @@ describe("deployContract", () => {
     vi.unstubAllGlobals();
   });
 
+  it("should_rethrow_the_original_DEPLOY_FAILED_when_recovery_throws_after_a_horizon_hit", async () => {
+    const deployError = new CaatingaError(
+      "Command failed: stellar contract deploy",
+      CaatingaErrorCode.DEPLOY_FAILED,
+      [
+        "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+        "error: xdr processing error: xdr value invalid",
+      ].join("\n")
+    );
+
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        throw deployError;
+      }
+
+      if (command === "stellar" && args[0] === "contract" && args[1] === "id") {
+        throw new Error("salt resolution failed");
+      }
+
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        _embedded: {
+          records: [
+            {
+              transaction_successful: true,
+              type: "invoke_host_function",
+              function: "HostFunctionTypeHostFunctionTypeCreateContract",
+              salt: "36760584017419743124423536061373365464991553746983011352231996661702535035363",
+            },
+          ],
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchImpl);
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-recover-throw-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    try {
+      await expect(
+        deployContract({
+          config: baseConfig,
+          contractName: "counter",
+          networkName: "testnet",
+          source: "alice",
+          cwd: tmpDir,
+        })
+      ).rejects.toBe(deployError);
+      expect(fetchImpl).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("should_preserve_deploy_failed_error_on_custom_network_instead_of_throwing_network_not_found", async () => {
+    const customConfig: CaatingaConfig = {
+      ...baseConfig,
+      defaultNetwork: "custom",
+      networks: {
+        custom: {
+          rpcUrl: "http://localhost:8000/rpc",
+          networkPassphrase: "Custom Standalone Network ; 2026",
+        },
+      },
+    };
+
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        throw new CaatingaError(
+          "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+          CaatingaErrorCode.DEPLOY_FAILED,
+          "error: xdr processing error: xdr value invalid"
+        );
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-custom-fail-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    await expect(
+      deployContract({
+        config: customConfig,
+        contractName: "counter",
+        networkName: "custom",
+        source: "alice",
+        cwd: tmpDir,
+      })
+    ).rejects.toMatchObject({
+      code: CaatingaErrorCode.DEPLOY_FAILED,
+      message:
+        "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+      hint: "error: xdr processing error: xdr value invalid",
+    });
+  });
+
+  it("should_retry_transient_deploy_failures_on_custom_network_until_success", async () => {
+    const customConfig: CaatingaConfig = {
+      ...baseConfig,
+      defaultNetwork: "custom",
+      networks: {
+        custom: {
+          rpcUrl: "http://localhost:8000/rpc",
+          networkPassphrase: "Custom Standalone Network ; 2026",
+        },
+      },
+    };
+
+    let deployAttempts = 0;
+    runCommand.mockImplementation(async (command: string, args: string[]) => {
+      if (command === "stellar" && args[0] === "contract" && args[1] === "deploy") {
+        deployAttempts += 1;
+        if (deployAttempts === 1) {
+          throw new CaatingaError(
+            "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+            CaatingaErrorCode.DEPLOY_FAILED,
+            "error: xdr processing error: xdr value invalid\ntransaction submission timeout"
+          );
+        }
+        return {
+          stdout: `deployed ${CONTRACT_ID}\n`,
+          stderr: "",
+          all: `deployed ${CONTRACT_ID}\n`,
+        };
+      }
+      return { stdout: "0.0.0", stderr: "", all: "0.0.0" };
+    });
+
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-deploy-custom-retry-"));
+    const wasmPath = path.join(tmpDir, "rel", "counter.wasm");
+    await mkdir(path.dirname(wasmPath), { recursive: true });
+    await writeFile(wasmPath, Buffer.from("wasm-bytes"), "utf8");
+    await writeArtifacts(createInitialArtifacts("app"), tmpDir);
+
+    const result = await deployContract({
+      config: customConfig,
+      contractName: "counter",
+      networkName: "custom",
+      source: "alice",
+      cwd: tmpDir,
+      deployRetryDelaysMs: [0],
+    });
+
+    expect(result.contractId).toBe(CONTRACT_ID);
+    expect(deployAttempts).toBe(2);
+  });
+
   it("should_retry_transient_deploy_failures_until_success", async () => {
     let deployAttempts = 0;
     runCommand.mockImplementation(async (command: string, args: string[]) => {

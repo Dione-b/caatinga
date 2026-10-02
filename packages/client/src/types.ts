@@ -32,10 +32,25 @@ export interface CaatingaContractRegistration {
 export interface CaatingaClientConfig {
   network: CaatingaNetwork;
   artifacts: CaatingaArtifacts;
-  wallet: CaatingaWalletAdapter;
+  /**
+   * Wallet integration for signing transactions. Optional: `simulate()` and `read()`
+   * work without a wallet by falling back to {@link readSourceAccount}. `invoke()` and
+   * `buildXdr()` require a wallet and throw `CAATINGA_WALLET_NOT_CONNECTED` without one.
+   */
+  wallet?: CaatingaWalletAdapter;
   /** Optional timeout (ms) for wallet `getPublicKey` and `signTransaction`. No default when omitted. */
   walletTimeout?: number;
   contracts: Record<string, CaatingaContractRegistration>;
+  /**
+   * Source account for `simulate()` and `read()` when no wallet public key is available
+   * (no wallet configured, disconnected, locked, or an empty address).
+   *
+   * Must be a `G…` Ed25519 public key StrKey; any other value throws
+   * `CAATINGA_INVALID_CONFIG` before the RPC call. Defaults to
+   * `DEFAULT_READ_SOURCE_ACCOUNT` (the Stellar null account), which the client turns into
+   * an SDK-local source account instead of an RPC lookup.
+   */
+  readSourceAccount?: string;
 }
 
 /**
@@ -62,6 +77,18 @@ export interface CaatingaInvokeOptions {
 
 export interface CaatingaReadOptions {
   debugRaw?: boolean;
+  /**
+   * Source account override for this call. Takes precedence over the connected wallet,
+   * over {@link CaatingaClientConfig.readSourceAccount}, and over the default
+   * placeholder.
+   *
+   * Must be a `G…` Ed25519 public key StrKey; any other value throws
+   * `CAATINGA_INVALID_CONFIG` before the RPC call. Pass options as the second argument
+   * when the method also takes args (`simulate("balance", { id }, { sourceAccount })`):
+   * a single object is only treated as options when every key is `debugRaw` or
+   * `sourceAccount`.
+   */
+  sourceAccount?: string;
 }
 
 export interface CaatingaInvokeResult<T = unknown> {
@@ -102,9 +129,14 @@ export interface CaatingaXdrBuildResult {
 }
 
 export interface CaatingaBindingAdapter {
+  /**
+   * Builds the generated binding client. `publicKey` is omitted for calls without a
+   * source account (wallet-less reads): generated bindings then use the SDK's local null
+   * account instead of fetching it from the RPC, so reads work on unfunded networks.
+   */
   createClient(input: {
     contractId: string;
-    publicKey: string;
+    publicKey?: string;
     rpcUrl: string;
     networkPassphrase: string;
   }): unknown;

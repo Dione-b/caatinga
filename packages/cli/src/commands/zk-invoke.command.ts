@@ -1,5 +1,5 @@
 import { type Command } from "commander";
-import { loadConfig, resolveNetwork } from "@caatinga/core";
+import { formatNetworkOrigin, loadConfig, resolveNetwork } from "@caatinga/core";
 import { assertDevCeremonyAllowed, invokeVerifier, zkArtifactsDir } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -48,10 +48,10 @@ export function registerZkInvokeCommand(program: Command): void {
             throw new Error(`Verifier contract not configured for circuit "${name}"`);
           }
 
-          const { name: networkName, config: networkConfig } = resolveNetwork(
-            config,
-            options.network
-          );
+          const network = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = network;
+
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
 
           // Runs after the ceremony gate so a blocked dev-ceremony invoke still
           // reports CAATINGA_ZK_DEV_CEREMONY_BLOCKED rather than a confirmation error.
@@ -86,7 +86,6 @@ export function registerZkInvokeCommand(program: Command): void {
 
           logger.success(`Proof verified for circuit "${name}"`);
           logger.info("");
-          logger.info(`Network: ${result.network}`);
           logger.info(`Verifier: ${result.verifierContract}`);
           logger.info(`Contract ID: ${result.contractId}`);
           logger.info(`Public signals: ${result.publicSignals.join(", ")}`);

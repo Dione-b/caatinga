@@ -16,6 +16,7 @@ export const TIER1_CLIENT_ROOT_EXPORTS = [
   "CaatingaWalletAdapter",
   "CaatingaWalletCapabilities",
   "CaatingaXdrBuildResult",
+  "DEFAULT_READ_SOURCE_ACCOUNT",
   "WALLET_SESSION_STORAGE_KEY",
   "WalletSession",
   "WalletSessionOptions",

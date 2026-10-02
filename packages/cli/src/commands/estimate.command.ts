@@ -1,5 +1,10 @@
 import { Command } from "commander";
-import { estimateDeployCost, loadConfig } from "@caatinga/core";
+import {
+  estimateDeployCost,
+  formatNetworkOrigin,
+  loadConfig,
+  resolveNetwork,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -20,6 +25,10 @@ export function registerEstimateCommand(program: Command): void {
     .action((contractName: string, options: { network?: string; source: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const network = resolveNetwork(config, options.network);
+
+        logger.info(`Network: ${formatNetworkOrigin(network)}`);
+
         const result = await estimateDeployCost({
           config,
           contractName,
@@ -27,7 +36,7 @@ export function registerEstimateCommand(program: Command): void {
           source: options.source,
         });
 
-        logger.info(`Deploy estimate: ${result.contractName} (${result.network})`);
+        logger.info(`Deploy estimate: ${result.contractName}`);
         logger.info(`WASM: ${result.wasmPath}`);
         if (!result.simulation.ok) {
           logger.warn(`Fee estimate unavailable: ${result.simulation.error}`);

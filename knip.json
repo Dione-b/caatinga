@@ -4,6 +4,7 @@
   "ignoreWorkspaces": ["packages/templates/*"],
   "ignoreDependencies": [
     "@stellar/freighter-api",
+    "@stellar/stellar-sdk",
     "@testing-library/dom",
     "@testing-library/react",
     "react-dom"

@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { inspectContract, loadConfig } from "@caatinga/core";
+import { formatNetworkOrigin, inspectContract, loadConfig, resolveNetwork } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -12,13 +12,17 @@ export function registerInspectCommand(program: Command): void {
     .action((contractName: string, options: { network?: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const network = resolveNetwork(config, options.network);
+
+        logger.info(`Network: ${formatNetworkOrigin(network)}`);
+
         const result = await inspectContract({
           config,
           contractName,
           networkName: options.network,
         });
 
-        logger.info(`Inspect: ${result.contractName} (${result.network})`);
+        logger.info(`Inspect: ${result.contractName}`);
         logger.info(`Contract ID: ${result.artifact.contractId}`);
         logger.info(`Artifact WASM hash: ${result.artifact.wasmHash}`);
         logger.info(`Deployed at: ${result.artifact.deployedAt}`);

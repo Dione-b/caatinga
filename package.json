@@ -23,6 +23,7 @@
     "check:versions": "bash scripts/check-version-alignment.sh",
     "check:fixtures": "bash scripts/check-fixture-references.sh",
     "check:wasm-targets": "bash scripts/check-wasm-target-paths.sh",
+    "check:template-imports": "node scripts/check-template-imports.mjs",
     "changeset": "changeset",
     "pack:packages": "( cd packages/core && pnpm pack --pack-destination ../../packed ) && ( cd packages/zk && pnpm pack --pack-destination ../../packed ) && ( cd packages/client && pnpm pack --pack-destination ../../packed ) && ( cd packages/cli && pnpm pack --pack-destination ../../packed )",
     "test:consumer": "bash scripts/consumer-isolation-test.sh",

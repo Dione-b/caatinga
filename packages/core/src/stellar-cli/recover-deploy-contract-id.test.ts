@@ -4,6 +4,7 @@ import {
   decimalSaltToHex,
   fetchCreateContractSalt,
   isLikelyPublicKeySource,
+  resolveHorizonUrl,
   tryRecoverContractIdFromDeployFailure,
 } from "./recover-deploy-contract-id.js";
 import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "./version.js";
@@ -28,6 +29,10 @@ describe("recover deploy contract id", () => {
         "36760584017419743124423536061373365464991553746983011352231996661702535035363"
       )
     ).toBe("5145c0d3671aa4c41fa2615b64030e9be5cddb08411ce792bf568ef51f1239e3");
+  });
+
+  it("should_throw_when_the_salt_is_not_a_decimal_integer", () => {
+    expect(() => decimalSaltToHex("not-a-salt")).toThrow(SyntaxError);
   });
 
   it("should_fetch_create_contract_salt_from_horizon", async () => {
@@ -106,6 +111,126 @@ describe("recover deploy contract id", () => {
       ]),
       expect.any(Object)
     );
+  });
+
+  it("should_resolve_horizon_url_for_known_networks", () => {
+    expect(
+      resolveHorizonUrl({
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        networkPassphrase: "Test SDF Network ; September 2015",
+      })
+    ).toBe("https://horizon-testnet.stellar.org");
+
+    expect(
+      resolveHorizonUrl({
+        rpcUrl: "https://mainnet.sorobanrpc.com",
+        networkPassphrase: "Public Global Stellar Network ; September 2015",
+      })
+    ).toBe("https://horizon.stellar.org");
+  });
+
+  it("should_return_null_for_custom_or_unknown_network_passphrases", () => {
+    expect(
+      resolveHorizonUrl({
+        rpcUrl: "http://localhost:8000/rpc",
+        networkPassphrase: "Custom Standalone Network ; 2026",
+      })
+    ).toBeNull();
+  });
+
+  it("should_return_null_for_networks_without_horizon", () => {
+    expect(
+      resolveHorizonUrl({
+        rpcUrl: "https://rpc-futurenet.stellar.org",
+        networkPassphrase: "Test SDF Future Network ; October 2022",
+      })
+    ).toBeNull();
+  });
+
+  it("should_return_null_when_recovering_on_custom_network_without_throwing", async () => {
+    const contractId = await tryRecoverContractIdFromDeployFailure({
+      output: [
+        "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+        "error: xdr processing error: xdr value invalid",
+      ].join("\n"),
+      source: "alice",
+      network: {
+        rpcUrl: "http://localhost:8000/rpc",
+        networkPassphrase: "Custom Standalone Network ; 2026",
+      },
+    });
+
+    expect(contractId).toBeNull();
+  });
+
+  it("should_return_null_when_contract_id_resolution_fails", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        _embedded: {
+          records: [
+            {
+              transaction_successful: true,
+              type: "invoke_host_function",
+              function: "HostFunctionTypeHostFunctionTypeCreateContract",
+              salt: "36760584017419743124423536061373365464991553746983011352231996661702535035363",
+            },
+          ],
+        },
+      }),
+    });
+
+    runCommandMock.mockRejectedValue(new Error("stellar command failed"));
+
+    const contractId = await tryRecoverContractIdFromDeployFailure({
+      output: [
+        "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+        "error: xdr processing error: xdr value invalid",
+      ].join("\n"),
+      source: "alice",
+      network: {
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        networkPassphrase: "Test SDF Network ; September 2015",
+      },
+      fetchImpl,
+    });
+
+    expect(contractId).toBeNull();
+  });
+
+  it("should_return_null_when_the_horizon_salt_is_malformed", async () => {
+    runCommandMock.mockReset();
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        _embedded: {
+          records: [
+            {
+              transaction_successful: true,
+              type: "invoke_host_function",
+              function: "HostFunctionTypeHostFunctionTypeCreateContract",
+              salt: "not-a-salt",
+            },
+          ],
+        },
+      }),
+    });
+
+    await expect(
+      tryRecoverContractIdFromDeployFailure({
+        output: [
+          "Transaction hash is 9fd39d640ef3bae443d2b2748aa3f2ca43bb8261a9d5b8a8fa07fc3c0c1c85d6",
+          "error: xdr processing error: xdr value invalid",
+        ].join("\n"),
+        source: "alice",
+        network: {
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
+        fetchImpl,
+      })
+    ).resolves.toBeNull();
+    expect(runCommandMock).not.toHaveBeenCalled();
   });
 });
 

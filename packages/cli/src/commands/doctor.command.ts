@@ -9,7 +9,13 @@ import { evaluateWasmDriftDiagnostics } from "./doctor-wasm-drift.js";
 import { reportCliVersionChannel } from "./doctor-cli-version.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
-import { loadConfig, readContractSorobanSdkVersions, WELL_KNOWN_NETWORKS } from "@caatinga/core";
+import {
+  loadConfig,
+  formatNetworkOrigin,
+  readContractSorobanSdkVersions,
+  resolveNetwork,
+  WELL_KNOWN_NETWORKS,
+} from "@caatinga/core";
 
 type DoctorOptions = {
   network?: string;
@@ -230,6 +236,16 @@ export function registerDoctorCommand(program: Command): void {
         if (config && options.allNetworks) {
           await reportAllNetworks(config);
         } else if (deployNetwork && ready && config) {
+          // #244: name the network the coverage reports below describe, and where
+          // it came from (--network flag vs the config default).
+          try {
+            const network = resolveNetwork(config, options.network);
+            logger.info("");
+            logger.info(`Network: ${formatNetworkOrigin(network)}`);
+          } catch {
+            // networkDiagnostic already reports an unresolvable --network.
+          }
+
           await reportDeployCoverage(deployNetwork);
           const bindingsBlocked = await reportBindingCoverage(deployNetwork, strictBindings);
           blocked = blocked || bindingsBlocked;

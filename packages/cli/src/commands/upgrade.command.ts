@@ -3,6 +3,7 @@ import {
   generateBindingsGraph,
   loadConfig,
   resolveNetwork,
+  formatNetworkOrigin,
   syncFrontendEnv,
   toCaatingaError,
   upgradeContractInPlace,
@@ -54,10 +55,10 @@ export function registerUpgradeCommand(program: Command): void {
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
-          const { name: networkName, config: networkConfig } = resolveNetwork(
-            config,
-            options.network
-          );
+          const network = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = network;
+
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
 
           await confirmMainnetOperation({
             operation: "upgrade",
@@ -91,7 +92,6 @@ export function registerUpgradeCommand(program: Command): void {
           }
 
           logger.success("Upgrade complete");
-          logger.info(`Network: ${networkName}`);
           logger.info(`Contract: ${result.contractName}`);
           logger.info(`Contract ID: ${result.contractId}`);
           logger.info(`WASM hash: ${result.wasmHash}`);

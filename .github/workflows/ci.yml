@@ -70,6 +70,9 @@ jobs:
       - name: Docs check
         run: pnpm docs:check
 
+      - name: Template imports
+        run: pnpm check:template-imports
+
       - name: Build
         run: pnpm build
 

@@ -3,6 +3,7 @@ import { execa } from "execa";
 import {
   buildWorkspace,
   deployContractGraph,
+  formatNetworkOrigin,
   generateBindingsGraph,
   loadConfig,
   resolveNetwork,
@@ -38,6 +39,8 @@ export function registerRegressionCommand(program: Command): void {
         runCliAction(async () => {
           const config = await loadConfig();
           const network = resolveNetwork(config, options.network);
+
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
 
           // Confirm before the test/build steps so an unattended mainnet run fails
           // fast instead of after several minutes of work.

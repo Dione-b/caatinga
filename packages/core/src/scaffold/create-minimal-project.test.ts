@@ -42,7 +42,7 @@ describe("createMinimalProject", () => {
     expect(packageJson.scripts.invoke).toBeUndefined();
     expect(packageJson.scripts["read:hello"]).toContain("ctg read app.hello");
     expect(packageJson.scripts["read:version"]).toContain("ctg read app.version");
-    expect(packageJson.scripts.doctor).toBe("ctg doctor --network testnet");
+    expect(packageJson.scripts.doctor).toBe("ctg doctor");
     expect(packageJson.scripts.test).toBe("cargo test --manifest-path contracts/app/Cargo.toml");
 
     const readme = await readFile(path.join(targetDir, "README.md"), "utf8");

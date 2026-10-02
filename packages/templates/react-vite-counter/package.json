@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "cargo test --manifest-path contracts/counter/Cargo.toml",
     "caatinga:build": "npx ctg build counter",
-    "caatinga:deploy": "npx ctg deploy counter --network testnet --source ${CAATINGA_SOURCE:-alice}",
-    "caatinga:generate": "npx ctg generate counter --network testnet"
+    "caatinga:deploy": "npx ctg deploy counter --source ${CAATINGA_SOURCE:-alice}",
+    "caatinga:generate": "npx ctg generate counter"
   },
   "dependencies": {
     "@caatinga/client": "^3.11.0",

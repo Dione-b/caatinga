@@ -4,7 +4,8 @@ import type { CaatingaBindingAdapter } from "../types.js";
 interface BindingWithClient {
   Client?: new (input: {
     contractId: string;
-    publicKey: string;
+    /** Omitted/undefined for wallet-less reads: the SDK then uses its local null account. */
+    publicKey?: string;
     rpcUrl: string;
     networkPassphrase: string;
   }) => unknown;

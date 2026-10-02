@@ -59,11 +59,11 @@ function packageJsonSource(projectName: string): string {
       type: "module",
       scripts: {
         build: "ctg build app",
-        deploy: "ctg deploy app --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        doctor: "ctg doctor --network testnet",
+        deploy: "ctg deploy app --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "ctg doctor",
         test: "cargo test --manifest-path contracts/app/Cargo.toml",
-        "read:hello": "ctg read app.hello --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        "read:version": "ctg read app.version --network testnet --source ${CAATINGA_SOURCE:-alice}",
+        "read:hello": "ctg read app.hello --source ${CAATINGA_SOURCE:-alice}",
+        "read:version": "ctg read app.version --source ${CAATINGA_SOURCE:-alice}",
       },
       devDependencies: {
         "@caatinga/cli": `^${CAATINGA_CORE_VERSION}`,
@@ -87,9 +87,9 @@ npm install
 npm test
 npx ctg doctor
 npx ctg build app
-npx ctg deploy app --network testnet --source <identity>
-npx ctg read app.version --network testnet
-npx ctg read app.hello --network testnet
+npx ctg deploy app --source <identity>
+npx ctg read app.version
+npx ctg read app.hello
 \`\`\`
 
 ## Tests
@@ -118,7 +118,7 @@ client for the contract, add a \`frontend\` section to \`caatinga.config.ts\`:
 ${frontendBindingsConfigSnippet()}
 \`\`\`
 
-Then run \`npx ctg generate app --network testnet\`.
+Then run \`npx ctg generate app\`.
 
 Soroban \`Symbol\` parameters are generated as TypeScript \`string\` values with host-specific restrictions — see the Caatinga docs on [Soroban types](https://github.com/caatinga/caatinga/blob/main/docs/soroban-types.md).
 

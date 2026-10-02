@@ -3,13 +3,14 @@
 // clear, actionable error. `ctg generate counter` overwrites this file with
 // real @stellar/stellar-sdk generate bindings.
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
+import { appNetwork } from "../../../../network.js";
 
 // Marker the client checks to detect that real bindings haven't been generated
 // yet. Real @stellar/stellar-sdk generate bindings never export this.
 export const __caatingaPlaceholder = true;
 
 const GENERATE_HINT =
-  "Run `npx ctg generate counter --network testnet`, then restart the dev server.";
+  `Run \`npx ctg generate counter --network ${appNetwork.name}\`, then restart the dev server.`;
 
 function placeholderBinding(method: string): never {
   throw new CaatingaError(

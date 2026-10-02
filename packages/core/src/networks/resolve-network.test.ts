@@ -3,7 +3,7 @@ import type { CaatingaConfig } from "../config/config.schema.js";
 import { NetworkConfigSchema } from "../config/config.schema.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { WELL_KNOWN_NETWORKS } from "./networks.js";
-import { resolveNetwork } from "./resolve-network.js";
+import { formatNetworkOrigin, resolveNetwork } from "./resolve-network.js";
 
 const baseConfig: CaatingaConfig = {
   project: "app",
@@ -28,13 +28,40 @@ describe("resolveNetwork", () => {
   it("should_resolve_default_network_when_name_omitted", () => {
     const r = resolveNetwork(baseConfig);
     expect(r.name).toBe("testnet");
+    expect(r.origin).toBe("config");
     expect(r.config.rpcUrl).toContain("testnet");
+    expect(formatNetworkOrigin(r)).toBe("testnet (config)");
   });
 
   it("should_resolve_explicit_network_when_configured", () => {
     const r = resolveNetwork(baseConfig, "mainnet");
     expect(r.name).toBe("mainnet");
+    expect(r.origin).toBe("flag");
     expect(r.config.rpcUrl).toContain("mainnet");
+    expect(formatNetworkOrigin(r)).toBe("mainnet (flag)");
+  });
+
+  it.each(["", "   "])(
+    "should_throw_CAATINGA_NETWORK_NOT_FOUND_when_network_name_is_%j",
+    (networkName) => {
+      // An empty --network must fail loudly, never fall back to defaultNetwork:
+      // `ctg deploy --network "$NET"` with $NET unset would otherwise silently
+      // target mainnet in CI (#244).
+      try {
+        resolveNetwork(baseConfig, networkName);
+        expect.fail("expected throw");
+      } catch (error) {
+        expect(error).toBeInstanceOf(CaatingaError);
+        const ce = error as CaatingaError;
+        expect(ce.code).toBe(CaatingaErrorCode.NETWORK_NOT_FOUND);
+        expect(ce.message).toContain(`Network "${networkName}" is not configured.`);
+      }
+    }
+  );
+
+  it("should_format_network_origin_by_omitting_the_suffix_when_origin_is_unknown", () => {
+    expect(formatNetworkOrigin({ name: "testnet" })).toBe("testnet");
+    expect(formatNetworkOrigin({ name: "mainnet", origin: "flag" })).toBe("mainnet (flag)");
   });
 
   it("should_throw_CAATINGA_NETWORK_NOT_FOUND_when_name_missing", () => {

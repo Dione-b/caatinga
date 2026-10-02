@@ -2,10 +2,17 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { CaatingaConfig, NetworkConfig } from "../config/config.schema.js";
 import { NETWORK_METADATA_BY_PASSPHRASE } from "./network-metadata.js";
 
+export type NetworkOrigin = "flag" | "config";
+
 export type ResolvedNetwork = {
   name: string;
   config: NetworkConfig;
+  origin?: NetworkOrigin;
 };
+
+export function formatNetworkOrigin(network: { name: string; origin?: NetworkOrigin }): string {
+  return network.origin === undefined ? network.name : `${network.name} (${network.origin})`;
+}
 
 const BOILERPLATE_NETWORKS: Record<string, NetworkConfig> = Object.fromEntries(
   Object.entries(NETWORK_METADATA_BY_PASSPHRASE).map(([networkPassphrase, metadata]) => [
@@ -34,8 +41,16 @@ function renderNetworkBoilerplate(name: string, config: NetworkConfig): string {
   return `${BOILERPLATE_LABELS[name] ?? name} Boilerplate:\n  networks: {\n    ${name}: {\n${fields}\n    }\n  }`;
 }
 
-export function resolveNetwork(config: CaatingaConfig, networkName?: string): ResolvedNetwork {
+export function resolveNetwork(
+  config: CaatingaConfig,
+  networkName?: string
+): ResolvedNetwork & { origin: NetworkOrigin } {
+  // `networkName ?? ...` (not a truthiness check): an empty --network must fail
+  // loudly instead of silently targeting defaultNetwork — e.g. `ctg deploy
+  // --network "$NET" --yes` in CI with $NET unset would otherwise hit whatever
+  // defaultNetwork (possibly mainnet) is configured (#244).
   const name = networkName ?? config.defaultNetwork;
+  const origin: NetworkOrigin = networkName === undefined ? "config" : "flag";
   const network = config.networks[name];
 
   if (!network) {
@@ -53,5 +68,5 @@ export function resolveNetwork(config: CaatingaConfig, networkName?: string): Re
     );
   }
 
-  return { name, config: network };
+  return { name, config: network, origin };
 }

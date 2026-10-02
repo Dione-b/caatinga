@@ -7,8 +7,8 @@ Caatinga counter dApp template — Vite, React, Soroban counter contract, and `@
 ```bash
 npm install
 npx ctg build counter
-npx ctg deploy counter --network testnet --source alice
-npx ctg generate counter --network testnet
+npx ctg deploy counter --source alice
+npx ctg generate counter
 npm run dev
 ```
 
@@ -28,7 +28,7 @@ Templates default to npm. pnpm 10.26+/11.x is supported via the shipped `pnpm-wo
 
 ```bash
 npm run caatinga:build
-npm run caatinga:deploy -- --network testnet --source alice
+npm run caatinga:deploy -- --source alice
 ```
 
 With pnpm: `pnpm run caatinga:build` (same pattern for deploy/generate).

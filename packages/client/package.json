@@ -71,6 +71,7 @@
   "devDependencies": {
     "tsup": "^8.3.5",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
+    "@stellar/stellar-sdk": "^17.2.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^18.3.18",

@@ -1,4 +1,3 @@
-import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { NetworkConfig } from "../config/config.schema.js";
 import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js";
 import { runCommand } from "../shell/run-command.js";
@@ -34,17 +33,8 @@ export function decimalSaltToHex(salt: string): string {
   return BigInt(salt).toString(16).padStart(64, "0");
 }
 
-export function resolveHorizonUrl(network: NetworkConfig): string {
-  const horizonUrl = NETWORK_METADATA_BY_PASSPHRASE[network.networkPassphrase]?.horizonUrl;
-  if (!horizonUrl) {
-    throw new CaatingaError(
-      `No Horizon URL mapping for network passphrase "${network.networkPassphrase}".`,
-      CaatingaErrorCode.NETWORK_NOT_FOUND,
-      "Use testnet or mainnet, or extend Caatinga network metadata."
-    );
-  }
-
-  return horizonUrl;
+export function resolveHorizonUrl(network: NetworkConfig): string | null {
+  return NETWORK_METADATA_BY_PASSPHRASE[network.networkPassphrase]?.horizonUrl ?? null;
 }
 
 export async function fetchCreateContractSalt(
@@ -130,6 +120,10 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
   }
 
   const horizonUrl = resolveHorizonUrl(options.network);
+  if (!horizonUrl) {
+    return null;
+  }
+
   const salt = await fetchCreateContractSalt(
     horizonUrl,
     hashMatch[1],
@@ -140,10 +134,17 @@ export async function tryRecoverContractIdFromDeployFailure(options: {
     return null;
   }
 
-  return resolveContractIdFromDeploySalt({
-    salt,
-    source: options.source,
-    network: options.network,
-    cwd: options.cwd,
-  });
+  try {
+    return await resolveContractIdFromDeploySalt({
+      salt,
+      source: options.source,
+      network: options.network,
+      cwd: options.cwd,
+    });
+  } catch {
+    // A malformed salt, a stellar CLI failure, or an unparseable contract id means
+    // recovery is unavailable. Returning null lets the caller rethrow the original
+    // deploy error instead of replacing it.
+    return null;
+  }
 }

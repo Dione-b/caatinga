@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { invokeContract, loadConfig, resolveNetwork } from "@caatinga/core";
+import { formatNetworkOrigin, invokeContract, loadConfig, resolveNetwork } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
@@ -33,7 +33,10 @@ export function registerInvokeCommand(program: Command): void {
       ) =>
         runCliAction(async () => {
           const config = await loadConfig();
-          const { name: networkName, config: networkConfig } = resolveNetwork(config, options.network);
+          const network = resolveNetwork(config, options.network);
+          const { name: networkName, config: networkConfig } = network;
+
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
 
           await confirmMainnetOperation({
             operation: "invoke",
@@ -55,7 +58,6 @@ export function registerInvokeCommand(program: Command): void {
 
           logger.success("Invoke complete");
           logger.info("");
-          logger.info(`Network: ${result.network.name}`);
           logger.info(`Contract: ${result.target.contractName}`);
           logger.info(`Method: ${result.target.method}`);
 

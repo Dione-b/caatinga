@@ -3,11 +3,12 @@
 // clear, actionable error. `ctg generate verifier` overwrites this file with
 // real @stellar/stellar-sdk generate bindings.
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
+import { appNetwork } from "../../../network.js";
 
 export const __caatingaPlaceholder = true;
 
 const GENERATE_HINT =
-  "Run `npx ctg generate verifier --network testnet`, then restart the dev server.";
+  `Run \`npx ctg generate verifier --network ${appNetwork.name}\`, then restart the dev server.`;
 
 function placeholderBinding(method: string): never {
   throw new CaatingaError(

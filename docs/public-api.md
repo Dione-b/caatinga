@@ -41,6 +41,7 @@ Root exports:
 - `CaatingaContractClient`
 - `buildXdr`
 - `createWalletSession`, `WALLET_SESSION_STORAGE_KEY`
+- `DEFAULT_READ_SOURCE_ACCOUNT`
 
 Types: `CaatingaBindingAdapter`, `CaatingaClientConfig`, `CaatingaContractRegistration`, `CaatingaInvokeOptions`, `CaatingaInvokeResult`, `CaatingaInvokeStatus`, `CaatingaNetwork`, `CaatingaReadOptions`, `CaatingaReadResult`, `CaatingaWalletAdapter`, `CaatingaXdrBuildResult`, wallet session types.
 
@@ -96,7 +97,7 @@ Exported from `@caatinga/core` for power users and CI. **Additive changes are mi
 
 ### Networks / config / templates
 
-- Networks: `resolveNetwork`, `WELL_KNOWN_NETWORKS`
+- Networks: `resolveNetwork`, `formatNetworkOrigin`, `WELL_KNOWN_NETWORKS` (types: `ResolvedNetwork`, `NetworkOrigin`)
 - Config load: `loadConfig`, `CaatingaConfigSchema`
 - Templates: `createProjectFromTemplate`, `TemplateManifestSchema`
 

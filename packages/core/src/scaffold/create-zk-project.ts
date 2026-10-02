@@ -71,8 +71,8 @@ function packageJsonSource(projectName: string): string {
         "zk:build": "ctg zk build main",
         "zk:prove": "ctg zk prove main",
         build: "ctg build verifier",
-        deploy: "ctg deploy verifier --network testnet --source ${CAATINGA_SOURCE:-alice}",
-        doctor: "ctg doctor --network testnet",
+        deploy: "ctg deploy verifier --source ${CAATINGA_SOURCE:-alice}",
+        doctor: "ctg doctor",
         test: "cargo test --manifest-path contracts/verifier/Cargo.toml",
       },
       devDependencies: {
@@ -97,7 +97,7 @@ npm install
 npm test
 npx ctg zk build main
 npx ctg build verifier
-npx ctg deploy verifier --network testnet --source <identity>
+npx ctg deploy verifier --source <identity>
 npx ctg zk prove main
 \`\`\`
 

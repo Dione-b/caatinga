@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { loadConfig, syncFrontendEnv } from "@caatinga/core";
+import { formatNetworkOrigin, loadConfig, resolveNetwork, syncFrontendEnv } from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -11,6 +11,10 @@ export function registerSyncEnvCommand(program: Command): void {
     .action((options: { network?: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
+        const network = resolveNetwork(config, options.network);
+
+        logger.info(`Network: ${formatNetworkOrigin(network)}`);
+
         const result = await syncFrontendEnv({
           config,
           networkName: options.network,

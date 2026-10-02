@@ -20,6 +20,7 @@ export type {
   WalletSessionStorage,
 } from "./wallet/wallet-session.js";
 export { createWalletSession, WALLET_SESSION_STORAGE_KEY } from "./wallet/wallet-session.js";
+export { DEFAULT_READ_SOURCE_ACCOUNT } from "./constants.js";
 export { resolveContractId } from "./artifacts/resolve-contract-id.js";
 export { createDefaultBindingAdapter } from "./bindings/default-binding-adapter.js";
 export { createCaatingaClient } from "./client/create-caatinga-client.js";
