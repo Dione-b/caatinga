@@ -6,9 +6,9 @@ import { DEFAULT_READ_SOURCE_ACCOUNT } from "../constants.js";
 import { createCaatingaClient } from "./create-caatinga-client.js";
 
 const WALLET_PUBLIC_KEY = "GPUBLIC";
-const READ_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(new Uint8Array(32).fill(3));
-const OVERRIDE_READ_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(new Uint8Array(32).fill(5));
-const REAL_CONTRACT_ID = StrKey.encodeContract(new Uint8Array(32).fill(7));
+const READ_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(Buffer.alloc(32, 3));
+const OVERRIDE_READ_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(Buffer.alloc(32, 5));
+const REAL_CONTRACT_ID = StrKey.encodeContract(Buffer.alloc(32, 7));
 
 const artifacts: CaatingaArtifacts = {
   project: "counter-app",
@@ -987,7 +987,7 @@ describe("read source accounts against @stellar/stellar-sdk", () => {
   });
 
   it("should_load_the_wallet_public_key_with_getAccount", async () => {
-    const walletKey = StrKey.encodeEd25519PublicKey(new Uint8Array(32).fill(9));
+    const walletKey = StrKey.encodeEd25519PublicKey(Buffer.alloc(32, 9));
     const client = createSdkClient({
       wallet: {
         getPublicKey: vi.fn(async () => walletKey),

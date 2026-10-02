@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import {
@@ -51,5 +54,27 @@ describe("evaluateStellarSdkCompatibility", () => {
   it("parses version strings from npm output", () => {
     expect(parseStellarSdkVersion("16.0.1")).toBe("16.0.1");
     expect(parseStellarSdkVersion("  16.0.1\n")).toBe("16.0.1");
+  });
+});
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
+
+describe("workspace @stellar/stellar-sdk ranges", () => {
+  // Client SDK-parity tests and template pins must exercise the contracted SDK line, not a
+  // newer major (#282).
+  it.each([
+    "packages/client/package.json",
+    "packages/templates/react-vite-counter/package.json",
+    "packages/templates/zk-starter/package.json",
+  ])("pins %s to the contracted SDK range", async (manifestPath) => {
+    const manifest = JSON.parse(await readFile(path.join(repoRoot, manifestPath), "utf8")) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const range =
+      manifest.dependencies?.["@stellar/stellar-sdk"] ??
+      manifest.devDependencies?.["@stellar/stellar-sdk"];
+
+    expect(range).toBe(`^${STELLAR_SDK_MIN_VERSION}`);
   });
 });

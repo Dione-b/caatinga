@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import { assertReadSourceAccount, normalizeReadSourceAccount } from "./read-source.js";
 
-const VALID_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(new Uint8Array(32).fill(3));
+const VALID_SOURCE_ACCOUNT = StrKey.encodeEd25519PublicKey(Buffer.alloc(32, 3));
 
 function captureError(run: () => unknown): unknown {
   try {
@@ -43,7 +43,7 @@ describe("assertReadSourceAccount", () => {
       // checked here: the client validates the `G` + 55 base32 shape without the SDK.
       VALID_SOURCE_ACCOUNT.slice(0, -1),
       `G${"0".repeat(55)}`,
-      StrKey.encodeContract(new Uint8Array(32).fill(7)),
+      StrKey.encodeContract(Buffer.alloc(32, 7)),
       "SABCDEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOPQRSTUVW",
     ];
 

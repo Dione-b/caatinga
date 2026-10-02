@@ -9,4 +9,7 @@
    if you need to capture generated output as fixtures.
 3. Run `pnpm test`.
 4. Bump `STELLAR_SDK_LAST_TESTED_VERSION` in `packages/core/src/stellar-sdk/version.ts`.
-5. Update this document and template manifests.
+5. Update this document and every workspace `@stellar/stellar-sdk` range together: both template
+   `package.json` files and the `@caatinga/client` devDependency. The "workspace
+   `@stellar/stellar-sdk` ranges" test in `compat.test.ts` fails if they drift from
+   `^STELLAR_SDK_MIN_VERSION`.
