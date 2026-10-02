@@ -78,7 +78,7 @@ npx ctg regression --network testnet --source alice  # test → build → deploy
 npx ctg doctor --network testnet --strict-bindings   # fail on stale bindings
 npx ctg status --network testnet --strict            # after deploy --no-generate
 npx ctg ci run --network testnet --source alice --strict  # doctor + smoke in CI
-ctg identity export > stellar-config.b64             # rotate CAATINGA_CI_STELLAR_CONFIG_B64
+ctg identity export > stellar-config.b64             # move an identity to another machine
 ```
 
 See [Production readiness](./production-readiness.md) and [Testing](./internal/testing.md) for workflow details.

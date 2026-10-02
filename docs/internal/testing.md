@@ -55,13 +55,11 @@ Live testnet smoke uses `CAATINGA_CI_IDENTITY_ALIAS` and `CAATINGA_CI_STELLAR_CO
 
 ### Stellar CLI config blob format
 
-With Stellar CLI `27.0.0`, the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
+With Stellar CLI `28.0.0` (the CI pin), the safest secret format is a base64-encoded tar archive whose contents include `.config/stellar/config.toml` and `.config/soroban/identity/<alias>.toml`. The restore step still accepts the legacy plain `config.toml` payload, but that format can no longer recreate file-based identities by itself.
 
 To refresh `CAATINGA_CI_STELLAR_CONFIG_B64` for the current CLI layout:
 
 ```bash
-ctg identity export > stellar-ci-config.b64
-# or manually:
 mkdir -p ci-stellar-config/.config
 cp -R ~/.config/stellar ci-stellar-config/.config/stellar
 cp -R ~/.config/soroban ci-stellar-config/.config/soroban
@@ -69,7 +67,13 @@ tar -C ci-stellar-config -czf stellar-ci-config.tgz .config
 base64 -w0 stellar-ci-config.tgz
 ```
 
-Restore in CI with `ctg identity import stellar-ci-config.b64` after decoding is not needed — the import command reads the base64 text file directly.
+CI restores the secret with `bash scripts/restore-stellar-ci-config.sh`, which requires the archive
+to contain a top-level `.config/` directory.
+
+Do **not** use `ctg identity export` for this secret: it archives the contents of
+`~/.config/stellar` without the `.config/` prefix (and without `soroban/`), so the restore script
+rejects it. `ctg identity export` / `ctg identity import <file>` are for moving an identity between
+local machines.
 
 Before encoding, verify that `stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS"` succeeds locally with the same files.
 

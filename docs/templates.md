@@ -15,7 +15,7 @@ Every template must include `caatinga.template.json`:
   "version": "0.1.0",
   "description": "Minimal Vite + React + Soroban counter dApp.",
   "caatinga": {
-    "compatibleCore": "^0.2.0",
+    "compatibleCore": "^3.11.0",
     "templateVersion": 1
   },
   "frontend": {
@@ -62,9 +62,12 @@ Generated projects include:
 
 ### pnpm 10.26+ / 11.x
 
-`caatinga.template.json` declares `packageManager: "npm"`, but the `react-vite-counter` template also ships `pnpm-workspace.yaml` so generated apps can install with pnpm 10.26+ or 11.x:
+`caatinga.template.json` declares `packageManager: "npm"`, but both official templates
+(`react-vite-counter` and `zk-starter`) also ship `pnpm-workspace.yaml` so generated apps can install with pnpm.
+This is the `react-vite-counter` file:
 
 ```yaml
+packages: []
 allowBuilds:
   esbuild: true
 
@@ -75,13 +78,19 @@ ignoredOptionalDependencies:
 overrides:
   uuid: "^14.0.0"
   ws: "^8.21.0"
+  axios: "^1.17.1"
+  "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
+  "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
+  "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"
   "@reown/appkit-utils>@safe-global/safe-apps-sdk": "-"
   "@reown/appkit-utils>@safe-global/safe-apps-provider": "-"
   "@safe-global/safe-apps-sdk>@safe-global/safe-gateway-typescript-sdk": "-"
 ```
 
+- `packages: []` — required for pnpm 9, which treats any directory holding `pnpm-workspace.yaml` as a workspace root and aborts with "packages field missing or empty". The empty list is harmless on pnpm 10+/11.
 - `allowBuilds.esbuild: true` — pnpm blocks dependency lifecycle scripts by default; Vite pulls in esbuild. Without this, `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`.
 - `overrides.uuid` — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies. `package.json` also ships npm `overrides` for the same pin when using npm.
+- `overrides.axios` — pins `axios@^1.17.1` over the vulnerable `1.0.0–1.17.0` range pulled in via Coinbase CDP / Reown (high `npm audit` findings). See [Install override contract](./internal/template-overrides.md).
 - `overrides.ws` — **required.** Pins `ws@^8.21.0` across the Reown/viem chain (transitive via Stellar Wallets Kit). Without this, `npm audit` reports ~14 **high** DoS advisories ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)) after install. See [Install override contract](./internal/template-overrides.md).
 - Safe overrides — block optional EVM/Safe packages from Reown AppKit (transitive via Stellar Wallets Kit). Irrelevant for Stellar wallets; removes the deprecated `@safe-global/safe-gateway-typescript-sdk` warning on `npm install`. `package.json` ships equivalent nested npm `overrides` for npm users.
 - Trezor/HOT overrides — SWK lists `@trezor/connect-web` and `@hot-wallet/sdk` as direct dependencies but Caatinga does not register them (no hardware-wallet support yet). npm `overrides` replace them with local stubs under `src/stubs/`; pnpm uses `"-"` path overrides in `pnpm-workspace.yaml`. This avoids critical `protobufjs` advisories (Trezor) and NEAR/`elliptic` noise (HOT) without affecting Freighter, LOBSTR, WalletConnect, etc. **Do not remove** — see [Install override contract](./internal/template-overrides.md).

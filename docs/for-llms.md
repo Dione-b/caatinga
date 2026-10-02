@@ -8,15 +8,15 @@ Human docs: [caatinga.xyz](https://caatinga.xyz). Authoritative command/API deta
 
 ## Install & release
 
-| Item              | Value                                                                                        |
-| ----------------- | -------------------------------------------------------------------------------------------- |
-| npm dist-tag      | `latest` → **3.9.2** (`@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk`) |
-| Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs. |
-| Global install    | `npm install -g @caatinga/cli` (binaries: `caatinga`, `ctg`)                                 |
-| No global install | `npx ctg <command>` (`caatinga` is a legacy alias)                                           |
-| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.9.2`), not a floating tag                        |
-| Fresh machine     | Node 22+, then check with `npx ctg doctor`. Install Rust, Stellar CLI manually.              |
-| Stellar CLI       | Hard floor **23.0.0**; last tested **28.0.0**; newer = advisory warning only                 |
+| Item              | Value                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| npm dist-tag      | Check with `npm view @caatinga/cli dist-tags` (`cli`, `core`, `client`, `zk` release together) |
+| Status            | **v1.0 stable contract** on npm major `3.x`. Pin an exact version for reproducible installs.   |
+| Global install    | `npm install -g @caatinga/cli` (binary `ctg`; `caatinga` is a legacy alias)                    |
+| No global install | `npx ctg <command>` (`caatinga` is a legacy alias)                                             |
+| Reproducible CI   | Pin an exact version (e.g. `@caatinga/cli@3.10.3`), not a floating tag                         |
+| Fresh machine     | Node 22+, then check with `npx ctg doctor`. Install Rust, Stellar CLI manually.                |
+| Stellar CLI       | Hard floor **23.0.0**; last tested **28.0.0**; newer = advisory warning only                   |
 
 See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-cli-version-contract.md).
 
@@ -138,8 +138,9 @@ Full API: [Client](./client.md) · [Wallets](./wallets.md).
 ```ts
 import { createCaatingaClient } from "@caatinga/client";
 import { createStellarWalletsKitAdapter } from "@caatinga/client/stellar-wallets-kit";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
+import artifactsJson from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
   network: {
@@ -147,7 +148,8 @@ const client = createCaatingaClient({
     rpcUrl: "https://soroban-testnet.stellar.org",
     networkPassphrase: "Test SDF Network ; September 2015",
   },
-  artifacts,
+  // JSON imports widen `version` to number; the cast restores the artifacts schema type.
+  artifacts: artifactsJson as CaatingaArtifacts,
   wallet: createStellarWalletsKitAdapter(),
   contracts: { counter: { binding: Counter } },
 });

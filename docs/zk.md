@@ -32,18 +32,19 @@ Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet 
 
 ## Commands
 
-| Command                                   | Purpose                                                                  |
-| ----------------------------------------- | ------------------------------------------------------------------------ |
-| `ctg zk init [project]`                   | Scaffold `zk-starter` (multiplier circuit + verifier).                   |
-| `ctg zk init [project] --minimal`         | Scaffold a ZK-only project with a minimal identity circuit and verifier. |
-| `ctg zk init [project] --template <name>` | Use a specific template instead of the default `zk-starter`.             |
-| `ctg zk init [project] --force`           | Overwrite existing scaffold files.                                       |
-| `ctg zk build [circuit]`                  | Compile Circom (`-p bls12381`) and run dev trusted setup.                |
-| `ctg zk build [circuit] --embed-vk`       | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).  |
-| `ctg zk prove [circuit]`                  | Generate `proof.json` and `public.json` from `input.json`.               |
-| `ctg zk prove [circuit] --debug`          | Emit intermediate `witness.wtns` for debugging.                          |
-| `ctg zk invoke [circuit]`                 | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK).  |
-| `ctg zk invoke [circuit] --embed-vk`      | **Blocked** — experimental; use dynamic VK flow today.                   |
+| Command                                       | Purpose                                                                                                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctg zk init [project]`                       | Scaffold `zk-starter` (multiplier circuit + verifier).                                                                                                     |
+| `ctg zk init [project] --minimal`             | Scaffold a ZK-only project with a minimal identity circuit and verifier.                                                                                   |
+| `ctg zk init [project] --template <name>`     | Use a specific template instead of the default `zk-starter`.                                                                                               |
+| `ctg zk init [project] --force`               | Overwrite existing scaffold files.                                                                                                                         |
+| `ctg zk build [circuit]`                      | Compile Circom (`-p bls12381`) and run dev trusted setup.                                                                                                  |
+| `ctg zk build [circuit] --embed-vk`           | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).                                                                                    |
+| `ctg zk build [circuit] --allow-dev-ceremony` | Allow dev-ceremony artifacts on mainnet (not for production).                                                                                              |
+| `ctg zk prove [circuit]`                      | Generate `proof.json` and `public.json` from `input.json`.                                                                                                 |
+| `ctg zk prove [circuit] --debug`              | Emit intermediate `witness.wtns` for debugging.                                                                                                            |
+| `ctg zk invoke [circuit] --source <id>`       | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK). `--source` is required; also `-n, --network`, `-y, --yes`, `--allow-dev-ceremony`. |
+| `ctg zk invoke [circuit] --embed-vk`          | **Blocked** — experimental; use dynamic VK flow today.                                                                                                     |
 
 Artifacts land in `.artifacts/zk/<circuit>/`.
 
@@ -133,6 +134,8 @@ import {
 | `ZK_VERIFY_FAILED`        | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
 | `ZK_DEV_CEREMONY_BLOCKED` | Mainnet blocked for dev-ceremony artifacts (maps to `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)   |
 | `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform                                               |
+| `ZK_DOWNLOAD_FAILED`      | Downloading a ZK tool (Circom/snarkjs) failed                                             |
+| `ZK_CHECKSUM_MISMATCH`    | A downloaded ZK tool did not match its pinned checksum                                    |
 
 ## Dynamic VK vs embedded VK
 
@@ -190,14 +193,14 @@ export default defineConfig({
         path: "./circuits",
         protocol: "groth16",
         curve: "bls12381",
-        verifierContract: "verifier", // optional: contract name for on-chain verification
+        verifierContract: "verifier", // contract name used by `ctg zk invoke`
       },
     },
   },
 });
 ```
 
-Only `bls12381` is accepted today; other curves fail config validation. `verifierContract` is optional — when omitted, `zk invoke` targets the default verifier.
+Only `bls12381` is accepted today; other curves fail config validation. `verifierContract` is optional in the schema, but `ctg zk invoke` requires it: without it the command fails with `Verifier contract not configured for circuit "<name>"`.
 
 ## Phase note
 

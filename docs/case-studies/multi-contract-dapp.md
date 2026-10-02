@@ -45,14 +45,20 @@ sequenceDiagram
 
 ## Upgrade
 
-After changing token WASM:
+The dogfood `token` has no `upgrade(new_wasm_hash)` entrypoint, so in-place `ctg upgrade token`
+fails (`CAATINGA_INVOKE_FAILED`, with a hint to use `ctg deploy --upgrade`). Upgrade by redeploying
+instead. A redeployed token gets a **new** `contractId`, and `vault` stored the old token `Address`
+in its constructor, so redeploy the whole graph to re-resolve `${contracts.token.contractId}`:
 
 ```bash
-ctg build token
-ctg upgrade token --network testnet --source alice
+ctg build
+ctg deploy --network testnet --source alice --upgrade
 ```
 
-Vault artifact still references the same token `contractId` unless vault logic changes.
+`--upgrade` redeploys every contract in dependency order and records the previous instances in
+`history` with reason `upgrade`. For in-place upgrades that keep the same `contractId`, the contract
+must expose an admin-gated `upgrade(new_wasm_hash)`; see
+[Contract upgrade](../tutorials/contract-upgrade.md).
 
 ## Validation
 
