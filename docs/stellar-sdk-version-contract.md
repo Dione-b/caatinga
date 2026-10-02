@@ -39,6 +39,9 @@ Official templates ship:
 
 Pin explicitly in production projects and CI.
 
+`@caatinga/client` does not depend on the SDK at runtime (generated bindings bring the app's copy);
+its SDK-parity tests run against the same `^16.0.1` range via a devDependency.
+
 > **Maintainers:** upgrade steps live in [Stellar SDK upgrade process](./internal/stellar-sdk-upgrade.md).
 
 ## Related docs
