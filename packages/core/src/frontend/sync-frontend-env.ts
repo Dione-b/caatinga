@@ -16,7 +16,6 @@ export type SyncFrontendEnvResult = {
   entries: Array<{ key: string; value: string }>;
 };
 
-const NETWORK_ENV_KEYS = new Set(["network", "rpcUrl", "networkPassphrase"]);
 const WASM_HASH_PATTERN = /^(.+)\.wasmHash$/;
 
 function formatEnvValue(value: string): string {
@@ -120,12 +119,6 @@ export async function syncFrontendEnv(
       value = network.config.rpcUrl;
     } else if (sourceKey === "networkPassphrase") {
       value = network.config.networkPassphrase;
-    } else if (NETWORK_ENV_KEYS.has(sourceKey)) {
-      throw new CaatingaError(
-        `Unsupported frontend env source key "${sourceKey}".`,
-        CaatingaErrorCode.INVALID_CONFIG,
-        "Use network, rpcUrl or networkPassphrase for network values."
-      );
     } else {
       const wasmHashMatch = sourceKey.match(WASM_HASH_PATTERN);
       const lookupKey = wasmHashMatch ? wasmHashMatch[1] : sourceKey;
@@ -191,12 +184,6 @@ export async function computeFrontendEnvEntries(
       value = network.config.rpcUrl;
     } else if (sourceKey === "networkPassphrase") {
       value = network.config.networkPassphrase;
-    } else if (NETWORK_ENV_KEYS.has(sourceKey)) {
-      throw new CaatingaError(
-        `Unsupported frontend env source key "${sourceKey}".`,
-        CaatingaErrorCode.INVALID_CONFIG,
-        "Use network, rpcUrl or networkPassphrase for network values."
-      );
     } else {
       const wasmHashMatch = sourceKey.match(WASM_HASH_PATTERN);
       const lookupKey = wasmHashMatch ? wasmHashMatch[1] : sourceKey;

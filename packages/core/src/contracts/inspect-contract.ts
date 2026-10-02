@@ -71,23 +71,37 @@ export async function inspectContract(
     reachable = false;
     detail =
       error instanceof CaatingaError
-        ? [error.message, error.hint].filter(Boolean).join("\n")
+        ? [error.message, error.cause instanceof CaatingaError ? error.cause.hint : undefined]
+            .filter(Boolean)
+            .join("\n")
         : error instanceof Error
           ? error.message
           : "Contract not reachable on network.";
   }
 
   let localHash: string | undefined;
-  const configuredWasmPath = path.resolve(cwd, artifact.wasmPath || contract.wasmPath);
-  let localWasmPath = configuredWasmPath;
-  try {
-    const wasmPath = await resolveWasmArtifactPath(configuredWasmPath, {
-      sourcePath: contract.sourcePath,
-    });
-    localWasmPath = wasmPath;
-    localHash = await hashWasm(wasmPath);
-  } catch {
-    localHash = undefined;
+  const artifactWasmPath = artifact.wasmPath ? path.resolve(cwd, artifact.wasmPath) : undefined;
+  const configuredWasmPath = path.resolve(cwd, contract.wasmPath);
+  const wasmCandidates = [
+    ...new Set(
+      [artifactWasmPath, configuredWasmPath].filter(
+        (candidate): candidate is string => candidate !== undefined
+      )
+    ),
+  ];
+  let localWasmPath = artifactWasmPath ?? configuredWasmPath;
+  for (const candidate of wasmCandidates) {
+    try {
+      const wasmPath = await resolveWasmArtifactPath(candidate, {
+        sourcePath: contract.sourcePath,
+      });
+      localWasmPath = wasmPath;
+      localHash = await hashWasm(wasmPath);
+      break;
+    } catch {
+      // The artifact path may refer to an old or relocated build. Retry the
+      // configured contract path before reporting the local hash as unknown.
+    }
   }
 
   return {

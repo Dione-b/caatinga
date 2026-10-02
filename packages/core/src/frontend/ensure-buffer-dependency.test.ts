@@ -62,12 +62,39 @@ describe("ensureBufferDependency", () => {
     expect(pkg.dependencies.buffer).toBe("^6.0.3");
   });
 
-  it("should_not_throw_for_non_semver_workspace_protocols", async () => {
-    const cwd = await scaffold({ name: "app", dependencies: { buffer: "workspace:*" } });
+  it("should_update_an_out_of_range_dev_dependency_in_place", async () => {
+    const cwd = await scaffold({ name: "app", devDependencies: { buffer: "^1.0.0" } });
 
     const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
 
     expect(result?.added).toBe(true);
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+    expect(pkg.dependencies).toBeUndefined();
+    expect(pkg.devDependencies.buffer).toBe("^6.0.3");
+  });
+
+  it.each(["workspace:*", "file:../buffer", "npm:buffer@^6", "latest"])(
+    "should_leave_non_semver_spec_%s_untouched",
+    async (version) => {
+      const cwd = await scaffold({ name: "app", dependencies: { buffer: version } });
+
+      const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+      expect(result?.added).toBe(false);
+      const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+      expect(pkg.dependencies.buffer).toBe(version);
+    }
+  );
+
+  it("should_leave_non_semver_dev_dependency_untouched_without_adding_a_duplicate", async () => {
+    const cwd = await scaffold({ name: "app", devDependencies: { buffer: "workspace:*" } });
+
+    const result = await ensureBufferDependency(cwd, "./frontend/src/contracts");
+
+    expect(result?.added).toBe(false);
+    const pkg = JSON.parse(await readFile(path.join(cwd, "frontend", "package.json"), "utf8"));
+    expect(pkg.dependencies).toBeUndefined();
+    expect(pkg.devDependencies.buffer).toBe("workspace:*");
   });
 
   it("should_return_undefined_when_no_package_json_is_found", async () => {

@@ -76,18 +76,31 @@ export async function ensureBufferDependency(
     return undefined;
   }
 
-  const existingVersion = pkg.dependencies?.buffer ?? pkg.devDependencies?.buffer;
+  const dependencySection =
+    pkg.dependencies?.buffer !== undefined
+      ? "dependencies"
+      : pkg.devDependencies?.buffer !== undefined
+        ? "devDependencies"
+        : undefined;
+  const existingVersion = dependencySection ? pkg[dependencySection]?.buffer : undefined;
   // package.json may contain npm ranges (for example `^6.0.3`) rather than
   // concrete versions. `satisfies` treats those ranges as invalid versions;
-  // normalize them first and only compare valid ranges. Non-npm protocols
-  // such as `workspace:*` are intentionally treated as needing the direct
-  // dependency instead of throwing.
+  // normalize them first and only compare valid ranges. A non-semver protocol
+  // (workspace:, file:, npm:, git, etc.) is an intentional package-manager
+  // choice; leave it untouched rather than replacing it with an npm range.
   const existingRange = existingVersion === undefined ? null : validRange(existingVersion);
+  if (existingVersion !== undefined && existingRange === null) {
+    return { packageJsonPath, added: false };
+  }
   if (existingRange && intersects(existingRange, BUFFER_DEPENDENCY_RANGE)) {
     return { packageJsonPath, added: false };
   }
 
-  pkg.dependencies = { ...(pkg.dependencies ?? {}), buffer: BUFFER_DEPENDENCY_RANGE };
+  if (dependencySection === "devDependencies") {
+    pkg.devDependencies = { ...(pkg.devDependencies ?? {}), buffer: BUFFER_DEPENDENCY_RANGE };
+  } else {
+    pkg.dependencies = { ...(pkg.dependencies ?? {}), buffer: BUFFER_DEPENDENCY_RANGE };
+  }
   await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
 
   return { packageJsonPath, added: true };
