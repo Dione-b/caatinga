@@ -42,7 +42,7 @@ This document defines the acceptance criteria that must be satisfied before Caat
 
 ## Documentation Criteria
 
-- [x] `README.md` describes the problem, differentiator, and quick start in under 5 minutes
+- [x] `README.md` describes the problem, value proposition, and quick start in under 5 minutes
 - [x] `docs/getting-started.md` guides a new user from zero to first deploy
 - [x] `docs/errors.md` lists all `CAATINGA_*` error codes with descriptions
 - [x] `docs/architecture.md` describes the package layout and data flow
