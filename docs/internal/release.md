@@ -51,7 +51,13 @@ version (internal ranges are updated automatically).
 3. Validate locally: `pnpm pre:publish` (`scripts/pre-publish.sh`; pass `-- --tag <tag>`,
    default `next`) and `pnpm ci:publish-matrix`.
 4. Publish (operator, manual): `pnpm publish -r --access public --no-git-checks --tag next`.
-5. Promote to `latest` without republishing: `bash scripts/promote-latest.sh <version> --otp <code>`.
+5. Promote to `latest` without republishing: `bash scripts/promote-latest.sh <version> --otp <code>`
+   (TOTP 2FA). With passkey / browser auth there is no code: run
+   `npm dist-tag add "@caatinga/<pkg>@<version>" latest` for `cli`, `core`, `client`, `zk` and approve
+   each prompt in the browser (the script currently requires `--otp`).
+
+Release history note: `3.11.0` was versioned in the repo but never published to npm; npm went from
+`3.10.3` to `3.12.0`, whose CHANGELOG sections cover both.
 
 See [`release/publish-checklist.md`](./release/publish-checklist.md) for the full checklist.
 

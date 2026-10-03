@@ -40,7 +40,7 @@ graph TD
 ### Phase 3: Wire Hooks (full deploy only; skip with `--no-wire`)
 
 - **Actions:** Runs `postDeploy` and `postDeployRead` hooks in order when either declares at least
-  one hook (in `@caatinga/cli` 3.11.0 and earlier, a `postDeploy` array was required, so
+  one hook (before 3.12.0, a `postDeploy` array was required, so
   `postDeployRead`-only configs were skipped). A failure here does not fail the deploy: Caatinga prints the error and the
   `ctg wire` recovery command.
 

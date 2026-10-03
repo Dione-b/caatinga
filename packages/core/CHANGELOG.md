@@ -1,5 +1,15 @@
 ## Breaking changes policy
 
+## 3.12.0
+
+### Patch Changes
+
+- 21b518a: Preserve intentional non-semver `buffer` dependency protocols and update out-of-range versions in their existing dependency section. Contract inspection now falls back to the configured WASM path when the deployed artifact path is missing, and `inspectContract().localWasm.path` now reports the absolute resolved path that was hashed instead of the configured `wasm` value. Inspection diagnostics no longer include deploy-only `--verify-deps` guidance. Also remove unreachable frontend network-key validation branches.
+- 670f3aa: Deploy recovery no longer masks `DEPLOY_FAILED` with `NETWORK_NOT_FOUND` on custom or unmapped networks. When there is no Horizon URL, or the salt and contract-id lookup fails after a Horizon hit, recovery returns null so the original deploy error and its retry path stay intact (#234).
+- 4615ed4: `ctg inspect` now shows the Stellar CLI output in the on-chain `detail` when the contract probe fails. `verifyDependencyContract` keeps the `runCommand` error as the `cause` of `DEPENDENCY_CONTRACT_NOT_FOUND`, so the raw CLI diagnostics reach callers. `ctg generate` now says `Set "buffer" to ^6` instead of `Added "buffer"`, since an out-of-range `buffer` entry is updated in place.
+- fb04f3e: Every `ctg` command now logs the resolved network and its origin up front (`Network: testnet (config)` when it came from `defaultNetwork`, `Network: mainnet (flag)` when passed via `--network`), so `--skip-deploy` runs and failed commands no longer hide which network they targeted (#244). An empty `--network ""` (for example `--network "$NET"` with `$NET` unset in CI) now fails with `CAATINGA_NETWORK_NOT_FOUND` instead of silently falling back to `defaultNetwork`. Template placeholder hints render the configured network, and the zk-starter placeholder bindings import was fixed so scaffolded projects type-check.
+- 94551d4: New projects now start on the current artifacts schema (`version: 2`). The `react-vite-counter` and `zk-starter` templates shipped `"version": 1` in `caatinga.artifacts.json`, so `ctg init` / `ctg zk init` projects stayed on v1 until their first upgrade or redeploy, while `ctg init --minimal` already started on v2. Templates now ship v2, and scaffolding migrates any template that still ships v1 (for example a custom template via `CAATINGA_TEMPLATES_DIR`). Existing project files are not touched (#280).
+
 ## 3.11.0
 
 ### Minor Changes
