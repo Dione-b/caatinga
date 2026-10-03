@@ -1,7 +1,7 @@
 # Caatinga Docs
 
 > [!NOTE]
-> O site de documentação oficial foi movido para o repositório dedicado [`caatinga-docs`](https://github.com/Dione-b/caatinga-docs).
+> A documentação oficial está em **[caatinga.xyz](https://caatinga.xyz)** (fonte: [`caatinga-docs`](https://github.com/Dione-b/caatinga-docs)).
 > As especificações técnicas internas do core e ADRs seguem mantidas neste repositório em [`docs/internal/`](./internal/) e [`docs/adr/`](./adr/).
 
 ## Start here
