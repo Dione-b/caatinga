@@ -84,8 +84,8 @@ Structural `expect` matchers: `equals`, `reachable`, `isNull`, `isArray`, `minLe
 `postDeployRead` (optional): same shape as `postDeploy`; always simulated (`kind: "read"`). Use a read-only identity separate from write hooks when testnet state accumulates.
 
 Auto-wiring after a full-graph `ctg deploy` (no contract name, without `--no-wire`) and `ctg wire`
-run when `postDeploy` or `postDeployRead` declares at least one hook. In `@caatinga/cli` 3.11.0 and
-earlier, both skipped configs with only `postDeployRead` hooks.
+run when `postDeploy` or `postDeployRead` declares at least one hook. Before 3.12.0, both skipped
+configs with only `postDeployRead` hooks.
 
 `smoke` (optional):
 

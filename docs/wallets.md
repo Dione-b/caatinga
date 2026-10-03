@@ -80,7 +80,7 @@ npm install @caatinga/client @stellar/freighter-api
 import { freighterWalletAdapter } from "@caatinga/client/freighter";
 ```
 
-Since 3.11.0 the adapter maps freighter-api v4 `{ error }` responses to Caatinga errors: a missing address throws `CAATINGA_WALLET_NOT_CONNECTED`, and a failed or rejected signature throws `CAATINGA_XDR_SIGN_FAILED`.
+Since 3.12.0 the adapter maps freighter-api v4 `{ error }` responses to Caatinga errors: a missing address throws `CAATINGA_WALLET_NOT_CONNECTED`, and a failed or rejected signature throws `CAATINGA_XDR_SIGN_FAILED`.
 
 Both peer dependencies are optional: install only the one your app uses.
 
@@ -227,7 +227,7 @@ export default defineConfig({
 Also apply install overrides:
 
 - npm `package.json`: merge `walletStubOverrides("./src/stubs")` into `overrides`
-- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`. Its output starts with `packages: []`, which pnpm 9 requires; `@caatinga/client` 3.11.0 and earlier omit that line, so add it at the top on those versions
+- pnpm: write `walletStubPnpmWorkspaceYaml()` into `pnpm-workspace.yaml`. Its output starts with `packages: []`, which pnpm 9 requires; `@caatinga/client` versions before 3.12.0 omit that line, so add it at the top on those versions
 
 Copy the stub files from `react-vite-counter/src/stubs/` (`hot-wallet.ts`, `empty-wallet-dep/`, `hot-wallet-sdk/`). Projects created with `ctg init --minimal` do not need wallet stubs until you add `@creit.tech/stellar-wallets-kit`.
 

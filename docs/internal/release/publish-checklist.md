@@ -48,8 +48,15 @@ pnpm ci:publish-matrix
 Promote an already-published version (no republish) by moving the `latest` dist-tag:
 
 ```bash
+# TOTP 2FA (authenticator app):
 bash scripts/promote-latest.sh <version> --otp <code-from-authenticator>
+
+# Passkey / browser auth (no code): approve each prompt in the browser
+for pkg in cli core client zk; do npm dist-tag add "@caatinga/$pkg@<version>" latest; done
 ```
+
+`--otp` takes the 6-digit authenticator code, never an `npm_…` access token. A token passed there is
+rejected (`E400`) and ends up in shell history and npm debug logs — revoke it if that happens.
 
 The script moves `latest` for `cli`, `core`, `client`, and `zk`, then prints each package's
 dist-tags. Confirm with `npm view @caatinga/cli dist-tags`.
