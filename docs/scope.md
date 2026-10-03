@@ -17,7 +17,7 @@ Core features define what Caatinga is at its heart. These are fully supported, g
 - **Versioned Artifacts:**
   - Local state tracking via the per-network `caatinga.artifacts.json` file.
   - Storage of contract IDs, compiler versions, and WASM hashes.
-  - Complete integration and versioning via Git (no mandatory on-chain registry dependencies).
+  - Complete integration and versioning via Git.
 - **Runtime Client Library:**
   - Strongly typed client consumer helpers in `@caatinga/client`.
   - Pluggable wallet adapters (Freighter, Stellar Wallets Kit) and React context bindings (`@caatinga/client/react`).

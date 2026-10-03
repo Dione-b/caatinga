@@ -8,7 +8,7 @@ Deployment Orchestration + Versioned Artifacts for Soroban.
 - Deploy multiple Soroban contracts.
 - Track deployments in Git.
 - Generate browser-ready TypeScript bindings.
-- No hosted registry required.
+- Deployment state lives in your repo.
 
 ```bash
 npm install -g @caatinga/cli
@@ -72,7 +72,7 @@ await caatingaClient.contract("counter").invoke("increment");
 
 Caatinga orchestrates the official Stellar stack — build, deploy, and invoke still shell out to Stellar CLI;
 `ctg generate` runs `npx @stellar/stellar-sdk generate`. Deployed contract IDs live in
-`caatinga.artifacts.json`, committed to git, keyed per network. No mandatory hosted registry.
+`caatinga.artifacts.json`, committed to git, keyed per network.
 See [ADR 0002](./docs/adr/0002-local-artifacts-as-source-of-truth.md).
 
 ```
