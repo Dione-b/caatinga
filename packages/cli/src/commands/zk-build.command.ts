@@ -1,5 +1,5 @@
 import { type Command } from "commander";
-import { loadConfig } from "@caatinga/core";
+import { loadConfig, resolveNetwork } from "@caatinga/core";
 import { buildCircuit } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -12,14 +12,15 @@ export function registerZkBuildCommand(program: Command): void {
     .command("build [circuitName]")
     .description("Compile a Circom circuit and run the trusted setup")
     .option("--embed-vk", "Emit a static vk.rs artifact for the verifier contract (experimental)")
+    .option("--network <network>", "Target network for the build")
     .option(
       "--allow-dev-ceremony",
-      "Allow single-party dev ceremony when defaultNetwork is mainnet (not for production)"
+      "Allow single-party dev ceremony when the target network is mainnet (not for production)"
     )
     .action(
       async (
         circuitName: string | undefined,
-        options: { embedVk?: boolean; allowDevCeremony?: boolean }
+        options: { embedVk?: boolean; allowDevCeremony?: boolean; network?: string }
       ) => {
         await runCliAction(async () => {
           const config = await loadConfig();
@@ -28,9 +29,11 @@ export function registerZkBuildCommand(program: Command): void {
             throw new Error("No ZK circuits configured in caatinga.config.ts");
           }
 
+          const targetNetwork = resolveNetwork(config, options.network);
+
           await assertZkBuildNetworkAllowed({
-            networkName: config.defaultNetwork,
-            networkConfig: config.networks[config.defaultNetwork],
+            networkName: targetNetwork.name,
+            networkConfig: targetNetwork.config,
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 
@@ -57,7 +60,7 @@ export function registerZkBuildCommand(program: Command): void {
           });
           logger.success(`Built circuit "${name}"`);
           logger.warn(
-            `Single-party development trusted setup (defaultNetwork: ${config.defaultNetwork}). Do not use on mainnet for production.`
+            `Single-party development trusted setup (target network: ${targetNetwork.name}). Do not use on mainnet for production.`
           );
         });
       }

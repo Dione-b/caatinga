@@ -125,6 +125,58 @@ describe("zk build command", () => {
     expect(buildCircuitMock).toHaveBeenCalled();
   });
 
+  it("fails when --network is mainnet without --allow-dev-ceremony", async () => {
+    // defaultNetwork is testnet
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "build", "main", "--network", "mainnet"]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("CAATINGA_ZK_DEV_CEREMONY_BLOCKED");
+      expect(buildCircuitMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("fails when --network is unknown", async () => {
+    // defaultNetwork is testnet
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "build", "main", "--network", "unknown"]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("NETWORK_NOT_FOUND");
+      expect(buildCircuitMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("allows --network mainnet with --allow-dev-ceremony", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerZkBuildCommand(program);
+
+    await program.parseAsync(["node", "caatinga", "zk", "build", "main", "--network", "mainnet", "--allow-dev-ceremony"]);
+
+    expect(buildCircuitMock).toHaveBeenCalled();
+  });
+
   it("warns when --embed-vk is passed", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
