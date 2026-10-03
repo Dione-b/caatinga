@@ -8,7 +8,7 @@ Accepted 2026-06-25.
 
 Multi-contract Soroban projects often need **admin-signed wiring** after constructors run:
 `set_minter`, `set_burner`, and similar authority edges that cannot be set at deploy time
-because of circular address dependencies. The [stellar-album](https://github.com/stellar/stellar-album)
+because of circular address dependencies. The [stellar-album](https://github.com/wmendes/stellar-album-2026)
 course project is the first real consumer: seven contracts, four post-deploy invokes, and a
 Vite frontend that reads contract IDs from `frontend/.env.local` instead of
 `@caatinga/client` artifacts.

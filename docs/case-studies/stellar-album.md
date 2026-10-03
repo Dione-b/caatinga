@@ -1,6 +1,6 @@
 # Case study: stellar-album
 
-[stellar-album](https://github.com/stellar/stellar-album) is an educational Soroban dApp that
+[stellar-album](https://github.com/wmendes/stellar-album-2026) is an educational Soroban dApp that
 teaches the fungibility spectrum through a sticker-album game. It is the first multi-contract
 project validated against Caatinga's extended workflow (workspace build, seven-contract deploy
 graph, post-deploy wiring, and frontend env sync).
