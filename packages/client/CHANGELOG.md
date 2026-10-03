@@ -175,7 +175,7 @@
 
   **Positioning & docs**
 
-  - Reposition README and architecture around git-driven artifacts, multi-contract deploy, and sovereignty (ZK moved to Advanced section).
+  - Reposition README and architecture around git-driven artifacts and multi-contract deploy (ZK moved to Advanced section).
   - Add signing strategy, production readiness checklist, contract upgrade tutorial, internal counter-web case study, and outreach template.
 
   **CLI**

@@ -41,11 +41,11 @@ This file is versioned along with the source code in Git.
 
 ---
 
-### 6. Does Caatinga rely on an on-chain registry?
+### 6. Where does Caatinga keep deployment state?
 
-No.
+In your repository.
 
-Its operation is based on local artifacts (`caatinga.artifacts.json`), requiring no mandatory registry on the blockchain.
+Contract IDs, WASM hashes, and deploy history live in `caatinga.artifacts.json`, keyed per network and committed to Git alongside your code.
 
 ---
 

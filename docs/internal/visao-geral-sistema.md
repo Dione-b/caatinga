@@ -249,7 +249,7 @@ Alterações nestes itens exigem nota de compatibilidade e plano de rollback:
 - **Status:** contrato estável v1.0 na linha npm `3.x` (ver `README.md` e [`public-api.md`](../public-api.md)). Versões atuais: `npm view @caatinga/cli dist-tags`. Destaques: Node 22+, `@stellar/stellar-sdk` v16, `init --minimal`, `ctg read`, post-deploy hooks (`ctg wire`), frontend env sync (`ctg sync-env`), `${source.address}` placeholder, `buildRoot` para workspaces Cargo, retry de falhas transientes (TxBadSeq), guias de scaffold, workflow ZK (`@caatinga/zk`, comandos `ctg zk init|build|prove|invoke` (experimentais), cerimônia dev com guardrails em mainnet), `ctg status`, deploy com geração automática de bindings, `@caatinga/client/react`, multi-build (`ctg build` sem argumento), overrides de dependências nos templates.
 - **Client:** single-invoker wallet signing até v1.0; multisig / `signAuthEntry` fora do escopo atual.
 - **Distribuição:** dist-tag `latest` em todos os pacotes publicados; `next` segue candidatos pré-release.
-- **Sem** registry on-chain e **sem** camada de macro Rust — diferencial vs Scaffold Stellar (toolkit npm-first em TypeScript).
+- Toolkit npm-first em TypeScript: estado de deploy versionado no Git, sem camada de macro Rust.
 - Templates oficiais vivem no repo, com CI e matriz de semver. Templates da comunidade são tratados como código não confiável.
 
 > _Deploy multi-contrato com dependências está fora do escopo deste documento._
