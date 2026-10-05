@@ -96,6 +96,10 @@ describe("zk-init command", () => {
 
     const circuit = await fs.readFile(path.join(tmpDir, "circuits", "main.circom"), "utf-8");
     expect(circuit).toContain("Multiplier");
+    await expect(
+      fs.access(path.join(tmpDir, "contracts", "verifier", "Cargo.toml"))
+    ).resolves.toBeUndefined();
+    await expect(fs.access(path.join(tmpDir, "src"))).rejects.toThrow();
   });
 
   it("merges zk config when scaffolding into the current project", async () => {
@@ -227,6 +231,32 @@ export default defineConfig({
       expect(merged).toContain("verifier:");
       expect(merged).toContain("token:");
       expect(merged.indexOf("verifier:")).toBeGreaterThan(merged.indexOf("token:"));
+    });
+
+    it("should_add_missing_comma_after_last_contract_entry", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  defaultNetwork: "testnet",
+  contracts: {
+    app: {
+      path: "./contracts/app",
+      wasm: "./contracts/app/target/wasm32v1-none/release/app.wasm"
+    }
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    }
+  }
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toMatch(/\n {4}\},\n {4}verifier: \{/);
+      expect(merged).not.toContain("},,");
     });
 
     it("should_not_modify_when_merge_patterns_do_not_match", () => {
