@@ -3,6 +3,7 @@ import { Command } from "commander";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import { registerZkInitCommand, mergeZkIntoConfigSource } from "./zk-init.command.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
@@ -96,6 +97,10 @@ describe("zk-init command", () => {
 
     const circuit = await fs.readFile(path.join(tmpDir, "circuits", "main.circom"), "utf-8");
     expect(circuit).toContain("Multiplier");
+    await expect(
+      fs.access(path.join(tmpDir, "contracts", "verifier", "Cargo.toml"))
+    ).resolves.toBeUndefined();
+    await expect(fs.access(path.join(tmpDir, "src"))).rejects.toThrow();
   });
 
   it("merges zk config when scaffolding into the current project", async () => {
@@ -229,6 +234,49 @@ export default defineConfig({
       expect(merged.indexOf("verifier:")).toBeGreaterThan(merged.indexOf("token:"));
     });
 
+    it("should_add_missing_comma_after_last_contract_entry", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  defaultNetwork: "testnet",
+  contracts: {
+    app: {
+      path: "./contracts/app",
+      wasm: "./contracts/app/target/wasm32v1-none/release/app.wasm"
+    }
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    }
+  }
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toMatch(/\n {4}\},\n {4}verifier: \{/);
+      expect(merged).not.toContain("},,");
+    });
+
+    it.each([
+      ["multi-line", "  contracts: {\n  },"],
+      ["inline", "  contracts: {},"],
+    ])("should_merge_into_empty_%s_contracts_block", (_label, contracts) => {
+      const source = `export default defineConfig({
+  project: "app",
+${contracts}
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain("  contracts: {\n    verifier: {");
+      expect(merged).not.toContain("{,");
+    });
+
     it("should_not_modify_when_merge_patterns_do_not_match", () => {
       const source = `export default defineConfig({ project: "x" });`;
 
@@ -237,6 +285,105 @@ export default defineConfig({
       expect(changed).toBe(false);
       expect(merged).toBe(source);
     });
+  });
+
+  it("reports a missing config as not found", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError("caatinga.config.ts was not found.", CaatingaErrorCode.CONFIG_NOT_FOUND)
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    expect(process.exitCode).toBe(1);
+    expect(errorSpy.mock.calls.flat().join("\n")).toContain("No caatinga.config.ts found");
+  });
+
+  it("surfaces config load failures other than a missing config", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError(
+        "Project dependencies are not installed.",
+        CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED,
+        "Run npm install (or pnpm install) in the project root, then retry."
+      )
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    const output = errorSpy.mock.calls.flat().join("\n");
+    expect(process.exitCode).toBe(1);
+    expect(output).toContain("CAATINGA_DEPENDENCIES_NOT_INSTALLED");
+    expect(output).not.toContain("No caatinga.config.ts found");
+  });
+
+  it("adds zk to a project that has no contracts yet", async () => {
+    const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
+    loadConfigMock.mockImplementation(actual.loadConfig);
+    process.exitCode = undefined;
+    await fs.writeFile(
+      path.join(tmpDir, "caatinga.config.ts"),
+      // Same shape as a real config; defineConfig is inlined because tmpDir has no node_modules.
+      `const defineConfig = (config) => config;
+
+export default defineConfig({
+  project: "empty",
+  defaultNetwork: "testnet",
+  contracts: {},
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
+});
+`,
+      "utf8"
+    );
+
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    expect(process.exitCode).toBeUndefined();
+    const config = await actual.loadConfig({ cwd: tmpDir });
+    expect(Object.keys(config.contracts)).toEqual(["verifier"]);
+    expect(config.zk?.circuits.main?.verifierContract).toBe("verifier");
+    await expect(
+      fs.access(path.join(tmpDir, "contracts", "verifier", "Cargo.toml"))
+    ).resolves.toBeUndefined();
+  });
+
+  it("still surfaces other invalid config errors", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError(
+        "caatinga.config.ts is invalid.",
+        CaatingaErrorCode.INVALID_CONFIG,
+        "contracts: At least one contract must be configured.; defaultNetwork: Required"
+      )
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    expect(process.exitCode).toBe(1);
+    expect(errorSpy.mock.calls.flat().join("\n")).toContain("CAATINGA_INVALID_CONFIG");
+    await expect(fs.access(path.join(tmpDir, "circuits"))).rejects.toThrow();
   });
 
   it("fails before overwriting existing zk files unless --force is passed", async () => {
