@@ -1,5 +1,11 @@
 import { type Command } from "commander";
-import { createProjectFromTemplate, createZkProject, loadConfig } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  createProjectFromTemplate,
+  createZkProject,
+  loadConfig,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { resolveTemplateDir } from "../utils/template-path.js";
@@ -187,10 +193,15 @@ export function registerZkInitCommand(program: Command): void {
         let config;
         try {
           config = await loadConfig({ cwd });
-        } catch {
-          throw new Error(
-            "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
-          );
+        } catch (error) {
+          // Only a missing config means "not a project"; surface every other load
+          // failure (dependencies not installed, invalid config, syntax error) as is.
+          if (error instanceof CaatingaError && error.code === CaatingaErrorCode.CONFIG_NOT_FOUND) {
+            throw new Error(
+              "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
+            );
+          }
+          throw error;
         }
 
         await assertCanWriteZkScaffold(cwd, Boolean(options.force));

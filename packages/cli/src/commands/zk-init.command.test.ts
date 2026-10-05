@@ -3,6 +3,7 @@ import { Command } from "commander";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import { registerZkInitCommand, mergeZkIntoConfigSource } from "./zk-init.command.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
@@ -267,6 +268,44 @@ export default defineConfig({
       expect(changed).toBe(false);
       expect(merged).toBe(source);
     });
+  });
+
+  it("reports a missing config as not found", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError("caatinga.config.ts was not found.", CaatingaErrorCode.CONFIG_NOT_FOUND)
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    expect(process.exitCode).toBe(1);
+    expect(errorSpy.mock.calls.flat().join("\n")).toContain("No caatinga.config.ts found");
+  });
+
+  it("surfaces config load failures other than a missing config", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError(
+        "Project dependencies are not installed.",
+        CaatingaErrorCode.DEPENDENCIES_NOT_INSTALLED,
+        "Run npm install (or pnpm install) in the project root, then retry."
+      )
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
+    const program = new Command();
+    registerZkInitCommand(program);
+    program.exitOverride();
+
+    await program.parseAsync(["node", "caatinga", "zk", "init"]);
+
+    const output = errorSpy.mock.calls.flat().join("\n");
+    expect(process.exitCode).toBe(1);
+    expect(output).toContain("CAATINGA_DEPENDENCIES_NOT_INSTALLED");
+    expect(output).not.toContain("No caatinga.config.ts found");
   });
 
   it("fails before overwriting existing zk files unless --force is passed", async () => {
