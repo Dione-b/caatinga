@@ -164,6 +164,20 @@ async function mergeZkIntoConfig(cwd: string): Promise<boolean> {
   return false;
 }
 
+// loadConfig joins schema issues into the hint; an exact match means it is the only issue.
+const EMPTY_CONTRACTS_HINT = "contracts: At least one contract must be configured.";
+
+function isOnlyEmptyContractsError(error: unknown): boolean {
+  return (
+    error instanceof CaatingaError &&
+    error.code === CaatingaErrorCode.INVALID_CONFIG &&
+    error.hint === EMPTY_CONTRACTS_HINT
+  );
+}
+
+const CONFIG_NOT_UPDATED_WARNING =
+  "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above.";
+
 export function registerZkInitCommand(program: Command): void {
   getOrCreateZkCommand(program)
     .command("init [projectName]")
@@ -195,6 +209,7 @@ export function registerZkInitCommand(program: Command): void {
 
         const cwd = process.cwd();
         let config;
+        let configMerged = false;
         try {
           config = await loadConfig({ cwd });
         } catch (error) {
@@ -205,7 +220,20 @@ export function registerZkInitCommand(program: Command): void {
               "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
             );
           }
-          throw error;
+          if (!isOnlyEmptyContractsError(error)) {
+            throw error;
+          }
+          // A project without contracts yet: adding the verifier makes the config valid.
+          await assertCanWriteZkScaffold(cwd, Boolean(options.force));
+          if (!(await mergeZkIntoConfig(cwd))) {
+            logger.warn(
+              "caatinga.config.ts has no contracts and could not be updated automatically — follow the instructions above."
+            );
+            process.exitCode = 1;
+            return;
+          }
+          configMerged = true;
+          config = await loadConfig({ cwd });
         }
 
         await assertCanWriteZkScaffold(cwd, Boolean(options.force));
@@ -217,11 +245,8 @@ export function registerZkInitCommand(program: Command): void {
             force: true,
             projectFiles: false,
           });
-          const configMerged = await mergeZkIntoConfig(cwd);
-          if (!configMerged) {
-            logger.warn(
-              "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
-            );
+          if (!configMerged && !(await mergeZkIntoConfig(cwd))) {
+            logger.warn(CONFIG_NOT_UPDATED_WARNING);
             process.exitCode = 1;
             return;
           }
@@ -242,11 +267,8 @@ export function registerZkInitCommand(program: Command): void {
             relativePath === "contracts/verifier" ||
             relativePath.startsWith("contracts/verifier/"),
         });
-        const configMerged = await mergeZkIntoConfig(cwd);
-        if (!configMerged) {
-          logger.warn(
-            "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
-          );
+        if (!configMerged && !(await mergeZkIntoConfig(cwd))) {
+          logger.warn(CONFIG_NOT_UPDATED_WARNING);
           process.exitCode = 1;
           return;
         }

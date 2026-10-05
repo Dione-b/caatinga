@@ -49,6 +49,31 @@ describe("loadConfig", () => {
     expect(config.contracts.counter.path).toBe("./contracts/counter");
   });
 
+  it("should_read_the_current_file_when_config_changes_in_the_same_process", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
+    const configPath = path.join(tmpDir, "caatinga.config.ts");
+    const source = (project: string) => `export default {
+  project: "${project}",
+  defaultNetwork: "testnet",
+  contracts: {
+    counter: { path: "./contracts/counter", wasm: "./target/counter.wasm" }
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015"
+    }
+  }
+};
+`;
+
+    await writeFile(configPath, source("before"), "utf8");
+    await expect(loadConfig({ cwd: tmpDir })).resolves.toMatchObject({ project: "before" });
+
+    await writeFile(configPath, source("after"), "utf8");
+    await expect(loadConfig({ cwd: tmpDir })).resolves.toMatchObject({ project: "after" });
+  });
+
   it("should_throw_CAATINGA_INVALID_CONFIG_when_zod_validation_fails", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-load-"));
     await writeFile(
