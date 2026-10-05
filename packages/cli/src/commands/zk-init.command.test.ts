@@ -260,6 +260,23 @@ export default defineConfig({
       expect(merged).not.toContain("},,");
     });
 
+    it.each([
+      ["multi-line", "  contracts: {\n  },"],
+      ["inline", "  contracts: {},"],
+    ])("should_merge_into_empty_%s_contracts_block", (_label, contracts) => {
+      const source = `export default defineConfig({
+  project: "app",
+${contracts}
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain("  contracts: {\n    verifier: {");
+      expect(merged).not.toContain("{,");
+    });
+
     it("should_not_modify_when_merge_patterns_do_not_match", () => {
       const source = `export default defineConfig({ project: "x" });`;
 

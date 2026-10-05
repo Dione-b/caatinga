@@ -86,12 +86,16 @@ function mergeZkIntoConfigSource(source: string): { merged: string; changed: boo
   if (needsVerifier) {
     const before = next;
     // Match contracts block closing at 2-space indent (not inner contract entries).
-    next = next.replace(/contracts:\s*\{([\s\S]*?)\n {2}\},/, (_match, entries: string) => {
-      // The last entry may lack a trailing comma (e.g. configs written by `ctg init --minimal`).
-      const body = entries.trimEnd();
-      const separator = body.endsWith(",") || body.endsWith("{") ? "" : ",";
-      return "contracts: {" + body + separator + "\n" + ZK_VERIFIER_BLOCK + "\n  },";
-    });
+    // The first alternative matches an empty block, including the inline `contracts: {},`.
+    next = next.replace(
+      /contracts:\s*\{\s*\},|contracts:\s*\{([\s\S]*?)\n {2}\},/,
+      (_match, entries: string | undefined) => {
+        const body = (entries ?? "").trimEnd();
+        // The last entry may lack a trailing comma (e.g. configs written by `ctg init --minimal`).
+        const separator = body === "" || body.endsWith(",") ? "" : ",";
+        return "contracts: {" + body + separator + "\n" + ZK_VERIFIER_BLOCK + "\n  },";
+      }
+    );
     if (next === before) {
       return { merged: source, changed: false };
     }
