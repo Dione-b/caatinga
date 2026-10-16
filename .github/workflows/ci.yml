@@ -79,6 +79,55 @@ jobs:
       - name: Test
         run: pnpm test
 
+  # ZK checks that need real toolchains: the verifier scaffold under `cargo test`
+  # (#299) and snarkjs-backed ceremony verification (#300).
+  zk-verifier-cargo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.91.1
+
+      - name: Restore cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ runner.temp }}/zk-verifier-target
+          key: zk-verifier-cargo-${{ runner.os }}-${{ hashFiles('packages/core/scaffolds/zk-verifier/Cargo.lock') }}
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Embedded VK equivalence
+        env:
+          CAATINGA_CARGO_TESTS: "1"
+          CARGO_TARGET_DIR: ${{ runner.temp }}/zk-verifier-target
+        run: pnpm --filter @caatinga/zk exec vitest run src/build/embedded-vk-equivalence.test.ts
+
+      # Real snarkjs: a power-8 BLS12-381 ceremony, imported and checked by
+      # `ctg zk verify-ceremony`'s logic, including tampered-key cases (#300).
+      - name: Ceremony verification
+        env:
+          CAATINGA_ZK_TOOLS_TESTS: "1"
+        run: pnpm --filter @caatinga/zk exec vitest run src/ceremony/verify-ceremony.test.ts
+
   stellar-cli-matrix:
     runs-on: ubuntu-latest
     strategy:

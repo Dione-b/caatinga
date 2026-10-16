@@ -3,7 +3,14 @@ name: Testnet Smoke
 on:
   schedule:
     - cron: "0 6 * * *"
+    # Weekly ZK loop: negative cases and verify_proof cost benchmarks (#301).
+    - cron: "0 7 * * 1"
   workflow_dispatch:
+    inputs:
+      zk:
+        description: "Run the ZK testnet smoke loop (spends extra testnet XLM)"
+        type: boolean
+        default: false
   release:
     types:
       - published
@@ -14,6 +21,7 @@ permissions:
 
 jobs:
   smoke:
+    if: github.event.schedule != '0 7 * * 1'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -116,6 +124,108 @@ jobs:
             smoke-app-marketplace/caatinga.artifacts.json
             smoke-app-retry-counter/caatinga.artifacts.json
             smoke-app-retry-marketplace/caatinga.artifacts.json
+          if-no-files-found: ignore
+
+      - name: Remove Stellar CLI config
+        if: always()
+        run: |
+          rm -f "$HOME/.config/stellar/config.toml"
+          rm -rf "$HOME/.config/soroban/identity"
+
+  # The ZK loop is slower and spends more testnet XLM than the counter smoke, so
+  # it runs weekly or through workflow_dispatch with `zk: true`. `inputs.zk` is a
+  # boolean: comparing it to the string 'true' is always false in expressions.
+  zk-smoke:
+    if: inputs.zk || github.event.schedule == '0 7 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.91.1
+        with:
+          targets: wasm32v1-none
+
+      - name: Restore Stellar CLI from cache
+        id: stellar-cli-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/stellar
+          key: stellar-cli-28.0.0-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install Stellar CLI
+        if: steps.stellar-cli-cache.outputs.cache-hit != 'true'
+        run: bash scripts/install-stellar-cli.sh 28.0.0
+
+      - name: Add Stellar CLI to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Restore Stellar CLI config
+        env:
+          CAATINGA_CI_STELLAR_CONFIG_B64: ${{ secrets.CAATINGA_CI_STELLAR_CONFIG_B64 }}
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
+        run: |
+          set -euo pipefail
+          test -n "$CAATINGA_CI_STELLAR_CONFIG_B64"
+          test -n "$CAATINGA_CI_IDENTITY_ALIAS"
+          bash scripts/restore-stellar-ci-config.sh
+          stellar keys public-key "$CAATINGA_CI_IDENTITY_ALIAS" >/dev/null
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: ZK smoke attempt 1
+        id: zksmoke1
+        continue-on-error: true
+        env:
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
+        run: bash scripts/zk-testnet-smoke.sh zk-smoke-app
+
+      - name: ZK smoke retry
+        id: zksmokeretry
+        if: steps.zksmoke1.outcome == 'failure' && steps.zksmoke1.outputs.transient == 'true'
+        env:
+          CAATINGA_CI_IDENTITY_ALIAS: ${{ secrets.CAATINGA_CI_IDENTITY_ALIAS }}
+        run: bash scripts/zk-testnet-smoke.sh zk-smoke-app-retry
+
+      - name: ZK smoke gate
+        if: always()
+        run: |
+          s1="${{ steps.zksmoke1.outcome }}"
+          tr="${{ steps.zksmoke1.outputs.transient }}"
+          sr="${{ steps.zksmokeretry.outcome }}"
+          if [[ "$s1" == "success" ]]; then
+            exit 0
+          fi
+          if [[ "$s1" == "failure" && "$tr" == "true" && "$sr" == "success" ]]; then
+            exit 0
+          fi
+          exit 1
+
+      - name: Upload ZK smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zk-testnet-smoke-artifacts
+          path: |
+            smoke-ci-out/
+            zk-smoke-app/caatinga.artifacts.json
+            zk-smoke-app-retry/caatinga.artifacts.json
           if-no-files-found: ignore
 
       - name: Remove Stellar CLI config

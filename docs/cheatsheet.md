@@ -170,15 +170,29 @@ Setup broken? `npx ctg doctor --network testnet --source alice` tells you which 
 
 ## ZK loop
 
-> **Dev/testnet only:** `ctg zk build` runs a single-party development ceremony. Mainnet deploy/invoke with those artifacts is blocked unless you pass `--allow-dev-ceremony` (not for production).
+> **Dev/testnet only:** `ctg zk build` runs a single-party development ceremony. Mainnet deploy/invoke with those artifacts is blocked unless you import an audited ceremony (`ctg zk import-ceremony`) or pass `--allow-dev-ceremony` (not for production).
 
 ```bash
 ctg zk init my-zk-dapp && cd my-zk-dapp && npm install
 npx ctg build verifier
 npx ctg zk build main
+npx ctg estimate verify main                       # CPU/memory budget
+npx ctg doctor --network testnet                   # protocol + drift
+npx ctg status                                     # ZK drift
 npx ctg deploy verifier --network testnet --source alice
 npx ctg zk prove main
 npx ctg zk invoke main --source alice
+npx ctg zk import-ceremony main --ceremony <dir>   # audited MPC → lifts mainnet block
+npx ctg zk verify-ceremony main                    # offline: hashes, zkey verify, VK
+```
+
+Freeze the circuit and bake the key in:
+
+```bash
+npx ctg zk build main --embed-vk
+npx ctg build verifier
+npx ctg upgrade verifier --network testnet --source alice
+npx ctg zk invoke main --embed-vk --source alice
 ```
 
 Full reference: [ZK module](./zk.md) · [ZK tutorial](./tutorials/zk-project.md) · [CLI](./cli.md) · [Errors](./errors.md).

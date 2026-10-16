@@ -9,7 +9,7 @@ starter circuit and no frontend config.
 
 ## Requirements
 
-- Protocol 25+ on the target network (BLS12-381 host functions)
+- Protocol 27+ on the target network (the verifier is built with `soroban-sdk` 27)
 - `soroban-sdk = "27.0.6"` and Rust `1.91.1` for the verifier contract
 
 ## Circuit inputs
@@ -66,8 +66,9 @@ Hybrid flow after changing inputs in the browser:
 ## Trusted setup
 
 The default `ctg zk build` flow runs a **local, single-party** trusted setup suitable
-for development only. Do not use those keys in production — run a proper MPC ceremony instead.
+for development only. Do not use those keys in production — run a proper MPC ceremony and import it with
+`ctg zk import-ceremony`.
 
-**Mainnet guardrail:** Caatinga blocks `zk build` when `defaultNetwork` is `mainnet`, and blocks
+**Mainnet guardrail:** Caatinga blocks `zk build` when the target network (`--network`, else `defaultNetwork`) is `mainnet`, and blocks
 mainnet deploy/invoke of verifiers backed by dev-ceremony artifacts (`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)
 unless you pass `--allow-dev-ceremony` for conscious testing. See [ZK production guardrails](https://github.com/Dione-b/caatinga/blob/main/docs/zk.md#production-guardrails).

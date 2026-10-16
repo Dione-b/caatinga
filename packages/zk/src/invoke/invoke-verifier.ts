@@ -89,7 +89,10 @@ export async function invokeVerifier(
     embedVk: options.embedVk,
   });
 
-  const target = `${options.verifierContract}.verify_proof`;
+  // The embedded-VK entrypoint takes no VK argument, so it is a separate
+  // contract method rather than the same one called with fewer args.
+  const method = options.embedVk ? "verify_proof_embedded" : "verify_proof";
+  const target = `${options.verifierContract}.${method}`;
   const result = await invokeContract({
     config,
     target,

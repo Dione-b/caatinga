@@ -6,16 +6,16 @@ After `npm install -g @caatinga/cli` (or a local install), the package exposes t
 
 ## Supported today vs not yet
 
-| Capability                        | Status                                                       |
-| --------------------------------- | ------------------------------------------------------------ |
-| Official frontend templates       | Vite + React only (`vite-react`)                             |
-| `ctg upgrade`                     | In-place WASM upgrade (upload + invoke `upgrade`)            |
-| `ctg deploy --upgrade`            | Redeploy with new `contractId` + artifact history            |
-| `ctg zk build`                    | Single-party **dev** ceremony; blocked on mainnet by default |
-| `ctg zk invoke --embed-vk`        | **Not supported** (experimental / end-to-end incomplete)     |
-| Browser `invoke` via wallet       | **Single-invoker**; multi-auth is app-owned                  |
-| Multi-signer / `signAuthEntry`    | Application code; `CAATINGA_MULTI_AUTH_REQUIRED`             |
-| Production ZK (MPC powers-of-tau) | Out of scope; no Caatinga command for MPC ceremony           |
+| Capability                     | Status                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Official frontend templates    | Vite + React only (`vite-react`)                                                                                   |
+| `ctg upgrade`                  | In-place WASM upgrade (upload + invoke `upgrade`)                                                                  |
+| `ctg deploy --upgrade`         | Redeploy with new `contractId` + artifact history                                                                  |
+| `ctg zk build`                 | **Dev** ceremony by default; import an audited one for mainnet (`ctg zk import-ceremony`)                          |
+| `ctg zk invoke --embed-vk`     | Supported — calls `verify_proof_embedded` (needs `zk build --embed-vk`)                                            |
+| Browser `invoke` via wallet    | **Single-invoker**; multi-auth is app-owned                                                                        |
+| Multi-signer / `signAuthEntry` | Application code; `CAATINGA_MULTI_AUTH_REQUIRED`                                                                   |
+| Production ZK (MPC ceremony)   | `ctg zk import-ceremony` **imports** an external ceremony's artifacts; running the ceremony itself is out of scope |
 
 See [Client — Single-invoker scope](./client.md#single-invoker-scope) and [ZK module](./zk.md#production-guardrails) for details.
 
@@ -140,6 +140,22 @@ deploy transaction for `--source`, simulates it against the selected network, an
 inclusion fee, resource fee, and total in stroops. The estimate is **advisory**: when simulation
 fails, the command prints the reason and exits without an estimate instead of failing.
 `ctg deploy --dry-run` runs the same estimate.
+
+## `ctg estimate verify <circuit> [--network testnet]`
+
+Estimates the on-chain CPU and memory needed to verify a proof for a ZK circuit, without
+submitting anything. Reads the public-signal count from the circuit's verification key and
+reports CPU instructions and memory against the reference network limits, warning when the
+budget is close to (or past) the limit.
+
+The estimate is fitted to testnet simulations of the Caatinga verifier (see
+[ZK cost reference](./zk.md#cost-reference)) and depends only on the public-signal count;
+the limits are the 400M-instruction / 40 MiB per-transaction caps shared by testnet and
+mainnet. Treat it as a pre-flight signal, not a fee quote — simulate the real call with
+`stellar contract invoke --send=no` for exact numbers.
+
+With `--network`, the ZK protocol pre-flight (protocol 27+) runs first: a network that cannot verify
+BLS12-381 fails with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` before any budget is printed.
 
 ## `ctg inspect <contract> [--network testnet]`
 
@@ -310,20 +326,38 @@ Full schema and config examples: [Config — postDeploy and smoke](./config.md#e
 Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full reference:
 [ZK module](./zk.md).
 
-| Command                                       | Purpose                                                                  |
-| --------------------------------------------- | ------------------------------------------------------------------------ |
-| `ctg zk init [project]`                       | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)             |
-| `ctg zk build [circuit] [--embed-vk]`         | Compile Circom and run **dev** trusted setup (`--embed-vk` experimental) |
-| `ctg zk prove [circuit] [--debug]`            | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`) |
-| `ctg zk invoke [circuit] --source <identity>` | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt     |
-| `ctg zk invoke [circuit] --network <name>`    | Target a configured network (not only `defaultNetwork`)                  |
+| Command                                              | Purpose                                                                      |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `ctg zk init [project]`                              | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)                 |
+| `ctg zk build [circuit] [--embed-vk] [--network]`    | Compile Circom + trusted setup; `--embed-vk` also writes `vk.rs`             |
+| `ctg zk import-ceremony [circuit] --ceremony <path>` | Import an external ceremony's `circuit_final.zkey` + `verification_key.json` |
+| `ctg zk verify-ceremony [circuit]`                   | Re-check an imported ceremony offline (hashes, `zkey verify`, VK)            |
+| `ctg zk prove [circuit] [--debug]`                   | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`)     |
+| `ctg zk invoke [circuit] --source <identity>`        | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt         |
+| `ctg zk invoke [circuit] --network <name>`           | Target a configured network (not only `defaultNetwork`)                      |
+| `ctg zk invoke [circuit] --embed-vk`                 | Call `verify_proof_embedded` using the baked-in VK                           |
 
 Shared ZK flags:
 
 - `--allow-dev-ceremony` — bypass mainnet guardrails for dev-ceremony artifacts (not for production)
-- `--embed-vk` on `zk build` — experimental; writes `vk.rs` only. **`zk invoke --embed-vk` is blocked** until the embedded-VK contract path is complete.
+- `--embed-vk` on `zk build` — generates `contracts/verifier/src/vk.rs`; rebuild and redeploy the verifier before invoking with `--embed-vk`
+- `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output; `--source-url`, `--ceremony-name`, `--participants` and `--retrieved-at` record provenance
 
-When verification returns `false`, the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`. Mainnet deploy/invoke with dev ceremony artifacts exits with `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` unless `--allow-dev-ceremony` is set.
+`ctg estimate verify <circuit> [--network <name>]` reports the CPU/memory budget for verifying that circuit, and flags a network below protocol 27.
+
+When verification returns `false`, the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`.
+
+Error codes the ZK commands surface:
+
+| Code                                        | Cause                                                                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`          | Mainnet deploy/invoke with dev ceremony artifacts, unless an audited ceremony is imported or `--allow-dev-ceremony` is set |
+| `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`  | Network is below protocol 27, which the verifier wasm (`soroban-sdk` 27) requires                                          |
+| `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` | `circuits/input.json` holds a signal the circuit does not accept as input                                                  |
+| `CAATINGA_ZK_EMBED_VK_UNSUPPORTED`          | `--embed-vk` invoke without a generated `vk.rs`                                                                            |
+| `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`         | Imported ceremony artifacts do not match the circuit                                                                       |
+| `CAATINGA_ZK_CEREMONY_TAMPERED`             | Imported ceremony artifacts changed since import, or fail `ctg zk verify-ceremony`                                         |
+| `CAATINGA_ZK_VERIFICATION_FAILED`           | On-chain verifier returned `false`                                                                                         |
 
 ## Stellar CLI compatibility
 

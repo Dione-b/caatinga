@@ -1,11 +1,16 @@
 import { type Command } from "commander";
-import { formatNetworkOrigin, loadConfig, resolveNetwork } from "@caatinga/core";
+import {
+  assertProtocolForZk,
+  formatNetworkOrigin,
+  loadConfig,
+  resolveNetwork,
+} from "@caatinga/core";
 import { assertDevCeremonyAllowed, invokeVerifier, zkArtifactsDir } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
-import { assertEmbedVkInvokeBlocked } from "../utils/zk-guardrails.js";
+import { assertEmbedVkInvokeSupported } from "../utils/zk-guardrails.js";
 
 export function registerZkInvokeCommand(program: Command): void {
   getOrCreateZkCommand(program)
@@ -34,7 +39,7 @@ export function registerZkInvokeCommand(program: Command): void {
         }
       ) => {
         await runCliAction(async () => {
-          assertEmbedVkInvokeBlocked(Boolean(options.embedVk));
+          assertEmbedVkInvokeSupported({ embedVk: Boolean(options.embedVk) });
 
           const config = await loadConfig();
           const zk = config.zk;
@@ -63,6 +68,15 @@ export function registerZkInvokeCommand(program: Command): void {
             operation: `ctg zk invoke ${name}`,
           });
 
+          const protocolAdvisory = await assertProtocolForZk({
+            networkName,
+            networkConfig,
+            operation: `ctg zk invoke ${name}`,
+          });
+          if (protocolAdvisory) {
+            logger.warn(protocolAdvisory);
+          }
+
           await confirmMainnetOperation({
             operation: "invoke",
             networkName,
@@ -80,7 +94,7 @@ export function registerZkInvokeCommand(program: Command): void {
             proofPath: `${zkArtifactsDir(name)}/proof.json`,
             vkPath: `${zkArtifactsDir(name)}/verification_key.json`,
             publicSignalsPath: `${zkArtifactsDir(name)}/public.json`,
-            embedVk: false,
+            embedVk: Boolean(options.embedVk),
             config,
           });
 

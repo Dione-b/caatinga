@@ -1,8 +1,25 @@
 import { readFileSync } from "node:fs";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
-import { generateVkRust } from "./build-circuit.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { buildCircuit, generateVkRust } from "./build-circuit.js";
+import { hashCircuitSources } from "../ceremony/import-ceremony.js";
+import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "../ceremony/dev-ceremony.js";
+
+const runCommandMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@caatinga/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@caatinga/core")>();
+  return { ...actual, runCommand: runCommandMock };
+});
+
+vi.mock("../install/lazy-install-zk-tools.js", () => ({
+  ensureCircom: vi.fn(async () => "circom"),
+  ensureSnarkjs: vi.fn(async () => "snarkjs"),
+  ensurePtau: vi.fn(async () => "/tmp/powersOfTau.ptau"),
+}));
 
 const fixtureDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../test/fixtures");
 
@@ -18,5 +35,103 @@ describe("generateVkRust", () => {
     expect(rustSource).toContain("soroban_sdk::vec![&env,");
     expect(rustSource).toContain("// IC[0]");
     expect(rustSource).not.toContain("todo!");
+  });
+});
+
+describe("buildCircuit with imported MPC ceremony", () => {
+  let tmpRoot: string;
+  let circuitPath: string;
+  let artifactsDir: string;
+
+  beforeEach(async () => {
+    tmpRoot = await mkdtemp(path.join(os.tmpdir(), "caatinga-zk-build-"));
+    circuitPath = path.join(tmpRoot, "circuits");
+    artifactsDir = path.join(tmpRoot, ".artifacts/zk/main");
+    await mkdir(circuitPath, { recursive: true });
+    await mkdir(artifactsDir, { recursive: true });
+    await writeFile(path.join(circuitPath, "main.circom"), "template Main() { signal input a; }");
+    runCommandMock.mockReset();
+  });
+
+  afterEach(async () => {
+    await rm(tmpRoot, { recursive: true, force: true });
+  });
+
+  async function seedMpcCeremony(): Promise<string> {
+    await writeFile(path.join(artifactsDir, "circuit_final.zkey"), "mpc-zkey-bytes");
+    await writeFile(
+      path.join(artifactsDir, "verification_key.json"),
+      JSON.stringify({
+        protocol: "groth16",
+        ic: [
+          ["0x1", "0x2"],
+          ["0x3", "0x4"],
+        ],
+      })
+    );
+    await writeFile(
+      path.join(artifactsDir, "ceremony.json"),
+      `${JSON.stringify(
+        {
+          type: MPC_CEREMONY_TYPE,
+          generatedAt: new Date().toISOString(),
+          circuitHash: await hashCircuitSources(circuitPath),
+          publicSignals: 1,
+        },
+        null,
+        2
+      )}\n`
+    );
+    return await hashCircuitSources(circuitPath);
+  }
+
+  it("should_reuse_mpc_artifacts_without_running_the_trusted_setup", async () => {
+    const circuitHash = await seedMpcCeremony();
+
+    await buildCircuit({
+      circuitName: "main",
+      circuitPath,
+      artifactsDir,
+      embedVk: false,
+    });
+
+    // Only the circom compile runs; the setup, contribute, and export steps
+    // that would overwrite the audited proving key must not.
+    const invocations = runCommandMock.mock.calls.map(([command]) => command);
+    expect(invocations).toEqual(["circom"]);
+
+    const manifest = await readCeremonyManifest(artifactsDir);
+    expect(manifest?.type).toBe(MPC_CEREMONY_TYPE);
+    if (manifest?.type !== MPC_CEREMONY_TYPE) {
+      throw new Error("expected the MPC manifest to survive the rebuild");
+    }
+    expect(manifest.circuitHash).toBe(circuitHash);
+  });
+
+  it("should_fail_when_the_circuit_source_changed_after_the_ceremony", async () => {
+    await seedMpcCeremony();
+    await writeFile(path.join(circuitPath, "main.circom"), "template Main() { signal input b; }");
+
+    await expect(
+      buildCircuit({ circuitName: "main", circuitPath, artifactsDir, embedVk: false })
+    ).rejects.toThrow(expect.objectContaining({ code: "ZK_CEREMONY_INCOMPATIBLE" }));
+  });
+
+  it("should_run_the_dev_ceremony_when_no_mpc_manifest_is_present", async () => {
+    runCommandMock.mockResolvedValue({ stdout: "# of Constraints: 4", stderr: "", exitCode: 0 });
+
+    await buildCircuit({
+      circuitName: "main",
+      circuitPath,
+      artifactsDir,
+      embedVk: false,
+    });
+
+    const invocations = runCommandMock.mock.calls.map(([, args]) => (args as string[])[0]);
+    expect(invocations).toContain("r1cs");
+    expect(invocations).toContain("groth16");
+
+    const manifest = await readCeremonyManifest(artifactsDir);
+    expect(manifest?.type).toBe("dev-single-party");
   });
 });

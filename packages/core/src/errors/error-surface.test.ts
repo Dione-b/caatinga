@@ -278,6 +278,26 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/errors/to-caatinga-error.test.ts",
     trigger: "toCaatingaError(",
   },
+  [CaatingaErrorCode.ZK_PROTOCOL_VERSION_UNSUPPORTED]: {
+    file: "packages/core/src/networks/protocol-version.test.ts",
+    trigger: "assertProtocolForZk(",
+  },
+  [CaatingaErrorCode.ZK_INPUT_CONTAINS_PUBLIC_SIGNALS]: {
+    file: "packages/core/src/errors/to-caatinga-error.test.ts",
+    trigger: "toCaatingaError(",
+  },
+  [CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED]: {
+    file: "packages/cli/src/utils/zk-guardrails.test.ts",
+    trigger: "assertEmbedVkInvokeSupported(",
+  },
+  [CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE]: {
+    file: "packages/core/src/errors/to-caatinga-error.test.ts",
+    trigger: "toCaatingaError(",
+  },
+  [CaatingaErrorCode.ZK_CEREMONY_TAMPERED]: {
+    file: "packages/zk/src/ceremony/ceremony-integrity.test.ts",
+    trigger: "assertCeremonyIntegrity(",
+  },
   [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
     file: "packages/core/src/errors/error-codes.test.ts",
     trigger: "CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY",
