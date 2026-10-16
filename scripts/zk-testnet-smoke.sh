@@ -265,7 +265,17 @@ if [[ "$ec_doc" -ne 0 ]]; then
   classify_and_exit "$ec_doc" "zk-doctor"
 fi
 expect_output_contains "zk-doctor" "Protocol required for verification" "$DOCTOR_OUT"
-expect_output_contains "zk-doctor" "testnet: protocol [0-9]" "$DOCTOR_OUT"
+# A numeric protocol proves the pre-flight request itself works (a malformed
+# getNetwork once made every pre-flight report "unknown"). A slow RPC is not
+# that bug, so a timeout only warns.
+if ! grep -q "testnet: protocol [0-9]" "$DOCTOR_OUT"; then
+  if grep -q "testnet: protocol unknown (.*timeout" "$DOCTOR_OUT"; then
+    log "Warning: testnet RPC timed out during the doctor protocol check; not treating it as a failure."
+  else
+    log "Expected doctor to report a numeric testnet protocol version"
+    classify_and_exit 1 "zk-doctor-assert"
+  fi
+fi
 rm -f "$DOCTOR_OUT"
 
 run_step "zk-prove" "$CAATINGA_BIN" zk prove "$CIRCUIT_NAME"
