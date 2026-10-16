@@ -7,6 +7,8 @@ import type { NetworkConfig } from "../config/config.schema.js";
 import {
   assertProtocolForZk,
   fetchNetworkProtocolVersion,
+  PROTOCOL_VERSION_MAX_ATTEMPTS,
+  PROTOCOL_VERSION_TIMEOUT_MS,
   ZK_MIN_PROTOCOL_VERSION,
 } from "./protocol-version.js";
 
@@ -25,6 +27,10 @@ function jsonRpc(protocolVersion: unknown): Response {
     statusText: "OK",
     json: async () => ({ result: { protocolVersion } }),
   } as Response;
+}
+
+function timeoutError(): Error {
+  return new DOMException("The operation was aborted due to timeout", "TimeoutError");
 }
 
 afterEach(() => {
@@ -116,6 +122,68 @@ describe("fetchNetworkProtocolVersion", () => {
     expect(result.protocolVersion).toBeUndefined();
     expect(result.reason).toBe("ECONNREFUSED");
   });
+
+  it("should_allow_a_slow_public_rpc_at_least_twenty_seconds", () => {
+    // The public testnet RPC has taken ~12s to answer getNetwork; a 10s budget
+    // reported "protocol unknown" with nothing actually wrong.
+    expect(PROTOCOL_VERSION_TIMEOUT_MS).toBeGreaterThanOrEqual(20_000);
+  });
+
+  it("should_retry_once_when_the_first_attempt_times_out", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(timeoutError())
+      .mockResolvedValueOnce(jsonRpc(27));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchNetworkProtocolVersion(rpcUrl)).resolves.toEqual({ protocolVersion: 27 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    for (const [, init] of fetchMock.mock.calls as unknown as [string, RequestInit][]) {
+      expect(JSON.parse(String(init.body))).toEqual({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "getNetwork",
+      });
+    }
+  });
+
+  it("should_give_up_with_the_timeout_reason_after_the_last_attempt", async () => {
+    const fetchMock = vi.fn(async () => {
+      throw timeoutError();
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await fetchNetworkProtocolVersion(rpcUrl);
+
+    expect(fetchMock).toHaveBeenCalledTimes(PROTOCOL_VERSION_MAX_ATTEMPTS);
+    expect(result).toEqual({ reason: "The operation was aborted due to timeout" });
+  });
+
+  it("should_not_retry_an_rpc_error_payload", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: async () => ({ error: { message: "method not found" } }),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchNetworkProtocolVersion(rpcUrl);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("should_not_retry_a_refused_connection", async () => {
+    const fetchMock = vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchNetworkProtocolVersion(rpcUrl);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("assertProtocolForZk", () => {
@@ -181,6 +249,23 @@ describe("assertProtocolForZk", () => {
       networkName: "testnet",
       networkConfig: testnet,
       operation: "ctg deploy verifier",
+    });
+
+    expect(advisory).toContain("Could not determine the protocol version");
+  });
+
+  it("should_return_an_advisory_when_every_attempt_times_out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw timeoutError();
+      })
+    );
+
+    const advisory = await assertProtocolForZk({
+      networkName: "testnet",
+      networkConfig: testnet,
+      operation: "ctg doctor",
     });
 
     expect(advisory).toContain("Could not determine the protocol version");

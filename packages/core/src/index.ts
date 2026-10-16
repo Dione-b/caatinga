@@ -65,6 +65,7 @@ export {
   fetchNetworkProtocolVersion,
   ZK_MIN_PROTOCOL_VERSION,
   PROTOCOL_VERSION_TIMEOUT_MS,
+  PROTOCOL_VERSION_MAX_ATTEMPTS,
   type AssertProtocolForZkOptions,
   type FetchProtocolVersionResult,
 } from "./networks/protocol-version.js";

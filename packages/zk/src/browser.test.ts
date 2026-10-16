@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import proofFixture from "../test/fixtures/proof.json" with { type: "json" };
-import vkFixture from "../test/fixtures/verification_key.json" with { type: "json" };
-import publicFixture from "../test/fixtures/public.json" with { type: "json" };
+import proofFixture from "../test/fixtures/multiplier/proof.json" with { type: "json" };
+import vkFixture from "../test/fixtures/multiplier/verification_key.json" with { type: "json" };
+import publicFixture from "../test/fixtures/multiplier/public.json" with { type: "json" };
 import { buildVerifyProofBindingArgs } from "./browser/build-verify-proof-binding-args.js";
 import { type SnarkjsProof } from "./serialization/serialize-proof.js";
 import { type SnarkjsVk } from "./serialization/serialize-vk.js";
 
 const proof = proofFixture as SnarkjsProof;
-const vk = vkFixture as SnarkjsVk;
+const vk = vkFixture as unknown as SnarkjsVk;
 const publicSignals = publicFixture as string[];
 
 describe("buildVerifyProofBindingArgs", () => {
