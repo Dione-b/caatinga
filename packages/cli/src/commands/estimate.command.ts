@@ -99,7 +99,7 @@ export function registerEstimateCommand(program: Command): void {
 
         logger.info(`Verifier contract: ${circuit.verifierContract ?? "(not configured)"}`);
         logger.warn(
-          "Estimates come from the reference groth16_verifier budget report. Run env.cost_estimate().budget().print() in the contract tests for numbers that reflect your circuit."
+          "Estimates are fitted to testnet simulations of the Caatinga verifier and depend only on the public-signal count. Simulate the real call with `stellar contract invoke --send=no` (or scripts/zk-verify-benchmark.mjs) for exact numbers."
         );
       })
     );

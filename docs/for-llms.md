@@ -92,7 +92,7 @@ Full flags and tables: [CLI](./cli.md) · [Cheatsheet](./cheatsheet.md).
 - `status --strict` fails when deployed contracts have bindings other than `fresh`.
 - Expect DSL (smoke / `read --expect` / postDeploy): `reachable`, `equals`, `contains`, `matches`, `jsonEquals`, `isArray`, `isNull`, `minLength`, `maxLength` — see [CLI](./cli.md).
 
-Core commands: `init`, `zk init`, `build`, `deploy`, `upgrade`, `generate`, `doctor`, `status`, `invoke`, `read`, `smoke`, `regression`, `ci run`, `wire`, `sync-env`, `estimate deploy`, `estimate verify`, `inspect`, `migrate artifacts`, `rollback`, `zk init|build|import-ceremony|prove|invoke`. Binary alias: `ctg` ≡ `caatinga`.
+Core commands: `init`, `zk init`, `build`, `deploy`, `upgrade`, `generate`, `doctor`, `status`, `invoke`, `read`, `smoke`, `regression`, `ci run`, `wire`, `sync-env`, `estimate deploy`, `estimate verify`, `inspect`, `migrate artifacts`, `rollback`, `zk init|build|import-ceremony|verify-ceremony|prove|invoke`. Binary alias: `ctg` ≡ `caatinga`.
 
 ---
 

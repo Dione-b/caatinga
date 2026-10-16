@@ -23,6 +23,7 @@ const ZK_ERROR_CODE_MAP: Record<string, CaatingaErrorCodeValue> = {
   ZK_UNSUPPORTED_PLATFORM: CaatingaErrorCode.ZK_UNSUPPORTED_PLATFORM,
   ZK_INPUT_CONTAINS_PUBLIC_SIGNALS: CaatingaErrorCode.ZK_INPUT_CONTAINS_PUBLIC_SIGNALS,
   ZK_CEREMONY_INCOMPATIBLE: CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE,
+  ZK_CEREMONY_TAMPERED: CaatingaErrorCode.ZK_CEREMONY_TAMPERED,
 };
 
 export function toCaatingaError(error: unknown): CaatingaError {

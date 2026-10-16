@@ -294,6 +294,10 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/core/src/errors/to-caatinga-error.test.ts",
     trigger: "toCaatingaError(",
   },
+  [CaatingaErrorCode.ZK_CEREMONY_TAMPERED]: {
+    file: "packages/zk/src/ceremony/ceremony-integrity.test.ts",
+    trigger: "assertCeremonyIntegrity(",
+  },
   [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
     file: "packages/core/src/errors/error-codes.test.ts",
     trigger: "CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY",

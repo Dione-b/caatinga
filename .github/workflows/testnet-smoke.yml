@@ -3,6 +3,8 @@ name: Testnet Smoke
 on:
   schedule:
     - cron: "0 6 * * *"
+    # Weekly ZK loop: negative cases and verify_proof cost benchmarks (#301).
+    - cron: "0 7 * * 1"
   workflow_dispatch:
     inputs:
       zk:
@@ -19,6 +21,7 @@ permissions:
 
 jobs:
   smoke:
+    if: github.event.schedule != '0 7 * * 1'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -129,10 +132,11 @@ jobs:
           rm -f "$HOME/.config/stellar/config.toml"
           rm -rf "$HOME/.config/soroban/identity"
 
-  # Opt-in only: the ZK loop is slower and spends more testnet XLM than the
-  # counter smoke, so it is triggered explicitly through workflow_dispatch.
+  # The ZK loop is slower and spends more testnet XLM than the counter smoke, so
+  # it runs weekly or through workflow_dispatch with `zk: true`. `inputs.zk` is a
+  # boolean: comparing it to the string 'true' is always false in expressions.
   zk-smoke:
-    if: inputs.zk == 'true'
+    if: inputs.zk || github.event.schedule == '0 7 * * 1'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 

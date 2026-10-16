@@ -165,7 +165,8 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 | Command                                | Purpose                                            | Flags                        |
 | -------------------------------------- | -------------------------------------------------- | ---------------------------- |
 | `ctg zk build [circuit]`               | Compile Circom + trusted setup                     | `--embed-vk`, `--network`, `--allow-dev-ceremony` |
-| `ctg zk import-ceremony [circuit]`     | Import an external ceremony's artifacts            | `--ceremony <path>` (required) |
+| `ctg zk import-ceremony [circuit]`     | Import an external ceremony's artifacts            | `--ceremony <path>` (required), `--source-url`, `--ceremony-name`, `--participants`, `--retrieved-at` |
+| `ctg zk verify-ceremony [circuit]`     | Offline check of an imported ceremony              | — |
 | `ctg zk prove [circuit]`               | Generate `proof.json` + `public.json`              | `--debug`                    |
 | `ctg zk invoke [circuit]`              | Call on-chain `verify_proof` (dynamic VK)          | `--source`, `--network`, `--allow-dev-ceremony` |
 | `ctg zk invoke [circuit] --embed-vk`   | Call `verify_proof_embedded` (baked-in VK)        | `--source`, `--network`      |
@@ -516,6 +517,7 @@ All errors use `CAATINGA_*` codes. **Automation must key on the code, never on m
 | ---------------------------------- | ---------------------------------------------------------------- |
 | `CAATINGA_ZK_VERIFICATION_FAILED`  | On-chain verify_proof returned false                             |
 | `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` | Dev ceremony artifacts on mainnet without `--allow-dev-ceremony` |
+| `CAATINGA_ZK_CEREMONY_TAMPERED` | Imported ceremony artifacts changed since import or fail `ctg zk verify-ceremony` |
 
 ### Stellar CLI warnings (advisory, non-fatal)
 

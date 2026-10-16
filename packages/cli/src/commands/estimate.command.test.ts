@@ -99,8 +99,8 @@ describe("estimate verify command", () => {
   it("should_warn_when_the_budget_is_tight", async () => {
     await mkdir(artifactsDir, { recursive: true });
     await writeFile(path.join(artifactsDir, "verification_key.json"), "{}");
-    // A large public-signal count drives CPU toward the reference limit.
-    readVerificationKeyPublicSignalsMock.mockResolvedValue(20);
+    // 96 public signals measured ~382M instructions, close to the 400M tx limit.
+    readVerificationKeyPublicSignalsMock.mockResolvedValue(96);
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -110,7 +110,7 @@ describe("estimate verify command", () => {
 
       const warnings = warnSpy.mock.calls.map((call) => String(call[0])).join("\n");
       expect(warnings).toContain("CPU");
-      expect(warnings).toContain("reference groth16_verifier budget report");
+      expect(warnings).toContain("fitted to testnet simulations");
     } finally {
       warnSpy.mockRestore();
       logSpy.mockRestore();

@@ -34,6 +34,7 @@ describe("toCaatingaError", () => {
     ["ZK_UNSUPPORTED_PLATFORM", CaatingaErrorCode.ZK_UNSUPPORTED_PLATFORM],
     ["ZK_INPUT_CONTAINS_PUBLIC_SIGNALS", CaatingaErrorCode.ZK_INPUT_CONTAINS_PUBLIC_SIGNALS],
     ["ZK_CEREMONY_INCOMPATIBLE", CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE],
+    ["ZK_CEREMONY_TAMPERED", CaatingaErrorCode.ZK_CEREMONY_TAMPERED],
   ])("should_map_ZkError_%s", (sourceCode, expectedCode) => {
     const result = toCaatingaError(Object.assign(new Error("zk failure"), { code: sourceCode }));
 

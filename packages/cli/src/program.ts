@@ -9,6 +9,7 @@ import { registerInitCommand } from "./commands/init.command.js";
 import { registerZkInitCommand } from "./commands/zk-init.command.js";
 import { registerZkBuildCommand } from "./commands/zk-build.command.js";
 import { registerZkImportCeremonyCommand } from "./commands/zk-import-ceremony.command.js";
+import { registerZkVerifyCeremonyCommand } from "./commands/zk-verify-ceremony.command.js";
 import { registerZkProveCommand } from "./commands/zk-prove.command.js";
 import { registerZkInvokeCommand } from "./commands/zk-invoke.command.js";
 import { registerInvokeCommand } from "./commands/invoke.command.js";
@@ -106,6 +107,7 @@ export function createProgram(): Command {
   registerZkInitCommand(program);
   registerZkBuildCommand(program);
   registerZkImportCeremonyCommand(program);
+  registerZkVerifyCeremonyCommand(program);
   registerZkProveCommand(program);
   registerZkInvokeCommand(program);
   registerDevCommand(program);

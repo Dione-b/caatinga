@@ -112,4 +112,34 @@ describe("formatZkVerifyCostEstimate", () => {
     expect(lines).toContain("Memory:");
     expect(lines).toContain("%");
   });
+
+  // Simulated `verify_proof` cost on testnet (protocol 29, 2026-10), measured with
+  // scripts/zk-verify-benchmark.mjs. The model must never undershoot a measurement
+  // by more than 0.5% — an estimate that reads low is the one that lets a circuit
+  // fail at deploy time.
+  it.each([
+    [1, 44_038_142],
+    [2, 47_594_581],
+    [4, 54_707_459],
+    [8, 68_933_213],
+    [16, 97_384_723],
+    [32, 154_287_742],
+    [64, 268_093_781],
+    [96, 381_899_819],
+    [104, 410_351_328],
+  ])("should_track_the_measured_cost_for_%i_public_signals", (publicSignals, measured) => {
+    const { cpuInstructions } = estimateZkVerifyCost({ circuitName: "main", publicSignals });
+
+    expect(cpuInstructions).toBeGreaterThanOrEqual(measured * 0.995);
+    expect(cpuInstructions).toBeLessThanOrEqual(measured * 1.02);
+  });
+
+  it("should_flag_more_than_100_public_signals_as_over_the_transaction_limit", () => {
+    // 112 public signals failed simulation on testnet; 104 was the largest that passed.
+    const over = estimateZkVerifyCost({ circuitName: "main", publicSignals: 112 });
+    const under = estimateZkVerifyCost({ circuitName: "main", publicSignals: 80 });
+
+    expect(over.cpuUtilization).toBeGreaterThan(1);
+    expect(under.cpuUtilization).toBeLessThan(1);
+  });
 });

@@ -148,10 +148,11 @@ submitting anything. Reads the public-signal count from the circuit's verificati
 reports CPU instructions and memory against the reference network limits, warning when the
 budget is close to (or past) the limit.
 
-The estimate comes from the reference `groth16_verifier` budget report, so treat it as a
-pre-flight signal for "this circuit is too big" rather than a fee quote — run
-`env.cost_estimate().budget().print()` in the contract tests for numbers that reflect your
-circuit shape.
+The estimate is fitted to testnet simulations of the Caatinga verifier (see
+[ZK cost reference](./zk.md#cost-reference)) and depends only on the public-signal count;
+the limits are the 400M-instruction / 40 MiB per-transaction caps shared by testnet and
+mainnet. Treat it as a pre-flight signal, not a fee quote — simulate the real call with
+`stellar contract invoke --send=no` for exact numbers.
 
 With `--network`, the ZK protocol pre-flight (protocol 27+) runs first: a network that cannot verify
 BLS12-381 fails with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` before any budget is printed.
@@ -330,6 +331,7 @@ Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full refere
 | `ctg zk init [project]`                              | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)                 |
 | `ctg zk build [circuit] [--embed-vk] [--network]`    | Compile Circom + trusted setup; `--embed-vk` also writes `vk.rs`             |
 | `ctg zk import-ceremony [circuit] --ceremony <path>` | Import an external ceremony's `circuit_final.zkey` + `verification_key.json` |
+| `ctg zk verify-ceremony [circuit]`                   | Re-check an imported ceremony offline (hashes, `zkey verify`, VK)            |
 | `ctg zk prove [circuit] [--debug]`                   | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`)     |
 | `ctg zk invoke [circuit] --source <identity>`        | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt         |
 | `ctg zk invoke [circuit] --network <name>`           | Target a configured network (not only `defaultNetwork`)                      |
@@ -339,7 +341,7 @@ Shared ZK flags:
 
 - `--allow-dev-ceremony` — bypass mainnet guardrails for dev-ceremony artifacts (not for production)
 - `--embed-vk` on `zk build` — generates `contracts/verifier/src/vk.rs`; rebuild and redeploy the verifier before invoking with `--embed-vk`
-- `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output
+- `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output; `--source-url`, `--ceremony-name`, `--participants` and `--retrieved-at` record provenance
 
 `ctg estimate verify <circuit> [--network <name>]` reports the CPU/memory budget for verifying that circuit, and flags a network below protocol 27.
 
@@ -354,6 +356,7 @@ Error codes the ZK commands surface:
 | `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` | `circuits/input.json` holds a signal the circuit does not accept as input                                                  |
 | `CAATINGA_ZK_EMBED_VK_UNSUPPORTED`          | `--embed-vk` invoke without a generated `vk.rs`                                                                            |
 | `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`         | Imported ceremony artifacts do not match the circuit                                                                       |
+| `CAATINGA_ZK_CEREMONY_TAMPERED`             | Imported ceremony artifacts changed since import, or fail `ctg zk verify-ceremony`                                         |
 | `CAATINGA_ZK_VERIFICATION_FAILED`           | On-chain verifier returned `false`                                                                                         |
 
 ## Stellar CLI compatibility

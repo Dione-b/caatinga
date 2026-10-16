@@ -1,4 +1,5 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -137,6 +138,55 @@ describe("importCeremony", () => {
     }
     expect(manifest.publicSignals).toBe(publicSignals);
     expect(manifest.source).toBe(ceremonyDir);
+  });
+
+  it("should_pin_every_artifact_by_sha256_and_record_provenance", async () => {
+    const circuitPath = await seedCircuit(path.join(tmpRoot, "circuits"));
+    const artifactsDir = path.join(tmpRoot, ".artifacts/zk/main");
+    const ceremonyDir = await seedCeremonyOutput(path.join(tmpRoot, "ceremony"), publicSignals);
+    await writeFile(path.join(ceremonyDir, "pot12_final.ptau"), "ptau-bytes");
+    await seedCompiledArtifacts(artifactsDir, publicSignals);
+
+    await importCeremony({
+      circuitName: "main",
+      circuitPath,
+      artifactsDir,
+      ceremonyDir,
+      provenance: {
+        sourceUrl: "https://example.org/ceremony",
+        ceremony: "multiplier-2026",
+        participants: 12,
+        retrievedAt: "2026-10-01T00:00:00.000Z",
+      },
+    });
+
+    const manifest = await readCeremonyManifest(artifactsDir);
+    if (manifest?.type !== MPC_CEREMONY_TYPE) {
+      throw new Error("expected an MPC manifest");
+    }
+    const sha = async (relative: string) =>
+      createHash("sha256")
+        .update(await readFile(path.join(artifactsDir, relative)))
+        .digest("hex");
+
+    expect(manifest.version).toBe(2);
+    expect(manifest.artifacts).toEqual({
+      zkey: { path: "circuit_final.zkey", sha256: await sha("circuit_final.zkey") },
+      verificationKey: {
+        path: "verification_key.json",
+        sha256: await sha("verification_key.json"),
+      },
+      r1cs: { path: "main.r1cs", sha256: await sha("main.r1cs") },
+      wasm: { path: path.join("main_js", "main.wasm"), sha256: await sha("main_js/main.wasm") },
+      ptau: { path: "pot12_final.ptau", sha256: await sha("pot12_final.ptau") },
+    });
+    expect(manifest.provenance).toEqual({
+      sourceUrl: "https://example.org/ceremony",
+      ceremony: "multiplier-2026",
+      participants: 12,
+      retrievedAt: "2026-10-01T00:00:00.000Z",
+      curve: "bls12381",
+    });
   });
 
   it("should_fail_when_the_ceremony_is_missing_the_proving_key", async () => {

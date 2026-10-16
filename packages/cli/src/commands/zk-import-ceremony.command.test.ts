@@ -104,6 +104,71 @@ describe("zk import-ceremony command", () => {
     expect(process.exitCode).toBeUndefined();
   });
 
+  it("should_pass_provenance_flags_through_to_the_manifest", async () => {
+    importCeremonyMock.mockResolvedValue({
+      circuitHash: "a".repeat(64),
+      publicSignals: 1,
+      zkeyPath: ".artifacts/zk/main/circuit_final.zkey",
+      verificationKeyPath: ".artifacts/zk/main/verification_key.json",
+    });
+
+    await createProgram().parseAsync([
+      "node",
+      "caatinga",
+      "zk",
+      "import-ceremony",
+      "--ceremony",
+      "/tmp/ceremony",
+      "--source-url",
+      "https://example.org/ceremony",
+      "--ceremony-name",
+      "multiplier-2026",
+      "--participants",
+      "12",
+      "--retrieved-at",
+      "2026-10-01",
+    ]);
+
+    expect(importCeremonyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provenance: {
+          sourceUrl: "https://example.org/ceremony",
+          ceremony: "multiplier-2026",
+          participants: 12,
+          retrievedAt: "2026-10-01T00:00:00.000Z",
+        },
+      })
+    );
+  });
+
+  it.each([
+    ["--participants", "zero"],
+    ["--participants", "0"],
+    ["--retrieved-at", "not-a-date"],
+  ])("should_reject_%s_%s", async (flag, value) => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await createProgram().parseAsync([
+        "node",
+        "caatinga",
+        "zk",
+        "import-ceremony",
+        "--ceremony",
+        "/tmp/ceremony",
+        flag,
+        value,
+      ]);
+
+      expect(process.exitCode).toBe(1);
+      expect(importCeremonyMock).not.toHaveBeenCalled();
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("CAATINGA_INVALID_CONFIG");
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
   it("should_default_to_the_first_configured_circuit", async () => {
     importCeremonyMock.mockResolvedValue({
       circuitHash: "b".repeat(64),
