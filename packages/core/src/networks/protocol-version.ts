@@ -53,7 +53,9 @@ export async function fetchNetworkProtocolVersion(
     const response = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getNetwork", params: [] }),
+      // No `params`: Stellar RPC decodes them into a request object, and an
+      // array (`params: []`) is rejected with "invalid parameters".
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getNetwork" }),
       signal: AbortSignal.timeout(timeoutMs),
     });
 
