@@ -6,10 +6,16 @@ import { ZkError } from "../errors/ZkError.js";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
 import type { ZkInstallProgress } from "../install/install-progress.js";
 import {
+  MPC_CEREMONY_MANIFEST_VERSION,
   MPC_CEREMONY_TYPE,
   readCeremonyManifest,
   writeMpcCeremonyManifest,
 } from "./dev-ceremony.js";
+import {
+  digestCeremonyArtifacts,
+  type CeremonyArtifactDigests,
+  type CeremonyProvenance,
+} from "./ceremony-integrity.js";
 
 export const MPC_ZKEY_FILENAME = "circuit_final.zkey";
 export const MPC_VERIFICATION_KEY_FILENAME = "verification_key.json";
@@ -28,6 +34,8 @@ export type ImportCeremonyOptions = {
   artifactsDir: string;
   /** Directory holding the MPC ceremony output to import. */
   ceremonyDir: string;
+  /** Provenance recorded in `ceremony.json`; `retrievedAt` defaults to now. */
+  provenance?: Partial<Omit<CeremonyProvenance, "curve">>;
   progress?: ZkInstallProgress;
 };
 
@@ -38,6 +46,7 @@ export type ImportCeremonyResult = {
   verificationKeyPath: string;
   /** Powers-of-tau file copied alongside, when the ceremony shipped one. */
   ptauPath?: string;
+  artifacts: CeremonyArtifactDigests;
 };
 
 /**
@@ -208,10 +217,26 @@ export async function importCeremony(
     break;
   }
 
+  // Pinned so mainnet deploy/invoke can refuse artifacts swapped after import.
+  const artifacts = await digestCeremonyArtifacts(artifactsDir, {
+    zkey: MPC_ZKEY_FILENAME,
+    verificationKey: MPC_VERIFICATION_KEY_FILENAME,
+    r1cs: "main.r1cs",
+    wasm: path.join("main_js", "main.wasm"),
+    ...(ptauPath ? { ptau: path.basename(ptauPath) } : {}),
+  });
+
   await writeMpcCeremonyManifest(artifactsDir, {
+    version: MPC_CEREMONY_MANIFEST_VERSION,
     circuitHash,
     publicSignals,
     source: ceremonyDir,
+    artifacts,
+    provenance: {
+      ...options.provenance,
+      retrievedAt: options.provenance?.retrievedAt ?? new Date().toISOString(),
+      curve: "bls12381",
+    },
   });
 
   return {
@@ -220,5 +245,6 @@ export async function importCeremony(
     zkeyPath: zkeyTarget,
     verificationKeyPath: vkTarget,
     ptauPath,
+    artifacts,
   };
 }

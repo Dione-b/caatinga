@@ -34,6 +34,7 @@ export {
   zkArtifactsDir,
   DEV_CEREMONY_TYPE,
   MPC_CEREMONY_TYPE,
+  MPC_CEREMONY_MANIFEST_VERSION,
   CEREMONY_MANIFEST_FILE,
   type AssertDevCeremonyAllowedOptions,
   type CeremonyManifest,
@@ -48,6 +49,23 @@ export {
   type ImportCeremonyOptions,
   type ImportCeremonyResult,
 } from "./ceremony/import-ceremony.js";
+export {
+  assertCeremonyIntegrity,
+  digestCeremonyArtifacts,
+  findCeremonyMismatches,
+  sha256File,
+  CRITICAL_CEREMONY_ARTIFACTS,
+  type CeremonyArtifactDigest,
+  type CeremonyArtifactDigests,
+  type CeremonyArtifactMismatch,
+  type CeremonyArtifactRole,
+  type CeremonyProvenance,
+} from "./ceremony/ceremony-integrity.js";
+export {
+  verifyCeremony,
+  type VerifyCeremonyOptions,
+  type VerifyCeremonyResult,
+} from "./ceremony/verify-ceremony.js";
 export {
   collectZkStatus,
   type CollectZkStatusOptions,

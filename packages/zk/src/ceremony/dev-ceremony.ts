@@ -2,10 +2,17 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isMainnetNetwork, type NetworkConfig } from "@caatinga/core";
 import { ZkError } from "../errors/ZkError.js";
+import {
+  assertCeremonyIntegrity,
+  type CeremonyArtifactDigests,
+  type CeremonyProvenance,
+} from "./ceremony-integrity.js";
 
 export const DEV_CEREMONY_TYPE = "dev-single-party" as const;
 export const MPC_CEREMONY_TYPE = "mpc-multi-party" as const;
 export const CEREMONY_MANIFEST_FILE = "ceremony.json";
+/** Version of the MPC manifest shape written by `ctg zk import-ceremony`. */
+export const MPC_CEREMONY_MANIFEST_VERSION = 2 as const;
 
 export type DevCeremonyManifest = {
   type: typeof DEV_CEREMONY_TYPE;
@@ -28,6 +35,16 @@ export type MpcCeremonyManifest = {
   publicSignals: number;
   /** Path the artifacts were imported from, kept for auditability. */
   source?: string;
+  /**
+   * Manifest shape version. Absent on manifests written before artifact hashes
+   * were recorded; those are rejected on mainnet until re-imported.
+   */
+  version?: typeof MPC_CEREMONY_MANIFEST_VERSION;
+  /** sha256 of each imported artifact, enforced on mainnet deploy/invoke. */
+  artifacts?: CeremonyArtifactDigests;
+  provenance?: CeremonyProvenance;
+  /** Set by `ctg zk verify-ceremony` after `snarkjs zkey verify` succeeds. */
+  verifiedAt?: string;
 };
 
 export type CeremonyManifest = DevCeremonyManifest | MpcCeremonyManifest;
@@ -62,12 +79,12 @@ export async function writeDevCeremonyManifest(artifactsDir: string): Promise<vo
 
 export async function writeMpcCeremonyManifest(
   artifactsDir: string,
-  manifest: Omit<MpcCeremonyManifest, "type" | "generatedAt">
+  manifest: Omit<MpcCeremonyManifest, "type" | "generatedAt"> & { generatedAt?: string }
 ): Promise<void> {
   const full: MpcCeremonyManifest = {
-    type: MPC_CEREMONY_TYPE,
-    generatedAt: new Date().toISOString(),
     ...manifest,
+    type: MPC_CEREMONY_TYPE,
+    generatedAt: manifest.generatedAt ?? new Date().toISOString(),
   };
   await writeFile(ceremonyManifestPath(artifactsDir), `${JSON.stringify(full, null, 2)}\n`, "utf8");
 }
@@ -114,14 +131,22 @@ export async function assertDevCeremonyAllowed(
     return;
   }
 
-  if (options.allowDevCeremony) {
+  const manifest = await readCeremonyManifest(options.artifactsDir);
+  // An imported MPC ceremony is allowed on mainnet only while its artifacts still
+  // match the hashes recorded at import — a swapped zkey or VK would otherwise
+  // ride on the ceremony's reputation.
+  if (manifest?.type === MPC_CEREMONY_TYPE) {
+    await assertCeremonyIntegrity({
+      artifactsDir: options.artifactsDir,
+      artifacts: manifest.artifacts,
+      operation: options.operation,
+    });
     return;
   }
 
-  const manifest = await readCeremonyManifest(options.artifactsDir);
-  // Only a dev-single-party ceremony is blocked. MPC artifacts are audited by
-  // construction, so mainnet is legitimate once they are the ones in place.
-  if (manifest?.type !== DEV_CEREMONY_TYPE) {
+  // --allow-dev-ceremony lifts the dev-ceremony block only; it never waives the
+  // tamper check above.
+  if (manifest?.type !== DEV_CEREMONY_TYPE || options.allowDevCeremony) {
     return;
   }
 
