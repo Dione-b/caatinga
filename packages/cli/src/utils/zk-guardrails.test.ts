@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { CaatingaConfig } from "@caatinga/core";
-import { writeDevCeremonyManifest } from "@caatinga/zk";
+import { digestCeremonyArtifacts, writeDevCeremonyManifest } from "@caatinga/zk";
 import {
   assertEmbedVkInvokeSupported,
   assertProtocolForZkVerifiers,
@@ -237,9 +237,18 @@ describe("zk-guardrails", () => {
 
   it("should_allow_a_verifier_deploy_on_mainnet_with_mpc_ceremony_artifacts", async () => {
     await mkdir(tmpArtifacts, { recursive: true });
+    await writeFile(path.join(tmpArtifacts, "circuit_final.zkey"), "zkey");
+    await writeFile(path.join(tmpArtifacts, "verification_key.json"), "{}");
     await writeFile(
       path.join(tmpArtifacts, "ceremony.json"),
-      JSON.stringify({ type: "mpc-multi-party" })
+      JSON.stringify({
+        type: "mpc-multi-party",
+        version: 2,
+        artifacts: await digestCeremonyArtifacts(tmpArtifacts, {
+          zkey: "circuit_final.zkey",
+          verificationKey: "verification_key.json",
+        }),
+      })
     );
 
     await expect(
@@ -250,5 +259,32 @@ describe("zk-guardrails", () => {
         allowDevCeremony: false,
       })
     ).resolves.toBeUndefined();
+  });
+
+  it("should_block_a_verifier_deploy_on_mainnet_when_the_mpc_zkey_was_swapped", async () => {
+    await mkdir(tmpArtifacts, { recursive: true });
+    await writeFile(path.join(tmpArtifacts, "circuit_final.zkey"), "zkey");
+    await writeFile(path.join(tmpArtifacts, "verification_key.json"), "{}");
+    await writeFile(
+      path.join(tmpArtifacts, "ceremony.json"),
+      JSON.stringify({
+        type: "mpc-multi-party",
+        version: 2,
+        artifacts: await digestCeremonyArtifacts(tmpArtifacts, {
+          zkey: "circuit_final.zkey",
+          verificationKey: "verification_key.json",
+        }),
+      })
+    );
+    await writeFile(path.join(tmpArtifacts, "circuit_final.zkey"), "dev-zkey");
+
+    await expect(
+      assertZkVerifierDeployAllowed({
+        config: zkConfig,
+        contractNames: ["verifier"],
+        networkName: "mainnet",
+        allowDevCeremony: true,
+      })
+    ).rejects.toMatchObject({ code: "ZK_CEREMONY_TAMPERED" });
   });
 });

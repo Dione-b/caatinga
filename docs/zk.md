@@ -12,16 +12,16 @@ official `groth16_verifier` pattern.
 
 ## Support matrix
 
-| Item                                                       | Status                                                                  |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Circom + snarkjs + Groth16 + BLS12-381                     | Supported                                                               |
-| Dynamic VK (`verify_proof`)                                | Supported (default)                                                     |
-| Embedded VK (`verify_proof_embedded`, `--embed-vk`)        | Supported — see [Dynamic VK vs embedded VK](#dynamic-vk-vs-embedded-vk) |
-| MPC ceremony import (`ctg zk import-ceremony`)             | Supported; running the ceremony itself is out of scope                  |
-| Offline ceremony verification and full artifact provenance | Planned                                                                 |
-| BN254                                                      | Out of scope                                                            |
-| Noir / UltraHonk, zkVMs                                    | Not supported                                                           |
-| Automatic Circom install                                   | Linux and macOS; on Windows, put `circom` on `PATH` manually            |
+| Item                                                     | Status                                                                  |
+| -------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Circom + snarkjs + Groth16 + BLS12-381                   | Supported                                                               |
+| Dynamic VK (`verify_proof`)                              | Supported (default)                                                     |
+| Embedded VK (`verify_proof_embedded`, `--embed-vk`)      | Supported — see [Dynamic VK vs embedded VK](#dynamic-vk-vs-embedded-vk) |
+| MPC ceremony import (`ctg zk import-ceremony`)           | Supported; running the ceremony itself is out of scope                  |
+| Offline ceremony verification (`ctg zk verify-ceremony`) | Supported                                                               |
+| BN254                                                    | Out of scope                                                            |
+| Noir / UltraHonk, zkVMs                                  | Not supported                                                           |
+| Automatic Circom install                                 | Linux and macOS; on Windows, put `circom` on `PATH` manually            |
 
 ## Requirements
 
@@ -55,7 +55,8 @@ Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet 
 | `ctg zk build [circuit] -n, --network <name>`        | Network the artifacts are meant for (defaults to `defaultNetwork`); the mainnet guardrail checks this network.                                             |
 | `ctg zk build [circuit] --embed-vk`                  | Also emit `contracts/verifier/src/vk.rs`, enabling the `verify_proof_embedded` entrypoint.                                                                 |
 | `ctg zk build [circuit] --allow-dev-ceremony`        | Allow dev-ceremony artifacts on mainnet (not for production).                                                                                              |
-| `ctg zk import-ceremony [circuit] --ceremony <path>` | Replace dev artifacts with an external MPC ceremony's `circuit_final.zkey` + `verification_key.json`.                                                      |
+| `ctg zk import-ceremony [circuit] --ceremony <path>` | Replace dev artifacts with an external MPC ceremony's `circuit_final.zkey` + `verification_key.json`, pinned by sha256.                                    |
+| `ctg zk verify-ceremony [circuit]`                   | Offline check of an import: artifact hashes, `snarkjs zkey verify`, and the VK against the zkey.                                                           |
 | `ctg zk prove [circuit]`                             | Generate `proof.json` and `public.json` from `input.json`.                                                                                                 |
 | `ctg zk prove [circuit] --debug`                     | Emit intermediate `witness.wtns` for debugging.                                                                                                            |
 | `ctg zk invoke [circuit] --source <id>`              | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK). `--source` is required; also `-n, --network`, `-y, --yes`, `--allow-dev-ceremony`. |
@@ -232,8 +233,8 @@ Caatinga **blocks mainnet** operations that would use dev-ceremony artifacts:
 | Command                 | Guardrail                                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `ctg zk build`          | Fails when the target network (`--network`, else `defaultNetwork`) is `mainnet` and no imported ceremony artifacts exist |
-| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits                                                 |
-| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                                                                     |
+| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits, or imported ones changed since import          |
+| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist, or imported ones changed since import                              |
 
 ### Importing an audited ceremony
 
@@ -242,14 +243,79 @@ lifts the mainnet block for that circuit:
 
 ```bash
 npx ctg zk build main
-npx ctg zk import-ceremony main --ceremony /path/to/ceremony-output
+npx ctg zk import-ceremony main --ceremony /path/to/ceremony-output \
+  --source-url https://example.org/ceremony --ceremony-name multiplier-2026 --participants 12
+npx ctg zk verify-ceremony main
 ```
 
 Point `--ceremony` at a directory holding `circuit_final.zkey` and `verification_key.json`
-(as produced by `snarkjs zkey export verificationkey`). The command copies those artifacts,
-records `mpc-multi-party` in the manifest, and verifies the artifacts match the compiled
-circuit by comparing the public-signal count — a mismatch fails with
-`CAATINGA_ZK_CEREMONY_INCOMPATIBLE` instead of an unexplained on-chain verification failure.
+(as produced by `snarkjs zkey export verificationkey`), plus the ceremony's final `.ptau`
+when you have it. The command copies those artifacts, records `mpc-multi-party` in the
+manifest, and verifies the artifacts match the compiled circuit by comparing the
+public-signal count — a mismatch fails with `CAATINGA_ZK_CEREMONY_INCOMPATIBLE` instead of an
+unexplained on-chain verification failure. `--source-url`, `--ceremony-name`,
+`--participants` and `--retrieved-at` are recorded for auditors; Caatinga does not fetch or
+check them.
+
+### Pinned artifacts and offline verification
+
+The import pins every artifact by sha256 in `ceremony.json`. Mainnet `ctg deploy <verifier>`
+and `ctg zk invoke` re-hash the proving key, the verification key and the powers-of-tau
+before building a transaction, and fail with `CAATINGA_ZK_CEREMONY_TAMPERED` if any changed —
+`--allow-dev-ceremony` does not waive this. A hand-written `mpc-multi-party` manifest with no
+hashes is rejected the same way, so editing `ceremony.json` cannot lift the mainnet block.
+
+`ctg zk verify-ceremony [circuit]` re-checks an import offline and reproducibly:
+
+1. re-hashes every pinned artifact;
+2. runs `snarkjs zkey verify <r1cs> <ptau> <zkey>` when a `.ptau` was imported, proving the
+   proving key derives from this circuit and that powers-of-tau (skipped with a warning
+   otherwise);
+3. exports the verification key from the zkey and compares it with
+   `verification_key.json`, the key the verifier is actually fed.
+
+Any failure is `CAATINGA_ZK_CEREMONY_TAMPERED`. On success the manifest gains `verifiedAt`.
+The checks bind the artifacts to each other and to the circuit; whether the ceremony itself
+was run honestly is still for you to audit from its published transcript.
+
+### `ceremony.json` format
+
+`ceremony.json` is a public contract. An imported ceremony writes version 2:
+
+```json
+{
+  "type": "mpc-multi-party",
+  "version": 2,
+  "generatedAt": "2026-10-16T12:00:00.000Z",
+  "circuitHash": "<sha256 of the .circom sources>",
+  "publicSignals": 1,
+  "source": "/path/to/ceremony-output",
+  "artifacts": {
+    "zkey": { "path": "circuit_final.zkey", "sha256": "…" },
+    "verificationKey": { "path": "verification_key.json", "sha256": "…" },
+    "r1cs": { "path": "main.r1cs", "sha256": "…" },
+    "wasm": { "path": "main_js/main.wasm", "sha256": "…" },
+    "ptau": { "path": "pot12_final.ptau", "sha256": "…" }
+  },
+  "provenance": {
+    "sourceUrl": "https://example.org/ceremony",
+    "ceremony": "multiplier-2026",
+    "participants": 12,
+    "retrievedAt": "2026-10-16T12:00:00.000Z",
+    "curve": "bls12381"
+  },
+  "verifiedAt": "2026-10-16T12:05:00.000Z"
+}
+```
+
+Paths are relative to `.artifacts/zk/<circuit>`. `ptau`, `r1cs` and `wasm` are optional;
+`provenance` fields other than `retrievedAt` and `curve` are optional. `r1cs` and `wasm` are
+recompiled by `ctg zk build`, so a change to them is reported by `verify-ceremony` but does not
+block mainnet. Dev ceremonies keep the unversioned `{ "type": "dev-single-party", "generatedAt" }`
+shape. **Compatibility:** an `mpc-multi-party` manifest without `artifacts` (written by an
+earlier pre-release `import-ceremony`) is rejected on mainnet; re-run `ctg zk import-ceremony`
+to upgrade it. New optional fields may be added in a minor release; removing or renaming one
+is a breaking change.
 
 After an import, `ctg zk build` **reuses** the imported artifacts instead of running a new
 dev ceremony, so a rebuild cannot silently demote a production build.

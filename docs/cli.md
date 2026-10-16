@@ -330,6 +330,7 @@ Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full refere
 | `ctg zk init [project]`                              | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)                 |
 | `ctg zk build [circuit] [--embed-vk] [--network]`    | Compile Circom + trusted setup; `--embed-vk` also writes `vk.rs`             |
 | `ctg zk import-ceremony [circuit] --ceremony <path>` | Import an external ceremony's `circuit_final.zkey` + `verification_key.json` |
+| `ctg zk verify-ceremony [circuit]`                   | Re-check an imported ceremony offline (hashes, `zkey verify`, VK)            |
 | `ctg zk prove [circuit] [--debug]`                   | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`)     |
 | `ctg zk invoke [circuit] --source <identity>`        | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt         |
 | `ctg zk invoke [circuit] --network <name>`           | Target a configured network (not only `defaultNetwork`)                      |
@@ -339,7 +340,7 @@ Shared ZK flags:
 
 - `--allow-dev-ceremony` — bypass mainnet guardrails for dev-ceremony artifacts (not for production)
 - `--embed-vk` on `zk build` — generates `contracts/verifier/src/vk.rs`; rebuild and redeploy the verifier before invoking with `--embed-vk`
-- `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output
+- `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output; `--source-url`, `--ceremony-name`, `--participants` and `--retrieved-at` record provenance
 
 `ctg estimate verify <circuit> [--network <name>]` reports the CPU/memory budget for verifying that circuit, and flags a network below protocol 27.
 
@@ -354,6 +355,7 @@ Error codes the ZK commands surface:
 | `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` | `circuits/input.json` holds a signal the circuit does not accept as input                                                  |
 | `CAATINGA_ZK_EMBED_VK_UNSUPPORTED`          | `--embed-vk` invoke without a generated `vk.rs`                                                                            |
 | `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`         | Imported ceremony artifacts do not match the circuit                                                                       |
+| `CAATINGA_ZK_CEREMONY_TAMPERED`             | Imported ceremony artifacts changed since import, or fail `ctg zk verify-ceremony`                                         |
 | `CAATINGA_ZK_VERIFICATION_FAILED`           | On-chain verifier returned `false`                                                                                         |
 
 ## Stellar CLI compatibility

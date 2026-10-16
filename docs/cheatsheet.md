@@ -183,6 +183,7 @@ npx ctg deploy verifier --network testnet --source alice
 npx ctg zk prove main
 npx ctg zk invoke main --source alice
 npx ctg zk import-ceremony main --ceremony <dir>   # audited MPC → lifts mainnet block
+npx ctg zk verify-ceremony main                    # offline: hashes, zkey verify, VK
 ```
 
 Freeze the circuit and bake the key in:
