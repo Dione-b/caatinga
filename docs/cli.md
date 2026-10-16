@@ -237,7 +237,9 @@ restoring Stellar CLI identity secrets. `--strict` is forwarded to `doctor` only
 
 ## `ctg identity export [--path ~/.config/stellar]`
 
-Exports the Stellar CLI config directory as a base64 tarball on stdout. Use it to move an identity
+Exports the Stellar CLI config directory as a base64 tarball on stdout. The default path
+respects `STELLAR_CONFIG_HOME` > `STELLAR_HOME` > `XDG_CONFIG_HOME/stellar` >
+`~/.config/stellar` (matching `stellar-cli`). Use it to move an identity
 to another machine with `ctg identity import`, or as `CAATINGA_CI_STELLAR_CONFIG_B64` for the CI
 restore script — see
 [Testing — Stellar CLI config blob](./internal/testing.md#stellar-cli-config-blob-format).
@@ -245,6 +247,8 @@ restore script — see
 ## `ctg identity import <archive-file> [--path ~/.config/stellar]`
 
 Imports a base64-encoded tarball file produced by `ctg identity export` (not a raw binary path).
+The default target respects the same `STELLAR_CONFIG_HOME` > `STELLAR_HOME` >
+`XDG_CONFIG_HOME/stellar` > `~/.config/stellar` precedence.
 Before extracting, Caatinga lists the archive's entries and refuses to import it if any entry
 would resolve outside the target directory (tar path traversal) — treat this the same as any
 untrusted archive: only import files from a source you trust, since the check blocks path
