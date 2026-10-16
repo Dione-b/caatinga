@@ -38,7 +38,8 @@ Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet 
 | `ctg zk init [project] --minimal`                    | Scaffold a ZK-only project with a minimal identity circuit and verifier.                                                                                   |
 | `ctg zk init [project] --template <name>`            | Use a specific template instead of the default `zk-starter`.                                                                                               |
 | `ctg zk init [project] --force`                      | Overwrite existing scaffold files.                                                                                                                         |
-| `ctg zk build [circuit]`                             | Compile Circom (`-p bls12381`) and run dev trusted setup. Reaudited ceremony artifacts are reused when present.                                            |
+| `ctg zk build [circuit]`                             | Compile Circom (`-p bls12381`) and run dev trusted setup. Imported ceremony artifacts are reused when present.                                             |
+| `ctg zk build [circuit] -n, --network <name>`        | Network the artifacts are meant for (defaults to `defaultNetwork`); the mainnet guardrail checks this network.                                             |
 | `ctg zk build [circuit] --embed-vk`                  | Also emit `contracts/verifier/src/vk.rs`, enabling the `verify_proof_embedded` entrypoint.                                                                 |
 | `ctg zk build [circuit] --allow-dev-ceremony`        | Allow dev-ceremony artifacts on mainnet (not for production).                                                                                              |
 | `ctg zk import-ceremony [circuit] --ceremony <path>` | Replace dev artifacts with an external MPC ceremony's `circuit_final.zkey` + `verification_key.json`.                                                      |
@@ -209,11 +210,11 @@ ceremony and audited circuit artifacts.
 
 Caatinga **blocks mainnet** operations that would use dev-ceremony artifacts:
 
-| Command                 | Guardrail                                                                         |
-| ----------------------- | --------------------------------------------------------------------------------- |
-| `ctg zk build`          | Fails when `defaultNetwork` is `mainnet` and no imported ceremony artifacts exist |
-| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits          |
-| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                              |
+| Command                 | Guardrail                                                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `ctg zk build`          | Fails when the target network (`--network`, else `defaultNetwork`) is `mainnet` and no imported ceremony artifacts exist |
+| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits                                                 |
+| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                                                                     |
 
 ### Importing an audited ceremony
 

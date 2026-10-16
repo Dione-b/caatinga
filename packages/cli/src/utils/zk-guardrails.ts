@@ -57,9 +57,9 @@ export async function assertZkBuildNetworkAllowed(options: {
   }
 
   throw new ZkError(
-    "`ctg zk build` is blocked when defaultNetwork is mainnet: it always runs a single-party development ceremony.",
+    `\`ctg zk build\` is blocked for mainnet network "${options.networkName}": it always runs a single-party development ceremony.`,
     "ZK_DEV_CEREMONY_BLOCKED",
-    "Set defaultNetwork to testnet, import audited MPC ceremony artifacts with `ctg zk import-ceremony`, or pass --allow-dev-ceremony only for conscious testing."
+    "Target testnet (`--network testnet` or defaultNetwork), import audited MPC ceremony artifacts with `ctg zk import-ceremony`, or pass --allow-dev-ceremony only for conscious testing."
   );
 }
 

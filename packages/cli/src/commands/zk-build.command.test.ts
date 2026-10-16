@@ -115,6 +115,69 @@ describe("zk build command", () => {
     }
   });
 
+  it("fails with --network mainnet even when defaultNetwork is testnet", async () => {
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "build", "main", "--network", "mainnet"]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("CAATINGA_ZK_DEV_CEREMONY_BLOCKED");
+      expect(buildCircuitMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("allows --network testnet when defaultNetwork is mainnet", async () => {
+    loadConfigMock.mockResolvedValue({
+      ...baseConfig,
+      defaultNetwork: "mainnet",
+    });
+
+    const program = new Command();
+    program.exitOverride();
+    registerZkBuildCommand(program);
+
+    await program.parseAsync(["node", "caatinga", "zk", "build", "main", "--network", "testnet"]);
+
+    expect(buildCircuitMock).toHaveBeenCalled();
+  });
+
+  it("fails with CAATINGA_NETWORK_NOT_FOUND for an unknown --network", async () => {
+    process.exitCode = undefined;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync([
+        "node",
+        "caatinga",
+        "zk",
+        "build",
+        "main",
+        "--network",
+        "futurenet",
+      ]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("CAATINGA_NETWORK_NOT_FOUND");
+      expect(buildCircuitMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
   it("allows mainnet defaultNetwork with --allow-dev-ceremony", async () => {
     loadConfigMock.mockResolvedValue({
       ...baseConfig,

@@ -1,5 +1,5 @@
 import { type Command } from "commander";
-import { loadConfig } from "@caatinga/core";
+import { formatNetworkOrigin, loadConfig, resolveNetwork } from "@caatinga/core";
 import { buildCircuit, readCeremonyManifest } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -13,13 +13,17 @@ export function registerZkBuildCommand(program: Command): void {
     .description("Compile a Circom circuit and run the trusted setup")
     .option("--embed-vk", "Emit a static vk.rs artifact for the verifier contract (experimental)")
     .option(
+      "-n, --network <network>",
+      "Network the built artifacts are meant for (defaults to defaultNetwork)"
+    )
+    .option(
       "--allow-dev-ceremony",
-      "Allow single-party dev ceremony when defaultNetwork is mainnet (not for production)"
+      "Allow single-party dev ceremony when the target network is mainnet (not for production)"
     )
     .action(
       async (
         circuitName: string | undefined,
-        options: { embedVk?: boolean; allowDevCeremony?: boolean }
+        options: { embedVk?: boolean; network?: string; allowDevCeremony?: boolean }
       ) => {
         await runCliAction(async () => {
           const config = await loadConfig();
@@ -34,12 +38,18 @@ export function registerZkBuildCommand(program: Command): void {
             throw new Error(`Circuit "${name}" not found in caatinga.config.ts`);
           }
 
-          // Resolved before this call so the guardrail can look for an existing
-          // MPC ceremony manifest and, when one is present, allow a mainnet
-          // default network: the build reuses rather than replaces it.
+          // The guard runs against the network the artifacts will be deployed to,
+          // not just defaultNetwork: a testnet default must not let dev-ceremony
+          // keys be built for a later `--network mainnet` deploy without warning.
+          const network = resolveNetwork(config, options.network);
+          logger.info(`Network: ${formatNetworkOrigin(network)}`);
+
+          // The circuit is resolved before this call so the guardrail can look for
+          // an existing MPC ceremony manifest and, when one is present, allow a
+          // mainnet target: the build reuses rather than replaces it.
           await assertZkBuildNetworkAllowed({
-            networkName: config.defaultNetwork,
-            networkConfig: config.networks[config.defaultNetwork],
+            networkName: network.name,
+            networkConfig: network.config,
             allowDevCeremony: Boolean(options.allowDevCeremony),
             artifactsDir: `.artifacts/zk/${name}`,
           });
@@ -71,7 +81,7 @@ export function registerZkBuildCommand(program: Command): void {
           const ceremony = await readCeremonyManifest(`.artifacts/zk/${name}`);
           if (ceremony?.type === "dev-single-party") {
             logger.warn(
-              `Single-party development trusted setup (defaultNetwork: ${config.defaultNetwork}). Do not use on mainnet for production.`
+              `Single-party development trusted setup (network: ${network.name}). Do not use on mainnet for production.`
             );
           } else if (ceremony?.type === "mpc-multi-party") {
             logger.info("Using imported MPC ceremony artifacts — no dev ceremony was run.");

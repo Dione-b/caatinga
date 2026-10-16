@@ -328,7 +328,7 @@ Circom Groth16 workflow (`ctg zk init`, `build`, `prove`, `invoke`). Full refere
 | Command                                              | Purpose                                                                      |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `ctg zk init [project]`                              | Scaffold `zk-starter` (`--template`, `--minimal`, `--force`)                 |
-| `ctg zk build [circuit] [--embed-vk]`                | Compile Circom + trusted setup; `--embed-vk` also writes `vk.rs`             |
+| `ctg zk build [circuit] [--embed-vk] [--network]`    | Compile Circom + trusted setup; `--embed-vk` also writes `vk.rs`             |
 | `ctg zk import-ceremony [circuit] --ceremony <path>` | Import an external ceremony's `circuit_final.zkey` + `verification_key.json` |
 | `ctg zk prove [circuit] [--debug]`                   | Generate `proof.json` and `public.json` (`--debug` emits `witness.wtns`)     |
 | `ctg zk invoke [circuit] --source <identity>`        | Call on-chain `verify_proof` (dynamic VK); `-y` skips mainnet prompt         |

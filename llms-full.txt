@@ -164,7 +164,7 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 
 | Command                                | Purpose                                            | Flags                        |
 | -------------------------------------- | -------------------------------------------------- | ---------------------------- |
-| `ctg zk build [circuit]`               | Compile Circom + trusted setup                     | `--embed-vk`, `--allow-dev-ceremony` |
+| `ctg zk build [circuit]`               | Compile Circom + trusted setup                     | `--embed-vk`, `--network`, `--allow-dev-ceremony` |
 | `ctg zk import-ceremony [circuit]`     | Import an external ceremony's artifacts            | `--ceremony <path>` (required) |
 | `ctg zk prove [circuit]`               | Generate `proof.json` + `public.json`              | `--debug`                    |
 | `ctg zk invoke [circuit]`              | Call on-chain `verify_proof` (dynamic VK)          | `--source`, `--network`, `--allow-dev-ceremony` |
