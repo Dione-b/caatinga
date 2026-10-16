@@ -1,36 +1,35 @@
 /**
  * Resource-budget estimates for on-chain Groth16 verification on Soroban.
  *
- * These are *estimates*, not measurements. They come from the reference
- * `groth16_verifier` budget report and are the only numbers Caatinga can offer
- * without executing the verifier contract. Treat them as a pre-flight signal
- * for "this circuit is far too big", never as a fee quote — run
- * `env.cost_estimate().budget().print()` in the contract tests for numbers that
- * reflect your circuit shape.
+ * These are *estimates*, not measurements of your circuit. The model is fitted
+ * to simulations of the Caatinga verifier on testnet (protocol 29) for 1 to 104
+ * public signals, produced by `scripts/zk-verify-benchmark.mjs`; it lands within
+ * 0.2% of every measured point and rounds up. Verification cost depends on the
+ * public-signal count only — the pairing check is fixed and each public signal
+ * adds one G1 multiplication — not on the number of constraints. Treat it as a
+ * pre-flight signal, never as a fee quote.
  */
 
-/**
- * CPU instructions for a single public signal, from the reference
- * `groth16_verifier` budget report.
- */
-export const ZK_BASE_CPU_INSTRUCTIONS = 41_000_000;
+/** CPU instructions for verifying a proof with zero public signals. */
+export const ZK_BASE_CPU_INSTRUCTIONS = 40_500_000;
 
-/** Additional CPU instructions per public input beyond the first. */
-export const ZK_CPU_INSTRUCTIONS_PER_PUBLIC_INPUT = 2_460_000;
+/** Additional CPU instructions per public signal (one G1 mul + add). */
+export const ZK_CPU_INSTRUCTIONS_PER_PUBLIC_INPUT = 3_560_000;
 
 /** Memory used by the pairing check, in bytes. */
 export const ZK_BASE_MEMORY_BYTES = 294 * 1024;
 
 /**
- * Reference network limits, in instructions and bytes.
+ * Per-transaction Soroban limits, in instructions and bytes: `tx_max_instructions`
+ * and `tx_memory_limit` from the `contract_compute_v0` network setting, identical
+ * on testnet and mainnet as read with `stellar network settings` (2026-10, protocol 29).
  *
- * These are the Soroban network settings as documented by Stellar; they are not
- * fetched from the network because the RPC `getNetwork` response does not carry
- * them. When Stellar raises them, this table is the single place to update.
+ * They are not fetched at runtime because the RPC `getNetwork` response does not
+ * carry them. When the network raises them, this table is the single place to update.
  */
 export const SOROBAN_NETWORK_LIMITS = {
-  cpuInstructions: 100_000_000,
-  memoryBytes: 16_777_216,
+  cpuInstructions: 400_000_000,
+  memoryBytes: 41_943_040,
 } as const;
 
 /**
