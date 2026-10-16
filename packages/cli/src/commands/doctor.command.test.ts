@@ -212,7 +212,7 @@ describe("doctor command", () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(
-        new Response(JSON.stringify({ result: { protocolVersion: 26 } }), { status: 200 })
+        new Response(JSON.stringify({ result: { protocolVersion: 28 } }), { status: 200 })
       );
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -223,8 +223,8 @@ describe("doctor command", () => {
       const output = logSpy.mock.calls.map(([chunk]) => String(chunk)).join("\n");
       expect(output).toContain("ZK circuits:");
       expect(output).toContain("main");
-      expect(output).toContain("Protocol required for verification: >= 25");
-      expect(output).toContain("testnet: protocol 26");
+      expect(output).toContain("Protocol required for verification: >= 27");
+      expect(output).toContain("testnet: protocol 28");
       // A protocol below the floor must be reported, but must never block doctor.
       expect(warnSpy).not.toHaveBeenCalled();
       expect(process.exitCode).toBeUndefined();

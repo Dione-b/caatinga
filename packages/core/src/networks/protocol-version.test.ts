@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { NetworkConfig } from "../config/config.schema.js";
@@ -8,6 +11,7 @@ import {
 } from "./protocol-version.js";
 
 const rpcUrl = "https://soroban-testnet.stellar.org";
+const packagesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const testnet: NetworkConfig = {
   rpcUrl,
@@ -168,5 +172,22 @@ describe("assertProtocolForZk", () => {
     });
 
     expect(advisory).toContain("Could not determine the protocol version");
+  });
+});
+
+describe("ZK_MIN_PROTOCOL_VERSION", () => {
+  // A contract built with soroban-sdk vN declares protocol N in its env meta, so a
+  // network below the pinned SDK major rejects the verifier upload. If the pin moves
+  // without this constant, the pre-flight would wave through a network that cannot
+  // run the verifier (or block one that can).
+  it.each([
+    "core/scaffolds/zk-verifier/Cargo.toml",
+    "templates/zk-starter/contracts/verifier/Cargo.toml",
+  ])("should_match_the_soroban_sdk_major_pinned_in_%s", async (cargoToml) => {
+    const raw = await readFile(path.join(packagesDir, cargoToml), "utf8");
+    const match = raw.match(/^soroban-sdk = "(\d+)\./m);
+
+    expect(match, `no soroban-sdk pin found in ${cargoToml}`).not.toBeNull();
+    expect(Number.parseInt(match![1]!, 10)).toBe(ZK_MIN_PROTOCOL_VERSION);
   });
 });

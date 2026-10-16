@@ -185,7 +185,7 @@ describe("zk-guardrails", () => {
         networkName: "testnet",
         networkConfig: zkConfig.networks.testnet!,
         operation: "ctg deploy verifier",
-        protocolVersion: 24,
+        protocolVersion: 26,
       })
     ).rejects.toMatchObject({ code: "CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED" });
   });
@@ -198,7 +198,7 @@ describe("zk-guardrails", () => {
         networkName: "testnet",
         networkConfig: zkConfig.networks.testnet!,
         operation: "ctg deploy verifier",
-        protocolVersion: 25,
+        protocolVersion: 27,
       })
     ).resolves.toBeUndefined();
   });

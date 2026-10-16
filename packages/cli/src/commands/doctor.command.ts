@@ -191,7 +191,7 @@ async function reportAllNetworks(config: Awaited<ReturnType<typeof loadConfig>>)
 }
 
 /**
- * Advisory only: BLS12-381 Groth16 verification needs protocol 25+. Never
+ * Advisory only: the ZK verifier needs protocol ZK_MIN_PROTOCOL_VERSION+. Never
  * contributes to `blocked` — an unreachable RPC here must not fail a doctor run
  * that everything else says is ready. Skipped entirely for projects without ZK
  * circuits, so ordinary deploys pay no RPC round-trip.
@@ -224,7 +224,7 @@ async function reportZkProtocol(config: Awaited<ReturnType<typeof loadConfig>>):
 
     if (protocolVersion < ZK_MIN_PROTOCOL_VERSION) {
       logger.warn(
-        `  ${networkName}: protocol ${protocolVersion} is below ${ZK_MIN_PROTOCOL_VERSION} — BLS12-381 Groth16 verification is unavailable, so a verifier deploy or \`ctg zk invoke\` will be rejected.`
+        `  ${networkName}: protocol ${protocolVersion} is below ${ZK_MIN_PROTOCOL_VERSION} — the verifier wasm targets protocol ${ZK_MIN_PROTOCOL_VERSION}, so a verifier deploy or \`ctg zk invoke\` will be rejected.`
       );
       continue;
     }

@@ -2,11 +2,15 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import type { NetworkConfig } from "../config/config.schema.js";
 
 /**
- * Protocol version that introduced the BLS12-381 pairing host functions the
- * Soroban Groth16 verifier depends on. Networks below this cannot verify
- * BLS12-381 proofs on-chain.
+ * Minimum network protocol for the shipped ZK verifier.
+ *
+ * The BLS12-381 host functions themselves exist since protocol 22 (CAP-0059),
+ * but the verifier scaffold and `zk-starter` pin `soroban-sdk` 27, and a
+ * contract built with SDK vN declares protocol N in its env meta: a network
+ * below that rejects the wasm upload. Keep this equal to the pinned SDK major
+ * (enforced by a test against the scaffold's Cargo.toml).
  */
-export const ZK_MIN_PROTOCOL_VERSION = 25;
+export const ZK_MIN_PROTOCOL_VERSION = 27;
 
 /**
  * Per-request timeout for the RPC `getNetwork` call. Deliberately short: a
@@ -115,14 +119,14 @@ export async function assertProtocolForZk(
     (await fetchNetworkProtocolVersion(options.networkConfig.rpcUrl)).protocolVersion;
 
   if (resolved === undefined) {
-    return `Could not determine the protocol version of network "${options.networkName}"; BLS12-381 Groth16 verification requires protocol ${ZK_MIN_PROTOCOL_VERSION} or newer.`;
+    return `Could not determine the protocol version of network "${options.networkName}"; the Caatinga ZK verifier requires protocol ${ZK_MIN_PROTOCOL_VERSION} or newer.`;
   }
 
   if (resolved < ZK_MIN_PROTOCOL_VERSION) {
     throw new CaatingaError(
       `${options.operation} requires protocol ${ZK_MIN_PROTOCOL_VERSION} or newer on network "${options.networkName}", but it is at protocol ${resolved}.`,
       CaatingaErrorCode.ZK_PROTOCOL_VERSION_UNSUPPORTED,
-      `BLS12-381 pairing host functions arrived in protocol ${ZK_MIN_PROTOCOL_VERSION}. Target a network that has upgraded, or a different network.`
+      `The verifier is built with soroban-sdk ${ZK_MIN_PROTOCOL_VERSION}, which targets protocol ${ZK_MIN_PROTOCOL_VERSION}. Target a network that has upgraded, or a different network.`
     );
   }
 

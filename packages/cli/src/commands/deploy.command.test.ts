@@ -309,7 +309,7 @@ describe("deploy command", () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(
-        new Response(JSON.stringify({ result: { protocolVersion: 25 } }), { status: 200 })
+        new Response(JSON.stringify({ result: { protocolVersion: 27 } }), { status: 200 })
       );
 
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
