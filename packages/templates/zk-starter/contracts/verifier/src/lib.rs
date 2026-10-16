@@ -43,6 +43,37 @@ impl Groth16Verifier {
         proof: Proof,
         pub_signals: Vec<Fr>,
     ) -> Result<bool, Groth16Error> {
+        Self::verify_with_vk(env, vk, proof, pub_signals)
+    }
+
+    /// Verifies with the verification key baked into the contract by
+    /// `ctg zk build --embed-vk`, which overwrites `src/vk.rs`.
+    ///
+    /// Prefer this once a circuit is frozen: it removes the VK argument from
+    /// every transaction and makes the deployed contract self-contained. Use
+    /// `verify_proof` instead while a circuit is still changing.
+    pub fn verify_proof_embedded(
+        env: Env,
+        proof: Proof,
+        pub_signals: Vec<Fr>,
+    ) -> Result<bool, Groth16Error> {
+        let (alpha, beta, gamma, delta, ic) = vk::embedded_vk(&env);
+        let vk = VerificationKey {
+            alpha,
+            beta,
+            gamma,
+            delta,
+            ic,
+        };
+        Self::verify_with_vk(env, vk, proof, pub_signals)
+    }
+
+    fn verify_with_vk(
+        env: Env,
+        vk: VerificationKey,
+        proof: Proof,
+        pub_signals: Vec<Fr>,
+    ) -> Result<bool, Groth16Error> {
         let bls = env.crypto().bls12_381();
 
         if pub_signals.len() + 1 != vk.ic.len() {
@@ -63,4 +94,5 @@ impl Groth16Verifier {
     }
 }
 
+mod vk;
 mod test;
