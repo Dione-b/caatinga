@@ -1,0 +1,6 @@
+ℹ️  Simulating transaction…
+ℹ️  Signing transaction: 6a5e8599dd0964dcf15079111b10b3ce9a2b345857067499bee3a24c2c16889d
+🌎 Sending transaction…
+✅ Transaction submitted successfully!
+🔗 https://stellar.expert/explorer/testnet/tx/6a5e8599dd0964dcf15079111b10b3ce9a2b345857067499bee3a24c2c16889d
+bc6fa833dd01df3f7064f64d4ddb982f6f25330f7a5a390512460f23ee85cee5
