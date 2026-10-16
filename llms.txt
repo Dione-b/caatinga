@@ -103,7 +103,7 @@ Never recommend:
 - [Errors](docs/errors.md): Every `CAATINGA_*` code with meaning, common cause, user action.
 - [Cheatsheet](docs/cheatsheet.md): Command loop, flags, binding freshness — all on one page.
 - [Packages](docs/packages.md): `@caatinga/cli`, `@caatinga/core`, `@caatinga/client`, `@caatinga/zk` — subpath exports.
-- [ZK module](docs/zk.md): Circom Groth16 — BLS12-381, dev ceremony, proof, on-chain verification.
+- [ZK module](docs/zk.md): Circom Groth16 — BLS12-381, ceremony import, embedded VK, proof, on-chain verification.
 
 ## Tutorials
 

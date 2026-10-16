@@ -32,21 +32,23 @@ Walkthrough: [ZK project](./tutorials/zk-project.md). Command loop: [Cheatsheet 
 
 ## Commands
 
-| Command                                       | Purpose                                                                                                                                                    |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctg zk init [project]`                       | Scaffold `zk-starter` (multiplier circuit + verifier).                                                                                                     |
-| `ctg zk init [project] --minimal`             | Scaffold a ZK-only project with a minimal identity circuit and verifier.                                                                                   |
-| `ctg zk init [project] --template <name>`     | Use a specific template instead of the default `zk-starter`.                                                                                               |
-| `ctg zk init [project] --force`               | Overwrite existing scaffold files.                                                                                                                         |
-| `ctg zk build [circuit]`                      | Compile Circom (`-p bls12381`) and run dev trusted setup.                                                                                                  |
-| `ctg zk build [circuit] --embed-vk`           | **Experimental:** emit `contracts/verifier/src/vk.rs` (not end-to-end).                                                                                    |
-| `ctg zk build [circuit] --allow-dev-ceremony` | Allow dev-ceremony artifacts on mainnet (not for production).                                                                                              |
-| `ctg zk prove [circuit]`                      | Generate `proof.json` and `public.json` from `input.json`.                                                                                                 |
-| `ctg zk prove [circuit] --debug`              | Emit intermediate `witness.wtns` for debugging.                                                                                                            |
-| `ctg zk invoke [circuit] --source <id>`       | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK). `--source` is required; also `-n, --network`, `-y, --yes`, `--allow-dev-ceremony`. |
-| `ctg zk invoke [circuit] --embed-vk`          | **Blocked** — experimental; use dynamic VK flow today.                                                                                                     |
+| Command                                              | Purpose                                                                                                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctg zk init [project]`                              | Scaffold `zk-starter` (multiplier circuit + verifier).                                                                                                     |
+| `ctg zk init [project] --minimal`                    | Scaffold a ZK-only project with a minimal identity circuit and verifier.                                                                                   |
+| `ctg zk init [project] --template <name>`            | Use a specific template instead of the default `zk-starter`.                                                                                               |
+| `ctg zk init [project] --force`                      | Overwrite existing scaffold files.                                                                                                                         |
+| `ctg zk build [circuit]`                             | Compile Circom (`-p bls12381`) and run dev trusted setup. Reaudited ceremony artifacts are reused when present.                                            |
+| `ctg zk build [circuit] --embed-vk`                  | Also emit `contracts/verifier/src/vk.rs`, enabling the `verify_proof_embedded` entrypoint.                                                                 |
+| `ctg zk build [circuit] --allow-dev-ceremony`        | Allow dev-ceremony artifacts on mainnet (not for production).                                                                                              |
+| `ctg zk import-ceremony [circuit] --ceremony <path>` | Replace dev artifacts with an external MPC ceremony's `circuit_final.zkey` + `verification_key.json`.                                                      |
+| `ctg zk prove [circuit]`                             | Generate `proof.json` and `public.json` from `input.json`.                                                                                                 |
+| `ctg zk prove [circuit] --debug`                     | Emit intermediate `witness.wtns` for debugging.                                                                                                            |
+| `ctg zk invoke [circuit] --source <id>`              | Serialize snarkjs output and call `verify_proof` on-chain (dynamic VK). `--source` is required; also `-n, --network`, `-y, --yes`, `--allow-dev-ceremony`. |
+| `ctg zk invoke [circuit] --embed-vk`                 | Call `verify_proof_embedded` instead, using the VK baked into the contract. Requires `ctg zk build <circuit> --embed-vk` and a redeploy.                   |
 
-Artifacts land in `.artifacts/zk/<circuit>/`.
+Artifacts land in `.artifacts/zk/<circuit>/`. `ctg estimate verify <circuit>` reports the
+CPU/memory budget before you deploy.
 
 ## Minimal scaffold vs template
 
@@ -58,12 +60,30 @@ See [ZK project tutorial](./tutorials/zk-project.md) for the hybrid UI + CLI pro
 
 ## Circuit inputs
 
-`circuits/input.json` must contain **private signals only**. Do not include public outputs —
-for the multiplier scaffold, use `a` and `b` but not `c`. Snarkjs derives public signals during
-proving and writes them to `.artifacts/zk/<circuit>/public.json`.
+`circuits/input.json` must contain the circuit's **input signals only**. Do not include
+derived outputs — for the multiplier scaffold, use `a` and `b` but not `c`. Snarkjs derives
+public signals during proving and writes them to `.artifacts/zk/<circuit>/public.json`.
 
-If you include a public output in `input.json`, `ctg zk prove` fails with a witness error
-(for example `Too many values for input signal c`).
+If you include a derived output in `input.json`, `ctg zk prove` fails with a witness error
+(`Too many values for input signal c`). Caatinga rewrites that failure as
+`CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` with a hint naming the offending signal, so the
+fix is obvious rather than a guess from raw snarkjs stderr.
+
+## Drift detection
+
+`ctg status` reports ZK drift alongside contract and binding status:
+
+- whether the circuit has been built, and the recorded ceremony type
+- whether the circuit sources changed since an imported ceremony
+- whether `input.json` changed since the last `ctg zk prove`
+
+```bash
+npx ctg status
+npx ctg status --json
+```
+
+ZK drift never affects `ctg status --strict`: that flag guards binding freshness only, so
+widening it would silently change existing CI outcomes.
 
 ## Build artifacts
 
@@ -139,35 +159,80 @@ import {
 
 ## Dynamic VK vs embedded VK
 
-| Mode                     | When to use                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| **Dynamic VK** (default) | VK passed as a contract argument; flexible across circuit changes.                               |
-| **`--embed-vk`**         | **Experimental** — writes `vk.rs` only; `zk invoke --embed-vk` is blocked until E2E is complete. |
+| Mode                     | When to use                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| **Dynamic VK** (default) | VK passed as a contract argument; flexible while the circuit is still changing. |
+| **`--embed-vk`**         | VK baked into the contract as `vk.rs`; use once the circuit is frozen.          |
 
 Embedded VK is opt-in and visible in your repo — never a hidden dependency.
 
-### Experimental: `--embed-vk` (not end-to-end)
+Both entrypoints live in the verifier scaffold, so enabling one does not remove the other:
+
+| Entrypoint              | Arguments                    | Use with                             |
+| ----------------------- | ---------------------------- | ------------------------------------ |
+| `verify_proof`          | `vk`, `proof`, `pub_signals` | dynamic VK                           |
+| `verify_proof_embedded` | `proof`, `pub_signals`       | `ctg zk invoke <circuit> --embed-vk` |
+
+### Embedded VK (`--embed-vk`)
 
 `ctg zk build --embed-vk` writes `contracts/verifier/src/vk.rs` with real BLS12-381
-coordinates from `verification_key.json`. Re-run the same command after circuit changes to
-regenerate the file.
+coordinates from `verification_key.json`, and the verifier gains a
+`verify_proof_embedded` entrypoint. Re-run the command after circuit changes to regenerate
+the file — the CLI rejects `--embed-vk` invokes while `vk.rs` is still the scaffold
+placeholder or absent (`CAATINGA_ZK_EMBED_VK_UNSUPPORTED`).
 
-The default `zk-starter` verifier scaffold still expects a dynamic VK argument. **`ctg zk invoke --embed-vk` is blocked** until an embedded-VK entrypoint exists in the contract.
-Use the default dynamic VK flow for end-to-end verification today.
+Enable it on an already-deployed verifier with an in-place upgrade, which keeps the existing
+`contractId`:
+
+```bash
+npx ctg zk build main --embed-vk
+npx ctg build verifier
+npx ctg upgrade verifier --network testnet --source alice
+npx ctg zk invoke main --embed-vk --network testnet --source alice
+```
+
+Because `verify_proof` remains in the contract, dApps already calling the dynamic-VK
+entrypoint keep working after the upgrade.
+
+> **Upgrade vs redeploy are different operations.** `ctg upgrade` swaps the WASM in place and
+> keeps the `contractId`; `ctg deploy --upgrade` creates a **new** instance with a new
+> `contractId`. Enabling embedded VK is an in-place upgrade — do not redeploy unless you
+> actually want a new verifier address.
 
 ## Production guardrails
 
-`ctg zk build` always records a **single-party development ceremony**
-(`.artifacts/zk/<circuit>/ceremony.json`). Suitable for local testing only — production
-requires an external MPC powers-of-tau ceremony and audited circuit artifacts.
+`ctg zk build` runs a **single-party development ceremony** unless audited ceremony
+artifacts have already been imported, and records the type in
+`.artifacts/zk/<circuit>/ceremony.json` (`dev-single-party` or `mpc-multi-party`).
+A dev ceremony is suitable for local testing only — production requires an external MPC
+ceremony and audited circuit artifacts.
 
-Caatinga **blocks mainnet** operations that would use those artifacts:
+Caatinga **blocks mainnet** operations that would use dev-ceremony artifacts:
 
-| Command                 | Guardrail                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `ctg zk build`          | Fails when `defaultNetwork` is `mainnet` (ceremony is always dev single-party) |
-| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits       |
-| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                           |
+| Command                 | Guardrail                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `ctg zk build`          | Fails when `defaultNetwork` is `mainnet` and no imported ceremony artifacts exist |
+| `ctg deploy <verifier>` | Fails on `mainnet` when dev ceremony artifacts exist for linked circuits          |
+| `ctg zk invoke`         | Fails on `mainnet` when dev ceremony artifacts exist                              |
+
+### Importing an audited ceremony
+
+`ctg zk import-ceremony` replaces dev artifacts with the output of an external ceremony and
+lifts the mainnet block for that circuit:
+
+```bash
+npx ctg zk build main
+npx ctg zk import-ceremony main --ceremony /path/to/ceremony-output
+```
+
+Point `--ceremony` at a directory holding `circuit_final.zkey` and `verification_key.json`
+(as produced by `snarkjs zkey export verificationkey`). The command copies those artifacts,
+records `mpc-multi-party` in the manifest, and verifies the artifacts match the compiled
+circuit by comparing the public-signal count — a mismatch fails with
+`CAATINGA_ZK_CEREMONY_INCOMPATIBLE` instead of an unexplained on-chain verification failure.
+
+After an import, `ctg zk build` **reuses** the imported artifacts instead of running a new
+dev ceremony, so a rebuild cannot silently demote a production build.
 
 Pass `--allow-dev-ceremony` only for conscious testing — not for production deployments.
 The CLI surfaces `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` when a guardrail trips.
@@ -180,7 +245,8 @@ From the reference `groth16_verifier` budget report (one public input):
 - ~**+2.46M CPU** per additional public input
 - ~**294 KB** memory for pairing
 
-Run `env.cost_estimate().budget().print()` in contract tests for your circuit shape.
+Run `env.cost_estimate().budget().print()` in contract tests for your circuit shape, or use
+`ctg estimate verify <circuit>` for a pre-flight budget against the reference limits.
 
 ## Config (`caatinga.config.ts`)
 
@@ -202,8 +268,19 @@ export default defineConfig({
 
 Only `bls12381` is accepted today; other curves fail config validation. `verifierContract` is optional in the schema, but `ctg zk invoke` requires it: without it the command fails with `Verifier contract not configured for circuit "<name>"`.
 
+## Protocol pre-flight
+
+`ctg deploy <verifier>` and `ctg zk invoke` check the target network's protocol version via
+Soroban RPC `getNetwork` before building a transaction, because BLS12-381 pairing host
+functions only exist from protocol 25 onward. A network below that fails with
+`CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`.
+
+The check is advisory in `ctg doctor`, which prints each configured network's protocol
+version without ever making the run fail.
+
 ## Phase note
 
-The `zk-starter` verifier scaffold compiles against the reference contract shape. End-to-end proof
-verification on a live network should be validated after `zk build` + `zk prove` + `zk invoke` on
-Protocol 25+ testnet.
+The `zk-starter` verifier scaffold compiles against the reference contract shape and is
+validated end-to-end on a live network by `scripts/zk-testnet-smoke.sh` (opt-in — run it
+manually, or trigger the `zk-smoke` job in `.github/workflows/testnet-smoke.yml` with
+`workflow_dispatch` and `zk: true`).

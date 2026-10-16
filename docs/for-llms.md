@@ -22,14 +22,14 @@ See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-c
 
 ## Capability limits
 
-| Capability                     | Status                                                       |
-| ------------------------------ | ------------------------------------------------------------ |
-| Official frontend templates    | Vite + React only (`vite-react`)                             |
-| `ctg zk build`                 | Single-party **dev** ceremony; blocked on mainnet by default |
-| `ctg zk invoke --embed-vk`     | Not supported (experimental)                                 |
-| Browser `invoke` via wallet    | **Single-invoker only**                                      |
-| Multi-signer / `signAuthEntry` | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`            |
-| Production ZK (MPC ceremony)   | Out of scope                                                 |
+| Capability                     | Status                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Official frontend templates    | Vite + React only (`vite-react`)                                                                         |
+| `ctg zk build`                 | **Dev** ceremony by default; `ctg zk import-ceremony` imports an audited one and lifts the mainnet block |
+| `ctg zk invoke --embed-vk`     | Supported — calls `verify_proof_embedded` (needs `zk build --embed-vk`)                                  |
+| Browser `invoke` via wallet    | **Single-invoker only**                                                                                  |
+| Multi-signer / `signAuthEntry` | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`                                                        |
+| Production ZK (MPC ceremony)   | Out of scope                                                                                             |
 
 ---
 
@@ -92,7 +92,7 @@ Full flags and tables: [CLI](./cli.md) · [Cheatsheet](./cheatsheet.md).
 - `status --strict` fails when deployed contracts have bindings other than `fresh`.
 - Expect DSL (smoke / `read --expect` / postDeploy): `reachable`, `equals`, `contains`, `matches`, `jsonEquals`, `isArray`, `isNull`, `minLength`, `maxLength` — see [CLI](./cli.md).
 
-Core commands: `init`, `zk init`, `build`, `deploy`, `upgrade`, `generate`, `doctor`, `status`, `invoke`, `read`, `smoke`, `regression`, `ci run`, `wire`, `sync-env`, `estimate deploy`, `inspect`, `migrate artifacts`, `rollback`, `zk build|prove|invoke`. Binary alias: `ctg` ≡ `caatinga`.
+Core commands: `init`, `zk init`, `build`, `deploy`, `upgrade`, `generate`, `doctor`, `status`, `invoke`, `read`, `smoke`, `regression`, `ci run`, `wire`, `sync-env`, `estimate deploy`, `estimate verify`, `inspect`, `migrate artifacts`, `rollback`, `zk init|build|import-ceremony|prove|invoke`. Binary alias: `ctg` ≡ `caatinga`.
 
 ---
 
