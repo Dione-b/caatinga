@@ -10,9 +10,13 @@ ZK deployment is now production-ready: audited ceremony artifacts can be importe
 
 **New: `ctg estimate verify <circuit>`** (advisory). Reports the CPU/memory budget for on-chain proof verification against the reference network limits and warns as the budget approaches them. With `--network`, the protocol pre-flight runs first.
 
-**New: protocol-25 pre-flight.** `ctg deploy <verifier>` and `ctg zk invoke` check the target network's protocol version via Soroban RPC `getNetwork` before building a transaction, failing with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` when it is below 25. `ctg doctor` reports each network's protocol version as an advisory.
+**New: ZK protocol pre-flight.** `ctg deploy <verifier>` and `ctg zk invoke` check the target network's protocol version via Soroban RPC `getNetwork` before building a transaction, failing with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` when it is below 27 (the verifier is built with `soroban-sdk` 27, whose wasm declares protocol 27). `ctg doctor` reports each network's protocol version as an advisory.
 
 **Embedded VK works end to end.** `ctg zk build --embed-vk` generates `contracts/verifier/src/vk.rs` and the verifier scaffold gains a `verify_proof_embedded` entrypoint, so `ctg zk invoke <circuit> --embed-vk` now works. This is an in-place `ctg upgrade` on an already-deployed verifier — `verify_proof` stays in the contract, so existing dynamic-VK integrations keep working. The CLI rejects `--embed-vk` invokes while `vk.rs` is still the scaffold placeholder (`CAATINGA_ZK_EMBED_VK_UNSUPPORTED`).
+
+**`ctg zk build --network <name>`.** The mainnet dev-ceremony guard now checks the network the artifacts are meant for instead of only `defaultNetwork`, so a testnet default no longer hides a later mainnet deploy. Defaults to `defaultNetwork`; an unknown name fails with `CAATINGA_NETWORK_NOT_FOUND`.
+
+**`zk-starter` ships a `mainnet` network**, matching `react-vite-counter`, so `ctg deploy verifier --network mainnet` no longer fails with network-not-found in a fresh project.
 
 **Better input errors.** A malformed `circuits/input.json` (for example the multiplier scaffold's derived output `c`) is now reported as `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS`, naming the offending signal and how to fix it, instead of leaving the user to read raw snarkjs stderr.
 

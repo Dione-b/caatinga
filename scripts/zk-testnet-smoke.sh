@@ -4,7 +4,7 @@
 # Covers the whole loop end to end: scaffold, compile, dev ceremony, deploy,
 # prove, invoke, then a second pass where the dev ceremony is replaced by
 # audited ceremony artifacts and the verifier is invoked again. `ctg doctor`
-# is run in between to check that the protocol-25 pre-flight reports the
+# is run in between to check that the ZK protocol pre-flight reports the
 # network correctly.
 #
 # Opt-in: it needs a funded testnet identity and spends real testnet XLM.

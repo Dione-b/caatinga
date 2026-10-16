@@ -4,7 +4,7 @@
 
 ## When to use
 
-- Privacy or proof-carrying workflows on Stellar (Protocol 25+)
+- Privacy or proof-carrying workflows on Stellar (Protocol 27+)
 - Circom circuits with on-chain `verify_proof`
 - Hybrid flows: prove in CLI, verify in browser via `@caatinga/client`
 
@@ -14,7 +14,7 @@ For a standard Soroban dApp without ZK, use [Template](./template-project.md) or
 
 Beyond the usual [Getting started prerequisites](../getting-started.md#prerequisites):
 
-- **Protocol 25+** on the target network
+- **Protocol 27+** on the target network (the verifier is built with `soroban-sdk` 27)
 - **Verifier contract:** `soroban-sdk = "27.0.6"`, Rust **1.91.1**
 - **Circom 2 + snarkjs** — installed on first `ctg zk build` into `~/.caatinga/zk-tools`
 
@@ -65,7 +65,7 @@ Step by step:
 1. **`build verifier`** — compile the Soroban Groth16 verifier WASM
 2. **`zk build main`** — compile Circom (`-p bls12381`) and run the **dev** trusted setup (not for production); artifacts land in `.artifacts/zk/main/`
 3. **`estimate verify main`** — check the CPU/memory budget before spending anything on-chain
-4. **`doctor --network testnet`** — confirm the network is at protocol 25+ and report ZK drift
+4. **`doctor --network testnet`** — confirm the network is at protocol 27+ and report ZK drift
 5. **`deploy verifier`** — record verifier `contractId` in `caatinga.artifacts.json`
 6. **`zk prove main`** — generate `proof.json` and `public.json` from `circuits/input.json`
 7. **`zk invoke main`** — serialize proof data and call `verify_proof` on-chain
@@ -115,7 +115,7 @@ continue to work — no breaking change for existing integrations.
 
 ## Live end-to-end validation
 
-`scripts/zk-testnet-smoke.sh` runs the whole loop against a real Protocol 25+ testnet:
+`scripts/zk-testnet-smoke.sh` runs the whole loop against a real Protocol 27+ testnet:
 scaffold, build, dev ceremony, deploy, prove, invoke, mainnet guardrail, ceremony import,
 rebuild, and invoke again.
 

@@ -153,7 +153,7 @@ pre-flight signal for "this circuit is too big" rather than a fee quote — run
 `env.cost_estimate().budget().print()` in the contract tests for numbers that reflect your
 circuit shape.
 
-With `--network`, the protocol-25 pre-flight runs first: a network that cannot verify
+With `--network`, the ZK protocol pre-flight (protocol 27+) runs first: a network that cannot verify
 BLS12-381 fails with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` before any budget is printed.
 
 ## `ctg inspect <contract> [--network testnet]`
@@ -341,7 +341,7 @@ Shared ZK flags:
 - `--embed-vk` on `zk build` — generates `contracts/verifier/src/vk.rs`; rebuild and redeploy the verifier before invoking with `--embed-vk`
 - `--ceremony <path>` on `zk import-ceremony` — directory holding the ceremony output
 
-`ctg estimate verify <circuit> [--network <name>]` reports the CPU/memory budget for verifying that circuit, and flags a network below protocol 25.
+`ctg estimate verify <circuit> [--network <name>]` reports the CPU/memory budget for verifying that circuit, and flags a network below protocol 27.
 
 When verification returns `false`, the CLI exits with `CAATINGA_ZK_VERIFICATION_FAILED`.
 
@@ -350,7 +350,7 @@ Error codes the ZK commands surface:
 | Code                                        | Cause                                                                                                                      |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`          | Mainnet deploy/invoke with dev ceremony artifacts, unless an audited ceremony is imported or `--allow-dev-ceremony` is set |
-| `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`  | Network is below protocol 25 and cannot verify BLS12-381                                                                   |
+| `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`  | Network is below protocol 27, which the verifier wasm (`soroban-sdk` 27) requires                                          |
 | `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` | `circuits/input.json` holds a signal the circuit does not accept as input                                                  |
 | `CAATINGA_ZK_EMBED_VK_UNSUPPORTED`          | `--embed-vk` invoke without a generated `vk.rs`                                                                            |
 | `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`         | Imported ceremony artifacts do not match the circuit                                                                       |

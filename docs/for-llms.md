@@ -29,7 +29,7 @@ See [Public API](./public-api.md) and [Stellar CLI version contract](./stellar-c
 | `ctg zk invoke --embed-vk`     | Supported — calls `verify_proof_embedded` (needs `zk build --embed-vk`)                                  |
 | Browser `invoke` via wallet    | **Single-invoker only**                                                                                  |
 | Multi-signer / `signAuthEntry` | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`                                                        |
-| Production ZK (MPC ceremony)   | Out of scope                                                                                             |
+| Production ZK (MPC ceremony)   | `ctg zk import-ceremony` imports an external ceremony; running it is out of scope                        |
 
 ---
 

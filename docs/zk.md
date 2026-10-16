@@ -5,14 +5,27 @@ official `groth16_verifier` pattern.
 
 ## Curve choice
 
-| Choice                  | Why                                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| **BLS12-381 + Groth16** | Matches Stellar Protocol 25+ host functions and `stellar/soroban-examples/groth16_verifier`. |
-| **Not BN254**           | EVM-centric; Soroban does not expose BN254 pairing precompiles today.                        |
+| Choice                  | Why                                                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **BLS12-381 + Groth16** | Uses the BLS12-381 host functions (Protocol 22, CAP-0059) and follows `stellar/soroban-examples/groth16_verifier`.                                                                                                              |
+| **BN254: out of scope** | A Caatinga scope decision, not a network limitation: Soroban has BN254 host functions since Protocol 25 (CAP-0074), extended in Protocol 26 (CAP-0080). Caatinga ships one curve end to end; BN254 is not on the roadmap today. |
+
+## Support matrix
+
+| Item                                                       | Status                                                                  |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Circom + snarkjs + Groth16 + BLS12-381                     | Supported                                                               |
+| Dynamic VK (`verify_proof`)                                | Supported (default)                                                     |
+| Embedded VK (`verify_proof_embedded`, `--embed-vk`)        | Supported — see [Dynamic VK vs embedded VK](#dynamic-vk-vs-embedded-vk) |
+| MPC ceremony import (`ctg zk import-ceremony`)             | Supported; running the ceremony itself is out of scope                  |
+| Offline ceremony verification and full artifact provenance | Planned                                                                 |
+| BN254                                                      | Out of scope                                                            |
+| Noir / UltraHonk, zkVMs                                    | Not supported                                                           |
+| Automatic Circom install                                   | Linux and macOS; on Windows, put `circom` on `PATH` manually            |
 
 ## Requirements
 
-- **Protocol 25+** on the target network (testnet/mainnet must be at Protocol 25 before deploy).
+- **Protocol 27+** on the target network. BLS12-381 itself only needs Protocol 22, but the verifier is built with `soroban-sdk` 27, and a contract built with SDK major N declares protocol N in its wasm: a network below that rejects the upload. The [protocol pre-flight](#protocol-pre-flight) checks this before any transaction is built.
 - **Verifier contract:** `soroban-sdk = "27.0.6"`, Rust `1.91.1`.
 - **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary — freshly downloaded or read from cache — is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)).
 
@@ -272,9 +285,10 @@ Only `bls12381` is accepted today; other curves fail config validation. `verifie
 ## Protocol pre-flight
 
 `ctg deploy <verifier>` and `ctg zk invoke` check the target network's protocol version via
-Soroban RPC `getNetwork` before building a transaction, because BLS12-381 pairing host
-functions only exist from protocol 25 onward. A network below that fails with
-`CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`.
+Soroban RPC `getNetwork` before building a transaction. The minimum is protocol 27: the
+verifier wasm is built with `soroban-sdk` 27 and declares that protocol, so an older network
+would reject it. A network below that fails with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`.
+The minimum follows the pinned SDK major; a test keeps the two in sync.
 
 The check is advisory in `ctg doctor`, which prints each configured network's protocol
 version without ever making the run fail.

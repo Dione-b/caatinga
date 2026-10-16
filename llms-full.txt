@@ -26,7 +26,7 @@ Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. 
 | `ctg zk invoke --embed-vk` | Supported — calls `verify_proof_embedded` (needs `zk build --embed-vk`) |
 | Browser `invoke` via wallet     | **Single-invoker only** until v1.0                           |
 | Multi-signer / `signAuthEntry`  | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`            |
-| Production ZK (MPC ceremony)    | Out of scope                                                 |
+| Production ZK (MPC ceremony)    | `ctg zk import-ceremony` imports an external ceremony; running it is out of scope |
 
 ---
 
