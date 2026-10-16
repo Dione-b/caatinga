@@ -7,6 +7,13 @@
 # is run in between to check that the ZK protocol pre-flight reports the
 # network correctly.
 #
+# Negative cases run against the live verifier too (#301): an invalid proof,
+# altered public inputs, a mismatched VK and swapped G2 limbs must all be
+# rejected, and a tampered imported zkey must be refused before any
+# transaction. `verify_proof` is read-only, so these are simulations and spend
+# no XLM. Finally scripts/zk-verify-benchmark.mjs records the network's
+# resource accounting per public-signal count.
+#
 # Opt-in: it needs a funded testnet identity and spends real testnet XLM.
 #   CAATINGA_CI_IDENTITY_ALIAS=alice bash scripts/zk-testnet-smoke.sh
 set -euo pipefail
@@ -108,6 +115,75 @@ writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
 " "$1/package.json"
 }
 
+# Runs a command that must fail; asserts its output carries `needle` and never
+# claims the proof verified. Output goes to its own file so the assertion only
+# sees this command.
+expect_failure() {
+  local title="$1"
+  local needle="$2"
+  shift 2
+  local out="${ARTIFACT_DIR}/${APP_NAME}-${title}.log"
+  log "=== ${title} (expected to fail) ==="
+  set +e
+  { "$@" 2>&1; } | tee "$out" | tee -a "$LOG_FILE"
+  local ec=${PIPESTATUS[0]}
+  set -e
+  if [[ "$ec" -eq 0 ]] || grep -q "Proof verified for circuit" "$out"; then
+    log "Expected ${title} to be rejected, but it succeeded"
+    classify_and_exit 1 "${title}"
+  fi
+  if [[ -n "$needle" ]] && ! grep -q "$needle" "$out"; then
+    log "${title} failed, but without ${needle} (see above)"
+    classify_and_exit 1 "${title}-assert"
+  fi
+  rm -f "$out"
+}
+
+# Rewrites a JSON artifact in place with a JS expression over `j`, e.g.
+#   mutate_json proof.json 'j.pi_a = j.pi_c'
+mutate_json() {
+  node --input-type=module -e "
+import { readFileSync, writeFileSync } from 'node:fs';
+const file = process.argv[1];
+const j = JSON.parse(readFileSync(file, 'utf8'));
+${2};
+writeFileSync(file, JSON.stringify(j));
+" "$1"
+}
+
+# Each case mutates one artifact, expects the live verifier to reject the call,
+# and restores the original before the next case.
+run_negative_cases() {
+  local dir=".artifacts/zk/${CIRCUIT_NAME}"
+  local backup="${ARTIFACT_DIR}/${APP_NAME}-negative-backup"
+  rm -rf "$backup"
+  mkdir -p "$backup"
+  cp "$dir/proof.json" "$dir/public.json" "$dir/verification_key.json" "$backup/"
+  local invoke=("$CAATINGA_BIN" zk invoke "$CIRCUIT_NAME" --network testnet --source "$CI_IDENTITY")
+
+  # Valid points, wrong proof: the pairing check must return false.
+  mutate_json "$dir/proof.json" 'const a = j.pi_a; j.pi_a = j.pi_c; j.pi_c = a'
+  expect_failure "zk-negative-invalid-proof" "CAATINGA_ZK_VERIFICATION_FAILED" "${invoke[@]}"
+  cp "$backup/proof.json" "$dir/proof.json"
+
+  mutate_json "$dir/public.json" 'j[0] = (BigInt(j[0]) + 1n).toString()'
+  expect_failure "zk-negative-altered-public-input" "CAATINGA_ZK_VERIFICATION_FAILED" "${invoke[@]}"
+  cp "$backup/public.json" "$dir/public.json"
+
+  # A key from a different setup of the same circuit (the ceremony fixture).
+  cp "$MPC_FIXTURE_DIR/verification_key.json" "$dir/verification_key.json"
+  expect_failure "zk-negative-mismatched-vk" "CAATINGA_ZK_VERIFICATION_FAILED" "${invoke[@]}"
+  cp "$backup/verification_key.json" "$dir/verification_key.json"
+
+  # Fq2 limbs in the wrong order put B off the curve: the host must reject it
+  # rather than verify against a different point.
+  mutate_json "$dir/proof.json" 'j.pi_b[0] = [j.pi_b[0][1], j.pi_b[0][0]]'
+  expect_failure "zk-negative-swapped-g2" "" "${invoke[@]}"
+  cp "$backup/proof.json" "$dir/proof.json"
+
+  rm -rf "$backup"
+}
+
 assert_circuit_artifacts() {
   run_step "zk-r1cs-exists" test -f ".artifacts/zk/${CIRCUIT_NAME}/main.r1cs"
   run_step "zk-zkey-exists" test -f ".artifacts/zk/${CIRCUIT_NAME}/circuit_final.zkey"
@@ -189,7 +265,7 @@ if [[ "$ec_doc" -ne 0 ]]; then
   classify_and_exit "$ec_doc" "zk-doctor"
 fi
 expect_output_contains "zk-doctor" "Protocol required for verification" "$DOCTOR_OUT"
-expect_output_contains "zk-doctor" "testnet: protocol" "$DOCTOR_OUT"
+expect_output_contains "zk-doctor" "testnet: protocol [0-9]" "$DOCTOR_OUT"
 rm -f "$DOCTOR_OUT"
 
 run_step "zk-prove" "$CAATINGA_BIN" zk prove "$CIRCUIT_NAME"
@@ -198,8 +274,29 @@ run_step "zk-public-exists" test -f ".artifacts/zk/${CIRCUIT_NAME}/public.json"
 
 INVOKE_OUT="${ARTIFACT_DIR}/${APP_NAME}-invoke.log"
 run_step "zk-invoke" "$CAATINGA_BIN" zk invoke "$CIRCUIT_NAME" --network testnet --source "$CI_IDENTITY"
+tail -n 30 "$LOG_FILE" > "$INVOKE_OUT"
 expect_output_contains "zk-invoke" "Proof verified for circuit" "$INVOKE_OUT"
 rm -f "$INVOKE_OUT"
+
+VERIFIER_ID="$(node --input-type=module -e '
+import fs from "node:fs";
+const artifacts = JSON.parse(fs.readFileSync("caatinga.artifacts.json", "utf8"));
+process.stdout.write(artifacts.networks.testnet.contracts[process.argv[1]].contractId);
+' "$VERIFIER_CONTRACT")"
+
+# Measured right after deploy, so the fee is not inflated by restoring archived
+# entries. Simulation only; 100 public signals is close to the 400M tx limit.
+run_step "zk-benchmark" node "$ROOT_DIR/scripts/zk-verify-benchmark.mjs" \
+  --contract-id "$VERIFIER_ID" --source "$CI_IDENTITY" --network testnet \
+  --sizes "${CAATINGA_ZK_BENCHMARK_SIZES:-1,4,16,64,100}" \
+  --out "$ARTIFACT_DIR/${APP_NAME}-zk-benchmark"
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  {
+    echo "### ZK verify_proof cost (testnet, simulated)"
+    echo
+    cat "$ARTIFACT_DIR/${APP_NAME}-zk-benchmark.md"
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
 
 assert_dev_ceremony_blocked_on_mainnet() {
   log "=== zk-dev-ceremony-mainnet-guard ==="
@@ -223,7 +320,22 @@ assert_dev_ceremony_blocked_on_mainnet
 
 run_step "ceremony-fixture" produce_ceremony_fixture
 
-run_step "zk-import-ceremony" "$CAATINGA_BIN" zk import-ceremony "$CIRCUIT_NAME" --ceremony "$MPC_FIXTURE_DIR"
+run_negative_cases
+
+run_step "zk-import-ceremony" "$CAATINGA_BIN" zk import-ceremony "$CIRCUIT_NAME" --ceremony "$MPC_FIXTURE_DIR" \
+  --ceremony-name "zk-smoke-fixture" --participants 2
+run_step "zk-verify-ceremony" "$CAATINGA_BIN" zk verify-ceremony "$CIRCUIT_NAME"
+
+# A swapped proving key must be refused on mainnet before any transaction is
+# built, and flagged offline by verify-ceremony.
+ZKEY=".artifacts/zk/${CIRCUIT_NAME}/circuit_final.zkey"
+cp "$ZKEY" "${ZKEY}.orig"
+printf 'x' >> "$ZKEY"
+expect_failure "zk-negative-tampered-zkey-verify" "CAATINGA_ZK_CEREMONY_TAMPERED" \
+  "$CAATINGA_BIN" zk verify-ceremony "$CIRCUIT_NAME"
+expect_failure "zk-negative-tampered-zkey-mainnet" "CAATINGA_ZK_CEREMONY_TAMPERED" \
+  "$CAATINGA_BIN" zk invoke "$CIRCUIT_NAME" --network mainnet --source "$CI_IDENTITY" --yes
+mv "${ZKEY}.orig" "$ZKEY"
 
 # The imported artifacts are what a build now reuses, so a rebuild must not
 # overwrite them with a fresh dev ceremony.
