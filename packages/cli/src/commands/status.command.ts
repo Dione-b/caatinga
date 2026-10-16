@@ -7,6 +7,7 @@ import {
   resolveNetwork,
   type ContractStatusEntry,
 } from "@caatinga/core";
+import { collectZkStatus, type ZkCircuitStatus } from "@caatinga/zk";
 import { npxCli } from "../utils/cli-name.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -33,6 +34,31 @@ function toRow(entry: ContractStatusEntry): string[] {
   ];
 }
 
+const ZK_DRIFT_LABEL: Record<ZkCircuitStatus["status"], string> = {
+  "not-built": "not built",
+  "up-to-date": "up to date",
+  "circuit-changed": "circuit changed",
+  "input-changed": "inputs changed",
+  "vk-changed": "verification key changed",
+  "artifacts-missing": "artifacts missing",
+};
+
+function reportZkDrift(statuses: ZkCircuitStatus[]): void {
+  logger.info("");
+  logger.info("ZK circuits:");
+  for (const entry of statuses) {
+    logger.info(`  ${entry.name}: ${ZK_DRIFT_LABEL[entry.status]}`);
+    if (entry.ceremonyType) {
+      logger.info(
+        `    ceremony: ${entry.ceremonyType === "mpc-multi-party" ? "MPC (audited)" : "dev single-party"}`
+      );
+    }
+    for (const advisory of entry.advisories) {
+      logger.info(`    ${advisory}`);
+    }
+  }
+}
+
 export function registerStatusCommand(program: Command): void {
   program
     .command("status")
@@ -57,8 +83,12 @@ export function registerStatusCommand(program: Command): void {
           networkName: options.network,
         });
 
+        const zkStatuses = await collectZkStatus({ config });
+
         if (options.json) {
-          console.log(JSON.stringify(status, null, 2));
+          // Additive: contracts and networks keep their existing shape, so
+          // existing `--json` consumers and CI scripts are unaffected.
+          console.log(JSON.stringify({ ...status, zk: zkStatuses }, null, 2));
         } else {
           logger.success(`Project: ${status.project}`);
 
@@ -103,6 +133,13 @@ export function registerStatusCommand(program: Command): void {
                 `${summary} — run: ${npxCli(`generate ${entry.name} --network ${network.network}`)}`
               );
             }
+          }
+
+          // ZK drift is reported but never fed into `--strict`: the strict flag
+          // guards binding freshness, and widening its meaning would silently
+          // change CI outcomes for existing pipelines.
+          if (zkStatuses.length > 0) {
+            reportZkDrift(zkStatuses);
           }
         }
 

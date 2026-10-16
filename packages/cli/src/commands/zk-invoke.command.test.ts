@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { CaatingaErrorCode } from "@caatinga/core";
 import { registerZkInvokeCommand } from "./zk-invoke.command.js";
@@ -57,10 +57,28 @@ vi.mock("@caatinga/core", async () => {
 });
 
 describe("zk invoke command", () => {
+  // Minimal shape of the spy this suite needs; typing it as `vi.spyOn`'s
+  // overloaded return drags in generic parameters that never line up.
+  let fetchSpy:
+    | {
+        mockRestore: () => void;
+        mockResolvedValue: (value: Response) => void;
+        mockRejectedValue: (value: unknown) => void;
+      }
+    | undefined;
+
   beforeEach(() => {
     invokeVerifierMock.mockReset();
     assertDevCeremonyAllowedMock.mockReset();
     assertDevCeremonyAllowedMock.mockResolvedValue(undefined);
+    process.exitCode = undefined;
+    // The protocol pre-flight queries the network; stub it so the tests stay
+    // offline and deterministic instead of hitting real RPC endpoints.
+    fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ result: { protocolVersion: 25 } }), { status: 200 })
+      );
     invokeVerifierMock.mockResolvedValue({
       network: "testnet",
       verifierContract: "verifier",
@@ -68,6 +86,11 @@ describe("zk invoke command", () => {
       publicSignals: ["33"],
       verified: true,
     });
+  });
+
+  afterEach(() => {
+    fetchSpy?.mockRestore();
+    fetchSpy = undefined;
   });
 
   it("delegates to invokeVerifier", async () => {
@@ -177,10 +200,59 @@ describe("zk invoke command", () => {
 
       expect(process.exitCode).toBe(1);
       const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
-      expect(output).toContain(CaatingaErrorCode.INVALID_CONFIG);
+      expect(output).toContain(CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED);
       expect(invokeVerifierMock).not.toHaveBeenCalled();
     } finally {
       errorSpy.mockRestore();
+    }
+  });
+
+  it("blocks an invoke on a network below the protocol floor", async () => {
+    process.exitCode = undefined;
+    fetchSpy?.mockResolvedValue(
+      new Response(JSON.stringify({ result: { protocolVersion: 24 } }), { status: 200 })
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkInvokeCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "invoke", "--source", "alice"]);
+
+      expect(process.exitCode).toBe(1);
+      const output = errorSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain(CaatingaErrorCode.ZK_PROTOCOL_VERSION_UNSUPPORTED);
+      expect(invokeVerifierMock).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("warns but proceeds when the protocol version is unknown", async () => {
+    process.exitCode = undefined;
+    fetchSpy?.mockRejectedValue(new Error("ECONNREFUSED"));
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkInvokeCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "invoke", "--source", "alice"]);
+
+      // A pre-flight that cannot reach the network must not block a real invoke:
+      // the on-chain call reports the actual problem with better context.
+      expect(warnSpy.mock.calls.map((call) => String(call[0])).join("\n")).toContain(
+        "Could not determine the protocol version"
+      );
+      expect(invokeVerifierMock).toHaveBeenCalledTimes(1);
+      expect(process.exitCode).toBeUndefined();
+    } finally {
+      warnSpy.mockRestore();
+      logSpy.mockRestore();
     }
   });
 });

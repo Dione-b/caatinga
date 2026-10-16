@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { registerZkBuildCommand } from "./zk-build.command.js";
 
 const buildCircuitMock = vi.hoisted(() => vi.fn());
+const readCeremonyManifestMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/zk", async () => {
@@ -10,6 +11,7 @@ vi.mock("@caatinga/zk", async () => {
   return {
     ...actual,
     buildCircuit: buildCircuitMock,
+    readCeremonyManifest: readCeremonyManifestMock,
   };
 });
 
@@ -62,6 +64,9 @@ describe("zk build command", () => {
   beforeEach(() => {
     buildCircuitMock.mockReset();
     buildCircuitMock.mockResolvedValue(undefined);
+    readCeremonyManifestMock.mockReset();
+    // Default to a dev ceremony, matching what a fresh `ctg zk build` leaves.
+    readCeremonyManifestMock.mockResolvedValue({ type: "dev-single-party", generatedAt: "now" });
     loadConfigMock.mockReset();
     loadConfigMock.mockResolvedValue(baseConfig);
   });
@@ -137,9 +142,38 @@ describe("zk build command", () => {
 
       expect(buildCircuitMock).toHaveBeenCalledWith(expect.objectContaining({ embedVk: true }));
       const output = warnSpy.mock.calls.map((call) => String(call[0])).join("\n");
-      expect(output).toContain("experimental");
+      expect(output).toContain("contracts/verifier/src/vk.rs");
+      expect(output).toContain("verify_proof_embedded");
     } finally {
       warnSpy.mockRestore();
+    }
+  });
+
+  it("does not claim a dev ceremony when imported MPC artifacts were reused", async () => {
+    readCeremonyManifestMock.mockResolvedValue({
+      type: "mpc-multi-party",
+      generatedAt: "now",
+      circuitHash: "a".repeat(64),
+      publicSignals: 1,
+    });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "build", "main"]);
+
+      const warnings = warnSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(warnings).not.toContain("Single-party development trusted setup");
+      expect(logSpy.mock.calls.map((call) => String(call[0])).join("\n")).toContain(
+        "imported MPC ceremony artifacts"
+      );
+    } finally {
+      warnSpy.mockRestore();
+      logSpy.mockRestore();
     }
   });
 });

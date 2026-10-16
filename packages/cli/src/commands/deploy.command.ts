@@ -19,6 +19,7 @@ import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
 import { resolveDeployedTargetDetails } from "../utils/mainnet-target-details.js";
 import { hasPostDeployHooks } from "../utils/post-deploy-hooks.js";
 import {
+  assertProtocolForZkVerifiers,
   assertZkVerifierDeployAllowed,
   resolveContractNamesForDeploy,
 } from "../utils/zk-guardrails.js";
@@ -130,6 +131,17 @@ export function registerDeployCommand(program: Command): void {
           }
 
           const contractNames = resolveContractNamesForDeploy(config, contractName);
+
+          const protocolAdvisory = await assertProtocolForZkVerifiers({
+            config,
+            contractNames,
+            networkName,
+            networkConfig,
+            operation: `ctg deploy ${contractName ?? "contract"}`,
+          });
+          if (protocolAdvisory) {
+            logger.warn(protocolAdvisory);
+          }
 
           await assertZkVerifierDeployAllowed({
             config,

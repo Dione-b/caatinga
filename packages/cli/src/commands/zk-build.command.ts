@@ -1,6 +1,6 @@
 import { type Command } from "commander";
 import { loadConfig } from "@caatinga/core";
-import { buildCircuit } from "@caatinga/zk";
+import { buildCircuit, readCeremonyManifest } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { createZkInstallProgress } from "../utils/zk-install-progress.js";
@@ -28,23 +28,32 @@ export function registerZkBuildCommand(program: Command): void {
             throw new Error("No ZK circuits configured in caatinga.config.ts");
           }
 
-          await assertZkBuildNetworkAllowed({
-            networkName: config.defaultNetwork,
-            networkConfig: config.networks[config.defaultNetwork],
-            allowDevCeremony: Boolean(options.allowDevCeremony),
-          });
-
           const name = circuitName ?? Object.keys(zk.circuits)[0]!;
           const circuit = zk.circuits[name];
           if (!circuit) {
             throw new Error(`Circuit "${name}" not found in caatinga.config.ts`);
           }
 
+          // Resolved before this call so the guardrail can look for an existing
+          // MPC ceremony manifest and, when one is present, allow a mainnet
+          // default network: the build reuses rather than replaces it.
+          await assertZkBuildNetworkAllowed({
+            networkName: config.defaultNetwork,
+            networkConfig: config.networks[config.defaultNetwork],
+            allowDevCeremony: Boolean(options.allowDevCeremony),
+            artifactsDir: `.artifacts/zk/${name}`,
+          });
+
           if (options.embedVk) {
             logger.warn(
-              "`--embed-vk` is experimental: it writes vk.rs but the default verifier scaffold and `zk invoke --embed-vk` are not end-to-end yet."
+              "`--embed-vk` writes contracts/verifier/src/vk.rs and enables the `verify_proof_embedded` entrypoint."
             );
-            logger.warn("See docs/zk.md — use the dynamic VK flow for verification today.");
+            logger.warn(
+              "Rebuild and redeploy the verifier with `ctg build verifier` and `ctg deploy verifier` before invoking with `ctg zk invoke <circuit> --embed-vk`."
+            );
+            logger.warn(
+              "Prefer the dynamic VK flow (`verify_proof`) while the circuit is still changing; embedded VK suits a frozen circuit."
+            );
           }
 
           logger.info(`Building circuit "${name}" with curve ${circuit.curve}...`);
@@ -56,9 +65,17 @@ export function registerZkBuildCommand(program: Command): void {
             progress: createZkInstallProgress(),
           });
           logger.success(`Built circuit "${name}"`);
-          logger.warn(
-            `Single-party development trusted setup (defaultNetwork: ${config.defaultNetwork}). Do not use on mainnet for production.`
-          );
+
+          // Only a dev ceremony earns this warning. Claiming one after a build
+          // that reused imported MPC artifacts would be actively misleading.
+          const ceremony = await readCeremonyManifest(`.artifacts/zk/${name}`);
+          if (ceremony?.type === "dev-single-party") {
+            logger.warn(
+              `Single-party development trusted setup (defaultNetwork: ${config.defaultNetwork}). Do not use on mainnet for production.`
+            );
+          } else if (ceremony?.type === "mpc-multi-party") {
+            logger.info("Using imported MPC ceremony artifacts — no dev ceremony was run.");
+          }
         });
       }
     );

@@ -6,6 +6,7 @@ import { registerStatusCommand } from "./status.command.js";
 
 const collectProjectStatusMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn());
+const collectZkStatusMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");
@@ -13,6 +14,14 @@ vi.mock("@caatinga/core", async () => {
     ...actual,
     collectProjectStatus: collectProjectStatusMock,
     loadConfig: loadConfigMock,
+  };
+});
+
+vi.mock("@caatinga/zk", async () => {
+  const actual = await vi.importActual<typeof import("@caatinga/zk")>("@caatinga/zk");
+  return {
+    ...actual,
+    collectZkStatus: collectZkStatusMock,
   };
 });
 
@@ -87,8 +96,11 @@ describe("status command", () => {
   beforeEach(() => {
     collectProjectStatusMock.mockReset();
     loadConfigMock.mockReset();
+    collectZkStatusMock.mockReset();
     loadConfigMock.mockResolvedValue(config);
     collectProjectStatusMock.mockResolvedValue(status);
+    // Projects without ZK circuits report an empty list.
+    collectZkStatusMock.mockResolvedValue([]);
   });
 
   it("renders the per-network table with shortened ids and freshness", async () => {
@@ -237,7 +249,79 @@ describe("status command", () => {
 
       expect(logSpy).toHaveBeenCalledTimes(1);
       const parsed = JSON.parse(logSpy.mock.calls[0][0] as string);
-      expect(parsed).toEqual(status);
+      // The contract/networks block is unchanged; `zk` is purely additive.
+      expect(parsed.networks).toEqual(status.networks);
+      expect(parsed.project).toBe(status.project);
+      expect(parsed.zk).toEqual([]);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("includes zk drift in the JSON payload", async () => {
+    collectZkStatusMock.mockResolvedValue([
+      {
+        name: "main",
+        status: "input-changed",
+        ceremonyType: "dev-single-party",
+        inputChanged: true,
+        proofExists: true,
+        inputExists: true,
+        inputPath: "circuits/input.json",
+        advisories: ["circuits/input.json changed since `ctg zk prove main` was last run."],
+      },
+    ]);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status", "--json"]);
+
+      const parsed = JSON.parse(logSpy.mock.calls[0][0] as string);
+      expect(parsed.zk[0].name).toBe("main");
+      expect(parsed.zk[0].status).toBe("input-changed");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("prints a ZK section and never lets drift affect --strict", async () => {
+    collectZkStatusMock.mockResolvedValue([
+      {
+        name: "main",
+        status: "circuit-changed",
+        ceremonyType: "mpc-multi-party",
+        circuitChanged: true,
+        proofExists: false,
+        inputExists: true,
+        inputPath: "circuits/input.json",
+        advisories: ["The circuit sources changed since the ceremony was imported."],
+      },
+    ]);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status", "--strict"]);
+
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("ZK circuits:");
+      expect(output).toContain("main: circuit changed");
+      expect(output).toContain("MPC (audited)");
+      // --strict guards binding freshness only; ZK drift must not flip it.
+      expect(process.exitCode).toBe(1);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it("omits the ZK section for a project without ZK circuits", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status"]);
+
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).not.toContain("ZK circuits:");
+      expect(collectZkStatusMock).toHaveBeenCalledTimes(1);
     } finally {
       logSpy.mockRestore();
     }

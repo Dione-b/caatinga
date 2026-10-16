@@ -15,6 +15,8 @@ import {
   readContractSorobanSdkVersions,
   resolveNetwork,
   WELL_KNOWN_NETWORKS,
+  fetchNetworkProtocolVersion,
+  ZK_MIN_PROTOCOL_VERSION,
 } from "@caatinga/core";
 
 type DoctorOptions = {
@@ -188,6 +190,49 @@ async function reportAllNetworks(config: Awaited<ReturnType<typeof loadConfig>>)
   }
 }
 
+/**
+ * Advisory only: BLS12-381 Groth16 verification needs protocol 25+. Never
+ * contributes to `blocked` — an unreachable RPC here must not fail a doctor run
+ * that everything else says is ready. Skipped entirely for projects without ZK
+ * circuits, so ordinary deploys pay no RPC round-trip.
+ */
+async function reportZkProtocol(config: Awaited<ReturnType<typeof loadConfig>>): Promise<void> {
+  const circuits = Object.keys(config.zk?.circuits ?? {});
+  if (circuits.length === 0) {
+    return;
+  }
+
+  logger.info("");
+  logger.info("ZK circuits:");
+  for (const circuitName of circuits) {
+    logger.info(`  ${circuitName}`);
+  }
+  logger.info(`  Protocol required for verification: >= ${ZK_MIN_PROTOCOL_VERSION}`);
+
+  for (const networkName of Object.keys(config.networks)) {
+    const networkConfig = config.networks[networkName];
+    if (!networkConfig) {
+      continue;
+    }
+
+    const { protocolVersion, reason } = await fetchNetworkProtocolVersion(networkConfig.rpcUrl);
+
+    if (protocolVersion === undefined) {
+      logger.info(`  ${networkName}: protocol unknown${reason ? ` (${reason})` : ""}`);
+      continue;
+    }
+
+    if (protocolVersion < ZK_MIN_PROTOCOL_VERSION) {
+      logger.warn(
+        `  ${networkName}: protocol ${protocolVersion} is below ${ZK_MIN_PROTOCOL_VERSION} — BLS12-381 Groth16 verification is unavailable, so a verifier deploy or \`ctg zk invoke\` will be rejected.`
+      );
+      continue;
+    }
+
+    logger.info(`  ${networkName}: protocol ${protocolVersion}`);
+  }
+}
+
 export function registerDoctorCommand(program: Command): void {
   program
     .command("doctor")
@@ -258,6 +303,7 @@ export function registerDoctorCommand(program: Command): void {
           await reportPostDeployAdvisories(config);
           await reportWasmDrift(deployNetwork);
           await reportVersionMatrix(config);
+          await reportZkProtocol(config);
         }
 
         logger.info("");
