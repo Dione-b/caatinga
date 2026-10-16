@@ -325,14 +325,39 @@ The CLI surfaces `CAATINGA_ZK_DEV_CEREMONY_BLOCKED` when a guardrail trips.
 
 ## Cost reference
 
-From the reference `groth16_verifier` budget report (one public input):
+Measured on testnet (protocol 29, 2026-10-16) by `scripts/zk-verify-benchmark.mjs`, which
+simulates `verify_proof` (dynamic VK) against a freshly deployed Caatinga verifier with the
+same arguments `ctg zk invoke` sends:
 
-- ~**41M CPU** insn for a single public signal
-- ~**+2.46M CPU** per additional public input
-- ~**294 KB** memory for pairing
+| Public signals | CPU instructions | Resource fee (stroops) | Tx size (bytes) |
+| -------------: | ---------------: | ---------------------: | --------------: |
+|              1 |       43,116,283 |                 22,412 |           1,772 |
+|              4 |       53,785,599 |                 26,528 |           2,192 |
+|             16 |       96,462,864 |                 43,137 |           3,872 |
+|             64 |      267,171,922 |                110,462 |          10,592 |
+|            100 |      395,203,714 |                160,956 |          15,632 |
 
-Run `env.cost_estimate().budget().print()` in contract tests for your circuit shape, or use
-`ctg estimate verify <circuit>` for a pre-flight budget against the reference limits.
+- Cost depends on the **public-signal count**, not on the number of constraints: the pairing
+  check is fixed (≈40.5M instructions) and each public signal adds one G1 multiplication
+  (≈3.56M). `ctg estimate verify` uses that model and rounds up.
+- Testnet and mainnet both cap a transaction at **400M instructions** and **40 MiB** of
+  memory (`contract_compute_v0`), so the practical ceiling is **about 100 public signals** — 112
+  failed simulation. Hash many values into a few public signals if you need more.
+- The transaction stays far below the 132 KB size limit at every size measured.
+- Fees are the simulated resource fee at measurement time; they move with network fee
+  settings. A verifier whose instance has been archived also pays to restore it on the next
+  call, which can dominate the fee.
+
+The weekly `zk-smoke` job re-runs the benchmark and publishes the table in its job summary
+and in the `zk-testnet-smoke-artifacts` upload. For your own circuit, simulate the real call:
+`stellar contract invoke --send=no -- verify_proof ...`.
+
+### Live-network checks
+
+The same job checks that the deployed verifier **rejects** an invalid proof, altered public
+inputs, a mismatched verification key and swapped G2 limbs, and that a tampered imported
+zkey is refused by `ctg zk verify-ceremony` and on mainnet before any transaction is built.
+These are simulations of a read-only call, so they spend no XLM.
 
 ## Config (`caatinga.config.ts`)
 
@@ -368,6 +393,7 @@ version without ever making the run fail.
 ## Phase note
 
 The `zk-starter` verifier scaffold compiles against the reference contract shape and is
-validated end-to-end on a live network by `scripts/zk-testnet-smoke.sh` (opt-in — run it
-manually, or trigger the `zk-smoke` job in `.github/workflows/testnet-smoke.yml` with
-`workflow_dispatch` and `zk: true`).
+validated end-to-end on a live network by `scripts/zk-testnet-smoke.sh`, which the
+`zk-smoke` job in `.github/workflows/testnet-smoke.yml` runs weekly (or on demand through
+`workflow_dispatch` with `zk: true`). Run it yourself with a funded testnet identity:
+`CAATINGA_CI_IDENTITY_ALIAS=alice bash scripts/zk-testnet-smoke.sh`.
