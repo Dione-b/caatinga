@@ -115,7 +115,7 @@ export async function invokeVerifier(
       throw new CaatingaError(
         `The deployed "${options.verifierContract}" still carries the placeholder verification key, so verify_proof_embedded trapped.`,
         CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-        "The local vk.rs is newer than the deployed contract. Run `ctg build verifier` and `ctg deploy verifier --upgrade`, then invoke again."
+        "The local vk.rs is newer than the deployed contract. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
       );
     }
     throw error;

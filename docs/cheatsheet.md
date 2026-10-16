@@ -192,7 +192,7 @@ Freeze the circuit and bake the key in:
 npx ctg zk build main --embed-vk
 npx ctg zk prove main                                          # dev ceremony → new keys
 npx ctg build verifier
-npx ctg deploy verifier --upgrade --network testnet --source alice   # new contractId
+npx ctg upgrade verifier --network testnet --source alice   # same contractId; --source = deploy admin
 npx ctg zk invoke main --embed-vk --network testnet --source alice
 ```
 

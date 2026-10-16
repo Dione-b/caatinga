@@ -53,7 +53,7 @@ describe("invokeVerifier against a verifier that still has the placeholder key",
 
     await expect(invoke(true)).rejects.toMatchObject({
       code: CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-      hint: expect.stringContaining("ctg deploy verifier --upgrade"),
+      hint: expect.stringContaining("ctg upgrade verifier --source <admin>"),
     });
   });
 

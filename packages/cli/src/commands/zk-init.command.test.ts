@@ -201,6 +201,70 @@ export default defineConfig({
       expect(merged).toContain("zk:");
       expect(merged).toMatch(/\n {4}\},\n {4}verifier: \{/);
       expect(merged).not.toContain("},,");
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",\n' +
+          '      deployArgs: { admin: "${source.address}" }\n    },'
+      );
+    });
+
+    it("should_add_admin_deploy_arg_to_existing_verifier_without_one", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"
+    }
+  },
+  zk: {
+    circuits: {
+      main: { path: "./circuits", protocol: "groth16", curve: "bls12381", verifierContract: "verifier" }
+    }
+  }
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",\n' +
+          '      deployArgs: { admin: "${source.address}" }\n    }\n  },'
+      );
+      expect(mergeZkIntoConfigSource(merged)).toEqual({ merged, changed: false });
+    });
+
+    it("should_keep_existing_verifier_deploy_args", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+      deployArgs: { admin: "GADMIN" },
+    },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(source)).toEqual({ merged: source, changed: false });
+    });
+
+    it("should_not_touch_a_verifier_entry_outside_the_scaffold_path", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/my-verifier",
+      wasm: "./contracts/my-verifier/target/wasm32v1-none/release/my_verifier.wasm",
+    },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(source)).toEqual({ merged: source, changed: false });
     });
 
     it("should_merge_multi_contract_configs", () => {

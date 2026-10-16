@@ -97,20 +97,29 @@ npx ctg zk prove main          # a dev ceremony re-runs the setup, so re-prove
 npx ctg build verifier
 ```
 
-### 3. Deploy the verifier with the embedded key
+### 3. Upgrade the verifier in place
 
-The key is part of the contract code, and the verifier scaffold has no in-place `upgrade`
-entrypoint, so deploy a new instance:
+The key is part of the contract code, so the deployed verifier needs the new WASM. The
+scaffold deploys the verifier with your `--source` identity as admin
+(`deployArgs: { admin: "${source.address}" }` in `caatinga.config.ts`), and that admin can
+swap the WASM in place — the `contractId` stays the same:
 
 ```bash
-npx ctg deploy verifier --upgrade --network testnet --source alice
+npx ctg upgrade verifier --network testnet --source alice --generate --sync-env
 npx ctg zk invoke main --embed-vk --network testnet --source alice
 ```
 
-`--upgrade` records the previous `contractId` in `caatinga.artifacts.json` history,
-regenerates the bindings and syncs the frontend env; point any other client at the new
-address. The new verifier keeps `verify_proof`, so callers that pass the VK explicitly keep
-working against it.
+Use the identity you deployed with: `upgrade` requires the admin's signature and rejects
+anyone else. `--generate --sync-env` refreshes the bindings (now with
+`verify_proof_embedded`) and the frontend env. The upgraded verifier keeps `verify_proof`, so
+callers that pass the VK explicitly keep working.
+
+A verifier scaffolded before Caatinga 3.13.0 has no `upgrade` entrypoint. Copy
+`__constructor`, `admin` and `upgrade` (plus `DataKey`) from a fresh scaffold's
+`contracts/verifier/src/lib.rs`, add `deployArgs: { admin: "${source.address}" }` to the
+`verifier` entry, rebuild, and redeploy once with `ctg deploy verifier --upgrade` (new
+`contractId`, previous one kept in the artifact history); from then on, use
+`ctg upgrade verifier`.
 
 ## Live end-to-end validation
 
