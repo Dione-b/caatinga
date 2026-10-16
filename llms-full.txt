@@ -22,11 +22,11 @@ Caatinga represents Deployment Orchestration + Versioned Artifacts for Soroban. 
 | Capability                      | Status                                                       |
 | ------------------------------- | ------------------------------------------------------------ |
 | Official frontend templates     | Vite + React only (`vite-react`)                             |
-| `ctg zk build`             | Single-party **dev** ceremony; blocked on mainnet by default |
-| `ctg zk invoke --embed-vk` | Not supported (experimental)                                 |
+| `ctg zk build`             | **Dev** ceremony by default; `ctg zk import-ceremony` imports an audited one and lifts the mainnet block |
+| `ctg zk invoke --embed-vk` | Supported — calls `verify_proof_embedded` (needs `zk build --embed-vk`) |
 | Browser `invoke` via wallet     | **Single-invoker only** until v1.0                           |
 | Multi-signer / `signAuthEntry`  | Application code → `CAATINGA_MULTI_AUTH_REQUIRED`            |
-| Production ZK (MPC ceremony)    | Out of scope                                                 |
+| Production ZK (MPC ceremony)    | `ctg zk import-ceremony` imports an external ceremony; running it is out of scope |
 
 ---
 
@@ -153,6 +153,7 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 | Command                               | Purpose                                            | Flags                   |
 | ------------------------------------- | -------------------------------------------------- | ----------------------- |
 | `ctg estimate deploy <contract>` | Pre-deploy fee advisory (does not submit)          | `--network`, `--source` |
+| `ctg estimate verify <circuit>`  | CPU/memory budget for on-chain proof verification | `--network`             |
 | `ctg inspect <contract>`         | Compare local artifacts vs on-chain reachability   | `--network`             |
 | `ctg migrate artifacts`          | Upgrade `caatinga.artifacts.json` to schema v2     | —                       |
 | `ctg rollback <contract>`        | Restore a prior contract ID in artifacts (logical) | `--network`             |
@@ -161,13 +162,15 @@ Redeploy: `deploy --upgrade` records prior `contractId` in history (`upgradeType
 
 ### ZK Commands
 
-| Command                        | Purpose                               | Flags                       |
-| ------------------------------ | ------------------------------------- | --------------------------- |
-| `ctg zk build [circuit]`  | Compile Circom + dev trusted setup    | `--embed-vk` (experimental) |
-| `ctg zk prove [circuit]`  | Generate `proof.json` + `public.json` | —                           |
-| `ctg zk invoke [circuit]` | Call on-chain `verify_proof`          | `--source`, `--network`     |
+| Command                                | Purpose                                            | Flags                        |
+| -------------------------------------- | -------------------------------------------------- | ---------------------------- |
+| `ctg zk build [circuit]`               | Compile Circom + trusted setup                     | `--embed-vk`, `--network`, `--allow-dev-ceremony` |
+| `ctg zk import-ceremony [circuit]`     | Import an external ceremony's artifacts            | `--ceremony <path>` (required) |
+| `ctg zk prove [circuit]`               | Generate `proof.json` + `public.json`              | `--debug`                    |
+| `ctg zk invoke [circuit]`              | Call on-chain `verify_proof` (dynamic VK)          | `--source`, `--network`, `--allow-dev-ceremony` |
+| `ctg zk invoke [circuit] --embed-vk`   | Call `verify_proof_embedded` (baked-in VK)        | `--source`, `--network`      |
 
-Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk`.
+Shared ZK flags: `--allow-dev-ceremony` (bypass mainnet guardrails), `--embed-vk`, `--ceremony <path>`.
 
 ### Important Rules
 

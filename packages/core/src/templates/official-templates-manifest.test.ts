@@ -80,4 +80,24 @@ describe("official template manifests", () => {
     // Guards the guard: if the files are ever renamed, this test must not silently pass.
     expect(checked).toBeGreaterThan(0);
   });
+
+  it("should_declare_testnet_and_mainnet_networks_in_every_template_config", async () => {
+    // zk-starter shipped testnet only, so `ctg deploy verifier --network mainnet` failed
+    // with network-not-found in a freshly scaffolded project. See #237.
+    const templateNames = await listOfficialTemplateNames();
+    expect(templateNames.length).toBeGreaterThan(0);
+
+    for (const templateName of templateNames) {
+      const configPath = path.join(officialTemplatesDir, templateName, "caatinga.config.ts");
+      const raw = await readFile(configPath, "utf8");
+
+      expect(raw, `${templateName} has no testnet network`).toContain(
+        'networkPassphrase: "Test SDF Network ; September 2015"'
+      );
+      expect(raw, `${templateName} has no mainnet network`).toMatch(/^\s+mainnet: \{$/m);
+      expect(raw, `${templateName} has no mainnet passphrase`).toContain(
+        'networkPassphrase: "Public Global Stellar Network ; September 2015"'
+      );
+    }
+  });
 });

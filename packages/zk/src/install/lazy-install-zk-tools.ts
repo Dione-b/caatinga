@@ -54,22 +54,34 @@ export async function ensureCircom(progress?: ZkInstallProgress): Promise<string
 
   const installDir = path.join(zkCacheDir(), "circom", CIRCOM_VERSION);
   const binaryPath = path.join(installDir, asset);
+  const releaseUrl = `https://github.com/iden3/circom/releases/tag/v${CIRCOM_VERSION}`;
+  const url = `${releaseUrl}`.replace("/tag/", "/download/") + `/${asset}`;
+  const context = { version: CIRCOM_VERSION, downloadUrl: url, releaseUrl };
 
   try {
     await access(binaryPath);
-    await verifyFileChecksum(binaryPath, expectedSha256, `cached circom v${CIRCOM_VERSION}`);
+    await verifyFileChecksum(
+      binaryPath,
+      expectedSha256,
+      `cached circom v${CIRCOM_VERSION} binary`,
+      context
+    );
     progress?.onStatus?.(`Using cached circom v${CIRCOM_VERSION}`);
     return binaryPath;
   } catch {
     // Missing or tampered cache entry (verifyFileChecksum deletes it on mismatch) — redownload.
   }
 
-  const url = `https://github.com/iden3/circom/releases/download/v${CIRCOM_VERSION}/${asset}`;
   await mkdir(installDir, { recursive: true });
 
   progress?.onStatus?.(`Downloading circom v${CIRCOM_VERSION} (${asset})...`);
   await downloadWithProgress(url, binaryPath, progress);
-  await verifyFileChecksum(binaryPath, expectedSha256, `circom v${CIRCOM_VERSION} (${asset})`);
+  await verifyFileChecksum(
+    binaryPath,
+    expectedSha256,
+    `circom v${CIRCOM_VERSION} (${asset})`,
+    context
+  );
   await chmod(binaryPath, 0o755);
   progress?.onStatus?.(`circom installed → ${binaryPath}`);
 

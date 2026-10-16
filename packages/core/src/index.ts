@@ -60,6 +60,14 @@ export {
   type NetworkOrigin,
 } from "./networks/resolve-network.js";
 export { isMainnetNetwork, requiresMainnetConfirmation } from "./networks/mainnet-guardrails.js";
+export {
+  assertProtocolForZk,
+  fetchNetworkProtocolVersion,
+  ZK_MIN_PROTOCOL_VERSION,
+  PROTOCOL_VERSION_TIMEOUT_MS,
+  type AssertProtocolForZkOptions,
+  type FetchProtocolVersionResult,
+} from "./networks/protocol-version.js";
 
 export { runCommand, type RunCommandResult } from "./shell/run-command.js";
 export {
@@ -224,6 +232,16 @@ export {
   type DeployCostEstimate,
   type EstimateDeployCostOptions,
 } from "./contracts/estimate-deploy-cost.js";
+export {
+  estimateZkVerifyCost,
+  formatZkVerifyCostEstimate,
+  ZK_BASE_CPU_INSTRUCTIONS,
+  ZK_CPU_INSTRUCTIONS_PER_PUBLIC_INPUT,
+  ZK_BASE_MEMORY_BYTES,
+  ZK_WARN_UTILIZATION,
+  SOROBAN_NETWORK_LIMITS,
+  type ZkVerifyCostEstimate,
+} from "./zk/estimate-verify-cost.js";
 export {
   inspectContract,
   type ContractInspectResult,

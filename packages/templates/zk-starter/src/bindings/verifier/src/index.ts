@@ -46,6 +46,17 @@ export class Client {
     return placeholderBinding("verify_proof");
   }
 
+  verify_proof_embedded(_args: {
+    proof: {
+      a: unknown;
+      b: unknown;
+      c: unknown;
+    };
+    pub_signals: bigint[];
+  }): never {
+    return placeholderBinding("verify_proof_embedded");
+  }
+
   describe(): string {
     return `${this.input.contractId}:${this.input.publicKey}`;
   }
