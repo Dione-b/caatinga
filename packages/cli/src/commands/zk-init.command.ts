@@ -1,5 +1,11 @@
 import { type Command } from "commander";
-import { createProjectFromTemplate, createZkProject, loadConfig } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  createProjectFromTemplate,
+  createZkProject,
+  loadConfig,
+} from "@caatinga/core";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { resolveTemplateDir } from "../utils/template-path.js";
@@ -80,9 +86,15 @@ function mergeZkIntoConfigSource(source: string): { merged: string; changed: boo
   if (needsVerifier) {
     const before = next;
     // Match contracts block closing at 2-space indent (not inner contract entries).
+    // The first alternative matches an empty block, including the inline `contracts: {},`.
     next = next.replace(
-      /contracts:\s*\{([\s\S]*?)\n {2}\},/,
-      "contracts: {$1\n" + ZK_VERIFIER_BLOCK + "\n  },"
+      /contracts:\s*\{\s*\},|contracts:\s*\{([\s\S]*?)\n {2}\},/,
+      (_match, entries: string | undefined) => {
+        const body = (entries ?? "").trimEnd();
+        // The last entry may lack a trailing comma (e.g. configs written by `ctg init --minimal`).
+        const separator = body === "" || body.endsWith(",") ? "" : ",";
+        return "contracts: {" + body + separator + "\n" + ZK_VERIFIER_BLOCK + "\n  },";
+      }
     );
     if (next === before) {
       return { merged: source, changed: false };
@@ -152,6 +164,20 @@ async function mergeZkIntoConfig(cwd: string): Promise<boolean> {
   return false;
 }
 
+// loadConfig joins schema issues into the hint; an exact match means it is the only issue.
+const EMPTY_CONTRACTS_HINT = "contracts: At least one contract must be configured.";
+
+function isOnlyEmptyContractsError(error: unknown): boolean {
+  return (
+    error instanceof CaatingaError &&
+    error.code === CaatingaErrorCode.INVALID_CONFIG &&
+    error.hint === EMPTY_CONTRACTS_HINT
+  );
+}
+
+const CONFIG_NOT_UPDATED_WARNING =
+  "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above.";
+
 export function registerZkInitCommand(program: Command): void {
   getOrCreateZkCommand(program)
     .command("init [projectName]")
@@ -183,12 +209,31 @@ export function registerZkInitCommand(program: Command): void {
 
         const cwd = process.cwd();
         let config;
+        let configMerged = false;
         try {
           config = await loadConfig({ cwd });
-        } catch {
-          throw new Error(
-            "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
-          );
+        } catch (error) {
+          // Only a missing config means "not a project"; surface every other load
+          // failure (dependencies not installed, invalid config, syntax error) as is.
+          if (error instanceof CaatingaError && error.code === CaatingaErrorCode.CONFIG_NOT_FOUND) {
+            throw new Error(
+              "No caatinga.config.ts found in the current directory. Run `ctg zk init <projectName>` to create a new project."
+            );
+          }
+          if (!isOnlyEmptyContractsError(error)) {
+            throw error;
+          }
+          // A project without contracts yet: adding the verifier makes the config valid.
+          await assertCanWriteZkScaffold(cwd, Boolean(options.force));
+          if (!(await mergeZkIntoConfig(cwd))) {
+            logger.warn(
+              "caatinga.config.ts has no contracts and could not be updated automatically — follow the instructions above."
+            );
+            process.exitCode = 1;
+            return;
+          }
+          configMerged = true;
+          config = await loadConfig({ cwd });
         }
 
         await assertCanWriteZkScaffold(cwd, Boolean(options.force));
@@ -200,11 +245,8 @@ export function registerZkInitCommand(program: Command): void {
             force: true,
             projectFiles: false,
           });
-          const configMerged = await mergeZkIntoConfig(cwd);
-          if (!configMerged) {
-            logger.warn(
-              "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
-            );
+          if (!configMerged && !(await mergeZkIntoConfig(cwd))) {
+            logger.warn(CONFIG_NOT_UPDATED_WARNING);
             process.exitCode = 1;
             return;
           }
@@ -220,14 +262,13 @@ export function registerZkInitCommand(program: Command): void {
           filter: (relativePath: string) =>
             relativePath === "circuits" ||
             relativePath.startsWith("circuits/") ||
+            // fs.cp skips the whole subtree of a rejected directory, so the parent must pass too.
+            relativePath === "contracts" ||
             relativePath === "contracts/verifier" ||
             relativePath.startsWith("contracts/verifier/"),
         });
-        const configMerged = await mergeZkIntoConfig(cwd);
-        if (!configMerged) {
-          logger.warn(
-            "ZK scaffold added but caatinga.config.ts could not be updated automatically — follow the instructions above."
-          );
+        if (!configMerged && !(await mergeZkIntoConfig(cwd))) {
+          logger.warn(CONFIG_NOT_UPDATED_WARNING);
           process.exitCode = 1;
           return;
         }

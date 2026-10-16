@@ -26,7 +26,9 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Caati
   }
 
   try {
-    const jiti = createJiti(import.meta.url);
+    // No module cache: a config rewritten in the same process (e.g. by `ctg zk init`)
+    // must be read again, not served from the first import.
+    const jiti = createJiti(import.meta.url, { moduleCache: false });
     const loaded = await jiti.import(configPath, { default: true });
     return CaatingaConfigSchema.parse(loaded);
   } catch (error) {
