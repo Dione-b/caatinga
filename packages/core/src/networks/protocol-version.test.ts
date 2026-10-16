@@ -32,6 +32,18 @@ afterEach(() => {
 });
 
 describe("fetchNetworkProtocolVersion", () => {
+  it("should_send_getNetwork_without_positional_params", async () => {
+    // Stellar RPC rejects `params: []` with "invalid parameters" (it expects an
+    // object or nothing), which silently turned every pre-flight into "unknown".
+    const fetchMock = vi.fn(async () => jsonRpc(29));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchNetworkProtocolVersion(rpcUrl)).resolves.toEqual({ protocolVersion: 29 });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({ jsonrpc: "2.0", id: 1, method: "getNetwork" });
+  });
+
   it("should_return_the_numeric_protocol_version_from_getNetwork", async () => {
     vi.stubGlobal(
       "fetch",
