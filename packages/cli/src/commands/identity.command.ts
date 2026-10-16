@@ -7,7 +7,16 @@ import { execa } from "execa";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
-function defaultStellarHome(): string {
+export function defaultStellarHome(): string {
+  for (const candidate of [process.env.STELLAR_CONFIG_HOME, process.env.STELLAR_HOME]) {
+    if (candidate !== undefined && candidate.trim() !== "") {
+      return candidate;
+    }
+  }
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME;
+  if (xdgConfigHome !== undefined && xdgConfigHome.trim() !== "") {
+    return path.join(xdgConfigHome, "stellar");
+  }
   return path.join(os.homedir(), ".config", "stellar");
 }
 
@@ -94,7 +103,9 @@ export function registerIdentityCommand(program: Command): void {
 
   identity
     .command("export")
-    .description("Export ~/.config/stellar (or STELLAR_HOME) as base64 tarball on stdout")
+    .description(
+      "Export Stellar config dir (STELLAR_CONFIG_HOME > STELLAR_HOME > XDG_CONFIG_HOME/stellar > ~/.config/stellar) as base64 tarball on stdout"
+    )
     .option("--path <path>", "Stellar config directory", defaultStellarHome())
     .action((options: { path?: string }) =>
       runCliAction(async () => {
