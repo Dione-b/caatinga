@@ -13,11 +13,18 @@ import type { NetworkConfig } from "../config/config.schema.js";
 export const ZK_MIN_PROTOCOL_VERSION = 27;
 
 /**
- * Per-request timeout for the RPC `getNetwork` call. Deliberately short: a
- * protocol pre-flight that never returns would wall CI behind a hung socket,
- * and the SDK's own defaults are far more generous than a pre-flight needs.
+ * Per-attempt timeout for the RPC `getNetwork` call. Bounded so a pre-flight
+ * that never returns cannot wall CI behind a hung socket, but generous enough
+ * for the public testnet RPC, which has been seen taking ~12s to answer.
  */
-export const PROTOCOL_VERSION_TIMEOUT_MS = 10_000;
+export const PROTOCOL_VERSION_TIMEOUT_MS = 20_000;
+
+/**
+ * Attempts made when the `getNetwork` call times out. Only a timeout is
+ * retried: an RPC error payload, a non-2xx status or a refused connection is
+ * a real answer and retrying it would only delay the same result.
+ */
+export const PROTOCOL_VERSION_MAX_ATTEMPTS = 2;
 
 export type FetchProtocolVersionResult = {
   protocolVersion?: number;
@@ -28,6 +35,8 @@ export type FetchProtocolVersionResult = {
    */
   reason?: string;
 };
+
+type AttemptResult = FetchProtocolVersionResult & { timedOut?: boolean };
 
 type JsonRpcResponse = {
   result?: { protocolVersion?: unknown };
@@ -49,6 +58,23 @@ export async function fetchNetworkProtocolVersion(
   rpcUrl: string,
   timeoutMs: number = PROTOCOL_VERSION_TIMEOUT_MS
 ): Promise<FetchProtocolVersionResult> {
+  let result: AttemptResult = {};
+  for (let attempt = 1; attempt <= PROTOCOL_VERSION_MAX_ATTEMPTS; attempt += 1) {
+    result = await requestProtocolVersion(rpcUrl, timeoutMs);
+    if (!result.timedOut) {
+      break;
+    }
+  }
+  return result.reason === undefined
+    ? { protocolVersion: result.protocolVersion }
+    : { reason: result.reason };
+}
+
+function isTimeoutError(error: unknown): boolean {
+  return error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+}
+
+async function requestProtocolVersion(rpcUrl: string, timeoutMs: number): Promise<AttemptResult> {
   try {
     const response = await fetch(rpcUrl, {
       method: "POST",
@@ -90,6 +116,7 @@ export async function fetchNetworkProtocolVersion(
   } catch (error) {
     return {
       reason: error instanceof Error ? error.message : "unknown RPC failure",
+      timedOut: isTimeoutError(error),
     };
   }
 }

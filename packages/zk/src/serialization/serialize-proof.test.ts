@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import proofFixture from "../../test/fixtures/proof.json" with { type: "json" };
-import vkFixture from "../../test/fixtures/verification_key.json" with { type: "json" };
+import vkFixture from "../../test/fixtures/multiplier/verification_key.json" with { type: "json" };
 import publicFixture from "../../test/fixtures/public.json" with { type: "json" };
 import { serializeProof, type SnarkjsProof } from "./serialize-proof.js";
 import { serializeVk, type SnarkjsVk } from "./serialize-vk.js";
 import { serializePublicSignals } from "./serialize-public-signals.js";
 
 const proof = proofFixture as SnarkjsProof;
-const vk = vkFixture as SnarkjsVk;
+const vk = vkFixture as unknown as SnarkjsVk;
 const publicSignals = publicFixture as string[];
 
 function hex(bytes: Uint8Array): string {

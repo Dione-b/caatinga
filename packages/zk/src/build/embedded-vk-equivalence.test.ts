@@ -26,8 +26,7 @@ const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const scaffoldDir = path.resolve(here, "../../../core/scaffolds/zk-verifier");
 const fixturesDir = path.resolve(here, "../../test/fixtures");
-// Real `snarkjs` output for the zk-starter multiplier circuit (a * b = 33). Not the
-// hand-ordered `verification_key.json` fixture, whose G2 limbs are pre-swapped.
+// Real `snarkjs` output for the zk-starter multiplier circuit (a * b = 33).
 const multiplierDir = path.join(fixturesDir, "multiplier");
 
 const runCargoTests = process.env.CAATINGA_CARGO_TESTS === "1";
