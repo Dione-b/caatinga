@@ -63,7 +63,8 @@ use soroban_sdk::{
     crypto::bls12_381::{
         Bls12381Fr as Fr, Bls12381G1Affine as G1Affine, Bls12381G2Affine as G2Affine,
     },
-    Env, Vec, U256,
+    testutils::Address as _,
+    Address, Env, Vec, U256,
 };
 
 use crate::{Groth16Verifier, Groth16VerifierClient, Proof, VerificationKey};
@@ -93,7 +94,7 @@ fn signals(env: &Env, value: u32) -> Vec<Fr> {
 #[test]
 fn embedded_and_dynamic_vk_agree() {
     let env = Env::default();
-    let client = Groth16VerifierClient::new(&env, &env.register(Groth16Verifier {}, ()));
+    let client = Groth16VerifierClient::new(&env, &env.register(Groth16Verifier {}, (Address::generate(&env),)));
     let proof = proof(&env);
     let vk = dynamic_vk(&env);
     let good = signals(&env, ${options.publicSignal});

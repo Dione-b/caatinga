@@ -59,7 +59,7 @@ export function registerZkBuildCommand(program: Command): void {
               "`--embed-vk` writes contracts/verifier/src/vk.rs and enables the `verify_proof_embedded` entrypoint."
             );
             logger.warn(
-              "Rebuild and redeploy the verifier with `ctg build verifier` and `ctg deploy verifier` before invoking with `ctg zk invoke <circuit> --embed-vk`."
+              "The key is compiled into the contract: run `ctg build verifier` and `ctg upgrade verifier --source <admin>` (same contractId) before `ctg zk invoke <circuit> --embed-vk`. A verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade` (new contractId) instead."
             );
             logger.warn(
               "Prefer the dynamic VK flow (`verify_proof`) while the circuit is still changing; embedded VK suits a frozen circuit."
@@ -82,6 +82,11 @@ export function registerZkBuildCommand(program: Command): void {
           if (ceremony?.type === "dev-single-party") {
             logger.warn(
               `Single-party development trusted setup (network: ${network.name}). Do not use on mainnet for production.`
+            );
+            // A dev build always runs a fresh setup, so any earlier proof was made
+            // with keys that no longer exist and will fail verification.
+            logger.warn(
+              `New proving and verification keys were generated: re-run \`ctg zk prove ${name}\` before invoking.`
             );
           } else if (ceremony?.type === "mpc-multi-party") {
             logger.info("Using imported MPC ceremony artifacts — no dev ceremony was run.");

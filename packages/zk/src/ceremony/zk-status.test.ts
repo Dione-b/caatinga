@@ -69,6 +69,21 @@ describe("collectZkStatus", () => {
     expect(status?.ceremonyType).toBe("dev-single-party");
     expect(status?.status).toBe("up-to-date");
     expect(status?.circuitChanged).toBeUndefined();
+    expect(status?.ceremonyVerifiedAt).toBeUndefined();
+  });
+
+  it("should_report_when_verify_ceremony_last_succeeded", async () => {
+    const dir = await artifactsDir();
+    const hash = await hashCircuitSources(path.join(cwd, "circuits"));
+    await writeMpcCeremonyManifest(dir, {
+      circuitHash: hash,
+      publicSignals: 0,
+      verifiedAt: "2026-10-16T20:32:41.000Z",
+    });
+
+    const [status] = await collectZkStatus({ config, cwd });
+
+    expect(status?.ceremonyVerifiedAt).toBe("2026-10-16T20:32:41.000Z");
   });
 
   it("should_report_input_drift_against_the_last_proof", async () => {

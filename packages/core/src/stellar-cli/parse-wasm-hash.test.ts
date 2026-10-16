@@ -15,6 +15,19 @@ describe("parseWasmHash", () => {
     expect(parseWasmHash(output)).toBe(EXPECTED_HASH);
   });
 
+  it("should_return_the_wasm_hash_not_the_transaction_hash_for_a_new_upload", async () => {
+    // Real Stellar CLI 27 output for a WASM the network had not seen: stderr logs
+    // the transaction hash before stdout prints the WASM hash.
+    const output = await readFile(
+      path.join(fixturesDir, "v27.0.0/upload-success-new-wasm.txt"),
+      "utf8"
+    );
+
+    expect(parseWasmHash(output)).toBe(
+      "bc6fa833dd01df3f7064f64d4ddb982f6f25330f7a5a390512460f23ee85cee5"
+    );
+  });
+
   it("should_normalize_hash_to_lowercase", () => {
     const output = `Wasm hash: ${EXPECTED_HASH.toUpperCase()}`;
     expect(parseWasmHash(output)).toBe(EXPECTED_HASH);

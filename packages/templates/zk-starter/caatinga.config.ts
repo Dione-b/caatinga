@@ -7,6 +7,9 @@ export default defineConfig({
     verifier: {
       path: "./contracts/verifier",
       wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+      // The verifier's constructor stores the account allowed to call upgrade();
+      // `ctg deploy --source <identity>` fills in that identity's address.
+      deployArgs: { admin: "${source.address}" },
     },
   },
   networks: {

@@ -190,9 +190,10 @@ Freeze the circuit and bake the key in:
 
 ```bash
 npx ctg zk build main --embed-vk
+npx ctg zk prove main                                          # dev ceremony → new keys
 npx ctg build verifier
-npx ctg upgrade verifier --network testnet --source alice
-npx ctg zk invoke main --embed-vk --source alice
+npx ctg upgrade verifier --network testnet --source alice   # same contractId; --source = deploy admin
+npx ctg zk invoke main --embed-vk --network testnet --source alice
 ```
 
 Full reference: [ZK module](./zk.md) · [ZK tutorial](./tutorials/zk-project.md) · [CLI](./cli.md) · [Errors](./errors.md).

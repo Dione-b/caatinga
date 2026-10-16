@@ -53,12 +53,39 @@ async function assertCanWriteZkScaffold(cwd: string, force: boolean): Promise<vo
   }
 }
 
+// The verifier's constructor takes the account allowed to call `upgrade`.
+const ZK_VERIFIER_DEPLOY_ARGS = 'deployArgs: { admin: "${source.address}" }';
+
 const ZK_VERIFIER_BLOCK = [
   "    verifier: {",
   '      path: "./contracts/verifier",',
-  '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"',
+  '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",',
+  `      ${ZK_VERIFIER_DEPLOY_ARGS}`,
   "    },",
 ].join("\n");
+
+// A flat `verifier: { ... }` entry pointing at the scaffolded contract.
+const SCAFFOLD_VERIFIER_ENTRY =
+  /(\n([ \t]*)verifier:\s*\{)([^{}]*path:\s*["']\.\/contracts\/verifier["'][^{}]*?)(\n[ \t]*\})/;
+
+/**
+ * Adds the admin deploy arg to an existing scaffold verifier entry that predates
+ * the verifier's `upgrade` entrypoint. Returns the source unchanged when the
+ * entry already has deployArgs or is not the flat scaffold shape.
+ */
+function addVerifierAdminDeployArg(source: string): string {
+  return source.replace(
+    SCAFFOLD_VERIFIER_ENTRY,
+    (match, open: string, indent: string, body: string, close: string) => {
+      if (body.includes("deployArgs")) {
+        return match;
+      }
+      const trimmed = body.trimEnd();
+      const separator = trimmed.endsWith(",") ? "" : ",";
+      return `${open}${trimmed}${separator}\n${indent}  ${ZK_VERIFIER_DEPLOY_ARGS}${close}`;
+    }
+  );
+}
 
 const ZK_CONFIG_BLOCK = [
   "  zk: {",
@@ -79,8 +106,12 @@ function mergeZkIntoConfigSource(source: string): { merged: string; changed: boo
   const needsVerifier = !next.includes("verifier:");
   const needsZk = !next.includes("zk:");
 
+  if (!needsVerifier) {
+    next = addVerifierAdminDeployArg(next);
+  }
+
   if (!needsVerifier && !needsZk) {
-    return { merged: source, changed: false };
+    return next === source ? { merged: source, changed: false } : { merged: next, changed: true };
   }
 
   if (needsVerifier) {
@@ -128,7 +159,8 @@ function printManualZkConfigInstructions(): void {
   logger.info('  1. In the "contracts" section, add:');
   logger.info("     verifier: {");
   logger.info('       path: "./contracts/verifier",');
-  logger.info('       wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"');
+  logger.info('       wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",');
+  logger.info(`       ${ZK_VERIFIER_DEPLOY_ARGS}`);
   logger.info("     },");
   logger.info("");
   logger.info("  2. Before the closing });, add:");

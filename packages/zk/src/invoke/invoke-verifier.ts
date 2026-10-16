@@ -1,4 +1,11 @@
-import { invokeContract, loadConfig, readArtifacts, type CaatingaConfig } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  invokeContract,
+  loadConfig,
+  readArtifacts,
+  type CaatingaConfig,
+} from "@caatinga/core";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { concatG1Hex, concatG2Hex } from "../serialization/curve-bytes.js";
@@ -93,14 +100,26 @@ export async function invokeVerifier(
   // contract method rather than the same one called with fewer args.
   const method = options.embedVk ? "verify_proof_embedded" : "verify_proof";
   const target = `${options.verifierContract}.${method}`;
-  const result = await invokeContract({
-    config,
-    target,
-    args,
-    networkName: options.network,
-    source: options.sourceAccount,
-    cwd,
-  });
+  let result: Awaited<ReturnType<typeof invokeContract>>;
+  try {
+    result = await invokeContract({
+      config,
+      target,
+      args,
+      networkName: options.network,
+      source: options.sourceAccount,
+      cwd,
+    });
+  } catch (error) {
+    if (options.embedVk && isPlaceholderVkTrap(error)) {
+      throw new CaatingaError(
+        `The deployed "${options.verifierContract}" still carries the placeholder verification key, so verify_proof_embedded trapped.`,
+        CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
+        "The local vk.rs is newer than the deployed contract. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
+      );
+    }
+    throw error;
+  }
 
   if (!result.result) {
     throw new ZkError("Verifier invocation returned no result.", "ZK_INVOKE_FAILED");
@@ -129,4 +148,24 @@ export async function invokeVerifier(
     publicSignals,
     verified: true,
   };
+}
+
+/**
+ * The scaffold's placeholder `embedded_vk()` panics on purpose, which surfaces on
+ * chain as a VM trap. Recognising it turns a raw diagnostic dump into an
+ * actionable "deploy the verifier you built" error.
+ */
+function isPlaceholderVkTrap(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  const cause = (error as { cause?: unknown }).cause;
+  const text = [
+    error.message,
+    (error as { hint?: unknown }).hint,
+    cause instanceof Error ? cause.message : cause,
+  ]
+    .filter((part) => typeof part === "string")
+    .join("\n");
+  return text.includes("UnreachableCodeReached") && text.includes("verify_proof_embedded");
 }

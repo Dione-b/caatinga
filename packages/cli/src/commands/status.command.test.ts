@@ -284,6 +284,32 @@ describe("status command", () => {
     }
   });
 
+  it("labels a verified MPC ceremony with its verification date, never as audited", async () => {
+    collectZkStatusMock.mockResolvedValue([
+      {
+        name: "main",
+        status: "up-to-date",
+        ceremonyType: "mpc-multi-party",
+        ceremonyVerifiedAt: "2026-10-16T20:32:41.000Z",
+        proofExists: true,
+        inputExists: true,
+        inputPath: "circuits/input.json",
+        advisories: [],
+      },
+    ]);
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      await createStatusProgram().parseAsync(["node", "caatinga", "status"]);
+
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("ceremony: MPC (imported, verified 2026-10-16)");
+      expect(output).not.toContain("audited");
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
   it("prints a ZK section and never lets drift affect --strict", async () => {
     collectZkStatusMock.mockResolvedValue([
       {
@@ -305,7 +331,8 @@ describe("status command", () => {
       const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
       expect(output).toContain("ZK circuits:");
       expect(output).toContain("main: circuit changed");
-      expect(output).toContain("MPC (audited)");
+      expect(output).toContain("MPC (imported, not verified");
+      expect(output).not.toContain("audited");
       // --strict guards binding freshness only; ZK drift must not flip it.
       expect(process.exitCode).toBe(1);
     } finally {

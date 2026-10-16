@@ -18,6 +18,8 @@ export type ZkCircuitStatus = {
   status: ZkDriftStatus;
   /** Recorded ceremony type, when a manifest exists. */
   ceremonyType?: "dev-single-party" | "mpc-multi-party";
+  /** When `ctg zk verify-ceremony` last succeeded for an imported ceremony. */
+  ceremonyVerifiedAt?: string;
   /** Whether the circuit's current hash differs from the recorded one. */
   circuitChanged?: boolean;
   /** Whether `input.json` differs from the one the last proof used. */
@@ -63,6 +65,9 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
       name,
       status: "up-to-date",
       ceremonyType: manifest?.type,
+      ...(manifest?.type === MPC_CEREMONY_TYPE && manifest.verifiedAt
+        ? { ceremonyVerifiedAt: manifest.verifiedAt }
+        : {}),
       proofExists,
       inputExists,
       inputPath,

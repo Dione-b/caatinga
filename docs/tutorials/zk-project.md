@@ -93,25 +93,33 @@ Once the circuit stops changing, embed the verification key in the contract:
 
 ```bash
 npx ctg zk build main --embed-vk
+npx ctg zk prove main          # a dev ceremony re-runs the setup, so re-prove
 npx ctg build verifier
 ```
 
-### 3. Upgrade a verifier that is already deployed
+### 3. Upgrade the verifier in place
 
-`ctg upgrade` swaps the WASM in place and keeps the same `contractId`, so clients and
-`caatinga.artifacts.json` do not need to change:
+The key is part of the contract code, so the deployed verifier needs the new WASM. The
+scaffold deploys the verifier with your `--source` identity as admin
+(`deployArgs: { admin: "${source.address}" }` in `caatinga.config.ts`), and that admin can
+swap the WASM in place — the `contractId` stays the same:
 
 ```bash
-npx ctg upgrade verifier --network testnet --source alice
+npx ctg upgrade verifier --network testnet --source alice --generate --sync-env
 npx ctg zk invoke main --embed-vk --network testnet --source alice
 ```
 
-Because `verify_proof` stays in the contract, dApps that still pass the VK explicitly
-continue to work — no breaking change for existing integrations.
+Use the identity you deployed with: `upgrade` requires the admin's signature and rejects
+anyone else. `--generate --sync-env` refreshes the bindings (now with
+`verify_proof_embedded`) and the frontend env. The upgraded verifier keeps `verify_proof`, so
+callers that pass the VK explicitly keep working.
 
-> **Upgrade vs redeploy.** `ctg upgrade` keeps the `contractId`. `ctg deploy --upgrade`
-> creates a **new** instance with a new `contractId`. Only use a redeploy when you actually
-> want a new verifier address.
+A verifier scaffolded before Caatinga 3.13.0 has no `upgrade` entrypoint. Copy
+`__constructor`, `admin` and `upgrade` (plus `DataKey`) from a fresh scaffold's
+`contracts/verifier/src/lib.rs`, add `deployArgs: { admin: "${source.address}" }` to the
+`verifier` entry, rebuild, and redeploy once with `ctg deploy verifier --upgrade` (new
+`contractId`, previous one kept in the artifact history); from then on, use
+`ctg upgrade verifier`.
 
 ## Live end-to-end validation
 
