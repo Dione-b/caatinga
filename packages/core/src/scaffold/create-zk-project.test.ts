@@ -38,6 +38,7 @@ describe("createZkProject", () => {
     expect(config).toContain(
       'wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"'
     );
+    expect(config).toContain('deployArgs: { admin: "${source.address}" }');
     expect(config).toContain('path: "./circuits"');
     expect(config).toContain('protocol: "groth16"');
     expect(config).toContain('curve: "bls12381"');

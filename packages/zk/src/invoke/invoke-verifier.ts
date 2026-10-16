@@ -158,13 +158,13 @@ async function embeddedVkTrapError(verifierContract: string, cwd: string): Promi
     return new CaatingaError(
       message,
       CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-      "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg deploy verifier --upgrade`, then invoke again."
+      "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
     );
   }
   return new CaatingaError(
     message,
     CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-    "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg deploy verifier --upgrade`, then invoke again. If it still traps, the panic comes from the contract code itself."
+    "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`). If it still traps, the panic comes from the contract code itself."
   );
 }
 

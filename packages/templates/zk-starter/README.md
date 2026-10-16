@@ -63,6 +63,19 @@ Hybrid flow after changing inputs in the browser:
 3. Run `npm run caatinga:zk:prove` (or `npm run caatinga:zk:setup` after editing the circuit)
 4. Refresh artifacts in the UI, then **Verify proof on-chain**
 
+## Upgrading the verifier in place
+
+The verifier is deployed with an admin (`deployArgs: { admin: "${source.address}" }`, i.e. the
+`--source` identity used by `ctg deploy`). That admin can replace the contract WASM while keeping
+the same contract ID — for example after baking the verification key into the contract:
+
+```bash
+npx ctg zk build main --embed-vk
+npx ctg zk prove main
+npx ctg build verifier
+npm run caatinga:upgrade     # ctg upgrade verifier --source <same identity as deploy>
+```
+
 ## Trusted setup
 
 The default `ctg zk build` flow runs a **local, single-party** trusted setup suitable

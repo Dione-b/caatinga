@@ -66,7 +66,7 @@ describe("invokeVerifier against a verifier that still has the placeholder key",
       code: CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
       message: expect.stringContaining("most likely"),
       hint: expect.stringMatching(
-        /ctg zk build <circuit> --embed-vk.*ctg deploy verifier --upgrade/
+        /ctg zk build <circuit> --embed-vk.*ctg upgrade verifier --source <admin>/
       ),
     });
   });
@@ -79,14 +79,14 @@ describe("invokeVerifier against a verifier that still has the placeholder key",
     });
   });
 
-  it("should_only_ask_for_a_redeploy_when_the_local_vk_is_real", async () => {
+  it("should_only_ask_for_an_upgrade_when_the_local_vk_is_real", async () => {
     await writeLocalVk("pub fn embedded_vk(env: &Env) { /* generated */ }\n");
     trap();
 
     const error = (await invoke(true).catch((e: unknown) => e)) as CaatingaError;
     expect(error).toMatchObject({
       code: CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-      hint: expect.stringContaining("ctg deploy verifier --upgrade"),
+      hint: expect.stringContaining("ctg upgrade verifier --source <admin>"),
     });
     expect(error.hint).not.toContain("--embed-vk");
   });
