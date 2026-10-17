@@ -1,9 +1,20 @@
 import { randomBytes } from "node:crypto";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  chmod,
+  copyFile,
+  lstat,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Command } from "commander";
 import { execa } from "execa";
+import * as tar from "tar";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -38,53 +49,112 @@ async function tarDirectory(sourceDir: string, outputFile: string): Promise<void
   });
 }
 
-async function assertNoPathTraversal(archiveFile: string, targetDir: string): Promise<void> {
-  const { stdout } = await execa("tar", ["--full-time", "-tvzf", archiveFile]);
+function validateArchiveEntry(entryPath: string, type: string, targetDir: string): void {
+  if (type !== "File" && type !== "OldFile" && type !== "Directory") {
+    throw new Error(
+      `Refusing to import archive: entry "${entryPath}" is not a regular file or directory`
+    );
+  }
+  if (entryPath.includes("\\") || path.posix.isAbsolute(entryPath)) {
+    throw new Error(`Refusing to import archive: entry "${entryPath}" has an unsafe path`);
+  }
+
   const resolvedTarget = path.resolve(targetDir);
-
-  for (const rawEntry of stdout.split("\n")) {
-    const line = rawEntry.trim();
-    const entry = line.replace(/^\S+\s+\S+\s+\d+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+/, "");
-    if (!entry) {
-      continue;
-    }
-
-    const memberType = line[0];
-    if (memberType !== "-" && memberType !== "d") {
-      throw new Error(
-        `Refusing to import archive: entry "${entry}" is not a regular file or directory`
-      );
-    }
-
-    const resolvedEntry = path.resolve(resolvedTarget, entry);
-    if (resolvedEntry !== resolvedTarget && !resolvedEntry.startsWith(resolvedTarget + path.sep)) {
-      throw new Error(
-        `Refusing to import archive: entry "${entry}" would extract outside ${resolvedTarget}`
-      );
-    }
+  const resolvedEntry = path.resolve(resolvedTarget, entryPath);
+  if (resolvedEntry !== resolvedTarget && !resolvedEntry.startsWith(resolvedTarget + path.sep)) {
+    throw new Error(
+      `Refusing to import archive: entry "${entryPath}" would extract outside ${resolvedTarget}`
+    );
   }
 }
 
-async function untarDirectory(archiveFile: string, targetDir: string): Promise<void> {
-  await mkdir(targetDir, { recursive: true, mode: 0o700 });
-  await assertNoPathTraversal(archiveFile, targetDir);
-  try {
-    await execa(
-      "tar",
-      [
-        "-xzf",
-        archiveFile,
-        "-C",
-        targetDir,
-        "--no-same-permissions",
-        "--no-same-owner",
-        "--no-overwrite-dir",
-      ],
-      { stdio: "inherit" }
-    );
-  } finally {
-    await execa("chmod", ["-R", "go-rwx", targetDir], { stdio: "inherit" });
+async function ensureSafeDirectory(directory: string): Promise<void> {
+  const resolved = path.resolve(directory);
+  const parsed = path.parse(resolved);
+  let current = parsed.root;
+  for (const segment of resolved.slice(parsed.root.length).split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment);
+    try {
+      const info = await lstat(current);
+      if (!info.isDirectory() || info.isSymbolicLink()) {
+        throw new Error(`Refusing to import into non-directory or symbolic link: ${current}`);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+      await mkdir(current, { mode: 0o700 });
+    }
   }
+  await chmod(resolved, 0o700);
+}
+
+async function mergeStagedFiles(stagedDir: string, targetDir: string): Promise<void> {
+  await ensureSafeDirectory(targetDir);
+  for (const name of await readdir(stagedDir)) {
+    const stagedPath = path.join(stagedDir, name);
+    const targetPath = path.join(targetDir, name);
+    const stagedInfo = await lstat(stagedPath);
+    if (stagedInfo.isDirectory() && !stagedInfo.isSymbolicLink()) {
+      await ensureSafeDirectory(targetPath);
+      await mergeStagedFiles(stagedPath, targetPath);
+      continue;
+    }
+    if (!stagedInfo.isFile()) {
+      throw new Error(`Refusing to import archive: staged entry "${name}" is not a regular file`);
+    }
+    try {
+      const targetInfo = await lstat(targetPath);
+      if (!targetInfo.isFile() || targetInfo.isSymbolicLink()) {
+        throw new Error(`Refusing to overwrite non-file or symbolic link: ${targetPath}`);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+    await copyFile(stagedPath, targetPath);
+    await chmod(targetPath, 0o600);
+  }
+  await chmod(targetDir, 0o700);
+}
+
+async function untarDirectory(
+  archiveFile: string,
+  targetDir: string,
+  tempDir: string
+): Promise<void> {
+  const resolvedTarget = path.resolve(targetDir);
+  await tar.t({
+    file: archiveFile,
+    onReadEntry(entry) {
+      validateArchiveEntry(entry.path, entry.type, resolvedTarget);
+    },
+  });
+
+  const stagedDir = path.join(tempDir, "extracted");
+  await mkdir(stagedDir, { mode: 0o700 });
+  await tar.x({
+    file: archiveFile,
+    cwd: stagedDir,
+    preservePaths: false,
+    preserveOwner: false,
+    chmod: true,
+    processUmask: 0o077,
+    filter(entryPath, entry) {
+      const type =
+        "type" in entry
+          ? entry.type
+          : entry.isDirectory()
+            ? "Directory"
+            : entry.isFile()
+              ? "File"
+              : "Unsupported";
+      validateArchiveEntry(entryPath, type, resolvedTarget);
+      return true;
+    },
+  });
+  await mergeStagedFiles(stagedDir, resolvedTarget);
 }
 
 export function registerIdentityCommand(program: Command): void {
@@ -123,7 +193,7 @@ export function registerIdentityCommand(program: Command): void {
         await withSecureTempDir(async (dir) => {
           const tmpArchive = secureArchivePath(dir);
           await writeFile(tmpArchive, Buffer.from(encoded, "base64"), { mode: 0o600 });
-          await untarDirectory(tmpArchive, target);
+          await untarDirectory(tmpArchive, target, dir);
         });
         logger.success(`Imported identity config into ${target}`);
       })
