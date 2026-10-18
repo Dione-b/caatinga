@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -46,15 +46,49 @@ function invoke(embedVk: boolean) {
 }
 
 describe("invokeVerifier against a verifier that still has the placeholder key", () => {
-  it("should_report_CAATINGA_ZK_EMBED_VK_UNSUPPORTED_with_a_redeploy_hint", async () => {
+  async function writeLocalVk(source: string) {
+    const dir = path.join(cwd, "contracts", "verifier", "src");
+    await mkdir(dir, { recursive: true });
+    await writeFile(path.join(dir, "vk.rs"), source);
+  }
+
+  function trap() {
     invokeContractMock.mockRejectedValue(
       new CaatingaError(`Command failed\n${PLACEHOLDER_TRAP}`, CaatingaErrorCode.INVOKE_FAILED)
     );
+  }
+
+  it("should_ask_for_zk_build_embed_vk_first_when_the_local_vk_is_still_the_placeholder", async () => {
+    await writeLocalVk("// PLACEHOLDER verification key shipped with the scaffold.\n");
+    trap();
 
     await expect(invoke(true)).rejects.toMatchObject({
       code: CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
+      message: expect.stringContaining("most likely"),
+      hint: expect.stringMatching(
+        /ctg zk build <circuit> --embed-vk.*ctg deploy verifier --upgrade/
+      ),
+    });
+  });
+
+  it("should_ask_for_zk_build_embed_vk_first_when_there_is_no_local_vk", async () => {
+    trap();
+
+    await expect(invoke(true)).rejects.toMatchObject({
+      hint: expect.stringContaining("ctg zk build <circuit> --embed-vk"),
+    });
+  });
+
+  it("should_only_ask_for_a_redeploy_when_the_local_vk_is_real", async () => {
+    await writeLocalVk("pub fn embedded_vk(env: &Env) { /* generated */ }\n");
+    trap();
+
+    const error = (await invoke(true).catch((e: unknown) => e)) as CaatingaError;
+    expect(error).toMatchObject({
+      code: CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
       hint: expect.stringContaining("ctg deploy verifier --upgrade"),
     });
+    expect(error.hint).not.toContain("--embed-vk");
   });
 
   it("should_leave_other_invoke_failures_untouched", async () => {
