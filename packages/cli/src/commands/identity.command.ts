@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { constants as fsConstants } from "node:fs";
 import {
   chmod,
   copyFile,
@@ -7,7 +8,11 @@ import {
   mkdtemp,
   readFile,
   readdir,
+  realpath,
+  rename,
+  rmdir,
   rm,
+  unlink,
   writeFile,
 } from "node:fs/promises";
 import os from "node:os";
@@ -68,55 +73,182 @@ function validateArchiveEntry(entryPath: string, type: string, targetDir: string
   }
 }
 
-async function ensureSafeDirectory(directory: string): Promise<void> {
+async function ensureSafeDirectory(directory: string): Promise<string> {
   const resolved = path.resolve(directory);
-  const parsed = path.parse(resolved);
-  let current = parsed.root;
-  for (const segment of resolved.slice(parsed.root.length).split(path.sep).filter(Boolean)) {
-    current = path.join(current, segment);
-    try {
-      const info = await lstat(current);
-      if (!info.isDirectory() || info.isSymbolicLink()) {
-        throw new Error(`Refusing to import into non-directory or symbolic link: ${current}`);
-      }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw error;
-      }
-      await mkdir(current, { mode: 0o700 });
+  await mkdir(resolved, { recursive: true, mode: 0o700 });
+  const info = await lstat(resolved);
+  if (!info.isDirectory() || info.isSymbolicLink()) {
+    throw new Error(`Refusing to import into non-directory or symbolic link: ${resolved}`);
+  }
+  // Resolve permitted symlinked ancestors (for example macOS /var -> /private/var)
+  // once, then perform all child operations beneath the physical target directory.
+  return realpath(resolved);
+}
+
+interface StagedFile {
+  relativePath: string;
+  stagedPath: string;
+}
+
+async function listStagedFiles(
+  stagedDir: string,
+  relativeDir = ""
+): Promise<{ directories: string[]; files: StagedFile[] }> {
+  const directories: string[] = [];
+  const files: StagedFile[] = [];
+  for (const name of await readdir(path.join(stagedDir, relativeDir))) {
+    const relativePath = path.join(relativeDir, name);
+    const stagedPath = path.join(stagedDir, relativePath);
+    const info = await lstat(stagedPath);
+    if (info.isDirectory() && !info.isSymbolicLink()) {
+      directories.push(relativePath);
+      const nested = await listStagedFiles(stagedDir, relativePath);
+      directories.push(...nested.directories);
+      files.push(...nested.files);
+    } else if (info.isFile() && !info.isSymbolicLink()) {
+      files.push({ relativePath, stagedPath });
+    } else {
+      throw new Error(`Refusing to import: staged entry "${relativePath}" is not a regular file`);
     }
   }
-  await chmod(resolved, 0o700);
+  return { directories, files };
+}
+
+async function targetEntryType(targetPath: string): Promise<"directory" | "file" | "missing"> {
+  try {
+    const info = await lstat(targetPath);
+    if (info.isSymbolicLink()) {
+      throw new Error(`Refusing to overwrite symbolic link: ${targetPath}`);
+    }
+    if (info.isDirectory()) {
+      return "directory";
+    }
+    if (info.isFile()) {
+      return "file";
+    }
+    throw new Error(`Refusing to overwrite non-file: ${targetPath}`);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return "missing";
+    }
+    throw error;
+  }
+}
+
+interface StagedReplacement extends StagedFile {
+  targetPath: string;
+  temporaryPath: string;
+  backupPath?: string;
+  installed: boolean;
+}
+
+async function removeIfPresent(filePath: string): Promise<void> {
+  await unlink(filePath).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  });
 }
 
 async function mergeStagedFiles(stagedDir: string, targetDir: string): Promise<void> {
-  await ensureSafeDirectory(targetDir);
-  for (const name of await readdir(stagedDir)) {
-    const stagedPath = path.join(stagedDir, name);
-    const targetPath = path.join(targetDir, name);
-    const stagedInfo = await lstat(stagedPath);
-    if (stagedInfo.isDirectory() && !stagedInfo.isSymbolicLink()) {
-      await ensureSafeDirectory(targetPath);
-      await mergeStagedFiles(stagedPath, targetPath);
-      continue;
+  const resolvedTarget = await ensureSafeDirectory(targetDir);
+  const staged = await listStagedFiles(stagedDir);
+  const directorySet = new Set(staged.directories);
+  const fileSet = new Set(staged.files.map(({ relativePath }) => relativePath));
+  for (const directory of directorySet) {
+    if (fileSet.has(directory)) {
+      throw new Error(
+        'Refusing to import archive: path "' + directory + '" is both a file and a directory'
+      );
     }
-    if (!stagedInfo.isFile()) {
-      throw new Error(`Refusing to import archive: staged entry "${name}" is not a regular file`);
-    }
-    try {
-      const targetInfo = await lstat(targetPath);
-      if (!targetInfo.isFile() || targetInfo.isSymbolicLink()) {
-        throw new Error(`Refusing to overwrite non-file or symbolic link: ${targetPath}`);
-      }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw error;
-      }
-    }
-    await copyFile(stagedPath, targetPath);
-    await chmod(targetPath, 0o600);
   }
-  await chmod(targetDir, 0o700);
+  for (const file of fileSet) {
+    for (let parent = path.dirname(file); parent !== "."; parent = path.dirname(parent)) {
+      if (fileSet.has(parent)) {
+        throw new Error(
+          `Refusing to import archive: file and directory paths overlap at "${parent}"`
+        );
+      }
+      directorySet.add(parent);
+    }
+  }
+
+  // Check every destination before making any changes so ordinary conflicts cannot
+  // leave a partially imported identity behind.
+  const missingDirectories: string[] = [];
+  for (const relativePath of [...directorySet].sort(
+    (a, b) => a.split(path.sep).length - b.split(path.sep).length
+  )) {
+    const destination = path.join(resolvedTarget, relativePath);
+    const type = await targetEntryType(destination);
+    if (type === "file") {
+      throw new Error(`Refusing to create directory over file: ${destination}`);
+    }
+    if (type === "missing") {
+      missingDirectories.push(destination);
+    }
+  }
+  for (const { relativePath } of staged.files) {
+    const destination = path.join(resolvedTarget, relativePath);
+    if ((await targetEntryType(destination)) === "directory") {
+      throw new Error(`Refusing to overwrite directory with file: ${destination}`);
+    }
+  }
+
+  const createdDirectories: string[] = [];
+  const replacements: StagedReplacement[] = [];
+  try {
+    for (const directory of missingDirectories) {
+      await mkdir(directory, { mode: 0o700 });
+      createdDirectories.push(directory);
+    }
+
+    for (const file of staged.files) {
+      const targetPath = path.join(resolvedTarget, file.relativePath);
+      const temporaryPath = path.join(
+        path.dirname(targetPath),
+        `.caatinga-identity-${randomBytes(8).toString("hex")}.tmp`
+      );
+      const replacement = { ...file, targetPath, temporaryPath, installed: false };
+      replacements.push(replacement);
+      await copyFile(file.stagedPath, temporaryPath, fsConstants.COPYFILE_EXCL);
+      await chmod(temporaryPath, 0o600);
+    }
+
+    for (const replacement of replacements) {
+      // rename replaces a final symlink itself rather than following it. Keeping the
+      // temp file beside the destination also makes the install atomic on that volume.
+      if ((await targetEntryType(replacement.targetPath)) === "file") {
+        replacement.backupPath = path.join(
+          path.dirname(replacement.targetPath),
+          `.caatinga-identity-${randomBytes(8).toString("hex")}.bak`
+        );
+        await rename(replacement.targetPath, replacement.backupPath);
+      }
+      await rename(replacement.temporaryPath, replacement.targetPath);
+      replacement.installed = true;
+    }
+  } catch (error) {
+    for (const replacement of [...replacements].reverse()) {
+      if (replacement.installed) {
+        await removeIfPresent(replacement.targetPath).catch(() => undefined);
+      }
+      if (replacement.backupPath) {
+        await rename(replacement.backupPath, replacement.targetPath).catch(() => undefined);
+      }
+      await removeIfPresent(replacement.temporaryPath).catch(() => undefined);
+    }
+    for (const directory of [...createdDirectories].reverse()) {
+      await rmdir(directory).catch(() => undefined);
+    }
+    throw error;
+  }
+
+  for (const replacement of replacements) {
+    if (replacement.backupPath) {
+      await removeIfPresent(replacement.backupPath);
+    }
+  }
 }
 
 async function untarDirectory(
@@ -125,12 +257,23 @@ async function untarDirectory(
   tempDir: string
 ): Promise<void> {
   const resolvedTarget = path.resolve(targetDir);
+  let validationError: Error | undefined;
   await tar.t({
     file: archiveFile,
     onReadEntry(entry) {
-      validateArchiveEntry(entry.path, entry.type, resolvedTarget);
+      if (validationError) {
+        return;
+      }
+      try {
+        validateArchiveEntry(entry.path, entry.type, resolvedTarget);
+      } catch (error) {
+        validationError = error as Error;
+      }
     },
   });
+  if (validationError) {
+    throw validationError;
+  }
 
   const stagedDir = path.join(tempDir, "extracted");
   await mkdir(stagedDir, { mode: 0o700 });
@@ -150,10 +293,18 @@ async function untarDirectory(
             : entry.isFile()
               ? "File"
               : "Unsupported";
-      validateArchiveEntry(entryPath, type, resolvedTarget);
+      try {
+        validateArchiveEntry(entryPath, type, resolvedTarget);
+      } catch (error) {
+        validationError = error as Error;
+        return false;
+      }
       return true;
     },
   });
+  if (validationError) {
+    throw validationError;
+  }
   await mergeStagedFiles(stagedDir, resolvedTarget);
 }
 
