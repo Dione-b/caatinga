@@ -268,10 +268,13 @@ describe("defaultStellarHome env precedence (#233)", () => {
     }) as unknown as typeof execa);
     vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    await createProgram().exitOverride().parseAsync(["node", "caatinga", "identity", "export"]);
+    try {
+      await createProgram().exitOverride().parseAsync(["node", "caatinga", "identity", "export"]);
 
-    expect(seenSources).toHaveLength(1);
-    expect(seenSources[0]).toBe(stellarHome);
-    await rm(stellarHome, { recursive: true, force: true });
+      expect(seenSources).toHaveLength(1);
+      expect(seenSources[0]).toBe(stellarHome);
+    } finally {
+      await rm(stellarHome, { recursive: true, force: true });
+    }
   });
 });

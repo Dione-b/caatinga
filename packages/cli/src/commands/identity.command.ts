@@ -123,7 +123,9 @@ export function registerIdentityCommand(program: Command): void {
 
   identity
     .command("import")
-    .description("Import base64 tarball file into Stellar config directory")
+    .description(
+      "Import base64 tarball file into Stellar config dir (STELLAR_CONFIG_HOME > STELLAR_HOME > XDG_CONFIG_HOME/stellar > ~/.config/stellar)"
+    )
     .argument("<archive>", "Path to base64-encoded tarball file")
     .option("--path <path>", "Target Stellar config directory", defaultStellarHome())
     .action((archivePath: string, options: { path?: string }) =>
