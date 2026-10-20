@@ -1,5 +1,6 @@
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
 import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
+import { classifySimulationError } from "../errors/simulation-error.js";
 import { enrichReadCallInvokeError } from "./read-call-error.js";
 
 function isMultiAuthRequired(error: unknown): boolean {
@@ -46,6 +47,13 @@ export async function submitTransaction(
         throw readCallError;
       }
 
+      // signAndSend reads the simulation, so stellar-sdk raises ExpiredStateError and
+      // SimulationFailedError here rather than while building the transaction.
+      const simulationError = classifySimulationError(error, contractName, method, rpcUrl);
+      if (simulationError) {
+        throw simulationError;
+      }
+
       throw new CaatingaError(
         `Failed to submit XDR for "${contractName}.${method}".`,
         CaatingaErrorCode.XDR_SUBMIT_FAILED,
@@ -72,6 +80,13 @@ export async function submitTransaction(
       const readCallError = enrichReadCallInvokeError(error, contractName, method);
       if (readCallError) {
         throw readCallError;
+      }
+
+      // signAndSend reads the simulation, so stellar-sdk raises ExpiredStateError and
+      // SimulationFailedError here rather than while building the transaction.
+      const simulationError = classifySimulationError(error, contractName, method, rpcUrl);
+      if (simulationError) {
+        throw simulationError;
       }
 
       throw new CaatingaError(

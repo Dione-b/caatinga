@@ -20,6 +20,7 @@ import {
   splitReadArgsAndOptions,
 } from "./invoke-args.js";
 import { assertReadSourceAccount, normalizeReadSourceAccount } from "./read-source.js";
+import { classifySimulationError } from "../errors/simulation-error.js";
 import { prepareReadTransaction, readSimulationResult } from "./transaction-simulate.js";
 import { normalizeSubmitResult, submitTransaction } from "./transaction-submit.js";
 import type { StellarSdkSignTransaction, SubmitTransactionLike } from "./transaction-types.js";
@@ -60,9 +61,16 @@ export class CaatingaContractClient {
     argsOrOptions?: Record<string, unknown> | CaatingaInvokeOptions,
     maybeOptions?: CaatingaInvokeOptions
   ): Promise<CaatingaInvokeResult<T>> {
-    const { args, debugXdr, debugRaw } = splitInvokeArgsAndOptions(argsOrOptions, maybeOptions);
+    const { args, debugXdr, debugRaw, restore } = splitInvokeArgsAndOptions(
+      argsOrOptions,
+      maybeOptions
+    );
+    // Must run before createTransaction: with `restore`, the binding signs and submits
+    // the RestoreFootprint transaction while the method is being built.
     await this.assertWalletNetwork(method);
-    const { contractId, transaction } = await this.createTransaction(method, args);
+    const { contractId, transaction } = await this.createTransaction(method, args, {
+      methodOptions: restore ? this.createRestoreMethodOptions(method) : undefined,
+    });
     const xdr = await buildTransactionXdr({
       contractName: this.contractName,
       method,
@@ -175,7 +183,12 @@ export class CaatingaContractClient {
       method,
       this.config.network.rpcUrl
     );
-    const result = readSimulationResult<T>(raw, this.contractName, method);
+    const result = readSimulationResult<T>(
+      raw,
+      this.contractName,
+      method,
+      this.config.network.rpcUrl
+    );
 
     return {
       status: "simulated",
@@ -233,7 +246,11 @@ export class CaatingaContractClient {
   private async createTransaction(
     method: string,
     args?: Record<string, unknown>,
-    options: { readOnly?: boolean; sourceAccount?: string } = {}
+    options: {
+      readOnly?: boolean;
+      sourceAccount?: string;
+      methodOptions?: Record<string, unknown>;
+    } = {}
   ) {
     const contractId = resolveContractId({
       artifacts: this.config.artifacts,
@@ -255,7 +272,22 @@ export class CaatingaContractClient {
       rpcUrl: this.config.network.rpcUrl,
       networkPassphrase: this.config.network.networkPassphrase,
     });
-    const transaction = await this.bindingAdapter.callMethod({ client, method, args });
+    let transaction: unknown;
+    try {
+      transaction = await this.bindingAdapter.callMethod({
+        client,
+        method,
+        args,
+        ...(options.methodOptions ? { methodOptions: options.methodOptions } : {}),
+      });
+    } catch (error) {
+      // Only known Soroban simulation failures are reclassified; anything else (for
+      // example argument conversion errors) keeps propagating unchanged.
+      throw (
+        classifySimulationError(error, this.contractName, method, this.config.network.rpcUrl) ??
+        error
+      );
+    }
 
     return { contractId, transaction };
   }
@@ -363,5 +395,55 @@ export class CaatingaContractClient {
     }
 
     return typeof publicKey === "string" && publicKey.trim().length > 0 ? publicKey : undefined;
+  }
+  /**
+   * Method options for a generated binding's `restore: true` flow. The binding submits a
+   * RestoreFootprint transaction first, signed through the same wallet as the invoke.
+   */
+  private createRestoreMethodOptions(method: string): Record<string, unknown> {
+    const signTransaction: StellarSdkSignTransaction = async (xdr) => {
+      const wallet = this.config.wallet;
+      if (!wallet) {
+        throw new CaatingaError(
+          `Failed to sign the state restoration transaction for "${this.contractName}.${method}".`,
+          CaatingaErrorCode.WALLET_NOT_CONNECTED,
+          "Connect a wallet and approve the RestoreFootprint transaction."
+        );
+      }
+
+      let signedTxXdr: string;
+      try {
+        signedTxXdr = await withWalletTimeout("signTransaction", this.config.walletTimeout, () =>
+          wallet.signTransaction({
+            xdr,
+            networkPassphrase: this.config.network.networkPassphrase,
+          })
+        );
+      } catch (error) {
+        if (error instanceof CaatingaError) {
+          throw error;
+        }
+
+        throw new CaatingaError(
+          `Failed to sign the state restoration transaction for "${this.contractName}.${method}".`,
+          CaatingaErrorCode.XDR_SIGN_FAILED,
+          "Approve the RestoreFootprint transaction in the wallet and retry.",
+          error
+        );
+      }
+
+      if (typeof signedTxXdr !== "string" || signedTxXdr.trim().length === 0) {
+        throw new CaatingaError(
+          `Failed to sign the state restoration transaction for "${this.contractName}.${method}".`,
+          CaatingaErrorCode.XDR_SIGN_FAILED,
+          "Wallet returned an empty or invalid signed XDR for RestoreFootprint.",
+          signedTxXdr
+        );
+      }
+
+      return { signedTxXdr };
+    };
+
+    return { restore: true, signTransaction };
   }
 }

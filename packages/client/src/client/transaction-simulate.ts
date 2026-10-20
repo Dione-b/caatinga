@@ -1,4 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core/browser";
+import { toSimulationError } from "../errors/simulation-error.js";
 import type { SimulateTransactionLike } from "./transaction-types.js";
 
 type StellarContractResult = {
@@ -20,16 +21,7 @@ export async function prepareReadTransaction(
     try {
       return await candidate.prepare.call(transaction);
     } catch (error) {
-      if (error instanceof CaatingaError) {
-        throw error;
-      }
-
-      throw new CaatingaError(
-        `Failed to prepare XDR for "${contractName}.${method}".`,
-        CaatingaErrorCode.XDR_PREPARE_FAILED,
-        `RPC: ${rpcUrl}. Check connectivity, simulation errors, and binding compatibility.`,
-        error
-      );
+      throw toSimulationError(error, contractName, method, rpcUrl, "prepare");
     }
   }
 
@@ -37,16 +29,7 @@ export async function prepareReadTransaction(
     try {
       return await candidate.simulate.call(transaction);
     } catch (error) {
-      if (error instanceof CaatingaError) {
-        throw error;
-      }
-
-      throw new CaatingaError(
-        `Failed to simulate "${contractName}.${method}".`,
-        CaatingaErrorCode.XDR_PREPARE_FAILED,
-        `RPC: ${rpcUrl}. Check connectivity, simulation errors, and binding compatibility.`,
-        error
-      );
+      throw toSimulationError(error, contractName, method, rpcUrl);
     }
   }
 
@@ -89,9 +72,21 @@ export function normalizeSimulationValue<T>(
   return value.unwrap() as T;
 }
 
-export function readSimulationResult<T>(raw: unknown, contractName: string, method: string): T {
+export function readSimulationResult<T>(
+  raw: unknown,
+  contractName: string,
+  method: string,
+  rpcUrl: string
+): T {
   if (raw !== null && typeof raw === "object" && "result" in raw) {
-    const result = (raw as { result?: unknown }).result;
+    let result: unknown;
+    try {
+      // stellar-sdk's AssembledTransaction.result is a getter that throws
+      // SimulationFailedError / ExpiredStateError instead of rejecting simulate().
+      result = (raw as { result?: unknown }).result;
+    } catch (error) {
+      throw toSimulationError(error, contractName, method, rpcUrl);
+    }
     if (result !== undefined) {
       return normalizeSimulationValue<T>(result, contractName, method);
     }
