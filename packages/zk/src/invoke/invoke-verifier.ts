@@ -111,8 +111,9 @@ export async function invokeVerifier(
       cwd,
     });
   } catch (error) {
-    if (options.embedVk && isEmbeddedVkTrap(error)) {
-      throw await embeddedVkTrapError(options.verifierContract, cwd);
+    const trapLines = options.embedVk ? embeddedVkTrapLines(error) : [];
+    if (trapLines.length > 0) {
+      throw await embeddedVkTrapError(options.verifierContract, cwd, error, trapLines);
     }
     throw error;
   }
@@ -150,21 +151,24 @@ export async function invokeVerifier(
  * A trap in `verify_proof_embedded` is most often the scaffold's placeholder
  * `embedded_vk()`, which panics on purpose — but any panic in the contract looks
  * the same on chain, so the error says "likely" and the local `vk.rs` decides
- * which step the user is missing.
+ * which step the user is missing. The trap itself stays in the hint and the
+ * original error stays as the cause, for when the guess is wrong.
  */
-async function embeddedVkTrapError(verifierContract: string, cwd: string): Promise<CaatingaError> {
+async function embeddedVkTrapError(
+  verifierContract: string,
+  cwd: string,
+  cause: unknown,
+  trapLines: string[]
+): Promise<CaatingaError> {
   const message = `verify_proof_embedded trapped on "${verifierContract}", most likely because the deployed verifier still carries the placeholder verification key.`;
-  if (await localVkIsPlaceholder(cwd)) {
-    return new CaatingaError(
-      message,
-      CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-      "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
-    );
-  }
+  const nextStep = (await localVkIsPlaceholder(cwd))
+    ? "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
+    : "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`). If it still traps, the panic comes from the contract code itself.";
   return new CaatingaError(
     message,
     CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-    "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`). If it still traps, the panic comes from the contract code itself."
+    [nextStep, "Stellar CLI reported:", ...trapLines].join("\n"),
+    cause
   );
 }
 
@@ -178,17 +182,33 @@ async function localVkIsPlaceholder(cwd: string): Promise<boolean> {
   }
 }
 
-function isEmbeddedVkTrap(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
+/**
+ * The output lines reporting a VM trap in `verify_proof_embedded`, or none when
+ * the failure is something else. Searches the error and its causes, since
+ * `invokeContract` may re-wrap the Stellar CLI failure and move its output
+ * (kept in `hint`) down into the cause.
+ */
+function embeddedVkTrapLines(error: unknown): string[] {
+  const parts: string[] = [];
+  let current = error;
+  for (let depth = 0; current instanceof Error && depth < 5; depth++) {
+    const { hint, cause } = current as { hint?: unknown; cause?: unknown };
+    parts.push(current.message);
+    if (typeof hint === "string") {
+      parts.push(hint);
+    }
+    if (typeof cause === "string") {
+      parts.push(cause);
+    }
+    current = cause;
   }
-  const cause = (error as { cause?: unknown }).cause;
-  const text = [
-    error.message,
-    (error as { hint?: unknown }).hint,
-    cause instanceof Error ? cause.message : cause,
-  ]
-    .filter((part) => typeof part === "string")
-    .join("\n");
-  return text.includes("UnreachableCodeReached") && text.includes("verify_proof_embedded");
+  const text = parts.join("\n");
+  if (!text.includes("verify_proof_embedded")) {
+    return [];
+  }
+  const trapLines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.includes("UnreachableCodeReached"));
+  return [...new Set(trapLines)];
 }

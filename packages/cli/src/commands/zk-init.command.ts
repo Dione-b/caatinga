@@ -68,6 +68,83 @@ const ZK_VERIFIER_BLOCK = [
 const SCAFFOLD_VERIFIER_ENTRY =
   /(\n([ \t]*)verifier:\s*\{)([^{}]*path:\s*["']\.\/contracts\/verifier["'][^{}]*?)(\n[ \t]*\})/;
 
+const SCAFFOLD_VERIFIER_PATH = /path:\s*["']\.\/contracts\/verifier["']/g;
+
+const ADMIN_DEPLOY_ARG = /deployArgs:\s*\{[^}]*\badmin\b/;
+
+type CharKind = "code" | "string" | "comment";
+
+/**
+ * Labels each character of a config source as code, string literal or comment,
+ * so braces and commas inside strings and comments are not mistaken for code.
+ */
+function classifyChars(source: string): CharKind[] {
+  const kinds = new Array<CharKind>(source.length).fill("code");
+  let i = 0;
+  while (i < source.length) {
+    const char = source[i];
+    const next = source[i + 1];
+    let kind: CharKind;
+    let end: number;
+    if (char === "/" && next === "/") {
+      kind = "comment";
+      end = source.indexOf("\n", i);
+      end = end === -1 ? source.length : end;
+    } else if (char === "/" && next === "*") {
+      kind = "comment";
+      end = source.indexOf("*/", i + 2);
+      end = end === -1 ? source.length : end + 2;
+    } else if (char === '"' || char === "'" || char === "`") {
+      kind = "string";
+      end = i + 1;
+      while (end < source.length && source[end] !== char) {
+        end += source[end] === "\\" ? 2 : 1;
+      }
+      end = Math.min(end + 1, source.length);
+    } else {
+      i++;
+      continue;
+    }
+    kinds.fill(kind, i, end);
+    i = end;
+  }
+  return kinds;
+}
+
+/**
+ * The `{ ... }` object literal that encloses `index`, with comments blanked out,
+ * or undefined when `index` is not inside one.
+ */
+function enclosingObjectLiteral(
+  source: string,
+  kinds: CharKind[],
+  index: number
+): string | undefined {
+  const opens: number[] = [];
+  let start: number | undefined;
+  for (let i = 0; i < source.length; i++) {
+    if (i === index) {
+      start = opens.at(-1);
+      if (start === undefined) {
+        return undefined;
+      }
+    }
+    if (kinds[i] !== "code") {
+      continue;
+    }
+    if (source[i] === "{") {
+      opens.push(i);
+    } else if (source[i] === "}" && opens.pop() === start && start !== undefined) {
+      let entry = "";
+      for (let k = start; k <= i; k++) {
+        entry += kinds[k] === "comment" ? " " : source[k];
+      }
+      return entry;
+    }
+  }
+  return undefined;
+}
+
 /**
  * Adds the admin deploy arg to an existing scaffold verifier entry that predates
  * the verifier's `upgrade` entrypoint. Returns the source unchanged when the
@@ -80,23 +157,41 @@ function addVerifierAdminDeployArg(source: string): string {
       if (body.includes("deployArgs")) {
         return match;
       }
-      const trimmed = body.trimEnd();
-      const separator = trimmed.endsWith(",") ? "" : ",";
-      return `${open}${trimmed}${separator}\n${indent}  ${ZK_VERIFIER_DEPLOY_ARGS}${close}`;
+      // The comma goes after the last code character, never into a trailing
+      // `// comment` (where it would leave the config without a separator).
+      const kinds = classifyChars(body);
+      let last = body.length - 1;
+      while (last >= 0 && (kinds[last] === "comment" || /\s/.test(body[last]!))) {
+        last--;
+      }
+      if (last < 0) {
+        return match;
+      }
+      const separator = body[last] === "," ? "" : ",";
+      const trailingComments = body.slice(last + 1).trimEnd();
+      return `${open}${body.slice(0, last + 1)}${separator}${trailingComments}\n${indent}  ${ZK_VERIFIER_DEPLOY_ARGS}${close}`;
     }
   );
 }
 
 /**
- * True when the config points at the scaffolded verifier but its entry has no
- * admin deploy arg, e.g. a nested or computed entry `addVerifierAdminDeployArg`
+ * True when an entry points at the scaffolded verifier but has no admin deploy
+ * arg of its own, e.g. a nested or computed entry `addVerifierAdminDeployArg`
  * could not rewrite. Deploying that verifier fails without the constructor arg.
+ * Another contract's `deployArgs: { admin }` does not count.
  */
 function scaffoldVerifierLacksAdmin(source: string): boolean {
-  return (
-    /path:\s*["']\.\/contracts\/verifier["']/.test(source) &&
-    !/deployArgs:\s*\{[^}]*\badmin\b/.test(source)
-  );
+  const kinds = classifyChars(source);
+  for (const match of source.matchAll(SCAFFOLD_VERIFIER_PATH)) {
+    if (kinds[match.index] !== "code") {
+      continue;
+    }
+    const entry = enclosingObjectLiteral(source, kinds, match.index);
+    if (entry === undefined || !ADMIN_DEPLOY_ARG.test(entry)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const ZK_CONFIG_BLOCK = [

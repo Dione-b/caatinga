@@ -238,6 +238,52 @@ export default defineConfig({
       expect(mergeZkIntoConfigSource(merged)).toEqual({ merged, changed: false });
     });
 
+    it("should_put_the_comma_before_a_trailing_comment_on_the_last_verifier_line", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm" // built by ctg, see https://x.y
+      // keep in sync with Cargo.toml
+    }
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm", // built by ctg, see https://x.y\n' +
+          "      // keep in sync with Cargo.toml\n" +
+          '      deployArgs: { admin: "${source.address}" }\n    }\n  },'
+      );
+      expect(scaffoldVerifierLacksAdmin(merged)).toBe(false);
+      expect(mergeZkIntoConfigSource(merged)).toEqual({ merged, changed: false });
+    });
+
+    it("should_ignore_commas_and_braces_inside_strings_and_comments", () => {
+      const source = `export default defineConfig({
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/verifier.wasm" /* not here, */
+    }
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      const { merged } = mergeZkIntoConfigSource(source);
+
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/verifier.wasm", /* not here, */\n' +
+          '      deployArgs: { admin: "${source.address}" }\n'
+      );
+    });
+
     it("should_keep_existing_verifier_deploy_args", () => {
       const source = `export default defineConfig({
   project: "app",
@@ -293,6 +339,38 @@ export default defineConfig({
       expect(scaffoldVerifierLacksAdmin('verifier: { path: "./contracts/my-verifier" }')).toBe(
         false
       );
+    });
+
+    it("should_flag_the_verifier_even_when_another_contract_has_an_admin_deploy_arg", () => {
+      const source = `export default defineConfig({
+  contracts: {
+    token: { path: "./contracts/token", wasm: "token.wasm", deployArgs: { admin: "\${source.address}" } },
+    verifier: { path: "./contracts/verifier", wasm: build({ out: "verifier.wasm" }) },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(scaffoldVerifierLacksAdmin(source)).toBe(true);
+    });
+
+    it("should_not_count_a_commented_out_admin_deploy_arg", () => {
+      const source = `verifier: {
+  path: "./contracts/verifier",
+  // deployArgs: { admin: "GADMIN" },
+  wasm: build({ out: "verifier.wasm" }),
+}`;
+
+      expect(scaffoldVerifierLacksAdmin(source)).toBe(true);
+    });
+
+    it("should_ignore_a_scaffold_path_that_only_appears_in_a_comment", () => {
+      const source = `contracts: {
+  // verifier: { path: "./contracts/verifier" },
+  counter: { path: "./contracts/counter" },
+}`;
+
+      expect(scaffoldVerifierLacksAdmin(source)).toBe(false);
     });
 
     it("should_merge_multi_contract_configs", () => {
