@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { execa } from "execa";
 import { createProgram } from "../program.js";
+import { defaultStellarHome } from "./identity.command.js";
 
 vi.mock("execa", () => ({ execa: vi.fn() }));
 
@@ -185,5 +186,95 @@ describe("identity command temp archive handling", () => {
       "--no-overwrite-dir",
     ]);
     expect(calls[2]).toEqual({ file: "chmod", args: ["-R", "go-rwx", target] });
+  });
+});
+
+describe("defaultStellarHome env precedence (#233)", () => {
+  const keys = ["STELLAR_CONFIG_HOME", "STELLAR_HOME", "XDG_CONFIG_HOME"] as const;
+  let saved: Record<(typeof keys)[number], string | undefined>;
+
+  beforeEach(() => {
+    saved = {
+      STELLAR_CONFIG_HOME: process.env.STELLAR_CONFIG_HOME,
+      STELLAR_HOME: process.env.STELLAR_HOME,
+      XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME,
+    };
+    for (const key of keys) {
+      delete process.env[key];
+    }
+  });
+
+  afterEach(() => {
+    for (const key of keys) {
+      const value = saved[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    execaMock.mockReset();
+    vi.restoreAllMocks();
+  });
+
+  it("should_fall_back_to_homedir_when_no_env_is_set", () => {
+    expect(defaultStellarHome()).toBe(path.join(os.homedir(), ".config", "stellar"));
+  });
+
+  it("should_honor_STELLAR_HOME", () => {
+    process.env.STELLAR_HOME = "/secure/mainnet-keys";
+    expect(defaultStellarHome()).toBe("/secure/mainnet-keys");
+  });
+
+  it("should_honor_STELLAR_CONFIG_HOME", () => {
+    process.env.STELLAR_CONFIG_HOME = "/secure/stellar-config";
+    expect(defaultStellarHome()).toBe("/secure/stellar-config");
+  });
+
+  it("should_prefer_STELLAR_CONFIG_HOME_over_STELLAR_HOME", () => {
+    process.env.STELLAR_CONFIG_HOME = "/secure/config-home";
+    process.env.STELLAR_HOME = "/secure/stellar-home";
+    expect(defaultStellarHome()).toBe("/secure/config-home");
+  });
+
+  it("should_honor_XDG_CONFIG_HOME", () => {
+    process.env.XDG_CONFIG_HOME = "/custom/xdg";
+    expect(defaultStellarHome()).toBe(path.join("/custom/xdg", "stellar"));
+  });
+
+  it("should_prefer_STELLAR_HOME_over_XDG_CONFIG_HOME", () => {
+    process.env.STELLAR_HOME = "/secure/stellar-home";
+    process.env.XDG_CONFIG_HOME = "/custom/xdg";
+    expect(defaultStellarHome()).toBe("/secure/stellar-home");
+  });
+
+  it("should_ignore_empty_and_whitespace_env_values", () => {
+    process.env.STELLAR_CONFIG_HOME = "   ";
+    process.env.STELLAR_HOME = "";
+    process.env.XDG_CONFIG_HOME = "  ";
+    expect(defaultStellarHome()).toBe(path.join(os.homedir(), ".config", "stellar"));
+  });
+
+  it("should_export_from_STELLAR_HOME_when_no_path_flag_is_given", async () => {
+    const stellarHome = await mkdtemp(path.join(os.tmpdir(), "caatinga-stellar-home-"));
+    process.env.STELLAR_HOME = stellarHome;
+    // Commander captures the default at registration, which now reads the env above.
+    const seenSources: string[] = [];
+    execaMock.mockImplementation((async (_file: string, args: readonly string[]) => {
+      // tar -czf <archive> -C <source> .
+      seenSources.push(args[3] as string);
+      await writeFile(args[1] as string, "not-a-real-tarball", "utf8");
+      return { stdout: "", stderr: "", all: "" };
+    }) as unknown as typeof execa);
+    vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    try {
+      await createProgram().exitOverride().parseAsync(["node", "caatinga", "identity", "export"]);
+
+      expect(seenSources).toHaveLength(1);
+      expect(seenSources[0]).toBe(stellarHome);
+    } finally {
+      await rm(stellarHome, { recursive: true, force: true });
+    }
   });
 });
