@@ -3,12 +3,15 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { execa } from "execa";
+import * as tar from "tar";
 import { createProgram } from "../program.js";
 import { defaultStellarHome } from "./identity.command.js";
 
 vi.mock("execa", () => ({ execa: vi.fn() }));
+vi.mock("tar", () => ({ t: vi.fn(), x: vi.fn() }));
 
 const execaMock = vi.mocked(execa);
+const tarMock = vi.mocked(tar);
 
 /**
  * `identity export`/`import` archive `~/.config/stellar`, which holds Stellar secret keys.
@@ -36,6 +39,8 @@ describe("identity command temp archive handling", () => {
 
     observed = [];
     execaMock.mockReset();
+    tarMock.t.mockReset();
+    tarMock.x.mockReset();
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     restoreStdout = () => stdoutSpy.mockRestore();
   });
@@ -129,63 +134,44 @@ describe("identity command temp archive handling", () => {
     expect(remaining).toEqual([path.basename(source)]);
   });
 
-  it("should_reject_symlink_members_and_apply_secure_extraction_flags", async () => {
+  it("should_reject_symlink_members_before_extracting", async () => {
     const archive = path.join(tmpRoot, "identity.txt");
     const target = path.join(tmpRoot, "stellar-home");
     await writeFile(archive, Buffer.from("not-a-real-archive").toString("base64"));
 
-    const calls: Array<{ file: string; args: readonly string[] }> = [];
-    execaMock.mockImplementation((async (file: string, args: readonly string[]) => {
-      calls.push({ file, args });
-      if (file === "tar" && args[0] === "--full-time") {
-        return {
-          stdout: "lrwxrwxrwx user/group 0 2026-08-25 00:00:00 link -> /home/victim/.ssh",
-          stderr: "",
-          all: "",
-        };
-      }
-      return { stdout: "", stderr: "", all: "" };
-    }) as unknown as typeof execa);
+    tarMock.t.mockImplementation((async (options: unknown) => {
+      const onReadEntry = (options as { onReadEntry?: (entry: unknown) => void }).onReadEntry;
+      onReadEntry?.({ path: "link", type: "SymbolicLink" });
+    }) as unknown as typeof tar.t);
 
     const exitCodeBefore = process.exitCode;
     await runImport(archive, target);
 
-    expect(calls).toHaveLength(1);
-    expect(calls[0]?.args).toEqual(["--full-time", "-tvzf", expect.any(String)]);
+    expect(tarMock.x).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
     process.exitCode = exitCodeBefore;
   });
 
-  it("should_extract_without_archived_permissions_or_ownership", async () => {
+  it("should_extract_with_portable_tar_options_and_secure_modes", async () => {
     const archive = path.join(tmpRoot, "identity.txt");
     const target = path.join(tmpRoot, "stellar-home");
     await writeFile(archive, Buffer.from("not-a-real-archive").toString("base64"));
 
-    const calls: Array<{ file: string; args: readonly string[] }> = [];
-    execaMock.mockImplementation((async (file: string, args: readonly string[]) => {
-      calls.push({ file, args });
-      if (file === "tar" && args[0] === "--full-time") {
-        return {
-          stdout: "-rw-r--r-- user/group 4 2026-08-25 00:00:00 identity",
-          stderr: "",
-          all: "",
-        };
-      }
-      return { stdout: "", stderr: "", all: "" };
-    }) as unknown as typeof execa);
+    tarMock.t.mockImplementation((async (options: unknown) => {
+      const onReadEntry = (options as { onReadEntry?: (entry: unknown) => void }).onReadEntry;
+      onReadEntry?.({ path: "identity", type: "File" });
+    }) as unknown as typeof tar.t);
 
     await runImport(archive, target);
 
-    expect(calls[1]?.args).toEqual([
-      "-xzf",
-      expect.any(String),
-      "-C",
-      target,
-      "--no-same-permissions",
-      "--no-same-owner",
-      "--no-overwrite-dir",
-    ]);
-    expect(calls[2]).toEqual({ file: "chmod", args: ["-R", "go-rwx", target] });
+    expect(tarMock.x).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preservePaths: false,
+        preserveOwner: false,
+        chmod: true,
+        processUmask: 0o077,
+      })
+    );
   });
 });
 
