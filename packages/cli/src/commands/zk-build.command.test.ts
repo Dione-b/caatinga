@@ -193,6 +193,43 @@ describe("zk build command", () => {
     expect(buildCircuitMock).toHaveBeenCalled();
   });
 
+  it("allows --network mainnet with --allow-dev-ceremony", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerZkBuildCommand(program);
+
+    await program.parseAsync([
+      "node",
+      "caatinga",
+      "zk",
+      "build",
+      "main",
+      "--network",
+      "mainnet",
+      "--allow-dev-ceremony",
+    ]);
+
+    expect(buildCircuitMock).toHaveBeenCalled();
+  });
+
+  it("falls back to defaultNetwork when --network is omitted", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      const program = new Command();
+      program.exitOverride();
+      registerZkBuildCommand(program);
+
+      await program.parseAsync(["node", "caatinga", "zk", "build", "main"]);
+
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(output).toContain("Network: testnet (config)");
+      expect(buildCircuitMock).toHaveBeenCalled();
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
   it("warns when --embed-vk is passed", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
