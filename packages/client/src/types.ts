@@ -71,6 +71,8 @@ export type CaatingaInvokeStatus =
 export interface CaatingaInvokeOptions {
   debugXdr?: boolean;
   debugRaw?: boolean;
+  /** Allow a compatible generated binding to restore archived Soroban state before invocation. */
+  restore?: boolean;
 }
 
 export interface CaatingaReadOptions {
@@ -143,5 +145,7 @@ export interface CaatingaBindingAdapter {
     client: unknown;
     method: string;
     args?: Record<string, unknown>;
+    /** Generated binding method options, such as `restore` and its signer callback. */
+    methodOptions?: Record<string, unknown>;
   }): Promise<unknown>;
 }

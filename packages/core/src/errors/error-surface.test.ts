@@ -186,6 +186,18 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     file: "packages/client/src/xdr/build-xdr.test.ts",
     trigger: "buildXdr(",
   },
+  [CaatingaErrorCode.SIMULATION_ACCOUNT_NOT_FOUND]: {
+    file: "packages/client/src/client/transaction-simulate.test.ts",
+    trigger: "prepareReadTransaction(",
+  },
+  [CaatingaErrorCode.SIMULATION_RESOURCE_LIMIT]: {
+    file: "packages/client/src/client/transaction-simulate.test.ts",
+    trigger: "prepareReadTransaction(",
+  },
+  [CaatingaErrorCode.SIMULATION_ENTRY_ARCHIVED]: {
+    file: "packages/client/src/client/transaction-simulate.test.ts",
+    trigger: "prepareReadTransaction(",
+  },
   [CaatingaErrorCode.XDR_SIGN_FAILED]: {
     file: "packages/client/src/client/create-caatinga-client.test.ts",
     trigger: 'client.contract("counter").invoke(',

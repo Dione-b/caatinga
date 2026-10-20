@@ -1,7 +1,7 @@
 import type { CaatingaInvokeOptions, CaatingaReadOptions } from "../types.js";
 import { normalizeReadSourceAccount } from "./read-source.js";
 
-const INVOKE_OPTION_KEYS: readonly string[] = ["debugXdr", "debugRaw"];
+const INVOKE_OPTION_KEYS: readonly string[] = ["debugXdr", "debugRaw", "restore"];
 const READ_OPTION_KEYS: readonly string[] = ["debugRaw", "sourceAccount"];
 
 /**
@@ -39,6 +39,7 @@ export function splitInvokeArgsAndOptions(
       args: undefined,
       debugXdr: options.debugXdr ?? false,
       debugRaw: options.debugRaw ?? false,
+      restore: options.restore ?? false,
     };
   }
 
@@ -46,6 +47,7 @@ export function splitInvokeArgsAndOptions(
     args: argsOrOptions as Record<string, unknown> | undefined,
     debugXdr: maybeOptions?.debugXdr ?? false,
     debugRaw: maybeOptions?.debugRaw ?? false,
+    restore: maybeOptions?.restore ?? false,
   };
 }
 

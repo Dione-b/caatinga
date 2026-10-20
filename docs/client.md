@@ -187,6 +187,28 @@ console.log(result.raw);
 It does not call `wallet.signTransaction()`. If the simulated method does not expose a result,
 the client throws `CAATINGA_READ_RESULT_MISSING`.
 
+Reads do not sign or submit transactions. If simulation reports archived Soroban state, use
+`invoke()` with the explicit `restore: true` option when invoking the contract method:
+
+```ts
+await client.contract("counter").invoke("increment", { restore: true });
+```
+
+Pass it as the only key of the options object, or as the second argument when the method also
+takes args (`invoke("set", { value: 1 }, { restore: true })`). A single-argument object whose only
+key is `restore` is read as options, so a contract arg literally named `restore` must be passed
+with an explicit options argument: `invoke("set_flag", { restore: true }, {})`.
+
+The client checks the wallet network first (`CAATINGA_WALLET_NETWORK_MISMATCH`), then the default
+binding adapter forwards this option to compatible generated bindings and supplies the connected
+wallet signer; a rejected or empty restore signature fails with `CAATINGA_XDR_SIGN_FAILED`. The binding may ask the wallet to approve and submit a
+`RestoreFootprint` transaction before preparing the invocation. Custom binding adapters must
+forward `methodOptions` for this option to work. Networks with automatic restoration may not
+return a `restorePreamble` or require a separate restore transaction. If only a read is needed,
+`simulate()` will not submit a restore transaction; use the RPC's `restorePreamble.minResourceFee`
+and `restorePreamble.transactionData` with the SDK's `Operation.restoreFootprint()` to construct
+and sign a separate restore transaction, following the [Stellar JS SDK restore guide](https://developers.stellar.org/docs/build/guides/archival/restore-data-js), then retry the read.
+
 Calling `invoke()` on a read-only binding method may fail with a hint to use `read()` or `simulate()` instead.
 
 ### Source account
@@ -427,6 +449,9 @@ Client failures use public `CAATINGA_*` codes. The most common are:
 - `CAATINGA_WALLET_TIMEOUT`
 - `CAATINGA_XDR_BUILD_FAILED`
 - `CAATINGA_XDR_PREPARE_FAILED`
+- `CAATINGA_SIMULATION_ACCOUNT_NOT_FOUND`
+- `CAATINGA_SIMULATION_RESOURCE_LIMIT`
+- `CAATINGA_SIMULATION_ENTRY_ARCHIVED`
 - `CAATINGA_XDR_SIGN_FAILED`
 - `CAATINGA_XDR_SUBMIT_FAILED`
 - `CAATINGA_XDR_RESULT_FAILED`

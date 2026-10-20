@@ -13,6 +13,7 @@ describe("splitInvokeArgsAndOptions", () => {
       args: undefined,
       debugXdr: true,
       debugRaw: true,
+      restore: false,
     });
   });
 
@@ -23,6 +24,7 @@ describe("splitInvokeArgsAndOptions", () => {
       args: { count: 1 },
       debugXdr: false,
       debugRaw: true,
+      restore: false,
     });
   });
 
@@ -33,6 +35,7 @@ describe("splitInvokeArgsAndOptions", () => {
       args: { count: 1, debugRaw: true },
       debugXdr: false,
       debugRaw: false,
+      restore: false,
     });
   });
 
@@ -43,6 +46,32 @@ describe("splitInvokeArgsAndOptions", () => {
       args: {},
       debugXdr: false,
       debugRaw: false,
+      restore: false,
+    });
+  });
+
+  it("should_treat_a_single_restore_object_as_invoke_options", () => {
+    expect(splitInvokeArgsAndOptions({ restore: true })).toEqual({
+      args: undefined,
+      debugXdr: false,
+      debugRaw: false,
+      restore: true,
+    });
+  });
+
+  it("should_read_restore_from_explicit_options", () => {
+    expect(splitInvokeArgsAndOptions({ count: 1 }, { restore: true })).toMatchObject({
+      args: { count: 1 },
+      restore: true,
+    });
+  });
+
+  it("should_keep_a_contract_arg_named_restore_when_it_has_other_keys", () => {
+    expect(splitInvokeArgsAndOptions({ restore: true, id: 7 })).toEqual({
+      args: { restore: true, id: 7 },
+      debugXdr: false,
+      debugRaw: false,
+      restore: false,
     });
   });
 });
