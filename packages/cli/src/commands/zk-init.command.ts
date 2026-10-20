@@ -87,6 +87,18 @@ function addVerifierAdminDeployArg(source: string): string {
   );
 }
 
+/**
+ * True when the config points at the scaffolded verifier but its entry has no
+ * admin deploy arg, e.g. a nested or computed entry `addVerifierAdminDeployArg`
+ * could not rewrite. Deploying that verifier fails without the constructor arg.
+ */
+function scaffoldVerifierLacksAdmin(source: string): boolean {
+  return (
+    /path:\s*["']\.\/contracts\/verifier["']/.test(source) &&
+    !/deployArgs:\s*\{[^}]*\badmin\b/.test(source)
+  );
+}
+
 const ZK_CONFIG_BLOCK = [
   "  zk: {",
   "    circuits: {",
@@ -177,7 +189,7 @@ function printManualZkConfigInstructions(): void {
   logger.info("");
 }
 
-export { mergeZkIntoConfigSource };
+export { mergeZkIntoConfigSource, scaffoldVerifierLacksAdmin };
 
 async function mergeZkIntoConfig(cwd: string): Promise<boolean> {
   const configPath = path.join(cwd, "caatinga.config.ts");
@@ -187,6 +199,11 @@ async function mergeZkIntoConfig(cwd: string): Promise<boolean> {
 
   const source = await readFile(configPath, "utf8");
   const { merged, changed } = mergeZkIntoConfigSource(source);
+  if (scaffoldVerifierLacksAdmin(merged)) {
+    logger.warn(
+      `The verifier entry in caatinga.config.ts has no admin deploy arg. Add \`${ZK_VERIFIER_DEPLOY_ARGS}\` to it: the verifier constructor requires an admin.`
+    );
+  }
   if (changed) {
     await writeFile(configPath, merged, "utf8");
     return true;

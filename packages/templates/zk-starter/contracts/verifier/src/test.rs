@@ -13,7 +13,9 @@ use soroban_sdk::{
     Address, Bytes, Env, IntoVal, Symbol, Vec, U256,
 };
 
-use crate::{Groth16Verifier, Groth16VerifierClient, Proof, VerificationKey};
+use crate::{
+    DataKey, Groth16Error, Groth16Verifier, Groth16VerifierClient, Proof, VerificationKey,
+};
 
 fn g1_from_coords(env: &Env, x: &str, y: &str) -> G1Affine {
     let ark_g1 = ark_bls12_381::G1Affine::new(Fq::from_str(x).unwrap(), Fq::from_str(y).unwrap());
@@ -119,6 +121,26 @@ fn upgrade_rejects_unsigned_call() {
         .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
 
     assert!(client.try_upgrade(&new_wasm_hash).is_err());
+}
+
+#[test]
+fn admin_and_upgrade_return_admin_not_set_without_an_admin() {
+    let env = Env::default();
+    let contract_id = env.register(Groth16Verifier {}, (Address::generate(&env),));
+    let client = Groth16VerifierClient::new(&env, &contract_id);
+    env.as_contract(&contract_id, || {
+        env.storage().instance().remove(&DataKey::Admin)
+    });
+    let new_wasm_hash = env
+        .deployer()
+        .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
+
+    env.mock_all_auths();
+    assert_eq!(client.try_admin(), Err(Ok(Groth16Error::AdminNotSet)));
+    assert_eq!(
+        client.try_upgrade(&new_wasm_hash),
+        Err(Ok(Groth16Error::AdminNotSet))
+    );
 }
 
 #[test]

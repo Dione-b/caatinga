@@ -217,11 +217,13 @@ npx ctg zk invoke main --embed-vk --network testnet --source alice
   `deployArgs: { admin: "${source.address}" }`. `ctg upgrade verifier` calls
   `upgrade(new_wasm_hash)`, which requires that admin's signature, so pass the same
   `--source` you deployed with. Any other signer is rejected and the WASM stays as it was.
+  The admin is kept in the contract's instance storage, so it lives as long as the contract
+  instance (extend the instance TTL as you would for any long-lived contract).
   `ctg upgrade --generate --sync-env` also refreshes the bindings (now with
   `verify_proof_embedded`) and the frontend env.
 - **Verifiers scaffolded before 3.13.0 need one redeploy.** Those have no `upgrade`
   entrypoint, so `ctg upgrade verifier` fails against them with `CAATINGA_INVOKE_FAILED`.
-  Copy `DataKey`, `__constructor`, `admin` and `upgrade` from a fresh `ctg zk init` project's
+  Copy `DataKey`, the `AdminNotSet` error variant, `__constructor`, `admin` and `upgrade` from a fresh `ctg zk init` project's
   `contracts/verifier/src/lib.rs` into yours, add
   `deployArgs: { admin: "${source.address}" }` to the `verifier` entry in
   `caatinga.config.ts`, rebuild, and run `ctg deploy verifier --upgrade` once: that deploys a

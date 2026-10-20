@@ -12,6 +12,7 @@ use soroban_sdk::{
 #[repr(u32)]
 pub enum Groth16Error {
     MalformedVerifyingKey = 0,
+    AdminNotSet = 1,
 }
 
 #[derive(Clone)]
@@ -50,16 +51,20 @@ impl Groth16Verifier {
     }
 
     /// Returns the account allowed to call `upgrade`.
-    pub fn admin(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Admin).unwrap()
+    pub fn admin(env: Env) -> Result<Address, Groth16Error> {
+        env.storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .ok_or(Groth16Error::AdminNotSet)
     }
 
     /// Replaces the contract WASM in place, keeping the contract ID. Only the
     /// admin may call it; `ctg upgrade verifier` invokes it after
     /// `ctg zk build --embed-vk` changes the embedded verification key.
-    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
-        Self::admin(env.clone()).require_auth();
+    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) -> Result<(), Groth16Error> {
+        Self::admin(env.clone())?.require_auth();
         env.deployer().update_current_contract_wasm(new_wasm_hash);
+        Ok(())
     }
 
     pub fn verify_proof(
@@ -119,5 +124,5 @@ impl Groth16Verifier {
     }
 }
 
-mod vk;
 mod test;
+mod vk;

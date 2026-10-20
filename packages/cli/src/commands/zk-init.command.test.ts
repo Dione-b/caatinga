@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
-import { registerZkInitCommand, mergeZkIntoConfigSource } from "./zk-init.command.js";
+import {
+  registerZkInitCommand,
+  mergeZkIntoConfigSource,
+  scaffoldVerifierLacksAdmin,
+} from "./zk-init.command.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
@@ -265,6 +269,30 @@ export default defineConfig({
 `;
 
       expect(mergeZkIntoConfigSource(source)).toEqual({ merged: source, changed: false });
+    });
+
+    it("should_flag_a_scaffold_verifier_entry_it_could_not_give_an_admin", () => {
+      const nested = `export default defineConfig({
+  contracts: {
+    verifier: { path: "./contracts/verifier", wasm: build({ out: "verifier.wasm" }) },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(nested).merged).toBe(nested);
+      expect(scaffoldVerifierLacksAdmin(nested)).toBe(true);
+      expect(
+        scaffoldVerifierLacksAdmin(
+          nested.replace(
+            'path: "./contracts/verifier",',
+            'path: "./contracts/verifier", deployArgs: { admin: "GADMIN" },'
+          )
+        )
+      ).toBe(false);
+      expect(scaffoldVerifierLacksAdmin('verifier: { path: "./contracts/my-verifier" }')).toBe(
+        false
+      );
     });
 
     it("should_merge_multi_contract_configs", () => {
