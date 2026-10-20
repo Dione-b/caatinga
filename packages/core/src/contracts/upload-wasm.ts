@@ -55,7 +55,11 @@ export async function uploadWasm(options: UploadWasmOptions): Promise<UploadWasm
   );
 
   const output = result.all || `${result.stdout}\n${result.stderr}`;
-  const uploadedHash = parseWasmHash(output);
+  // The WASM hash is the only thing the CLI writes to stdout; stderr carries the
+  // transaction hash, which must never be mistaken for it.
+  const uploadedHash = parseWasmHash(
+    /\b[0-9a-fA-F]{64}\b/.test(result.stdout) ? result.stdout : output
+  );
 
   if (uploadedHash !== localHash) {
     throw new CaatingaError(

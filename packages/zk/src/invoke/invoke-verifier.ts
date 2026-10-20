@@ -1,4 +1,11 @@
-import { invokeContract, loadConfig, readArtifacts, type CaatingaConfig } from "@caatinga/core";
+import {
+  CaatingaError,
+  CaatingaErrorCode,
+  invokeContract,
+  loadConfig,
+  readArtifacts,
+  type CaatingaConfig,
+} from "@caatinga/core";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { concatG1Hex, concatG2Hex } from "../serialization/curve-bytes.js";
@@ -93,14 +100,22 @@ export async function invokeVerifier(
   // contract method rather than the same one called with fewer args.
   const method = options.embedVk ? "verify_proof_embedded" : "verify_proof";
   const target = `${options.verifierContract}.${method}`;
-  const result = await invokeContract({
-    config,
-    target,
-    args,
-    networkName: options.network,
-    source: options.sourceAccount,
-    cwd,
-  });
+  let result: Awaited<ReturnType<typeof invokeContract>>;
+  try {
+    result = await invokeContract({
+      config,
+      target,
+      args,
+      networkName: options.network,
+      source: options.sourceAccount,
+      cwd,
+    });
+  } catch (error) {
+    if (options.embedVk && isEmbeddedVkTrap(error)) {
+      throw await embeddedVkTrapError(options.verifierContract, cwd);
+    }
+    throw error;
+  }
 
   if (!result.result) {
     throw new ZkError("Verifier invocation returned no result.", "ZK_INVOKE_FAILED");
@@ -129,4 +144,51 @@ export async function invokeVerifier(
     publicSignals,
     verified: true,
   };
+}
+
+/**
+ * A trap in `verify_proof_embedded` is most often the scaffold's placeholder
+ * `embedded_vk()`, which panics on purpose — but any panic in the contract looks
+ * the same on chain, so the error says "likely" and the local `vk.rs` decides
+ * which step the user is missing.
+ */
+async function embeddedVkTrapError(verifierContract: string, cwd: string): Promise<CaatingaError> {
+  const message = `verify_proof_embedded trapped on "${verifierContract}", most likely because the deployed verifier still carries the placeholder verification key.`;
+  if (await localVkIsPlaceholder(cwd)) {
+    return new CaatingaError(
+      message,
+      CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
+      "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg deploy verifier --upgrade`, then invoke again."
+    );
+  }
+  return new CaatingaError(
+    message,
+    CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
+    "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg deploy verifier --upgrade`, then invoke again. If it still traps, the panic comes from the contract code itself."
+  );
+}
+
+async function localVkIsPlaceholder(cwd: string): Promise<boolean> {
+  try {
+    const source = await readFile(path.join(cwd, "contracts", "verifier", "src", "vk.rs"), "utf8");
+    return source.includes("PLACEHOLDER");
+  } catch {
+    // No vk.rs at all means it was never generated either.
+    return true;
+  }
+}
+
+function isEmbeddedVkTrap(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  const cause = (error as { cause?: unknown }).cause;
+  const text = [
+    error.message,
+    (error as { hint?: unknown }).hint,
+    cause instanceof Error ? cause.message : cause,
+  ]
+    .filter((part) => typeof part === "string")
+    .join("\n");
+  return text.includes("UnreachableCodeReached") && text.includes("verify_proof_embedded");
 }

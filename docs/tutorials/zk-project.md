@@ -93,25 +93,24 @@ Once the circuit stops changing, embed the verification key in the contract:
 
 ```bash
 npx ctg zk build main --embed-vk
+npx ctg zk prove main          # a dev ceremony re-runs the setup, so re-prove
 npx ctg build verifier
 ```
 
-### 3. Upgrade a verifier that is already deployed
+### 3. Deploy the verifier with the embedded key
 
-`ctg upgrade` swaps the WASM in place and keeps the same `contractId`, so clients and
-`caatinga.artifacts.json` do not need to change:
+The key is part of the contract code, and the verifier scaffold has no in-place `upgrade`
+entrypoint, so deploy a new instance:
 
 ```bash
-npx ctg upgrade verifier --network testnet --source alice
+npx ctg deploy verifier --upgrade --network testnet --source alice
 npx ctg zk invoke main --embed-vk --network testnet --source alice
 ```
 
-Because `verify_proof` stays in the contract, dApps that still pass the VK explicitly
-continue to work — no breaking change for existing integrations.
-
-> **Upgrade vs redeploy.** `ctg upgrade` keeps the `contractId`. `ctg deploy --upgrade`
-> creates a **new** instance with a new `contractId`. Only use a redeploy when you actually
-> want a new verifier address.
+`--upgrade` records the previous `contractId` in `caatinga.artifacts.json` history,
+regenerates the bindings and syncs the frontend env; point any other client at the new
+address. The new verifier keeps `verify_proof`, so callers that pass the VK explicitly keep
+working against it.
 
 ## Live end-to-end validation
 

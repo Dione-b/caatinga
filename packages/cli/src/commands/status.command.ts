@@ -49,9 +49,7 @@ function reportZkDrift(statuses: ZkCircuitStatus[]): void {
   for (const entry of statuses) {
     logger.info(`  ${entry.name}: ${ZK_DRIFT_LABEL[entry.status]}`);
     if (entry.ceremonyType) {
-      logger.info(
-        `    ceremony: ${entry.ceremonyType === "mpc-multi-party" ? "MPC (audited)" : "dev single-party"}`
-      );
+      logger.info(`    ceremony: ${describeCeremony(entry)}`);
     }
     for (const advisory of entry.advisories) {
       logger.info(`    ${advisory}`);
@@ -153,4 +151,18 @@ export function registerStatusCommand(program: Command): void {
         }
       })
     );
+}
+
+/**
+ * Caatinga can say a ceremony was imported and that its artifacts verified
+ * against each other — never that it was audited, which only its participants'
+ * transcript can show.
+ */
+function describeCeremony(entry: ZkCircuitStatus): string {
+  if (entry.ceremonyType !== "mpc-multi-party") {
+    return "dev single-party";
+  }
+  return entry.ceremonyVerifiedAt
+    ? `MPC (imported, verified ${entry.ceremonyVerifiedAt.slice(0, 10)})`
+    : "MPC (imported, not verified — run `ctg zk verify-ceremony`)";
 }
