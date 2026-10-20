@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
-import { registerZkInitCommand, mergeZkIntoConfigSource } from "./zk-init.command.js";
+import {
+  registerZkInitCommand,
+  mergeZkIntoConfigSource,
+  scaffoldVerifierLacksAdmin,
+} from "./zk-init.command.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
@@ -201,6 +205,94 @@ export default defineConfig({
       expect(merged).toContain("zk:");
       expect(merged).toMatch(/\n {4}\},\n {4}verifier: \{/);
       expect(merged).not.toContain("},,");
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",\n' +
+          '      deployArgs: { admin: "${source.address}" }\n    },'
+      );
+    });
+
+    it("should_add_admin_deploy_arg_to_existing_verifier_without_one", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"
+    }
+  },
+  zk: {
+    circuits: {
+      main: { path: "./circuits", protocol: "groth16", curve: "bls12381", verifierContract: "verifier" }
+    }
+  }
+});
+`;
+
+      const { merged, changed } = mergeZkIntoConfigSource(source);
+
+      expect(changed).toBe(true);
+      expect(merged).toContain(
+        '      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",\n' +
+          '      deployArgs: { admin: "${source.address}" }\n    }\n  },'
+      );
+      expect(mergeZkIntoConfigSource(merged)).toEqual({ merged, changed: false });
+    });
+
+    it("should_keep_existing_verifier_deploy_args", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/verifier",
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+      deployArgs: { admin: "GADMIN" },
+    },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(source)).toEqual({ merged: source, changed: false });
+    });
+
+    it("should_not_touch_a_verifier_entry_outside_the_scaffold_path", () => {
+      const source = `export default defineConfig({
+  project: "app",
+  contracts: {
+    verifier: {
+      path: "./contracts/my-verifier",
+      wasm: "./contracts/my-verifier/target/wasm32v1-none/release/my_verifier.wasm",
+    },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(source)).toEqual({ merged: source, changed: false });
+    });
+
+    it("should_flag_a_scaffold_verifier_entry_it_could_not_give_an_admin", () => {
+      const nested = `export default defineConfig({
+  contracts: {
+    verifier: { path: "./contracts/verifier", wasm: build({ out: "verifier.wasm" }) },
+  },
+  zk: { circuits: {} },
+});
+`;
+
+      expect(mergeZkIntoConfigSource(nested).merged).toBe(nested);
+      expect(scaffoldVerifierLacksAdmin(nested)).toBe(true);
+      expect(
+        scaffoldVerifierLacksAdmin(
+          nested.replace(
+            'path: "./contracts/verifier",',
+            'path: "./contracts/verifier", deployArgs: { admin: "GADMIN" },'
+          )
+        )
+      ).toBe(false);
+      expect(scaffoldVerifierLacksAdmin('verifier: { path: "./contracts/my-verifier" }')).toBe(
+        false
+      );
     });
 
     it("should_merge_multi_contract_configs", () => {

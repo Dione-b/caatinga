@@ -4,7 +4,7 @@ use soroban_sdk::{
     crypto::bls12_381::{
         Bls12381Fr as Fr, Bls12381G1Affine as G1Affine, Bls12381G2Affine as G2Affine,
     },
-    vec, Env, Vec,
+    vec, Address, BytesN, Env, Vec,
 };
 
 #[contracterror]
@@ -12,6 +12,13 @@ use soroban_sdk::{
 #[repr(u32)]
 pub enum Groth16Error {
     MalformedVerifyingKey = 0,
+    AdminNotSet = 1,
+}
+
+#[derive(Clone)]
+#[contracttype]
+enum DataKey {
+    Admin,
 }
 
 #[derive(Clone)]
@@ -37,6 +44,29 @@ pub struct Groth16Verifier;
 
 #[contractimpl]
 impl Groth16Verifier {
+    /// Stores the account allowed to call `upgrade`. Caatinga passes the
+    /// deploying identity through `deployArgs: { admin: "${source.address}" }`.
+    pub fn __constructor(env: Env, admin: Address) {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    }
+
+    /// Returns the account allowed to call `upgrade`.
+    pub fn admin(env: Env) -> Result<Address, Groth16Error> {
+        env.storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .ok_or(Groth16Error::AdminNotSet)
+    }
+
+    /// Replaces the contract WASM in place, keeping the contract ID. Only the
+    /// admin may call it; `ctg upgrade verifier` invokes it after
+    /// `ctg zk build --embed-vk` changes the embedded verification key.
+    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) -> Result<(), Groth16Error> {
+        Self::admin(env.clone())?.require_auth();
+        env.deployer().update_current_contract_wasm(new_wasm_hash);
+        Ok(())
+    }
+
     pub fn verify_proof(
         env: Env,
         vk: VerificationKey,
@@ -94,5 +124,5 @@ impl Groth16Verifier {
     }
 }
 
-mod vk;
 mod test;
+mod vk;

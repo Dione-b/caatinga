@@ -9,10 +9,13 @@ use soroban_sdk::{
         Bls12381Fr as Fr, Bls12381G1Affine as G1Affine, Bls12381G2Affine as G2Affine,
         G1_SERIALIZED_SIZE, G2_SERIALIZED_SIZE,
     },
-    Env, Vec, U256,
+    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, MockAuth, MockAuthInvoke},
+    Address, Bytes, Env, IntoVal, Symbol, Vec, U256,
 };
 
-use crate::{Groth16Verifier, Groth16VerifierClient, Proof, VerificationKey};
+use crate::{
+    DataKey, Groth16Error, Groth16Verifier, Groth16VerifierClient, Proof, VerificationKey,
+};
 
 fn g1_from_coords(env: &Env, x: &str, y: &str) -> G1Affine {
     let ark_g1 = ark_bls12_381::G1Affine::new(Fq::from_str(x).unwrap(), Fq::from_str(y).unwrap());
@@ -31,7 +34,113 @@ fn g2_from_coords(env: &Env, x1: &str, x2: &str, y1: &str, y2: &str) -> G2Affine
 }
 
 fn create_client(e: &Env) -> Groth16VerifierClient<'_> {
-    Groth16VerifierClient::new(e, &e.register(Groth16Verifier {}, ()))
+    let admin = Address::generate(e);
+    Groth16VerifierClient::new(e, &e.register(Groth16Verifier {}, (admin,)))
+}
+
+// Smallest WASM module the host accepts as a contract: only the
+// `contractenvmetav0` custom section declaring interface version 22.0.
+const MINIMAL_CONTRACT_WASM: [u8; 40] = [
+    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic + version
+    0x00, 0x1e, // custom section, 30 bytes
+    0x11, b'c', b'o', b'n', b't', b'r', b'a', b'c', b't', b'e', b'n', b'v', b'm', b'e', b't', b'a',
+    b'v', b'0', // name
+    0x00, 0x00, 0x00, 0x00, // SC_ENV_META_KIND_INTERFACE_VERSION
+    0x00, 0x00, 0x00, 0x16, // protocol 22
+    0x00, 0x00, 0x00, 0x00, // pre-release 0
+];
+
+#[test]
+fn constructor_stores_admin() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let client =
+        Groth16VerifierClient::new(&env, &env.register(Groth16Verifier {}, (admin.clone(),)));
+
+    assert_eq!(client.admin(), admin);
+}
+
+#[test]
+fn upgrade_requires_admin_auth() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(Groth16Verifier {}, (admin.clone(),));
+    let client = Groth16VerifierClient::new(&env, &contract_id);
+    let new_wasm_hash = env
+        .deployer()
+        .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
+
+    env.mock_all_auths();
+    client.upgrade(&new_wasm_hash);
+
+    assert_eq!(
+        env.auths(),
+        std::vec![(
+            admin,
+            AuthorizedInvocation {
+                function: AuthorizedFunction::Contract((
+                    contract_id,
+                    Symbol::new(&env, "upgrade"),
+                    (new_wasm_hash,).into_val(&env),
+                )),
+                sub_invocations: std::vec![],
+            }
+        )]
+    );
+}
+
+#[test]
+fn upgrade_rejects_non_admin() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let attacker = Address::generate(&env);
+    let contract_id = env.register(Groth16Verifier {}, (admin,));
+    let client = Groth16VerifierClient::new(&env, &contract_id);
+    let new_wasm_hash = env
+        .deployer()
+        .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
+
+    env.mock_auths(&[MockAuth {
+        address: &attacker,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "upgrade",
+            args: (new_wasm_hash.clone(),).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+    assert!(client.try_upgrade(&new_wasm_hash).is_err());
+}
+
+#[test]
+fn upgrade_rejects_unsigned_call() {
+    let env = Env::default();
+    let client = create_client(&env);
+    let new_wasm_hash = env
+        .deployer()
+        .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
+
+    assert!(client.try_upgrade(&new_wasm_hash).is_err());
+}
+
+#[test]
+fn admin_and_upgrade_return_admin_not_set_without_an_admin() {
+    let env = Env::default();
+    let contract_id = env.register(Groth16Verifier {}, (Address::generate(&env),));
+    let client = Groth16VerifierClient::new(&env, &contract_id);
+    env.as_contract(&contract_id, || {
+        env.storage().instance().remove(&DataKey::Admin)
+    });
+    let new_wasm_hash = env
+        .deployer()
+        .upload_contract_wasm(Bytes::from_array(&env, &MINIMAL_CONTRACT_WASM));
+
+    env.mock_all_auths();
+    assert_eq!(client.try_admin(), Err(Ok(Groth16Error::AdminNotSet)));
+    assert_eq!(
+        client.try_upgrade(&new_wasm_hash),
+        Err(Ok(Groth16Error::AdminNotSet))
+    );
 }
 
 #[test]

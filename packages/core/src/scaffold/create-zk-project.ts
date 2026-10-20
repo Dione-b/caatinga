@@ -33,7 +33,10 @@ export default defineConfig({
   contracts: {
     verifier: {
       path: "./contracts/verifier",
-      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm"
+      wasm: "./contracts/verifier/target/wasm32v1-none/release/verifier.wasm",
+      // The verifier's constructor stores the account allowed to call upgrade();
+      // \`ctg deploy --source <identity>\` fills in that identity's address.
+      deployArgs: { admin: "\${source.address}" }
     }
   },
   networks: {
@@ -109,6 +112,16 @@ Run the Rust verifier contract tests from the project root:
 npm test
 # or directly:
 cargo test --manifest-path contracts/verifier/Cargo.toml
+\`\`\`
+
+## Upgrading the verifier
+
+\`ctg deploy\` passes the \`--source\` identity as the verifier admin. That identity can replace
+the WASM in place, keeping the contract ID (for example after \`ctg zk build main --embed-vk\`):
+
+\`\`\`bash
+npx ctg build verifier
+npx ctg upgrade verifier --source <identity>
 \`\`\`
 
 Replace \`circuits/main.circom\` with your circuit. Keep the entry point named \`main\`.

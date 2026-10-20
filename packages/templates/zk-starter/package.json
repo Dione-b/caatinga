@@ -10,6 +10,7 @@
     "test": "cargo test --manifest-path contracts/verifier/Cargo.toml",
     "caatinga:build": "npx ctg build verifier",
     "caatinga:deploy": "npx ctg deploy verifier --source ${CAATINGA_SOURCE:-alice}",
+    "caatinga:upgrade": "npx ctg upgrade verifier --source ${CAATINGA_SOURCE:-alice}",
     "caatinga:generate": "npx ctg generate verifier",
     "caatinga:zk:build": "npx ctg zk build main",
     "caatinga:zk:prove": "npx ctg zk prove main",

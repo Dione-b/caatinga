@@ -59,7 +59,7 @@ export function registerZkBuildCommand(program: Command): void {
               "`--embed-vk` writes contracts/verifier/src/vk.rs and enables the `verify_proof_embedded` entrypoint."
             );
             logger.warn(
-              "The key is compiled into the contract, and the verifier has no in-place upgrade entrypoint: run `ctg build verifier` and `ctg deploy verifier --upgrade` (new contractId) before `ctg zk invoke <circuit> --embed-vk`."
+              "The key is compiled into the contract: run `ctg build verifier` and `ctg upgrade verifier --source <admin>` (same contractId) before `ctg zk invoke <circuit> --embed-vk`. A verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade` (new contractId) instead."
             );
             logger.warn(
               "Prefer the dynamic VK flow (`verify_proof`) while the circuit is still changing; embedded VK suits a frozen circuit."
