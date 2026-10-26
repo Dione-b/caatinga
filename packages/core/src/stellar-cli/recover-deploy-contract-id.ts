@@ -3,7 +3,7 @@ import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js"
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
-import { STELLAR_ADDRESS_REGEX } from "./strkey.js";
+import { isLikelyPublicKeySource } from "./strkey.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "./version.js";
 
@@ -25,9 +25,7 @@ type HorizonOperationsResponse = {
   };
 };
 
-export function isLikelyPublicKeySource(source: string): boolean {
-  return STELLAR_ADDRESS_REGEX.test(source);
-}
+export { isLikelyPublicKeySource } from "./strkey.js";
 
 export function decimalSaltToHex(salt: string): string {
   return BigInt(salt).toString(16).padStart(64, "0");
