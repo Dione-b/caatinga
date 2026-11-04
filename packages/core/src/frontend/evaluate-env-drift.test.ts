@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { CaatingaConfig } from "../config/config.schema.js";
@@ -96,6 +96,54 @@ describe("evaluateEnvDrift", () => {
     const report = await evaluateEnvDrift({ config, cwd });
     expect(report?.inSync).toBe(false);
     expect(report?.drifts.some((entry) => entry.envKey === "VITE_COUNTER_ID")).toBe(true);
+  });
+
+  async function seedExportPrefixedEnv(cwd: string): Promise<string> {
+    const envPath = path.join(cwd, "frontend/.env.local");
+    await mkdir(path.dirname(envPath), { recursive: true });
+    await writeFile(
+      envPath,
+      ["export VITE_COUNTER_ID=placeholder", "export VITE_RPC_URL=placeholder", ""].join("\n")
+    );
+    await syncFrontendEnv({ config, cwd });
+    return envPath;
+  }
+
+  it("should_report_in_sync_when_env_lines_use_export_prefix", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-env-drift-"));
+    tempDirs.push(cwd);
+
+    await seedArtifacts(cwd);
+    const envPath = await seedExportPrefixedEnv(cwd);
+
+    const content = await readFile(envPath, "utf8");
+    expect(content).toContain(`export VITE_COUNTER_ID=C${"C".repeat(55)}`);
+    expect(content).toContain("export VITE_RPC_URL=https://soroban-testnet.stellar.org");
+
+    const report = await evaluateEnvDrift({ config, cwd });
+    expect(report?.inSync).toBe(true);
+    expect(report?.drifts).toHaveLength(0);
+  });
+
+  it("should_report_drift_when_exported_env_value_differs", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-env-drift-"));
+    tempDirs.push(cwd);
+
+    await seedArtifacts(cwd);
+    const envPath = await seedExportPrefixedEnv(cwd);
+    const content = await readFile(envPath, "utf8");
+    await writeFile(
+      envPath,
+      content.replace(/export VITE_COUNTER_ID=.*/, "export VITE_COUNTER_ID=STALE_ID")
+    );
+
+    const report = await evaluateEnvDrift({ config, cwd });
+    expect(report?.inSync).toBe(false);
+    expect(report?.drifts).toHaveLength(1);
+    expect(report?.drifts[0]).toMatchObject({
+      envKey: "VITE_COUNTER_ID",
+      envValue: "STALE_ID",
+    });
   });
 
   it("should_return_null_when_frontend_env_is_not_configured", async () => {
