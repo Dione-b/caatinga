@@ -11,7 +11,7 @@ import { isMainnetNetwork } from "../networks/mainnet-guardrails.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
-import { parseContractId } from "../stellar-cli/parse-contract-id.js";
+import { parseContractId } from "../stellar-cli/stellar-cli-output-parser.js";
 import { tryRecoverContractIdFromDeployFailure } from "../stellar-cli/recover-deploy-contract-id.js";
 import { isTransientDeployFailure } from "./is-transient-deploy-failure.js";
 import { buildDependencyGraph } from "./dependency-graph.js";

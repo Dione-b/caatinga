@@ -3,7 +3,7 @@ import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import { checkBinary } from "../shell/check-binary.js";
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgs } from "../stellar-cli/build-stellar-network-args.js";
-import { parseWasmHash } from "../stellar-cli/parse-wasm-hash.js";
+import { parseWasmHash } from "../stellar-cli/stellar-cli-output-parser.js";
 import { assertSafeSourceAccount } from "./source-account.js";
 import { hashWasm } from "./wasm.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";

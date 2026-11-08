@@ -51,7 +51,7 @@ describe("probeMissingStellarCliFeatures", () => {
   it("does not probe features below the minimum version", async () => {
     const probe = await loadProbe();
 
-    await expect(probe("22.0.1", "/project")).resolves.toEqual(["contract-invoke-sign"]);
+    await expect(probe("22.0.1", "/project")).resolves.toEqual(STELLAR_CLI_REQUIRED_FEATURES);
     expect(runCommandMock).not.toHaveBeenCalled();
   });
 });
@@ -112,7 +112,7 @@ describe("probeMissingStellarCliFeatures caching", () => {
     const missing1 = await probeMissingStellarCliFeatures("22.0.1");
     const missing2 = await probeMissingStellarCliFeatures("22.0.1");
 
-    expect(missing1).toEqual(["contract-invoke-sign"]);
+    expect(missing1).toEqual(STELLAR_CLI_REQUIRED_FEATURES);
     expect(missing2).toBe(missing1);
     // No subprocess calls at all for below-minimum versions.
     expect(probeRunCommandMock).not.toHaveBeenCalled();

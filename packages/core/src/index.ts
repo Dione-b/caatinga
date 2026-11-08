@@ -79,8 +79,11 @@ export {
 } from "./shell/command-timeouts.js";
 export { resolveSubprocessEnv, isCargoBinMissingFromPath } from "./shell/resolve-subprocess-env.js";
 export { checkBinary } from "./shell/check-binary.js";
-export { parseContractId } from "./stellar-cli/parse-contract-id.js";
-export { parseWasmHash } from "./stellar-cli/parse-wasm-hash.js";
+export {
+  parseContractId,
+  parseWasmHash,
+  parseStellarCliVersion,
+} from "./stellar-cli/stellar-cli-output-parser.js";
 export {
   checkStellarCliVersion,
   type CheckStellarCliVersionOptions,
@@ -89,7 +92,6 @@ export {
   STELLAR_CLI_LAST_TESTED_VERSION,
   STELLAR_CLI_MIN_VERSION,
   evaluateStellarCliCompatibility,
-  parseStellarCliVersion,
   type CompatibilityReport,
   type CompatibilityStatus,
   type CompatibilityWarning,

@@ -224,12 +224,7 @@ async function ensureRootBindingIndex(outputDir: string): Promise<void> {
   const rootIndexPath = path.join(outputDir, "index.ts");
 
   try {
-    const existing = await readFile(rootIndexPath, "utf8");
-    if (existing === ROOT_BINDING_INDEX_CONTENT) {
-      return;
-    }
-
-    // Preserve a non-Caatinga root index if the generator starts shipping one.
+    await access(rootIndexPath);
     return;
   } catch {
     await writeFile(rootIndexPath, ROOT_BINDING_INDEX_CONTENT, "utf8");

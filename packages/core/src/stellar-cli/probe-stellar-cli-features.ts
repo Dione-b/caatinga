@@ -47,7 +47,7 @@ async function probeFeatures(version: string, cwd: string): Promise<string[]> {
   const missing: string[] = [];
 
   if (semver.valid(version) && semver.lt(version, STELLAR_CLI_MIN_VERSION)) {
-    return ["contract-invoke-sign"];
+    return [...STELLAR_CLI_REQUIRED_FEATURES];
   }
 
   for (const feature of STELLAR_CLI_REQUIRED_FEATURES) {
