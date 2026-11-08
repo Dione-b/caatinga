@@ -25,7 +25,7 @@ function formatEnvValue(value: string): string {
   return value;
 }
 
-const ENV_ASSIGNMENT_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
+export const ENV_ASSIGNMENT_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
 
 async function readExistingEnv(envFile: string): Promise<string | undefined> {
   try {

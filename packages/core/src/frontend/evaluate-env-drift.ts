@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { readArtifacts } from "../artifacts/read-artifacts.js";
 import { loadConfig } from "../config/load-config.js";
-import { computeFrontendEnvEntries } from "./sync-frontend-env.js";
+import { computeFrontendEnvEntries, ENV_ASSIGNMENT_PATTERN } from "./sync-frontend-env.js";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { resolveNetwork } from "../networks/resolve-network.js";
 import { hashWasm, resolveWasmArtifactPath } from "../contracts/wasm.js";
@@ -30,13 +30,13 @@ function parseEnvFile(content: string): Map<string, string> {
       continue;
     }
 
-    const eqIndex = trimmed.indexOf("=");
-    if (eqIndex <= 0) {
+    const match = trimmed.match(ENV_ASSIGNMENT_PATTERN);
+    if (!match?.[1]) {
       continue;
     }
 
-    const key = trimmed.slice(0, eqIndex).trim();
-    let value = trimmed.slice(eqIndex + 1).trim();
+    const key = match[1];
+    let value = trimmed.slice(match[0].length).trim();
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
       (value.startsWith("'") && value.endsWith("'"))
