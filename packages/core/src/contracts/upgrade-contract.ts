@@ -18,6 +18,7 @@ import { uploadWasm } from "./upload-wasm.js";
 import { hashWasm, resolveWasmArtifactPath } from "./wasm.js";
 import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
+import { withRetries } from "../retry.js";
 
 export type UpgradeContractOptions = {
   config: CaatingaConfig;
@@ -51,12 +52,6 @@ export type UpgradeContractResult = {
 const DEFAULT_UPGRADE_RETRY_DELAYS_MS = [2000, 5000] as const;
 const DEFAULT_UPGRADE_METHOD = "upgrade";
 const DEFAULT_WASM_ARG = "new_wasm_hash";
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 function isTransientUpgradeFailure(error: unknown): boolean {
   return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
@@ -123,11 +118,15 @@ export async function upgradeContractInPlace(
     ? []
     : DEFAULT_UPGRADE_RETRY_DELAYS_MS;
   const retryDelaysMs = options.upgradeRetryDelaysMs ?? defaultRetryDelays;
-  const maxAttempts = retryDelaysMs.length + 1;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      await runCommand(
+  try {
+    await withRetries({
+      delays: retryDelaysMs,
+      isRetryable: isTransientUpgradeFailure,
+      onRetry: ({ attempt, maxAttempts, delayMs }) => {
+        options.onTransientUpgradeRetry?.({ attempt, maxAttempts, delayMs });
+      },
+      fn: () =>
+        runCommand(
         "stellar",
         [
           "contract",
@@ -147,34 +146,18 @@ export async function upgradeContractInPlace(
           failureCode: CaatingaErrorCode.INVOKE_FAILED,
           timeout: TRANSACTION_TIMEOUT_MS,
         }
+      ),
+    });
+  } catch (error) {
+    if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
+      throw new CaatingaError(
+        error.message,
+        error.code,
+        `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use ctg deploy --upgrade for redeploy.`,
+        error
       );
-      break;
-    } catch (error) {
-      const isLastAttempt = attempt === maxAttempts - 1;
-      if (!isTransientUpgradeFailure(error) || isLastAttempt) {
-        if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
-          throw new CaatingaError(
-            error.message,
-            error.code,
-            `Ensure "${contract.name}" exposes ${upgradeMethod}(${wasmArg}) with admin auth, or use ctg deploy --upgrade for redeploy.`,
-            error
-          );
-        }
-        throw error;
-      }
-
-      const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
-      try {
-        options.onTransientUpgradeRetry?.({
-          attempt: attempt + 1,
-          maxAttempts,
-          delayMs,
-        });
-      } catch {
-        // #151: callback error is non-fatal; the original transient error takes precedence.
-      }
-      await sleep(delayMs);
     }
+    throw error;
   }
 
   const metadata = await collectDeploymentMetadata({

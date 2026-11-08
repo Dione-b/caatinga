@@ -26,6 +26,7 @@ import {
   resolveWasmArtifactPath,
 } from "./wasm.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
+import { withRetries } from "../retry.js";
 
 export type DeployContractOptions = {
   config: CaatingaConfig;
@@ -49,12 +50,6 @@ export type DeployContractOptions = {
 };
 
 const DEFAULT_DEPLOY_RETRY_DELAYS_MS = [2000, 5000] as const;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 export async function deployContract(options: DeployContractOptions) {
   const cwd = options.cwd ?? process.cwd();
@@ -154,78 +149,53 @@ export async function deployContract(options: DeployContractOptions) {
     ...constructorArgs,
   ];
 
-  let deployOutcome: { output: string; contractId: string } | undefined;
   const defaultRetryDelays = isMainnetNetwork(network.name, network.config)
     ? []
     : DEFAULT_DEPLOY_RETRY_DELAYS_MS;
   const retryDelaysMs = options.deployRetryDelaysMs ?? defaultRetryDelays;
-  const maxDeployAttempts = retryDelaysMs.length + 1;
-
-  for (let attempt = 0; attempt < maxDeployAttempts; attempt++) {
-    try {
-      const result = await runCommand("stellar", stellarArgs, {
-        cwd,
-        failureCode: CaatingaErrorCode.DEPLOY_FAILED,
-        timeout: TRANSACTION_TIMEOUT_MS,
-      });
-      const output = result.all || `${result.stdout}\n${result.stderr}`;
-      deployOutcome = {
-        output,
-        contractId: parseContractId(output),
-      };
-      break;
-    } catch (error) {
-      if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.DEPLOY_FAILED) {
-        throw error;
-      }
-
-      const recoveredContractId = await tryRecoverContractIdFromDeployFailure({
-        output: `${error.message}\n${error.hint ?? ""}`,
-        source,
-        network: network.config,
-        cwd,
-      });
-
-      if (recoveredContractId) {
-        deployOutcome = {
-          output: [
-            error.hint ?? "",
-            "Caatinga recovered the contract ID from the on-chain deploy transaction.",
-            `Contract ID: ${recoveredContractId}`,
-          ]
-            .filter(Boolean)
-            .join("\n"),
-          contractId: recoveredContractId,
-        };
-        break;
-      }
-
-      const isLastAttempt = attempt === maxDeployAttempts - 1;
-      if (!isTransientDeployFailure(error) || isLastAttempt) {
-        throw error;
-      }
-
-      const delayMs = retryDelaysMs[attempt] ?? retryDelaysMs[retryDelaysMs.length - 1] ?? 0;
+  const deployOutcome = await withRetries({
+    delays: retryDelaysMs,
+    isRetryable: isTransientDeployFailure,
+    onRetry: ({ attempt, maxAttempts, delayMs }) => {
+      options.onTransientDeployRetry?.({ attempt, maxAttempts, delayMs });
+    },
+    fn: async () => {
       try {
-        options.onTransientDeployRetry?.({
-          attempt: attempt + 1,
-          maxAttempts: maxDeployAttempts,
-          delayMs,
+        const result = await runCommand("stellar", stellarArgs, {
+          cwd,
+          failureCode: CaatingaErrorCode.DEPLOY_FAILED,
+          timeout: TRANSACTION_TIMEOUT_MS,
         });
-      } catch {
-        // #151: callback error is non-fatal; the original transient error takes precedence.
-      }
-      await sleep(delayMs);
-    }
-  }
+        const output = result.all || `${result.stdout}\n${result.stderr}`;
+        return { output, contractId: parseContractId(output) };
+      } catch (error) {
+        if (!(error instanceof CaatingaError) || error.code !== CaatingaErrorCode.DEPLOY_FAILED) {
+          throw error;
+        }
 
-  if (!deployOutcome) {
-    throw new CaatingaError(
-      "Deploy failed without a contract ID.",
-      CaatingaErrorCode.DEPLOY_FAILED,
-      "Re-run the deploy command with the underlying Stellar CLI for full diagnostics."
-    );
-  }
+        const recoveredContractId = await tryRecoverContractIdFromDeployFailure({
+          output: `${error.message}\n${error.hint ?? ""}`,
+          source,
+          network: network.config,
+          cwd,
+        });
+
+        if (recoveredContractId) {
+          return {
+            output: [
+              error.hint ?? "",
+              "Caatinga recovered the contract ID from the on-chain deploy transaction.",
+              `Contract ID: ${recoveredContractId}`,
+            ]
+              .filter(Boolean)
+              .join("\n"),
+            contractId: recoveredContractId,
+          };
+        }
+        throw error;
+      }
+    },
+  });
 
   const { output, contractId } = deployOutcome;
   const wasmHash = localWasmHash;

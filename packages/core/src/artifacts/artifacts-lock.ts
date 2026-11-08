@@ -1,5 +1,6 @@
 import { open, readFile, rename, unlink } from "node:fs/promises";
 import path from "node:path";
+import { sleep } from "../retry.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 
 const LOCK_RETRY_DELAY_MS = 50;
@@ -15,12 +16,6 @@ export type WithArtifactsLockOptions = {
   /** How long to wait for the lock before failing (default 15s). */
   timeoutMs?: number;
 };
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 async function readLockOwner(lockPath: string): Promise<LockOwner | undefined> {
   try {

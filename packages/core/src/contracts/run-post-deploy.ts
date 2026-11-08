@@ -17,6 +17,7 @@ import { resolvePlaceholders } from "./placeholder-engine.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import { assertSorobanSymbol } from "../soroban/assert-soroban-symbol.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
+import { withRetries } from "../retry.js";
 
 export type RunPostDeployHooksOptions = {
   config: CaatingaConfig;
@@ -41,12 +42,6 @@ export type PostDeployHookResult = {
 };
 
 const DEFAULT_HOOK_RETRY_DELAYS_MS = [2000, 5000] as const;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 function isTransientHookFailure(error: unknown): boolean {
   return isTransientCaatingaFailure(error, CaatingaErrorCode.INVOKE_FAILED);
@@ -192,12 +187,25 @@ export async function runPostDeployHooks(
         ? []
         : DEFAULT_HOOK_RETRY_DELAYS_MS;
       const retryDelaysMs = options.hookRetryDelaysMs ?? defaultRetryDelays;
-      const maxHookAttempts = retryDelaysMs.length + 1;
 
       async function invokeWithRetry(): Promise<{ stdout: string; stderr: string; all: string }> {
-        for (let attempt = 0; attempt < maxHookAttempts; attempt++) {
-          try {
-            return await runCommand(
+        return withRetries({
+          delays: retryDelaysMs,
+          isRetryable: isTransientHookFailure,
+          onRetry: ({ attempt, maxAttempts, delayMs }) => {
+            options.onTransientHookRetry?.({
+              hook: {
+                contract: hook.contract,
+                method: hook.method,
+                kind: hookKind,
+              },
+              attempt,
+              maxAttempts,
+              delayMs,
+            });
+          },
+          fn: () =>
+            runCommand(
               "stellar",
               [
                 "contract",
@@ -216,37 +224,8 @@ export async function runPostDeployHooks(
                 failureCode: CaatingaErrorCode.INVOKE_FAILED,
                 timeout: TRANSACTION_TIMEOUT_MS,
               }
-            );
-          } catch (error) {
-            const isLastAttempt = attempt === maxHookAttempts - 1;
-            if (!isTransientHookFailure(error) || isLastAttempt) {
-              throw error;
-            }
-
-            const delayMs = retryDelaysMs[attempt];
-            try {
-              options.onTransientHookRetry?.({
-                hook: {
-                  contract: hook.contract,
-                  method: hook.method,
-                  kind: hookKind,
-                },
-                attempt: attempt + 1,
-                maxAttempts: maxHookAttempts,
-                delayMs,
-              });
-            } catch {
-              // Callback error is non-fatal; original transient error takes precedence.
-            }
-            await sleep(delayMs);
-          }
-        }
-
-        throw new CaatingaError(
-          "Hook invocation failed after all retry attempts.",
-          CaatingaErrorCode.INVOKE_FAILED,
-          "The network may be congested; try again later."
-        );
+            ),
+        });
       }
 
       const result = await invokeWithRetry();
