@@ -1,6 +1,6 @@
-import { randomBytes } from "node:crypto";
-import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 import { CaatingaArtifactsSchema, type CaatingaArtifacts } from "./artifact.schema.js";
 
 export async function writeArtifacts(
@@ -15,16 +15,7 @@ export async function writeArtifacts(
   // call, after it's already the trusted record for signed transactions.
   const validated = CaatingaArtifactsSchema.parse(artifacts);
 
-  const tmpPath = `${artifactsPath}.${randomBytes(4).toString("hex")}.tmp`;
-  const payload = `${JSON.stringify(validated, null, 2)}\n`;
-
-  try {
-    await writeFile(tmpPath, payload, "utf8");
-    await rename(tmpPath, artifactsPath);
-  } catch (error) {
-    await unlink(tmpPath).catch(() => undefined);
-    throw error;
-  }
+  await atomicWriteFile(artifactsPath, `${JSON.stringify(validated, null, 2)}\n`);
 
   return artifactsPath;
 }
