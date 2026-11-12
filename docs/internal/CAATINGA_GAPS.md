@@ -476,9 +476,9 @@ responsável pelo crash recovery completo.
 | ✅         | Gap 5 — postDeploy source override      | Baixo            | Resolvido em v3.5.1                                 |
 | ✅         | Gap 3 — WASM hash em `sync-env`         | Baixo            | Resolvido em v3.5.1                                 |
 | ✅         | Gap 13 — postDeployVerify asserts       | Médio            | Resolvido em v3.5.1                                 |
-| P2         | Gap 2 — Contratos per-offer             | Alto             | Não aplicável (per-offer = backend)                 |
-| P2         | Gap 9 — Precomputação contractId        | Alto             | Não aplicável (per-offer = backend)                 |
-| P2         | Gap 14 — Upload WASM separado           | Médio            | Não aplicável (per-offer = backend)                 |
+| P2         | Gap 2 — Contratos per-offer             | Alto             | Em andamento (Hackathon B5)                         |
+| P2         | Gap 9 — Precomputação contractId        | Alto             | Em andamento (Hackathon B5)                         |
+| P2         | Gap 14 — Upload WASM separado           | Médio            | Em andamento (Hackathon B5)                         |
 | P2         | Gap 15 — Crash recovery on-chain        | Médio            | Já tem retry + recovery; falta verificação on-chain |
 | P3         | Gap 4 — Docker secret signing           | N/A              | Por design (dev only)                               |
 | P3         | Gap 6 — Multi-batch distribution        | N/A              | Backend only                                        |
