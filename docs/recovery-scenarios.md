@@ -23,7 +23,7 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 | Code                          | Recovery command                                                                                |
 | ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| `CAATINGA_ARTIFACT_NOT_FOUND` | `ctg init` or copy `caatinga.artifacts.json` from a teammate                                    |
+| `CAATINGA_ARTIFACT_NOT_FOUND` | `ctg adopt` (existing Soroban project), `ctg init`, or copy `caatinga.artifacts.json` from a teammate                                    |
 | `CAATINGA_ARTIFACT_INVALID`   | Fix JSON manually, or delete and redeploy: `ctg deploy --network <network> --source <identity>` |
 | Unsupported schema version    | Upgrade CLI: `npm install -g @caatinga/cli@latest`                                              |
 

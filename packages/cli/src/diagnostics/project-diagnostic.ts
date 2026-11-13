@@ -61,7 +61,7 @@ export async function artifactsDiagnostic(): Promise<Diagnostic> {
     return {
       ok: false,
       label: "caatinga.artifacts.json not found or invalid",
-      fix: `Run ${npxCli("init")}, or restore a valid caatinga.artifacts.json file.`,
+      fix: `Run ${npxCli("adopt")} for an existing Soroban project, or restore a valid caatinga.artifacts.json file.`,
     };
   }
 }
