@@ -16,6 +16,14 @@ describe("writeArtifacts and readArtifacts", () => {
     }
   });
 
+  it("should_point_the_missing_artifacts_hint_at_ctg_adopt", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
+
+    await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
+      hint: expect.stringContaining("ctg adopt"),
+    });
+  });
+
   it("should_roundtrip_valid_artifacts_json", async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
     const initial = createInitialArtifacts("app");
