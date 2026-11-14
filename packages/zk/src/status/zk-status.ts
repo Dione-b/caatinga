@@ -1,10 +1,25 @@
 import type { CaatingaConfig } from "@caatinga/core";
 import path from "node:path";
 import { hashFileContents, pathExists } from "../artifacts/files.js";
-import { CIRCUIT_INPUT_FILE, zkArtifactPaths, zkArtifactsDir } from "../artifacts/zk-paths.js";
+import {
+  CIRCUIT_INPUT_FILE,
+  CIRCUIT_WASM_FILE,
+  R1CS_FILE,
+  VERIFICATION_KEY_FILE,
+  ZKEY_FILE,
+  zkArtifactPaths,
+  zkArtifactsDir,
+} from "../artifacts/zk-paths.js";
 import { hashCircuitSources } from "../build/circuit-sources.js";
 import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "../ceremony/ceremony-manifest.js";
 import { readProveManifest } from "../prove/prove-manifest.js";
+
+const REQUIRED_BUILD_ARTIFACTS = [
+  R1CS_FILE,
+  CIRCUIT_WASM_FILE,
+  ZKEY_FILE,
+  VERIFICATION_KEY_FILE,
+] as const;
 
 export type ZkDriftStatus =
   | "not-built"
@@ -85,6 +100,18 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
       continue;
     }
 
+    const missingArtifacts: string[] = [];
+    for (const relPath of REQUIRED_BUILD_ARTIFACTS) {
+      if (!(await pathExists(path.join(artifactsDir, relPath)))) {
+        missingArtifacts.push(relPath.replace(/\\/g, "/"));
+      }
+    }
+    if (missingArtifacts.length > 0) {
+      advisories.push(
+        `Missing build artifact(s): ${missingArtifacts.join(", ")}. Run \`ctg zk build ${name}\` to regenerate them.`
+      );
+    }
+
     let currentCircuitHash: string | undefined;
     try {
       currentCircuitHash = await hashCircuitSources(circuitPath);
@@ -127,7 +154,9 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
       }
     }
 
-    if (status.circuitChanged) {
+    if (missingArtifacts.length > 0) {
+      status.status = "artifacts-missing";
+    } else if (status.circuitChanged) {
       status.status = "circuit-changed";
     } else if (status.vkChanged) {
       status.status = "vk-changed";
