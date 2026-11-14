@@ -8,11 +8,8 @@ import {
   digestCeremonyArtifacts,
   findCeremonyMismatches,
 } from "./ceremony-integrity.js";
-import {
-  assertDevCeremonyAllowed,
-  MPC_CEREMONY_MANIFEST_VERSION,
-  writeMpcCeremonyManifest,
-} from "./dev-ceremony.js";
+import { assertDevCeremonyAllowed } from "./ceremony-guards.js";
+import { MPC_CEREMONY_MANIFEST_VERSION, writeMpcCeremonyManifest } from "./ceremony-manifest.js";
 
 let artifactsDir: string;
 

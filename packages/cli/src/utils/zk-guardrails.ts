@@ -4,6 +4,8 @@ import type { CaatingaConfig, NetworkConfig } from "@caatinga/core";
 import { assertProtocolForZk, CaatingaError, CaatingaErrorCode } from "@caatinga/core";
 import {
   assertDevCeremonyAllowed,
+  embeddedVkSourcePath,
+  isPlaceholderEmbeddedVk,
   isProductionNetwork,
   readCeremonyManifest,
   zkArtifactsDir,
@@ -84,9 +86,6 @@ export async function assertZkVerifierDeployAllowed(options: {
   }
 }
 
-/** Marker the scaffold placeholder carries, so a stale vk.rs is detectable. */
-const EMBEDDED_VK_PLACEHOLDER_MARKER = "PLACEHOLDER verification key shipped with the scaffold";
-
 /**
  * Guards the embedded-VK invoke path.
  *
@@ -104,10 +103,9 @@ export function assertEmbedVkInvokeSupported(options: {
     return;
   }
 
-  const vkPath = path.join(
-    options.verifierSrcDir ?? path.resolve("contracts", "verifier", "src"),
-    "vk.rs"
-  );
+  const vkPath = options.verifierSrcDir
+    ? path.join(options.verifierSrcDir, "vk.rs")
+    : embeddedVkSourcePath();
 
   let source: string | undefined;
   try {
@@ -124,7 +122,7 @@ export function assertEmbedVkInvokeSupported(options: {
     );
   }
 
-  if (source.includes(EMBEDDED_VK_PLACEHOLDER_MARKER)) {
+  if (isPlaceholderEmbeddedVk(source)) {
     throw new CaatingaError(
       "`ctg zk invoke --embed-vk` cannot be used while vk.rs is still the scaffold placeholder.",
       CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,

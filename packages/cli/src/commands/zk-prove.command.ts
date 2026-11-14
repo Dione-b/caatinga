@@ -1,10 +1,11 @@
 import { type Command } from "commander";
 import path from "node:path";
 import { loadConfig } from "@caatinga/core";
-import { proveCircuit } from "@caatinga/zk";
+import { CIRCUIT_INPUT_FILE, proveCircuit } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { createZkInstallProgress } from "../utils/zk-install-progress.js";
+import { resolveZkCircuit } from "../utils/zk-circuit.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 
 export function registerZkProveCommand(program: Command): void {
@@ -15,28 +16,18 @@ export function registerZkProveCommand(program: Command): void {
     .action(async (circuitName: string | undefined, options: { debug?: boolean }) => {
       await runCliAction(async () => {
         const config = await loadConfig();
-        const zk = config.zk;
-        if (!zk) {
-          throw new Error("No ZK circuits configured");
-        }
+        const { name, circuit, artifactsDir, artifacts } = resolveZkCircuit(config, circuitName);
 
-        const name = circuitName ?? Object.keys(zk.circuits)[0]!;
-        const circuit = zk.circuits[name];
-        if (!circuit) {
-          throw new Error(`Circuit "${name}" not found`);
-        }
-
-        const artifactsDir = `.artifacts/zk/${name}`;
         await proveCircuit({
           circuitName: name,
           circuitPath: circuit.path,
           artifactsDir,
-          inputPath: path.join(circuit.path, "input.json"),
+          inputPath: path.join(circuit.path, CIRCUIT_INPUT_FILE),
           debug: Boolean(options.debug),
           progress: createZkInstallProgress(),
         });
         logger.success(`Generated proof for circuit "${name}"`);
-        logger.info(`Proof written to: ${path.join(artifactsDir, "proof.json")}`);
+        logger.info(`Proof written to: ${artifacts.proof}`);
       });
     });
 }

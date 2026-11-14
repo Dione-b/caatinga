@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { concatG1Bytes, concatG2Bytes } from "../serialization/curve-bytes.js";
 import { serializeProof, type SnarkjsProof } from "../serialization/serialize-proof.js";
 import { serializeVk, type SnarkjsVk } from "../serialization/serialize-vk.js";
-import { generateVkRust } from "./build-circuit.js";
+import { generateVkRust } from "./embedded-vk.js";
 
 /**
  * Proves the embedded-VK entrypoint is equivalent to the dynamic one (#299):
@@ -143,7 +143,7 @@ describe.skipIf(!runCargoTests)("embedded VK equivalence (cargo)", () => {
   });
 
   async function cargoTest(embeddedVkJson: string, expectEmbeddedMatch: boolean): Promise<void> {
-    await writeFile(path.join(crateDir, "src", "vk.rs"), generateVkRust("vk.json", embeddedVkJson));
+    await writeFile(path.join(crateDir, "src", "vk.rs"), generateVkRust(embeddedVkJson));
     await writeFile(
       path.join(crateDir, "src", "test.rs"),
       equivalenceTestRust({

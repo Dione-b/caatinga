@@ -1,8 +1,10 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { runCommand } from "@caatinga/core";
+import { readJsonFile } from "../artifacts/files.js";
+import { R1CS_FILE, VERIFICATION_KEY_FILE } from "../artifacts/zk-paths.js";
 import { ZkError } from "../errors/ZkError.js";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
 import type { ZkInstallProgress } from "../install/install-progress.js";
@@ -13,7 +15,7 @@ import {
   readCeremonyManifest,
   writeMpcCeremonyManifest,
   type MpcCeremonyManifest,
-} from "./dev-ceremony.js";
+} from "./ceremony-manifest.js";
 
 export type VerifyCeremonyOptions = {
   artifactsDir: string;
@@ -82,7 +84,7 @@ export async function verifyCeremony(
 
   const snarkjs = await ensureSnarkjs(options.progress);
   const zkeyPath = path.join(artifactsDir, manifest.artifacts.zkey.path);
-  const r1csPath = path.join(artifactsDir, manifest.artifacts.r1cs?.path ?? "main.r1cs");
+  const r1csPath = path.join(artifactsDir, manifest.artifacts.r1cs?.path ?? R1CS_FILE);
 
   let zkey: VerifyCeremonyResult["zkey"] = "skipped";
   if (manifest.artifacts.ptau) {
@@ -107,15 +109,12 @@ export async function verifyCeremony(
   const exportDir = await mkdtemp(path.join(tmpdir(), "caatinga-zk-vk-"));
   let verificationKeyMatchesZkey: boolean;
   try {
-    const exported = path.join(exportDir, "verification_key.json");
+    const exported = path.join(exportDir, VERIFICATION_KEY_FILE);
     await runCommand(snarkjs, ["zkey", "export", "verificationkey", zkeyPath, exported]);
-    const recorded = JSON.parse(
-      await readFile(path.join(artifactsDir, manifest.artifacts.verificationKey.path), "utf8")
-    ) as unknown;
-    verificationKeyMatchesZkey = isDeepStrictEqual(
-      JSON.parse(await readFile(exported, "utf8")),
-      recorded
+    const recorded = await readJsonFile<unknown>(
+      path.join(artifactsDir, manifest.artifacts.verificationKey.path)
     );
+    verificationKeyMatchesZkey = isDeepStrictEqual(await readJsonFile<unknown>(exported), recorded);
   } finally {
     await rm(exportDir, { recursive: true, force: true });
   }

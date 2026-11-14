@@ -1,5 +1,33 @@
-import { readFile } from "node:fs/promises";
+import { readJsonFile } from "../artifacts/files.js";
 import { ZkError } from "../errors/ZkError.js";
+
+/** The fields of a snarkjs verification key that say how many public signals it has. */
+export type VkPublicSignalFields = {
+  nPublic?: unknown;
+  ic?: unknown[];
+  vk_ic?: unknown[];
+  IC?: unknown[];
+};
+
+/**
+ * Explicit public-signal count of a verification key, when it declares one.
+ * Authoritative when present, since it is stated rather than inferred.
+ */
+export function declaredPublicSignals(vk: VkPublicSignalFields): number | undefined {
+  return typeof vk.nPublic === "number" && Number.isInteger(vk.nPublic) && vk.nPublic >= 0
+    ? vk.nPublic
+    : undefined;
+}
+
+/**
+ * The IC array of a verification key, or undefined when it has no usable one.
+ * snarkjs has shipped three spellings (`ic`, `vk_ic`, `IC`); an IC always
+ * holds one point more than the circuit has public signals.
+ */
+export function usableIc(vk: VkPublicSignalFields): unknown[] | undefined {
+  const ic = [vk.ic, vk.vk_ic, vk.IC].find((candidate) => Array.isArray(candidate));
+  return ic && ic.length >= 2 ? ic : undefined;
+}
 
 /**
  * Reads a snarkjs verification key and returns the number of public signals it
@@ -11,9 +39,9 @@ import { ZkError } from "../errors/ZkError.js";
  * when present because it is authoritative rather than inferred.
  */
 export async function readVerificationKeyPublicSignals(vkPath: string): Promise<number> {
-  let parsed: { nPublic?: unknown; ic?: unknown[]; vk_ic?: unknown[]; IC?: unknown[] };
+  let parsed: VkPublicSignalFields;
   try {
-    parsed = JSON.parse(await readFile(vkPath, "utf8")) as typeof parsed;
+    parsed = await readJsonFile<VkPublicSignalFields>(vkPath);
   } catch (error) {
     throw new ZkError(
       `Could not read the verification key at ${vkPath}.`,
@@ -22,17 +50,13 @@ export async function readVerificationKeyPublicSignals(vkPath: string): Promise<
     );
   }
 
-  if (
-    typeof parsed.nPublic === "number" &&
-    Number.isInteger(parsed.nPublic) &&
-    parsed.nPublic >= 0
-  ) {
-    return parsed.nPublic;
+  const declared = declaredPublicSignals(parsed);
+  if (declared !== undefined) {
+    return declared;
   }
 
-  const ic = [parsed.ic, parsed.vk_ic, parsed.IC].find((candidate) => Array.isArray(candidate));
-
-  if (!ic || ic.length < 2) {
+  const ic = usableIc(parsed);
+  if (!ic) {
     throw new ZkError(
       `The verification key at ${vkPath} has no usable IC array.`,
       "ZK_VK_REQUIRED",

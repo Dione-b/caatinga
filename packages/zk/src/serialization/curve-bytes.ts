@@ -1,4 +1,4 @@
-import type { SerializedG1, SerializedG2 } from "./serialize-proof.js";
+import type { SerializedG1, SerializedG2 } from "./curve-points.js";
 
 export function concatG1Bytes(point: SerializedG1): Uint8Array {
   const bytes = new Uint8Array(point.x.length + point.y.length);

@@ -4,9 +4,10 @@ import { registerZkProveCommand } from "./zk-prove.command.js";
 
 const proveCircuitMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@caatinga/zk", () => ({
-  proveCircuit: proveCircuitMock,
-}));
+vi.mock("@caatinga/zk", async () => {
+  const actual = await vi.importActual<typeof import("@caatinga/zk")>("@caatinga/zk");
+  return { ...actual, proveCircuit: proveCircuitMock };
+});
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");

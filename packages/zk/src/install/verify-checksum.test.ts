@@ -2,7 +2,8 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { sha256File, verifyFileChecksum } from "./verify-checksum.js";
+import { sha256File } from "../artifacts/files.js";
+import { verifyFileChecksum } from "./verify-checksum.js";
 
 let dir: string;
 let filePath: string;

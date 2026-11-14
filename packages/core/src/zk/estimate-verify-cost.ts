@@ -86,9 +86,7 @@ export function estimateZkVerifyCost(options: EstimateZkVerifyCostOptions): ZkVe
     );
   }
 
-  if (memoryUtilization > 1) {
-    advisories.push(`${describe("memory", memoryUtilization)}.`);
-  } else if (memoryUtilization >= ZK_WARN_UTILIZATION) {
+  if (memoryUtilization >= ZK_WARN_UTILIZATION) {
     advisories.push(`${describe("memory", memoryUtilization)}.`);
   }
 

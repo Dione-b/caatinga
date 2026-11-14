@@ -4,11 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { CaatingaError, CaatingaErrorCode } from "@caatinga/core";
-import {
-  registerZkInitCommand,
-  mergeZkIntoConfigSource,
-  scaffoldVerifierLacksAdmin,
-} from "./zk-init.command.js";
+import { registerZkInitCommand } from "./zk-init.command.js";
+import { mergeZkIntoConfigSource, scaffoldVerifierLacksAdmin } from "../utils/zk-config-merge.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
 

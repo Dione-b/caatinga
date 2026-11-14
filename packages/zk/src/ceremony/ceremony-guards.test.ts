@@ -1,12 +1,8 @@
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  assertDevCeremonyAllowed,
-  ceremonyManifestPath,
-  isProductionNetwork,
-  writeDevCeremonyManifest,
-} from "./dev-ceremony.js";
+import { assertDevCeremonyAllowed, isProductionNetwork } from "./ceremony-guards.js";
+import { ceremonyManifestPath, writeDevCeremonyManifest } from "./ceremony-manifest.js";
 
 const tmpRoot = path.join(process.cwd(), ".artifacts", "zk-test-ceremony");
 
@@ -14,7 +10,7 @@ afterEach(async () => {
   await rm(tmpRoot, { recursive: true, force: true });
 });
 
-describe("dev-ceremony", () => {
+describe("ceremony guards", () => {
   it("should_identify_mainnet_as_production_network", () => {
     expect(isProductionNetwork("mainnet")).toBe(true);
     expect(isProductionNetwork("testnet")).toBe(false);

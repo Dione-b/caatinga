@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { runCommand } from "@caatinga/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
-import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "./dev-ceremony.js";
+import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "./ceremony-manifest.js";
 import { importCeremony } from "./import-ceremony.js";
 import { verifyCeremony } from "./verify-ceremony.js";
 

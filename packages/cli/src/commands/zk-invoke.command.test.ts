@@ -42,11 +42,14 @@ const mockConfig = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@caatinga/zk", () => ({
-  invokeVerifier: invokeVerifierMock,
-  assertDevCeremonyAllowed: assertDevCeremonyAllowedMock,
-  zkArtifactsDir: (name: string) => `.artifacts/zk/${name}`,
-}));
+vi.mock("@caatinga/zk", async () => {
+  const actual = await vi.importActual<typeof import("@caatinga/zk")>("@caatinga/zk");
+  return {
+    ...actual,
+    invokeVerifier: invokeVerifierMock,
+    assertDevCeremonyAllowed: assertDevCeremonyAllowedMock,
+  };
+});
 
 vi.mock("@caatinga/core", async () => {
   const actual = await vi.importActual<typeof import("@caatinga/core")>("@caatinga/core");

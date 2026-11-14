@@ -1,7 +1,5 @@
-import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
 import { unlink } from "node:fs/promises";
-import { pipeline } from "node:stream/promises";
+import { sha256File } from "../artifacts/files.js";
 import { ZkError } from "../errors/ZkError.js";
 
 type ChecksumContext = {
@@ -12,12 +10,6 @@ type ChecksumContext = {
   /** GitHub release the pinned checksum was recorded from. */
   releaseUrl?: string;
 };
-
-export async function sha256File(filePath: string): Promise<string> {
-  const hash = createHash("sha256");
-  await pipeline(createReadStream(filePath), hash);
-  return hash.digest("hex");
-}
 
 /**
  * Fails the operation when a downloaded or cached tool does not match its

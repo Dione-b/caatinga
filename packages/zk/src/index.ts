@@ -10,40 +10,51 @@ export { buildCircuit, type BuildCircuitOptions } from "./build/build-circuit.js
 export {
   proveCircuit,
   resolveCircuitWasmPath,
-  proveManifestPath,
-  readProveManifest,
-  hashFileContents,
   type ProveCircuitOptions,
-  type ProveManifest,
 } from "./prove/prove-circuit.js";
 export {
+  proveManifestPath,
+  readProveManifest,
+  type ProveManifest,
+} from "./prove/prove-manifest.js";
+export { hashFileContents, sha256File } from "./artifacts/files.js";
+export {
+  zkArtifactsDir,
+  zkArtifactPaths,
+  embeddedVkSourcePath,
+  CEREMONY_MANIFEST_FILE,
+  CIRCUIT_INPUT_FILE,
+  type ZkArtifactPaths,
+} from "./artifacts/zk-paths.js";
+export { isPlaceholderEmbeddedVk } from "./build/embedded-vk.js";
+export { hashCircuitSources } from "./build/circuit-sources.js";
+export {
   invokeVerifier,
-  buildStellarVerifyProofArgs,
   type InvokeVerifierOptions,
   type InvokeVerifierResult,
 } from "./invoke/invoke-verifier.js";
+export { buildStellarVerifyProofArgs } from "./invoke/verify-proof-args.js";
 export { ptauSizeForConstraints } from "./build/detect-ptau-size.js";
 export {
   assertDevCeremonyAllowed,
   assertCeremonyMatchesCircuit,
   isProductionNetwork,
+  type AssertDevCeremonyAllowedOptions,
+} from "./ceremony/ceremony-guards.js";
+export {
   readCeremonyManifest,
   readDevCeremonyManifest,
   writeDevCeremonyManifest,
   writeMpcCeremonyManifest,
-  zkArtifactsDir,
   DEV_CEREMONY_TYPE,
   MPC_CEREMONY_TYPE,
   MPC_CEREMONY_MANIFEST_VERSION,
-  CEREMONY_MANIFEST_FILE,
-  type AssertDevCeremonyAllowedOptions,
   type CeremonyManifest,
   type DevCeremonyManifest,
   type MpcCeremonyManifest,
-} from "./ceremony/dev-ceremony.js";
+} from "./ceremony/ceremony-manifest.js";
 export {
   importCeremony,
-  hashCircuitSources,
   MPC_ZKEY_FILENAME,
   MPC_VERIFICATION_KEY_FILENAME,
   type ImportCeremonyOptions,
@@ -53,7 +64,6 @@ export {
   assertCeremonyIntegrity,
   digestCeremonyArtifacts,
   findCeremonyMismatches,
-  sha256File,
   CRITICAL_CEREMONY_ARTIFACTS,
   type CeremonyArtifactDigest,
   type CeremonyArtifactDigests,
@@ -71,6 +81,6 @@ export {
   type CollectZkStatusOptions,
   type ZkCircuitStatus,
   type ZkDriftStatus,
-} from "./ceremony/zk-status.js";
+} from "./status/zk-status.js";
 export type { ZkInstallProgress } from "./install/install-progress.js";
 export { ZkError } from "./errors/ZkError.js";

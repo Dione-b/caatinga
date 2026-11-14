@@ -1,7 +1,5 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { createHash } from "node:crypto";
 import path from "node:path";
+import { isFile, sha256File } from "../artifacts/files.js";
 import { ZkError } from "../errors/ZkError.js";
 
 /**
@@ -59,23 +57,6 @@ export type CeremonyArtifactMismatch = {
   critical: boolean;
 };
 
-/** Streaming sha256 of a file's raw bytes (zkeys can be hundreds of MB). */
-export async function sha256File(filePath: string): Promise<string> {
-  const hash = createHash("sha256");
-  for await (const chunk of createReadStream(filePath)) {
-    hash.update(chunk as Buffer);
-  }
-  return hash.digest("hex");
-}
-
-async function fileExists(target: string): Promise<boolean> {
-  try {
-    return (await stat(target)).isFile();
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Hashes each artifact that exists. `zkey` and `verificationKey` are required:
  * a ceremony without them is not one Caatinga can pin.
@@ -88,7 +69,7 @@ export async function digestCeremonyArtifacts(
 
   for (const [role, relativePath] of Object.entries(paths) as [CeremonyArtifactRole, string][]) {
     const absolute = path.join(artifactsDir, relativePath);
-    if (!(await fileExists(absolute))) {
+    if (!(await isFile(absolute))) {
       if (role === "zkey" || role === "verificationKey") {
         throw new ZkError(
           `Cannot pin the ceremony: ${absolute} does not exist.`,
@@ -119,7 +100,7 @@ export async function findCeremonyMismatches(
       continue;
     }
     const absolute = path.join(artifactsDir, digest.path);
-    const actual = (await fileExists(absolute)) ? await sha256File(absolute) : undefined;
+    const actual = (await isFile(absolute)) ? await sha256File(absolute) : undefined;
     if (actual !== digest.sha256) {
       mismatches.push({
         role,
