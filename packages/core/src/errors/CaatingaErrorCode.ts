@@ -68,6 +68,7 @@ export const CaatingaErrorCode = {
   ZK_EMBED_VK_UNSUPPORTED: "CAATINGA_ZK_EMBED_VK_UNSUPPORTED",
   ZK_CEREMONY_INCOMPATIBLE: "CAATINGA_ZK_CEREMONY_INCOMPATIBLE",
   ZK_CEREMONY_TAMPERED: "CAATINGA_ZK_CEREMONY_TAMPERED",
+  ZK_CHECKSUM_MISMATCH: "CAATINGA_ZK_CHECKSUM_MISMATCH",
   /**
    * Reserved: kept for compatibility, not emitted by any command. Doctor reports partial deploy
    * coverage as an advisory section only (see docs/internal/release/error-code-policy.md).
