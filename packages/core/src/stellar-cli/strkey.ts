@@ -25,5 +25,10 @@ export const CONTRACT_ID_REGEX = new RegExp(`^C${STRKEY_BODY}$`);
 /** Anchored account (source) strkey (`G` prefix), e.g. a deploy source address. */
 export const STELLAR_ADDRESS_REGEX = new RegExp(`^G${STRKEY_BODY}$`);
 
+/** Whether a value is a Stellar account public key (not a signing identity). */
+export function isLikelyPublicKeySource(source: string): boolean {
+  return STELLAR_ADDRESS_REGEX.test(source);
+}
+
 /** wasm hash as emitted by `hashWasm` / the Stellar CLI: 64 lowercase hex chars. */
 export const WASM_HASH_REGEX = /^[a-f0-9]{64}$/;
