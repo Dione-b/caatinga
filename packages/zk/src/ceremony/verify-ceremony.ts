@@ -5,6 +5,7 @@ import { isDeepStrictEqual } from "node:util";
 import { runCommand } from "@caatinga/core";
 import { readJsonFile } from "../artifacts/files.js";
 import { R1CS_FILE, VERIFICATION_KEY_FILE } from "../artifacts/zk-paths.js";
+import { collectErrorText } from "../errors/error-text.js";
 import { ZkError } from "../errors/ZkError.js";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
 import type { ZkInstallProgress } from "../install/install-progress.js";
@@ -36,6 +37,8 @@ export type VerifyCeremonyResult = {
 };
 
 const ZKEY_OK_PATTERN = /ZKey Ok!/;
+const ZKEY_REJECTED_PATTERN =
+  /INVALID(?:\(\d+\))?:|(?:Coeffs|A|B1|B2) section is not identical|(?:L|H) section does not match/i;
 
 /**
  * Offline, reproducible check of an imported ceremony:
@@ -91,17 +94,27 @@ export async function verifyCeremony(
     const ptauPath = path.join(artifactsDir, manifest.artifacts.ptau.path);
     options.progress?.onStatus?.("Running snarkjs zkey verify (this can take a while)...");
     let output = "";
+    let verifyError: unknown;
     try {
       output = (await runCommand(snarkjs, ["zkey", "verify", r1csPath, ptauPath, zkeyPath])).all;
     } catch (error) {
-      output = error instanceof Error ? error.message : String(error);
+      const combined = collectErrorText(error);
+      if (!ZKEY_REJECTED_PATTERN.test(combined)) {
+        throw error;
+      }
+      output = combined;
+      verifyError = error;
     }
     if (!ZKEY_OK_PATTERN.test(output)) {
-      throw new ZkError(
+      const tampered = new ZkError(
         `snarkjs zkey verify rejected ${zkeyPath} against ${path.basename(ptauPath)} and the compiled circuit.`,
         "ZK_CEREMONY_TAMPERED",
         "The proving key does not derive from this circuit and powers-of-tau. Obtain the ceremony's published artifacts again and re-import them."
       );
+      if (verifyError !== undefined) {
+        tampered.cause = verifyError;
+      }
+      throw tampered;
     }
     zkey = "verified";
   }
