@@ -244,6 +244,32 @@ describe("importCeremony", () => {
     ).rejects.toThrow(expect.objectContaining({ code: "ZK_CEREMONY_INCOMPATIBLE" }));
   });
 
+  it("should_fail_when_the_verification_key_is_not_on_bls12381", async () => {
+    const circuitPath = await seedCircuit(path.join(tmpRoot, "circuits"));
+    const artifactsDir = path.join(tmpRoot, ".artifacts/zk/main");
+    await seedCompiledArtifacts(artifactsDir, publicSignals);
+
+    const ceremonyDir = path.join(tmpRoot, "ceremony");
+    await mkdir(ceremonyDir, { recursive: true });
+    await writeFile(path.join(ceremonyDir, "circuit_final.zkey"), "zkey");
+    await writeFile(
+      path.join(ceremonyDir, "verification_key.json"),
+      JSON.stringify({
+        protocol: "groth16",
+        curve: "bn128",
+        IC: verificationKey(publicSignals).IC,
+      })
+    );
+
+    await expect(
+      importCeremony({ circuitName: "main", circuitPath, artifactsDir, ceremonyDir })
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "ZK_CEREMONY_INCOMPATIBLE",
+        message: expect.stringContaining("bn128"),
+      })
+    );
+  });
   it("should_preserve_a_powers_of_tau_file_shipped_with_the_ceremony", async () => {
     const circuitPath = await seedCircuit(path.join(tmpRoot, "circuits"));
     const artifactsDir = path.join(tmpRoot, ".artifacts/zk/main");
