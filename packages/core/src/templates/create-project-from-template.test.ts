@@ -436,6 +436,7 @@ describe("createProjectFromTemplate", () => {
     expect(packageJson.overrides?.uuid).toBe("^14.0.0");
     expect(packageJson.overrides?.ws).toBe("^8.21.0");
     expect(packageJson.overrides?.axios).toBe("^1.17.1");
+    expect(packageJson.overrides?.zod).toBe("^4.6.6");
     expect(packageJson.overrides?.["@trezor/connect-web"]).toBe(
       "file:./src/stubs/empty-wallet-dep"
     );
@@ -453,6 +454,7 @@ describe("createProjectFromTemplate", () => {
     expect(workspaceYaml).toContain('uuid: "^14.0.0"');
     expect(workspaceYaml).toContain('ws: "^8.21.0"');
     expect(workspaceYaml).toContain('axios: "^1.17.1"');
+    expect(workspaceYaml).toContain('zod: "^4.6.6"');
 
     expect(viteConfig).toContain("@caatinga/client/vite");
     expect(viteConfig).toContain("walletStubViteAliases");

@@ -58,7 +58,7 @@
     "execa": "^9.5.2",
     "jiti": "^2.4.2",
     "semver": "^7.8.0",
-    "zod": "^3.24.1"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/semver": "^7.7.1",
