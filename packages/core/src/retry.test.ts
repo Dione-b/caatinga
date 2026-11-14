@@ -6,9 +6,9 @@ describe("withRetries", () => {
     const fn = vi.fn().mockRejectedValueOnce(new Error("temporary")).mockResolvedValue("ok");
     const onRetry = vi.fn();
 
-    await expect(
-      withRetries({ delays: [0], fn, isRetryable: () => true, onRetry })
-    ).resolves.toBe("ok");
+    await expect(withRetries({ delays: [0], fn, isRetryable: () => true, onRetry })).resolves.toBe(
+      "ok"
+    );
 
     expect(fn).toHaveBeenCalledTimes(2);
     expect(onRetry).toHaveBeenCalledWith({
@@ -23,9 +23,7 @@ describe("withRetries", () => {
     const error = new Error("permanent");
     const fn = vi.fn().mockRejectedValue(error);
 
-    await expect(
-      withRetries({ delays: [0, 0], fn, isRetryable: () => false })
-    ).rejects.toBe(error);
+    await expect(withRetries({ delays: [0, 0], fn, isRetryable: () => false })).rejects.toBe(error);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -33,9 +31,7 @@ describe("withRetries", () => {
     const error = new Error("still unavailable");
     const fn = vi.fn().mockRejectedValue(error);
 
-    await expect(
-      withRetries({ delays: [0, 0], fn, isRetryable: () => true })
-    ).rejects.toBe(error);
+    await expect(withRetries({ delays: [0, 0], fn, isRetryable: () => true })).rejects.toBe(error);
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
@@ -47,7 +43,9 @@ describe("withRetries", () => {
         delays: [0],
         fn,
         isRetryable: () => true,
-        onRetry: () => { throw new Error("observer failed"); },
+        onRetry: () => {
+          throw new Error("observer failed");
+        },
       })
     ).resolves.toBe("ok");
   });
