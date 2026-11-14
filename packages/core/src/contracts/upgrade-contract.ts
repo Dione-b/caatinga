@@ -127,26 +127,26 @@ export async function upgradeContractInPlace(
       },
       fn: () =>
         runCommand(
-        "stellar",
-        [
-          "contract",
-          "invoke",
-          "--id",
-          existing.contractId,
-          "--source-account",
-          source,
-          ...buildStellarNetworkArgs(network),
-          "--",
-          upgradeMethod,
-          `--${wasmArg}`,
-          upload.wasmHash,
-        ],
-        {
-          cwd,
-          failureCode: CaatingaErrorCode.INVOKE_FAILED,
-          timeout: TRANSACTION_TIMEOUT_MS,
-        }
-      ),
+          "stellar",
+          [
+            "contract",
+            "invoke",
+            "--id",
+            existing.contractId,
+            "--source-account",
+            source,
+            ...buildStellarNetworkArgs(network),
+            "--",
+            upgradeMethod,
+            `--${wasmArg}`,
+            upload.wasmHash,
+          ],
+          {
+            cwd,
+            failureCode: CaatingaErrorCode.INVOKE_FAILED,
+            timeout: TRANSACTION_TIMEOUT_MS,
+          }
+        ),
     });
   } catch (error) {
     if (error instanceof CaatingaError && error.code === CaatingaErrorCode.INVOKE_FAILED) {
