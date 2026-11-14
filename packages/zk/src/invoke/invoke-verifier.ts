@@ -183,6 +183,14 @@ async function localVkIsPlaceholder(cwd: string): Promise<boolean> {
 }
 
 /**
+ * Markers of a VM trap in Stellar CLI output. The diagnostic event naming
+ * `UnreachableCodeReached` is printed only at some verbosity levels (CLI 28.1
+ * shows it only with `-v`); by default the CLI reports just the host error
+ * `Error(WasmVm, InvalidAction)`, which is what a trap surfaces as.
+ */
+const VM_TRAP_MARKERS = ["UnreachableCodeReached", "Error(WasmVm, InvalidAction)"];
+
+/**
  * The output lines reporting a VM trap in `verify_proof_embedded`, or none when
  * the failure is something else. Searches the error and its causes, since
  * `invokeContract` may re-wrap the Stellar CLI failure and move its output
@@ -209,6 +217,6 @@ function embeddedVkTrapLines(error: unknown): string[] {
   const trapLines = text
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => line.includes("UnreachableCodeReached"));
+    .filter((line) => VM_TRAP_MARKERS.some((marker) => line.includes(marker)));
   return [...new Set(trapLines)];
 }
