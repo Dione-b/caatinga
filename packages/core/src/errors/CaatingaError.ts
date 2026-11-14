@@ -24,6 +24,7 @@ const ZK_ERROR_CODE_MAP: Record<string, CaatingaErrorCodeValue> = {
   ZK_INPUT_CONTAINS_PUBLIC_SIGNALS: CaatingaErrorCode.ZK_INPUT_CONTAINS_PUBLIC_SIGNALS,
   ZK_CEREMONY_INCOMPATIBLE: CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE,
   ZK_CEREMONY_TAMPERED: CaatingaErrorCode.ZK_CEREMONY_TAMPERED,
+  ZK_CHECKSUM_MISMATCH: CaatingaErrorCode.ZK_CHECKSUM_MISMATCH,
 };
 
 export function toCaatingaError(error: unknown): CaatingaError {
@@ -32,19 +33,15 @@ export function toCaatingaError(error: unknown): CaatingaError {
   }
 
   if (error instanceof Error) {
+    const hint = "hint" in error && typeof error.hint === "string" ? error.hint : undefined;
     const zkCode =
       "code" in error && typeof error.code === "string" ? ZK_ERROR_CODE_MAP[error.code] : undefined;
 
     if (zkCode) {
-      return new CaatingaError(
-        error.message,
-        zkCode,
-        "hint" in error && typeof error.hint === "string" ? error.hint : undefined,
-        error
-      );
+      return new CaatingaError(error.message, zkCode, hint, error);
     }
 
-    return new CaatingaError(error.message, CaatingaErrorCode.UNEXPECTED_ERROR, undefined, error);
+    return new CaatingaError(error.message, CaatingaErrorCode.UNEXPECTED_ERROR, hint, error);
   }
 
   return new CaatingaError("An unexpected error occurred.", CaatingaErrorCode.UNEXPECTED_ERROR);
