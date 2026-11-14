@@ -112,9 +112,9 @@ export async function importCeremony(
   }
   const publicSignals = publicInputs + outputs;
 
-  const verificationKey = await readJsonFile<VkPublicSignalFields & { protocol?: unknown }>(
-    vkSource
-  );
+  const verificationKey = await readJsonFile<
+    VkPublicSignalFields & { protocol?: unknown; curve?: unknown }
+  >(vkSource);
   const ic = usableIc(verificationKey);
 
   if (!ic) {
@@ -141,6 +141,14 @@ export async function importCeremony(
       `The verification key is not a Groth16 key (protocol: ${String(verificationKey.protocol)}).`,
       "ZK_CEREMONY_INCOMPATIBLE",
       "Only groth16 is supported on Soroban. Re-run the ceremony with the groth16 protocol."
+    );
+  }
+
+  if (verificationKey.curve !== "bls12381") {
+    throw new ZkError(
+      `The verification key is not on the BLS12-381 curve (curve: ${String(verificationKey.curve)}).`,
+      "ZK_CEREMONY_INCOMPATIBLE",
+      "Only bls12381 is supported on Soroban. Re-run the ceremony on the bls12381 curve."
     );
   }
 
@@ -194,7 +202,7 @@ export async function importCeremony(
     provenance: {
       ...options.provenance,
       retrievedAt: options.provenance?.retrievedAt ?? new Date().toISOString(),
-      curve: "bls12381",
+      curve: verificationKey.curve,
     },
   });
 
