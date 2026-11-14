@@ -13,12 +13,14 @@ describe("wallet stub helpers", () => {
     const overrides = walletStubOverrides("./src/stubs") as {
       ws: string;
       axios: string;
+      zod: string;
       "@trezor/connect-web": string;
       "@creit.tech/stellar-wallets-kit": Record<string, string>;
     };
 
     expect(overrides.ws).toBe("^8.21.0");
     expect(overrides.axios).toBe("^1.17.1");
+    expect(overrides.zod).toBe("^4.6.6");
     expect(overrides["@trezor/connect-web"]).toBe("file:./src/stubs/empty-wallet-dep");
     expect(overrides["@creit.tech/stellar-wallets-kit"]["@hot-wallet/sdk"]).toBe(
       "file:./src/stubs/hot-wallet-sdk"
@@ -36,6 +38,7 @@ describe("wallet stub helpers", () => {
     expect(walletStubPnpmWorkspaceYaml()).toContain("allowBuilds:");
     expect(walletStubPnpmWorkspaceYaml()).toContain('ws: "^8.21.0"');
     expect(walletStubPnpmWorkspaceYaml()).toContain('axios: "^1.17.1"');
+    expect(walletStubPnpmWorkspaceYaml()).toContain('zod: "^4.6.6"');
   });
 
   it("should_declare_empty_packages_for_pnpm_9", () => {

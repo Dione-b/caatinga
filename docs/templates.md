@@ -79,6 +79,7 @@ overrides:
   uuid: "^14.0.0"
   ws: "^8.21.0"
   axios: "^1.17.1"
+  zod: "^4.6.6"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
   "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"
@@ -91,6 +92,7 @@ overrides:
 - `allowBuilds.esbuild: true` — pnpm blocks dependency lifecycle scripts by default; Vite pulls in esbuild. Without this, `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`.
 - `overrides.uuid` — avoids deprecated transitive `uuid@8` from optional wallet SDK dependencies. `package.json` also ships npm `overrides` for the same pin when using npm.
 - `overrides.axios` — pins `axios@^1.17.1` over the vulnerable `1.0.0–1.17.0` range pulled in via Coinbase CDP / Reown (high `npm audit` findings). See [Install override contract](./internal/template-overrides.md).
+- `overrides.zod` — pins `zod@^4.6.6` over the vulnerable `<4.6.6` range pulled in via Reown AppKit, Coinbase CDP and `abitype` (high `npm audit` findings, [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)). There is no patched 3.x release, so the pin moves those packages from zod 3 to zod 4. See [Install override contract](./internal/template-overrides.md).
 - `overrides.ws` — **required.** Pins `ws@^8.21.0` across the Reown/viem chain (transitive via Stellar Wallets Kit). Without this, `npm audit` reports ~14 **high** DoS advisories ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)) after install. See [Install override contract](./internal/template-overrides.md).
 - Safe overrides — block optional EVM/Safe packages from Reown AppKit (transitive via Stellar Wallets Kit). Irrelevant for Stellar wallets; removes the deprecated `@safe-global/safe-gateway-typescript-sdk` warning on `npm install`. `package.json` ships equivalent nested npm `overrides` for npm users.
 - Trezor/HOT overrides — SWK lists `@trezor/connect-web` and `@hot-wallet/sdk` as direct dependencies but Caatinga does not register them (no hardware-wallet support yet). npm `overrides` replace them with local stubs under `src/stubs/`; pnpm uses `"-"` path overrides in `pnpm-workspace.yaml`. This avoids critical `protobufjs` advisories (Trezor) and NEAR/`elliptic` noise (HOT) without affecting Freighter, LOBSTR, WalletConnect, etc. **Do not remove** — see [Install override contract](./internal/template-overrides.md).

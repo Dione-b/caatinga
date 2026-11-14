@@ -6,13 +6,14 @@ Official browser templates (`react-vite-counter`, `zk-starter`) ship npm `packag
 
 Stellar Wallets Kit (SWK) 2.x depends on Reown AppKit (WalletConnect), which pulls EVM tooling into the install tree even when the dApp only uses Freighter or LOBSTR. Caatinga does not use Trezor, HOT, or Safe directly, but those packages still appear in SWK's dependency graph unless blocked at install time.
 
-| Override                                                               | What breaks if removed                                                                                                     | Typical symptom                                                          |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `ws: "^8.21.0"`                                                        | Transitive `ws@8.0.0–8.20.1` via `viem` → Reown ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p)) | **~14 high** `npm audit` findings after `npm install`                    |
-| `axios: "^1.17.1"`                                                     | Transitive `axios@1.0.0–1.17.0` via Coinbase CDP / Reown                                                                   | **High** `npm audit` findings in consumer isolation                      |
-| Trezor stubs (`@trezor/connect-web`, `@trezor/connect-plugin-stellar`) | Real Trezor Connect → `protobufjs` advisories                                                                              | **Critical** audit noise; Caatinga does not support hardware wallets yet |
-| HOT stub (`@hot-wallet/sdk`)                                           | NEAR/`randombytes` chain                                                                                                   | Browser bundle/runtime errors                                            |
-| Safe / `uuid` overrides                                                | Optional EVM Safe packages, deprecated `uuid@8`                                                                            | Deprecated install warnings                                              |
+| Override                                                               | What breaks if removed                                                                                                                                             | Typical symptom                                                          |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `ws: "^8.21.0"`                                                        | Transitive `ws@8.0.0–8.20.1` via `viem` → Reown ([GHSA-96hv-2xvq-fx4p](https://github.com/advisories/GHSA-96hv-2xvq-fx4p))                                         | **~14 high** `npm audit` findings after `npm install`                    |
+| `axios: "^1.17.1"`                                                     | Transitive `axios@1.0.0–1.17.0` via Coinbase CDP / Reown                                                                                                           | **High** `npm audit` findings in consumer isolation                      |
+| `zod: "^4.6.6"`                                                        | Transitive `zod@3.x` via Reown AppKit / Coinbase CDP / `abitype` ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)); no patched 3.x exists | **~15 high** `npm audit` findings in consumer isolation                  |
+| Trezor stubs (`@trezor/connect-web`, `@trezor/connect-plugin-stellar`) | Real Trezor Connect → `protobufjs` advisories                                                                                                                      | **Critical** audit noise; Caatinga does not support hardware wallets yet |
+| HOT stub (`@hot-wallet/sdk`)                                           | NEAR/`randombytes` chain                                                                                                                                           | Browser bundle/runtime errors                                            |
+| Safe / `uuid` overrides                                                | Optional EVM Safe packages, deprecated `uuid@8`                                                                                                                    | Deprecated install warnings                                              |
 
 ## `ws` vulnerability chain (most common report)
 
@@ -35,6 +36,15 @@ npm install && npm audit
 npm ls ws
 ```
 
+## `zod` override (major-version pin)
+
+The `zod` advisory has no fix on the 3.x line, so the override forces zod 4 onto packages that declare zod 3: `@reown/appkit-wallet`, `@coinbase/cdp-sdk` and the `abitype` copies under `viem` / WalletConnect. Unlike the `ws` and `axios` pins this crosses a major version, so re-check it when bumping Stellar Wallets Kit or Reown:
+
+- every module in the install tree that imports `zod` must still evaluate (schemas are built at import time), and
+- `npm run build` must still succeed in a scaffolded template.
+
+When it was introduced (zod 4.6.7, `@reown/appkit` 1.8.21) all of those modules loaded and the Reown frame schemas parsed as before. `@caatinga/core` itself depends on `zod@^4.6.6` directly.
+
 ## Canonical source — keep files in sync
 
 When editing overrides, update **all** of:
@@ -49,7 +59,7 @@ When editing overrides, update **all** of:
 ## CI and tests that enforce overrides
 
 - [`scripts/consumer-isolation-test.sh`](../../scripts/consumer-isolation-test.sh) — runs `npm audit --audit-level=high` after scaffolding and installing the counter template
-- [`packages/core/src/templates/create-project-from-template.test.ts`](../../packages/core/src/templates/create-project-from-template.test.ts) — asserts `ws`, `axios`, Trezor, and SWK nested overrides in template `package.json`
+- [`packages/core/src/templates/create-project-from-template.test.ts`](../../packages/core/src/templates/create-project-from-template.test.ts) — asserts `ws`, `axios`, `zod`, Trezor, and SWK nested overrides in template `package.json`
 - [`packages/client/src/vite/wallet-stubs.test.ts`](../../packages/client/src/vite/wallet-stubs.test.ts)
 
 If you bump `@creit.tech/stellar-wallets-kit`, Reown, or other wallet dependencies, run consumer isolation (or at minimum scaffold + `npm install && npm audit`) before merging.

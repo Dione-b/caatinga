@@ -11,6 +11,7 @@ export function walletStubOverrides(stubsDir = "./src/stubs"): Record<string, un
     uuid: "^14.0.0",
     ws: "^8.21.0",
     axios: "^1.17.1",
+    zod: "^4.6.6",
     "@trezor/connect-web": `file:${posixStubsDir}/empty-wallet-dep`,
     "@trezor/connect-plugin-stellar": `file:${posixStubsDir}/empty-wallet-dep`,
     "@hot-wallet/sdk": `file:${posixStubsDir}/hot-wallet-sdk`,
@@ -57,6 +58,7 @@ overrides:
   uuid: "^14.0.0"
   ws: "^8.21.0"
   axios: "^1.17.1"
+  zod: "^4.6.6"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-web": "-"
   "@creit.tech/stellar-wallets-kit>@trezor/connect-plugin-stellar": "-"
   "@creit.tech/stellar-wallets-kit>@hot-wallet/sdk": "-"
