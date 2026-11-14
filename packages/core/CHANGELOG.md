@@ -1,5 +1,93 @@
 ## Breaking changes policy
 
+## 3.13.0
+
+### Minor Changes
+
+- d7eb132: Classify common Soroban simulation failures and add opt-in archived-state restoration to `invoke()`.
+
+  New public error codes (additive): `CAATINGA_SIMULATION_ACCOUNT_NOT_FOUND`, `CAATINGA_SIMULATION_RESOURCE_LIMIT` and `CAATINGA_SIMULATION_ENTRY_ARCHIVED`. They are matched against strings Soroban RPC, stellar-core and stellar-sdk actually emit (for example `Error(Budget, ExceededLimit)`, `txNO_ACCOUNT`, `ENTRY_ARCHIVED`, stellar-sdk's ExpiredStateError) and a non-null `restorePreamble`, in `read()` / `simulate()` (including errors thrown by the binding's `result` getter) and in `invoke()` (including errors raised inside `signAndSend`).
+
+  `invoke(method, args, { restore: true })` lets a compatible generated binding submit a RestoreFootprint transaction first, signed by the connected wallet after the wallet network check. Custom binding adapters receive the binding options as `methodOptions`.
+
+  **Compatibility:** these failures previously surfaced as `CAATINGA_XDR_PREPARE_FAILED` (prepare/simulate), `CAATINGA_XDR_SUBMIT_FAILED` (invoke) or the raw SDK error (`read()` getter, method construction). Callers that branch on those codes for these cases now receive the new codes. Other errors keep their previous codes; errors thrown while the binding builds the method that are not simulation failures still propagate unchanged. `restore` is a new invoke option key, so a single-argument object whose only key is `restore` is now read as options. Rollback: revert this change; no persisted data or artifacts are affected.
+
+- 6652eec: Imported ZK ceremonies are now pinned and verifiable, and ZK verification cost is measured on a live network.
+
+  **Pinned ceremony artifacts.** `ctg zk import-ceremony` writes a version-2 `ceremony.json` recording the sha256 of the proving key, verification key, powers-of-tau, r1cs and wasm, plus provenance (`--source-url`, `--ceremony-name`, `--participants`, `--retrieved-at`). Mainnet `ctg deploy <verifier>` and `ctg zk invoke` re-hash the proving key, verification key and powers-of-tau and fail with the new `CAATINGA_ZK_CEREMONY_TAMPERED` if any changed since import. `--allow-dev-ceremony` does not waive this check, and an `mpc-multi-party` manifest without hashes is rejected too, so editing `ceremony.json` no longer lifts the mainnet block. **Compatibility:** an MPC manifest written by the earlier pre-release `import-ceremony` has no hashes and is rejected on mainnet until the ceremony is re-imported. Dev-ceremony manifests are unchanged.
+
+  **New: `ctg zk verify-ceremony [circuit]`.** An offline, reproducible check: it re-hashes the pinned artifacts, runs `snarkjs zkey verify <r1cs> <ptau> <zkey>` when a powers-of-tau was imported, and checks that `verification_key.json` is the key exported from the zkey. On success it stamps `verifiedAt` in the manifest.
+
+  **`ctg estimate verify` recalibrated against testnet.** The model was fitted to simulated `verify_proof` calls for 1 to 104 public signals: about 40.5M instructions plus 3.56M per public signal. The previous model under-estimated by up to 26%. The reference limits now match the network's `contract_compute_v0` settings on testnet and mainnet: 400M instructions and 40 MiB per transaction, up from 100M and 16 MiB. In practice, a circuit can expose about 100 public signals before verification exceeds the transaction limit.
+
+  **Live-network ZK checks.** `scripts/zk-testnet-smoke.sh` now also checks that the live verifier rejects an invalid proof, altered public inputs, a mismatched verification key and swapped G2 limbs. It checks that a tampered imported zkey is refused both by `verify-ceremony` and on mainnet before any transaction, and it records verification cost per public-signal count with the new `scripts/zk-verify-benchmark.mjs`. The `zk-smoke` job now runs weekly. It also fixes the `workflow_dispatch` condition, which compared the boolean `zk` input to a string and therefore never ran.
+
+  New error code (public API, additive): `CAATINGA_ZK_CEREMONY_TAMPERED`.
+
+- 8631598: ZK deployment is now production-ready: audited ceremony artifacts can be imported, the embedded verification key path works end to end, and several guardrails report actionable errors instead of raw snarkjs stderr.
+
+  **New: `ctg zk import-ceremony <circuit> --ceremony <path>`** (breaking the mainnet dead end). Point it at an external MPC ceremony's `circuit_final.zkey` + `verification_key.json`; Caatinga copies them in, records `type: "mpc-multi-party"` in `ceremony.json`, and lifts the mainnet dev-ceremony block for that circuit. The artifacts are validated against the compiled circuit by public-signal count, so a key from a different circuit fails with `CAATINGA_ZK_CEREMONY_INCOMPATIBLE` instead of an unexplained on-chain verification failure. `ctg zk build` now **reuses** imported artifacts rather than overwriting them with a fresh dev ceremony.
+
+  **New: `ctg estimate verify <circuit>`** (advisory). Reports the CPU/memory budget for on-chain proof verification against the reference network limits and warns as the budget approaches them. With `--network`, the protocol pre-flight runs first.
+
+  **New: ZK protocol pre-flight.** `ctg deploy <verifier>` and `ctg zk invoke` check the target network's protocol version via Soroban RPC `getNetwork` before building a transaction, failing with `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED` when it is below 27 (the verifier is built with `soroban-sdk` 27, whose wasm declares protocol 27). `ctg doctor` reports each network's protocol version as an advisory.
+
+  **Embedded VK works end to end.** `ctg zk build --embed-vk` generates `contracts/verifier/src/vk.rs` and the verifier scaffold gains a `verify_proof_embedded` entrypoint, so `ctg zk invoke <circuit> --embed-vk` now works. Because the key is compiled into the contract, enabling it needs new contract code on chain (`ctg upgrade verifier` for an upgradeable verifier, otherwise one `ctg deploy verifier --upgrade` with a new `contractId`); after `--embed-vk` on a dev ceremony, re-run `ctg zk prove`. `verify_proof` stays in the contract, so dynamic-VK callers keep working after the switch. The CLI rejects `--embed-vk` invokes while `vk.rs` is still the scaffold placeholder (`CAATINGA_ZK_EMBED_VK_UNSUPPORTED`).
+
+  **`ctg zk build --network <name>`.** The mainnet dev-ceremony guard now checks the network the artifacts are meant for instead of only `defaultNetwork`, so a testnet default no longer hides a later mainnet deploy. Defaults to `defaultNetwork`; an unknown name fails with `CAATINGA_NETWORK_NOT_FOUND`.
+
+  **`zk-starter` ships a `mainnet` network**, matching `react-vite-counter`, so `ctg deploy verifier --network mainnet` no longer fails with network-not-found in a fresh project.
+
+  **Better input errors.** A malformed `circuits/input.json` (for example the multiplier scaffold's derived output `c`) is now reported as `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS`, naming the offending signal and how to fix it, instead of leaving the user to read raw snarkjs stderr.
+
+  **ZK drift in `ctg status`.** Reports whether a circuit has been built, its ceremony type, and whether the circuit sources or `input.json` changed since the last prove/import. Additive to the existing output and `--json` payload; `--strict` still guards binding freshness only.
+
+  **Checksum mismatches are actionable.** A `circom` binary failing its pinned SHA-256 now reports the pinned version, the download URL, and the GitHub release page, and points at the file holding the pin. It still never auto-retries.
+
+  New error codes (public API, additive): `CAATINGA_ZK_PROTOCOL_VERSION_UNSUPPORTED`, `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS`, `CAATINGA_ZK_EMBED_VK_UNSUPPORTED`, `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`. `ctg zk invoke --embed-vk` no longer reports `CAATINGA_INVALID_CONFIG`.
+
+  Add `scripts/zk-testnet-smoke.sh` (opt-in, spends testnet XLM) and the `zk-smoke` CI job in `.github/workflows/testnet-smoke.yml`, triggered via `workflow_dispatch` with `zk: true`.
+
+  Also fixes: the verification-key reader accepted only the legacy `vk_ic` spelling and now handles the `IC`/`nPublic` shape snarkjs actually exports; `snarkjs r1cs info` output was parsed with a non-existent `# of Public Signals` label, which made import validation always fail. A dry-run run-through of the full loop surfaced three more issues, all fixed: `ctg zk prove` now translates snarkjs stderr into `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS` instead of dumping raw stderr; `ctg zk build` no longer warns about a single-party dev ceremony when it reused imported MPC artifacts; and `ctg status` now reports `vk-changed` when the verification key swapped under a proof (for example after `ctg zk import-ceremony`), so a stale proof can't reach the verifier silently.
+
+  CLI test isolation: `zk-guardrails`, `deploy`, and `estimate` tests no longer remove the shared `.artifacts/zk` tree while the suite runs in parallel, which surfaced as flaky `ENOTEMPTY` failures.
+
+- 688db16: **The ZK verifier can be upgraded in place.** The verifier scaffold (`ctg zk init`, `zk-starter`) now has `__constructor(admin: Address)`, `admin()` and an admin-gated `upgrade(new_wasm_hash)`, and its config entry passes the deploying identity as admin with `deployArgs: { admin: "${source.address}" }`. Enabling embedded VK is now `ctg zk build --embed-vk` → `ctg build verifier` → `ctg upgrade verifier --source <admin>`, keeping the `contractId`; `verify_proof` and `verify_proof_embedded` are unchanged.
+
+  `ctg zk init` in an existing project adds the admin deploy arg to a `verifier` entry that points at `./contracts/verifier` and has no `deployArgs`, and warns when it cannot (for example a nested or computed entry). The `zk-starter` template gains a `caatinga:upgrade` script. The admin lives in instance storage, so it shares the contract instance's TTL. `admin()` and `upgrade` return the contract error `AdminNotSet` (code 1) instead of panicking when no admin is stored.
+
+  **Breaking for existing verifier configs:** the verifier now requires a constructor argument. A config whose `verifier` entry has no `deployArgs: { admin: "${source.address}" }` fails to deploy the new contract code; add that line (or re-run `ctg zk init`). Deploying also needs `--source` (already required for deploy). Verifiers scaffolded before this release have no `upgrade` entrypoint; they need one `ctg deploy verifier --upgrade` after adopting the new contract code, and `ctg upgrade` afterwards. Rollback: remove the `deployArgs` entry and the constructor/`upgrade` functions to return to the previous, non-upgradeable verifier.
+
+### Patch Changes
+
+- ba6c80f: `ctg doctor` no longer reports false env drift for `export KEY=value` lines in the frontend env file (#86).
+- 2f4b2cd: Fixes found by running the ZK flow end to end on testnet in fresh projects.
+
+  **`ctg upgrade` no longer fails on every new WASM.** `stellar contract upload` logs the transaction hash on stderr ("Signing transaction: <hash>") before printing the WASM hash on stdout. Caatinga read the first 64-hex token from the combined output, compared the transaction hash with the local WASM hash, and failed with `CAATINGA_UPLOAD_FAILED` even though the upload had succeeded. The WASM hash is now read from stdout (and `parseWasmHash` takes the last hash in mixed output).
+
+  **The embedded-VK flow is documented as it actually works.** Because the key is compiled into the contract, enabling `--embed-vk` needs new contract code on chain: `ctg upgrade verifier` for verifiers with the admin-gated `upgrade` entrypoint, or one `ctg deploy verifier --upgrade` (new `contractId`) for verifiers scaffolded without it. On a dev ceremony `ctg zk build` generates new keys, so `ctg zk prove` must run again; `ctg zk build` now says so. Docs, tutorial and cheatsheet are updated.
+
+  **Clear error for a stale on-chain verifier.** `ctg zk invoke --embed-vk` against a verifier deployed before `vk.rs` was generated now reports `CAATINGA_ZK_EMBED_VK_UNSUPPORTED` with a hint naming the missing step instead of a raw `UnreachableCodeReached` VM trap.
+
+  **`ctg status` no longer calls an imported ceremony "audited".** It shows `MPC (imported, verified <date>)` after `ctg zk verify-ceremony`, or `not verified` otherwise; the `--json` payload gains an additive `ceremonyVerifiedAt`.
+
+- d519194: **Internal restructuring of the ZK flow; no command changes behaviour.** Artifact file names and paths, file hashing, verification-key and `r1cs info` parsing, and the embedded-VK helpers each live in one module now instead of being repeated across build, prove, invoke, ceremony import/verify and status. `@caatinga/zk` additionally exports `zkArtifactPaths`, `embeddedVkSourcePath`, `isPlaceholderEmbeddedVk` and `CIRCUIT_INPUT_FILE`; every existing export is unchanged.
+
+  **`ctg zk prove` and `ctg zk invoke` name the real problem when the config has no circuits.** They used to report `Circuit "undefined" not found`; all `ctg zk` commands now share one message, `No ZK circuits configured in caatinga.config.ts`, and `ctg zk invoke <name>` with an unknown name reports that the circuit was not found rather than that its verifier contract is missing.
+
+- ca06250: Fix `ctg zk init` when adding ZK to an existing project: the default mode now copies `contracts/verifier` (previously only `circuits/` was copied), and the config merge adds the missing comma after a last contract entry without one (as written by `ctg init --minimal`) instead of producing invalid TypeScript.
+
+  `ctg zk init` in an existing project also no longer reports every config load failure as `No caatinga.config.ts found`: errors such as `CAATINGA_DEPENDENCIES_NOT_INSTALLED` (run `npm install` first) or `CAATINGA_INVALID_CONFIG` are now shown as is.
+
+  `ctg zk init` now also works in a project with no contracts yet (`contracts: {}`): the verifier is merged into the config first, which makes it valid. To support this, `loadConfig` no longer caches the config module, so a config rewritten in the same process is read again.
+
+- ef7072f: The ZK protocol pre-flight (`getNetwork`, used by `ctg deploy <verifier>`, `ctg zk invoke` and `ctg doctor`) now waits up to 20s per attempt instead of 10s and retries once when the request times out, so a slow public testnet RPC no longer shows up as "protocol unknown". RPC error payloads, non-2xx responses and refused connections are not retried, and the check stays advisory when the protocol cannot be determined. `PROTOCOL_VERSION_MAX_ATTEMPTS` is exported alongside `PROTOCOL_VERSION_TIMEOUT_MS`.
+- 6644b9d: **`npm audit` is clean again after `ctg init`.** A new high-severity advisory covers every `zod` release below 4.6.6 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)) and has no fix on the 3.x line. `@caatinga/core` now depends on `zod@^4.6.6`, and the browser templates (`react-vite-counter`, `zk-starter`) ship a `zod: "^4.6.6"` install override for the copies pulled in through Stellar Wallets Kit (Reown AppKit, Coinbase CDP, `abitype`). `walletStubOverrides()` and `walletStubPnpmWorkspaceYaml()` return the same pin.
+
+  Existing projects: add `"zod": "^4.6.6"` to `overrides` in `package.json` (and to `overrides` in `pnpm-workspace.yaml` when using pnpm), then reinstall.
+
+  Config and artifact validation behave the same; the wording of some schema-validation hints follows zod 4 (for example a missing field is reported as `Invalid input: expected string, received undefined` instead of `Required`).
+
 ## 3.12.0
 
 ### Patch Changes
