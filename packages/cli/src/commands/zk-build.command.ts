@@ -1,9 +1,15 @@
 import { type Command } from "commander";
 import { formatNetworkOrigin, loadConfig, resolveNetwork } from "@caatinga/core";
-import { buildCircuit, readCeremonyManifest } from "@caatinga/zk";
+import {
+  buildCircuit,
+  DEV_CEREMONY_TYPE,
+  MPC_CEREMONY_TYPE,
+  readCeremonyManifest,
+} from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { createZkInstallProgress } from "../utils/zk-install-progress.js";
+import { resolveZkCircuit } from "../utils/zk-circuit.js";
 import { assertZkBuildNetworkAllowed } from "../utils/zk-guardrails.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 
@@ -27,16 +33,7 @@ export function registerZkBuildCommand(program: Command): void {
       ) => {
         await runCliAction(async () => {
           const config = await loadConfig();
-          const zk = config.zk;
-          if (!zk || Object.keys(zk.circuits).length === 0) {
-            throw new Error("No ZK circuits configured in caatinga.config.ts");
-          }
-
-          const name = circuitName ?? Object.keys(zk.circuits)[0]!;
-          const circuit = zk.circuits[name];
-          if (!circuit) {
-            throw new Error(`Circuit "${name}" not found in caatinga.config.ts`);
-          }
+          const { name, circuit, artifactsDir } = resolveZkCircuit(config, circuitName);
 
           // The guard runs against the network the artifacts will be deployed to,
           // not just defaultNetwork: a testnet default must not let dev-ceremony
@@ -51,7 +48,7 @@ export function registerZkBuildCommand(program: Command): void {
             networkName: network.name,
             networkConfig: network.config,
             allowDevCeremony: Boolean(options.allowDevCeremony),
-            artifactsDir: `.artifacts/zk/${name}`,
+            artifactsDir,
           });
 
           if (options.embedVk) {
@@ -70,7 +67,7 @@ export function registerZkBuildCommand(program: Command): void {
           await buildCircuit({
             circuitName: name,
             circuitPath: circuit.path,
-            artifactsDir: `.artifacts/zk/${name}`,
+            artifactsDir,
             embedVk: Boolean(options.embedVk),
             progress: createZkInstallProgress(),
           });
@@ -78,8 +75,8 @@ export function registerZkBuildCommand(program: Command): void {
 
           // Only a dev ceremony earns this warning. Claiming one after a build
           // that reused imported MPC artifacts would be actively misleading.
-          const ceremony = await readCeremonyManifest(`.artifacts/zk/${name}`);
-          if (ceremony?.type === "dev-single-party") {
+          const ceremony = await readCeremonyManifest(artifactsDir);
+          if (ceremony?.type === DEV_CEREMONY_TYPE) {
             logger.warn(
               `Single-party development trusted setup (network: ${network.name}). Do not use on mainnet for production.`
             );
@@ -88,7 +85,7 @@ export function registerZkBuildCommand(program: Command): void {
             logger.warn(
               `New proving and verification keys were generated: re-run \`ctg zk prove ${name}\` before invoking.`
             );
-          } else if (ceremony?.type === "mpc-multi-party") {
+          } else if (ceremony?.type === MPC_CEREMONY_TYPE) {
             logger.info("Using imported MPC ceremony artifacts — no dev ceremony was run.");
           }
         });

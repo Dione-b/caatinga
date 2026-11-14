@@ -1,14 +1,10 @@
-import { decimalToBe48 } from "./bigint-helpers.js";
-
-export type SerializedG1 = {
-  x: Uint8Array;
-  y: Uint8Array;
-};
-
-export type SerializedG2 = {
-  x: [Uint8Array, Uint8Array];
-  y: [Uint8Array, Uint8Array];
-};
+import {
+  assertSupportedCurve,
+  g1FromSnarkjs,
+  g2FromSnarkjs,
+  type SerializedG1,
+  type SerializedG2,
+} from "./curve-points.js";
 
 export type SerializedProof = {
   a: SerializedG1;
@@ -25,22 +21,11 @@ export type SnarkjsProof = {
 };
 
 export function serializeProof(proof: SnarkjsProof): SerializedProof {
-  if (proof.curve !== "bls12381") {
-    throw new Error(`Expected curve bls12381, got ${proof.curve}`);
-  }
+  assertSupportedCurve(proof.curve);
 
   return {
-    a: {
-      x: decimalToBe48(proof.pi_a[0]),
-      y: decimalToBe48(proof.pi_a[1]),
-    },
-    b: {
-      x: [decimalToBe48(proof.pi_b[0][1]), decimalToBe48(proof.pi_b[0][0])],
-      y: [decimalToBe48(proof.pi_b[1][1]), decimalToBe48(proof.pi_b[1][0])],
-    },
-    c: {
-      x: decimalToBe48(proof.pi_c[0]),
-      y: decimalToBe48(proof.pi_c[1]),
-    },
+    a: g1FromSnarkjs(proof.pi_a),
+    b: g2FromSnarkjs(proof.pi_b),
+    c: g1FromSnarkjs(proof.pi_c),
   };
 }

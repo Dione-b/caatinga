@@ -8,9 +8,10 @@ import {
   loadConfig,
   resolveNetwork,
 } from "@caatinga/core";
-import { readVerificationKeyPublicSignals, zkArtifactsDir } from "@caatinga/zk";
+import { readVerificationKeyPublicSignals } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { resolveZkCircuit } from "../utils/zk-circuit.js";
 
 export function registerEstimateCommand(program: Command): void {
   const estimate = program
@@ -63,11 +64,7 @@ export function registerEstimateCommand(program: Command): void {
     .action((circuitName: string, options: { network?: string }) =>
       runCliAction(async () => {
         const config = await loadConfig();
-        const zk = config.zk;
-        const circuit = zk?.circuits[circuitName];
-        if (!circuit) {
-          throw new Error(`Circuit "${circuitName}" not found in caatinga.config.ts`);
-        }
+        const { circuit, artifacts } = resolveZkCircuit(config, circuitName);
 
         if (options.network) {
           const network = resolveNetwork(config, options.network);
@@ -85,8 +82,7 @@ export function registerEstimateCommand(program: Command): void {
           }
         }
 
-        const vkPath = `${zkArtifactsDir(circuitName)}/verification_key.json`;
-        const publicSignals = await readVerificationKeyPublicSignals(vkPath);
+        const publicSignals = await readVerificationKeyPublicSignals(artifacts.verificationKey);
 
         const estimateResult = estimateZkVerifyCost({ circuitName, publicSignals });
         for (const line of formatZkVerifyCostEstimate(estimateResult)) {

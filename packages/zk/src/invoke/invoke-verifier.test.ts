@@ -4,7 +4,7 @@ import vkFixture from "../../test/fixtures/multiplier/verification_key.json" wit
 import publicFixture from "../../test/fixtures/multiplier/public.json" with { type: "json" };
 import { type SnarkjsProof } from "../serialization/serialize-proof.js";
 import { type SnarkjsVk } from "../serialization/serialize-vk.js";
-import { buildStellarVerifyProofArgs } from "./invoke-verifier.js";
+import { buildStellarVerifyProofArgs } from "./verify-proof-args.js";
 
 const proof = proofFixture as SnarkjsProof;
 const vk = vkFixture as unknown as SnarkjsVk;

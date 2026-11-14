@@ -4,8 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { collectZkStatus } from "./zk-status.js";
-import { hashCircuitSources } from "./import-ceremony.js";
-import { writeDevCeremonyManifest, writeMpcCeremonyManifest } from "./dev-ceremony.js";
+import { hashCircuitSources } from "../build/circuit-sources.js";
+import {
+  writeDevCeremonyManifest,
+  writeMpcCeremonyManifest,
+} from "../ceremony/ceremony-manifest.js";
 import type { CaatingaConfig } from "@caatinga/core";
 
 let cwd: string;

@@ -5,10 +5,11 @@ import {
   loadConfig,
   resolveNetwork,
 } from "@caatinga/core";
-import { assertDevCeremonyAllowed, invokeVerifier, zkArtifactsDir } from "@caatinga/zk";
+import { assertDevCeremonyAllowed, invokeVerifier } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { confirmMainnetOperation } from "../utils/mainnet-guardrails.js";
+import { resolveZkCircuit } from "../utils/zk-circuit.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 import { assertEmbedVkInvokeSupported } from "../utils/zk-guardrails.js";
 
@@ -42,14 +43,8 @@ export function registerZkInvokeCommand(program: Command): void {
           assertEmbedVkInvokeSupported({ embedVk: Boolean(options.embedVk) });
 
           const config = await loadConfig();
-          const zk = config.zk;
-          if (!zk) {
-            throw new Error("No ZK circuits configured");
-          }
-
-          const name = circuitName ?? Object.keys(zk.circuits)[0]!;
-          const circuit = zk.circuits[name];
-          if (!circuit?.verifierContract) {
+          const { name, circuit, artifactsDir, artifacts } = resolveZkCircuit(config, circuitName);
+          if (!circuit.verifierContract) {
             throw new Error(`Verifier contract not configured for circuit "${name}"`);
           }
 
@@ -63,7 +58,7 @@ export function registerZkInvokeCommand(program: Command): void {
           await assertDevCeremonyAllowed({
             networkName,
             networkConfig,
-            artifactsDir: zkArtifactsDir(name),
+            artifactsDir,
             allowDevCeremony: Boolean(options.allowDevCeremony),
             operation: `ctg zk invoke ${name}`,
           });
@@ -91,9 +86,9 @@ export function registerZkInvokeCommand(program: Command): void {
             verifierContract: circuit.verifierContract,
             network: networkName,
             sourceAccount: options.source,
-            proofPath: `${zkArtifactsDir(name)}/proof.json`,
-            vkPath: `${zkArtifactsDir(name)}/verification_key.json`,
-            publicSignalsPath: `${zkArtifactsDir(name)}/public.json`,
+            proofPath: artifacts.proof,
+            vkPath: artifacts.verificationKey,
+            publicSignalsPath: artifacts.publicSignals,
             embedVk: Boolean(options.embedVk),
             config,
           });

@@ -1,9 +1,10 @@
 import { type Command } from "commander";
 import { CaatingaError, CaatingaErrorCode, loadConfig } from "@caatinga/core";
-import { importCeremony, zkArtifactsDir } from "@caatinga/zk";
+import { importCeremony } from "@caatinga/zk";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 import { createZkInstallProgress } from "../utils/zk-install-progress.js";
+import { resolveZkCircuit } from "../utils/zk-circuit.js";
 import { getOrCreateZkCommand } from "./zk.command.js";
 
 export function registerZkImportCeremonyCommand(program: Command): void {
@@ -37,18 +38,8 @@ export function registerZkImportCeremonyCommand(program: Command): void {
       ) => {
         await runCliAction(async () => {
           const config = await loadConfig();
-          const zk = config.zk;
-          if (!zk || Object.keys(zk.circuits).length === 0) {
-            throw new Error("No ZK circuits configured in caatinga.config.ts");
-          }
+          const { name, circuit, artifactsDir } = resolveZkCircuit(config, circuitName);
 
-          const name = circuitName ?? Object.keys(zk.circuits)[0]!;
-          const circuit = zk.circuits[name];
-          if (!circuit) {
-            throw new Error(`Circuit "${name}" not found in caatinga.config.ts`);
-          }
-
-          const artifactsDir = zkArtifactsDir(name);
           logger.info(`Importing MPC ceremony artifacts for circuit "${name}"...`);
           logger.info(`From: ${options.ceremony}`);
           logger.info(`Into: ${artifactsDir}`);

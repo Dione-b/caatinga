@@ -1,3 +1,4 @@
+import { collectErrorText } from "../errors/error-text.js";
 import { ZkError } from "../errors/ZkError.js";
 
 /**
@@ -32,32 +33,6 @@ const WITNESS_ERROR_PATTERNS: { pattern: RegExp; hint: (signal: string) => strin
 const ZK_INPUT_ERROR_CODE = "ZK_INPUT_CONTAINS_PUBLIC_SIGNALS" as const;
 
 /**
- * Collects every place the underlying tool's message can hide.
- *
- * `runCommand` throws a `CaatingaError` whose `message` is just
- * `Command failed: <cmd> <args>` and puts the combined stdout/stderr in `hint`,
- * keeping the original error as `cause`. Matching only `message` finds nothing,
- * so the witness message would never be recognised.
- */
-function describeError(error: unknown): string {
-  if (!(error instanceof Error)) {
-    return String(error);
-  }
-
-  const parts = [error.message];
-  for (const field of ["hint", "cause"] as const) {
-    const value = (error as unknown as Record<string, unknown>)[field];
-    if (value instanceof Error) {
-      parts.push(describeError(value));
-    } else if (typeof value === "string") {
-      parts.push(value);
-    }
-  }
-
-  return parts.join("\n");
-}
-
-/**
  * Re-throws a snarkjs witness failure as a `CAATINGA_ZK_INPUT_CONTAINS_PUBLIC_SIGNALS`
  * error with an actionable hint.
  *
@@ -67,7 +42,7 @@ function describeError(error: unknown): string {
  * unchanged so the original `CAATINGA_COMMAND_FAILED` path still reports them.
  */
 export function toZkInputError(error: unknown, inputPath: string): unknown {
-  const combined = describeError(error);
+  const combined = collectErrorText(error);
 
   for (const { pattern, hint } of WITNESS_ERROR_PATTERNS) {
     const match = combined.match(pattern);

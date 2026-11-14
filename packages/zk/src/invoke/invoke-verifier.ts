@@ -1,17 +1,15 @@
-import {
-  CaatingaError,
-  CaatingaErrorCode,
-  invokeContract,
-  loadConfig,
-  readArtifacts,
-  type CaatingaConfig,
-} from "@caatinga/core";
-import { readFile } from "node:fs/promises";
+import { invokeContract, loadConfig, readArtifacts, type CaatingaConfig } from "@caatinga/core";
 import path from "node:path";
-import { concatG1Hex, concatG2Hex } from "../serialization/curve-bytes.js";
-import { serializeProof, type SnarkjsProof } from "../serialization/serialize-proof.js";
-import { serializeVk, type SnarkjsVk } from "../serialization/serialize-vk.js";
+import { readJsonFile } from "../artifacts/files.js";
 import { ZkError } from "../errors/ZkError.js";
+import type { SnarkjsProof } from "../serialization/serialize-proof.js";
+import type { SnarkjsVk } from "../serialization/serialize-vk.js";
+import {
+  EMBEDDED_VK_METHOD,
+  embeddedVkTrapError,
+  embeddedVkTrapLines,
+} from "./embedded-vk-trap.js";
+import { buildStellarVerifyProofArgs } from "./verify-proof-args.js";
 
 export type InvokeVerifierOptions = {
   verifierContract: string;
@@ -24,46 +22,6 @@ export type InvokeVerifierOptions = {
   cwd?: string;
   config?: CaatingaConfig;
 };
-
-export function buildStellarVerifyProofArgs(options: {
-  proof: SnarkjsProof;
-  vk?: SnarkjsVk;
-  publicSignals: string[];
-  embedVk: boolean;
-}): string[] {
-  const serializedProof = serializeProof(options.proof);
-  const args: string[] = [];
-
-  if (!options.embedVk) {
-    if (!options.vk) {
-      throw new ZkError("Verification key is required when embedVk is false.", "ZK_VK_REQUIRED");
-    }
-
-    const serializedVk = serializeVk(options.vk);
-    args.push(
-      "--vk",
-      JSON.stringify({
-        alpha: concatG1Hex(serializedVk.alpha),
-        beta: concatG2Hex(serializedVk.beta),
-        gamma: concatG2Hex(serializedVk.gamma),
-        delta: concatG2Hex(serializedVk.delta),
-        ic: serializedVk.ic.map(concatG1Hex),
-      })
-    );
-  }
-
-  args.push(
-    "--proof",
-    JSON.stringify({
-      a: concatG1Hex(serializedProof.a),
-      b: concatG2Hex(serializedProof.b),
-      c: concatG1Hex(serializedProof.c),
-    })
-  );
-  args.push("--pub_signals", JSON.stringify(options.publicSignals));
-
-  return args;
-}
 
 export type InvokeVerifierResult = {
   network: string;
@@ -78,16 +36,11 @@ export async function invokeVerifier(
 ): Promise<InvokeVerifierResult> {
   const cwd = options.cwd ?? process.cwd();
   const config = options.config ?? (await loadConfig({ cwd }));
-  const proof = JSON.parse(
-    await readFile(path.resolve(cwd, options.proofPath), "utf8")
-  ) as SnarkjsProof;
-  const publicSignals = JSON.parse(
-    await readFile(path.resolve(cwd, options.publicSignalsPath), "utf8")
-  ) as string[];
-
+  const proof = await readJsonFile<SnarkjsProof>(path.resolve(cwd, options.proofPath));
+  const publicSignals = await readJsonFile<string[]>(path.resolve(cwd, options.publicSignalsPath));
   const vk = options.embedVk
     ? undefined
-    : (JSON.parse(await readFile(path.resolve(cwd, options.vkPath), "utf8")) as SnarkjsVk);
+    : await readJsonFile<SnarkjsVk>(path.resolve(cwd, options.vkPath));
 
   const args = buildStellarVerifyProofArgs({
     proof,
@@ -98,7 +51,7 @@ export async function invokeVerifier(
 
   // The embedded-VK entrypoint takes no VK argument, so it is a separate
   // contract method rather than the same one called with fewer args.
-  const method = options.embedVk ? "verify_proof_embedded" : "verify_proof";
+  const method = options.embedVk ? EMBEDDED_VK_METHOD : "verify_proof";
   const target = `${options.verifierContract}.${method}`;
   let result: Awaited<ReturnType<typeof invokeContract>>;
   try {
@@ -145,78 +98,4 @@ export async function invokeVerifier(
     publicSignals,
     verified: true,
   };
-}
-
-/**
- * A trap in `verify_proof_embedded` is most often the scaffold's placeholder
- * `embedded_vk()`, which panics on purpose — but any panic in the contract looks
- * the same on chain, so the error says "likely" and the local `vk.rs` decides
- * which step the user is missing. The trap itself stays in the hint and the
- * original error stays as the cause, for when the guess is wrong.
- */
-async function embeddedVkTrapError(
-  verifierContract: string,
-  cwd: string,
-  cause: unknown,
-  trapLines: string[]
-): Promise<CaatingaError> {
-  const message = `verify_proof_embedded trapped on "${verifierContract}", most likely because the deployed verifier still carries the placeholder verification key.`;
-  const nextStep = (await localVkIsPlaceholder(cwd))
-    ? "contracts/verifier/src/vk.rs is still the placeholder. Run `ctg zk build <circuit> --embed-vk`, then `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`)."
-    : "contracts/verifier/src/vk.rs has a real key, so the deployed contract is likely older than it. Run `ctg build verifier` and `ctg upgrade verifier --source <admin>`, then invoke again (a verifier deployed without an upgrade entrypoint needs one `ctg deploy verifier --upgrade`). If it still traps, the panic comes from the contract code itself.";
-  return new CaatingaError(
-    message,
-    CaatingaErrorCode.ZK_EMBED_VK_UNSUPPORTED,
-    [nextStep, "Stellar CLI reported:", ...trapLines].join("\n"),
-    cause
-  );
-}
-
-async function localVkIsPlaceholder(cwd: string): Promise<boolean> {
-  try {
-    const source = await readFile(path.join(cwd, "contracts", "verifier", "src", "vk.rs"), "utf8");
-    return source.includes("PLACEHOLDER");
-  } catch {
-    // No vk.rs at all means it was never generated either.
-    return true;
-  }
-}
-
-/**
- * Markers of a VM trap in Stellar CLI output. The diagnostic event naming
- * `UnreachableCodeReached` is printed only at some verbosity levels (CLI 28.1
- * shows it only with `-v`); by default the CLI reports just the host error
- * `Error(WasmVm, InvalidAction)`, which is what a trap surfaces as.
- */
-const VM_TRAP_MARKERS = ["UnreachableCodeReached", "Error(WasmVm, InvalidAction)"];
-
-/**
- * The output lines reporting a VM trap in `verify_proof_embedded`, or none when
- * the failure is something else. Searches the error and its causes, since
- * `invokeContract` may re-wrap the Stellar CLI failure and move its output
- * (kept in `hint`) down into the cause.
- */
-function embeddedVkTrapLines(error: unknown): string[] {
-  const parts: string[] = [];
-  let current = error;
-  for (let depth = 0; current instanceof Error && depth < 5; depth++) {
-    const { hint, cause } = current as { hint?: unknown; cause?: unknown };
-    parts.push(current.message);
-    if (typeof hint === "string") {
-      parts.push(hint);
-    }
-    if (typeof cause === "string") {
-      parts.push(cause);
-    }
-    current = cause;
-  }
-  const text = parts.join("\n");
-  if (!text.includes("verify_proof_embedded")) {
-    return [];
-  }
-  const trapLines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => VM_TRAP_MARKERS.some((marker) => line.includes(marker)));
-  return [...new Set(trapLines)];
 }

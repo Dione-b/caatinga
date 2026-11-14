@@ -2,8 +2,8 @@ import { runCommand } from "@caatinga/core";
 import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { createHash, randomBytes } from "node:crypto";
 import { ZkError } from "../errors/ZkError.js";
+import { devContributionInput } from "./dev-contribution.js";
 import { downloadWithProgress } from "./download-with-progress.js";
 import type { ZkInstallProgress } from "./install-progress.js";
 import { verifyFileChecksum } from "./verify-checksum.js";
@@ -133,11 +133,10 @@ export async function ensurePtau(size: number, progress?: ZkInstallProgress): Pr
   const snarkjs = await ensureSnarkjs(progress);
   const pot0 = path.join(ptauDir, `pot${size}_0000.ptau`);
   const pot1 = path.join(ptauDir, `pot${size}_0001.ptau`);
-  const entropy = createHash("sha256").update(randomBytes(32)).digest("hex");
 
   await runCommand(snarkjs, ["powersoftau", "new", "bls12-381", String(size), pot0, "-v"]);
   await runCommand(snarkjs, ["powersoftau", "contribute", pot0, pot1, "-v"], {
-    input: `caatinga-dev\n${entropy}\n`,
+    input: devContributionInput(),
   });
   await runCommand(snarkjs, ["powersoftau", "prepare", "phase2", pot1, finalPath, "-v"]);
   progress?.onStatus?.(`powers-of-tau ready → ${finalPath}`);

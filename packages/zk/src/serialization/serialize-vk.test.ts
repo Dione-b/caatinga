@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import snarkjsExportFixture from "../../test/fixtures/verification_key_snarkjs_export.json" with { type: "json" };
 import multiplierVkFixture from "../../test/fixtures/multiplier/verification_key.json" with { type: "json" };
 import { serializeVk, type SnarkjsVk } from "./serialize-vk.js";
-import type { SerializedG2 } from "./serialize-proof.js";
+import type { SerializedG2 } from "./curve-points.js";
 
 const snarkjsExport = snarkjsExportFixture as unknown as SnarkjsVk;
 const multiplierVk = multiplierVkFixture as unknown as SnarkjsVk;

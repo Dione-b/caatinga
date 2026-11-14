@@ -1,9 +1,10 @@
 import type { CaatingaConfig } from "@caatinga/core";
-import { access } from "node:fs/promises";
-import { hashFileContents, readProveManifest } from "../prove/prove-circuit.js";
-import { hashCircuitSources } from "../ceremony/import-ceremony.js";
-import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "../ceremony/dev-ceremony.js";
 import path from "node:path";
+import { hashFileContents, pathExists } from "../artifacts/files.js";
+import { CIRCUIT_INPUT_FILE, zkArtifactPaths, zkArtifactsDir } from "../artifacts/zk-paths.js";
+import { hashCircuitSources } from "../build/circuit-sources.js";
+import { MPC_CEREMONY_TYPE, readCeremonyManifest } from "../ceremony/ceremony-manifest.js";
+import { readProveManifest } from "../prove/prove-manifest.js";
 
 export type ZkDriftStatus =
   | "not-built"
@@ -51,15 +52,16 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
   const statuses: ZkCircuitStatus[] = [];
 
   for (const [name, circuit] of Object.entries(circuits)) {
-    const artifactsDir = path.join(cwd, ".artifacts", "zk", name);
+    const artifactsDir = path.join(cwd, zkArtifactsDir(name));
+    const artifacts = zkArtifactPaths(artifactsDir);
     const circuitPath = path.join(cwd, circuit.path);
-    const inputPath = path.join(circuitPath, "input.json");
+    const inputPath = path.join(circuitPath, CIRCUIT_INPUT_FILE);
     const advisories: string[] = [];
 
     const manifest = await readCeremonyManifest(artifactsDir);
     const prove = await readProveManifest(artifactsDir);
-    const inputExists = await fileExists(inputPath);
-    const proofExists = await fileExists(path.join(artifactsDir, "proof.json"));
+    const inputExists = await pathExists(inputPath);
+    const proofExists = await pathExists(artifacts.proof);
 
     const status: ZkCircuitStatus = {
       name,
@@ -102,7 +104,7 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
     }
 
     if (inputExists && prove) {
-      const currentInputHash = await hashFileContents(path.join(cwd, circuit.path, "input.json"));
+      const currentInputHash = await hashFileContents(inputPath);
       if (currentInputHash !== prove.inputHash) {
         status.inputChanged = true;
         advisories.push(
@@ -115,9 +117,8 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
 
     // A ceremony import replaces the verification key, which invalidates any
     // proof still sitting in the artifacts directory.
-    const vkPath = path.join(artifactsDir, "verification_key.json");
-    if (prove && (await fileExists(vkPath))) {
-      const currentVkHash = await hashFileContents(vkPath);
+    if (prove && (await pathExists(artifacts.verificationKey))) {
+      const currentVkHash = await hashFileContents(artifacts.verificationKey);
       if (prove.vkHash && prove.vkHash !== currentVkHash) {
         status.vkChanged = true;
         advisories.push(
@@ -140,11 +141,4 @@ export async function collectZkStatus(options: CollectZkStatusOptions): Promise<
   }
 
   return statuses;
-}
-
-function fileExists(target: string): Promise<boolean> {
-  return access(target).then(
-    () => true,
-    () => false
-  );
 }

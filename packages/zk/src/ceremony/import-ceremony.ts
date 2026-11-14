@@ -1,8 +1,21 @@
-import { copyFile, mkdir, readFile, readdir, stat } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { copyFile, mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
-import { runCommand } from "@caatinga/core";
+import { pathExists, readJsonFile } from "../artifacts/files.js";
+import {
+  CIRCUIT_WASM_FILE,
+  R1CS_FILE,
+  VERIFICATION_KEY_FILE,
+  ZKEY_FILE,
+  zkArtifactPaths,
+} from "../artifacts/zk-paths.js";
+import { hashCircuitSources } from "../build/circuit-sources.js";
+import { readR1csInfo } from "../build/r1cs-info.js";
 import { ZkError } from "../errors/ZkError.js";
+import {
+  declaredPublicSignals,
+  usableIc,
+  type VkPublicSignalFields,
+} from "../serialization/read-vk-public-signals.js";
 import { ensureSnarkjs } from "../install/lazy-install-zk-tools.js";
 import type { ZkInstallProgress } from "../install/install-progress.js";
 import {
@@ -10,21 +23,17 @@ import {
   MPC_CEREMONY_TYPE,
   readCeremonyManifest,
   writeMpcCeremonyManifest,
-} from "./dev-ceremony.js";
+} from "./ceremony-manifest.js";
 import {
   digestCeremonyArtifacts,
   type CeremonyArtifactDigests,
   type CeremonyProvenance,
 } from "./ceremony-integrity.js";
 
-export const MPC_ZKEY_FILENAME = "circuit_final.zkey";
-export const MPC_VERIFICATION_KEY_FILENAME = "verification_key.json";
+export const MPC_ZKEY_FILENAME = ZKEY_FILE;
+export const MPC_VERIFICATION_KEY_FILENAME = VERIFICATION_KEY_FILE;
 
 const PTAU_SUFFIX = ".ptau";
-// snarkjs `r1cs info` reports these counters separately; a circuit's public
-// signals are its public inputs plus its outputs.
-const PUBLIC_INPUTS_PATTERN = /# of Public Inputs:\s+(\d+)/;
-const OUTPUTS_PATTERN = /# of Outputs:\s+(\d+)/;
 
 export type ImportCeremonyOptions = {
   circuitName: string;
@@ -50,45 +59,6 @@ export type ImportCeremonyResult = {
 };
 
 /**
- * sha256 over the circuit sources, sorted by path so the digest is stable
- * regardless of directory iteration order. Hashing the source rather than the
- * compiled `.r1cs` keeps the manifest meaningful to users: it compares equal
- * exactly when the circuit being built is the one the ceremony ran against.
- */
-export async function hashCircuitSources(circuitPath: string): Promise<string> {
-  const circuitDir = path.resolve(circuitPath);
-  const entries = (await readdir(circuitDir, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".circom"))
-    .map((entry) => entry.name)
-    .sort();
-
-  if (entries.length === 0) {
-    throw new ZkError(
-      `No .circom sources found in ${circuitDir}.`,
-      "ZK_CEREMONY_INCOMPATIBLE",
-      "Add the circuit sources, or point the circuit `path` in caatinga.config.ts at the directory containing them."
-    );
-  }
-
-  const hash = createHash("sha256");
-  for (const name of entries) {
-    hash.update(name);
-    hash.update(await readFile(path.join(circuitDir, name), "utf8"));
-  }
-
-  return hash.digest("hex");
-}
-
-async function exists(target: string): Promise<boolean> {
-  try {
-    await stat(target);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Imports audited MPC ceremony artifacts in place of the dev ceremony.
  *
  * The ceremony's zkey and verification key must describe the same circuit as the
@@ -103,6 +73,7 @@ export async function importCeremony(
 ): Promise<ImportCeremonyResult> {
   const ceremonyDir = path.resolve(options.ceremonyDir);
   const artifactsDir = path.resolve(options.artifactsDir);
+  const targets = zkArtifactPaths(artifactsDir);
   const zkeySource = path.join(ceremonyDir, MPC_ZKEY_FILENAME);
   const vkSource = path.join(ceremonyDir, MPC_VERIFICATION_KEY_FILENAME);
 
@@ -110,7 +81,7 @@ export async function importCeremony(
     ["proving key", zkeySource],
     ["verification key", vkSource],
   ] as const) {
-    if (!(await exists(target))) {
+    if (!(await pathExists(target))) {
       throw new ZkError(
         `No ${label} found at ${target}.`,
         "ZK_CEREMONY_INCOMPATIBLE",
@@ -121,8 +92,8 @@ export async function importCeremony(
 
   const circuitHash = await hashCircuitSources(options.circuitPath);
 
-  const r1csPath = path.join(artifactsDir, "main.r1cs");
-  if (!(await exists(r1csPath))) {
+  const r1csPath = targets.r1cs;
+  if (!(await pathExists(r1csPath))) {
     throw new ZkError(
       `No compiled circuit found at ${r1csPath}.`,
       "ZK_CEREMONY_INCOMPATIBLE",
@@ -131,31 +102,22 @@ export async function importCeremony(
   }
 
   const snarkjs = await ensureSnarkjs(options.progress);
-  const r1csInfo = await runCommand(snarkjs, ["r1cs", "info", r1csPath]);
-  const publicInputs = r1csInfo.stdout.match(PUBLIC_INPUTS_PATTERN);
-  const outputs = r1csInfo.stdout.match(OUTPUTS_PATTERN);
-  if (!publicInputs || !outputs) {
+  const { publicInputs, outputs } = await readR1csInfo(snarkjs, r1csPath);
+  if (publicInputs === undefined || outputs === undefined) {
     throw new ZkError(
       `Could not read the public signal counts from ${r1csPath}.`,
       "ZK_CEREMONY_INCOMPATIBLE",
       "Re-run `ctg zk build` to recompile the circuit, then import the ceremony artifacts again."
     );
   }
-  const publicSignals = Number.parseInt(publicInputs[1]!, 10) + Number.parseInt(outputs[1]!, 10);
+  const publicSignals = publicInputs + outputs;
 
-  const verificationKey = JSON.parse(await readFile(vkSource, "utf8")) as {
-    ic?: unknown[];
-    vk_ic?: unknown[];
-    IC?: unknown[];
-    nPublic?: unknown;
-    protocol?: unknown;
-    curve?: unknown;
-  };
-  const ic = [verificationKey.ic, verificationKey.vk_ic, verificationKey.IC].find((candidate) =>
-    Array.isArray(candidate)
+  const verificationKey = await readJsonFile<VkPublicSignalFields & { protocol?: unknown }>(
+    vkSource
   );
+  const ic = usableIc(verificationKey);
 
-  if (!ic || ic.length < 2) {
+  if (!ic) {
     throw new ZkError(
       `The verification key at ${vkSource} has no usable IC array.`,
       "ZK_CEREMONY_INCOMPATIBLE",
@@ -164,10 +126,7 @@ export async function importCeremony(
   }
 
   // Prefer the explicit nPublic; fall back to IC length (always nPublic + 1).
-  const keyPublicSignals =
-    typeof verificationKey.nPublic === "number" && Number.isInteger(verificationKey.nPublic)
-      ? verificationKey.nPublic
-      : ic.length - 1;
+  const keyPublicSignals = declaredPublicSignals(verificationKey) ?? ic.length - 1;
 
   if (keyPublicSignals !== publicSignals) {
     throw new ZkError(
@@ -194,8 +153,8 @@ export async function importCeremony(
 
   await mkdir(artifactsDir, { recursive: true });
 
-  const zkeyTarget = path.join(artifactsDir, MPC_ZKEY_FILENAME);
-  const vkTarget = path.join(artifactsDir, MPC_VERIFICATION_KEY_FILENAME);
+  const zkeyTarget = targets.zkey;
+  const vkTarget = targets.verificationKey;
   await copyFile(zkeySource, zkeyTarget);
   await copyFile(vkSource, vkTarget);
 
@@ -208,7 +167,7 @@ export async function importCeremony(
       continue;
     }
     const target = path.join(artifactsDir, entry);
-    if (await exists(target)) {
+    if (await pathExists(target)) {
       ptauPath = target;
       continue;
     }
@@ -219,10 +178,10 @@ export async function importCeremony(
 
   // Pinned so mainnet deploy/invoke can refuse artifacts swapped after import.
   const artifacts = await digestCeremonyArtifacts(artifactsDir, {
-    zkey: MPC_ZKEY_FILENAME,
-    verificationKey: MPC_VERIFICATION_KEY_FILENAME,
-    r1cs: "main.r1cs",
-    wasm: path.join("main_js", "main.wasm"),
+    zkey: ZKEY_FILE,
+    verificationKey: VERIFICATION_KEY_FILE,
+    r1cs: R1CS_FILE,
+    wasm: CIRCUIT_WASM_FILE,
     ...(ptauPath ? { ptau: path.basename(ptauPath) } : {}),
   });
 

@@ -3,13 +3,14 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { hashCircuitSources, importCeremony } from "./import-ceremony.js";
+import { hashCircuitSources } from "../build/circuit-sources.js";
+import { importCeremony } from "./import-ceremony.js";
+import { assertCeremonyMatchesCircuit } from "./ceremony-guards.js";
 import {
-  assertCeremonyMatchesCircuit,
   MPC_CEREMONY_TYPE,
   readCeremonyManifest,
   writeMpcCeremonyManifest,
-} from "./dev-ceremony.js";
+} from "./ceremony-manifest.js";
 import { ZkError } from "../errors/ZkError.js";
 
 const runCommandMock = vi.hoisted(() => vi.fn());
