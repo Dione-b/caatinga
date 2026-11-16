@@ -37,7 +37,11 @@ const config: CaatingaConfig = {
 
 async function artifactsDir(): Promise<string> {
   const dir = path.join(cwd, ".artifacts", "zk", "main");
-  await mkdir(dir, { recursive: true });
+  await mkdir(path.join(dir, "main_js"), { recursive: true });
+  await writeFile(path.join(dir, "main.r1cs"), "r1cs");
+  await writeFile(path.join(dir, "main_js", "main.wasm"), "wasm");
+  await writeFile(path.join(dir, "circuit_final.zkey"), "zkey");
+  await writeFile(path.join(dir, "verification_key.json"), JSON.stringify({ IC: [] }));
   return dir;
 }
 
@@ -59,6 +63,23 @@ describe("collectZkStatus", () => {
     expect(status?.name).toBe("main");
     expect(status?.status).toBe("not-built");
     expect(status?.advisories.join(" ")).toContain("ctg zk build");
+  });
+
+  it("should_report_artifacts_missing_when_build_artifacts_were_deleted", async () => {
+    const dir = await artifactsDir();
+    await writeDevCeremonyManifest(dir);
+    await rm(path.join(dir, "circuit_final.zkey"));
+    await rm(path.join(dir, "verification_key.json"));
+    await rm(path.join(dir, "main.r1cs"));
+
+    const [status] = await collectZkStatus({ config, cwd });
+
+    expect(status?.status).toBe("artifacts-missing");
+    const advisories = status?.advisories.join(" ") ?? "";
+    expect(advisories).toContain("main.r1cs");
+    expect(advisories).toContain("circuit_final.zkey");
+    expect(advisories).toContain("verification_key.json");
+    expect(advisories).toContain("ctg zk build main");
   });
 
   it("should_report_a_dev_ceremony_without_guessing_circuit_drift", async () => {
