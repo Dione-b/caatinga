@@ -38,7 +38,7 @@ export type VerifyCeremonyResult = {
 
 const ZKEY_OK_PATTERN = /ZKey Ok!/;
 const ZKEY_REJECTED_PATTERN =
-  /INVALID(?:\(\d+\))?:|(?:Coeffs|A|B1|B2) section is not identical|(?:L|H) section does not match/i;
+  /INVALID(?:\(\d+\))?:|(?:Coeffs|A|B1|B2) section is not identical|(?:L|H) section does not match|Curve does not match/i;
 
 /**
  * Offline, reproducible check of an imported ceremony:
