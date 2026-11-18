@@ -6,6 +6,7 @@ import { registerDevCommand } from "./commands/dev.command.js";
 import { registerDoctorCommand } from "./commands/doctor.command.js";
 import { registerGenerateCommand } from "./commands/generate.command.js";
 import { registerInitCommand } from "./commands/init.command.js";
+import { registerAdoptCommand } from "./commands/adopt.command.js";
 import { registerZkInitCommand } from "./commands/zk-init.command.js";
 import { registerZkBuildCommand } from "./commands/zk-build.command.js";
 import { registerZkImportCeremonyCommand } from "./commands/zk-import-ceremony.command.js";
@@ -46,7 +47,7 @@ export function createProgram(): Command {
         }
 
         const categories: Record<string, string[]> = {
-          "Scaffolding & Setup": ["init", "identity"],
+          "Scaffolding & Setup": ["init", "adopt", "identity"],
           "Build & Compilation": ["build"],
           "Deployment & Lifecycle": ["deploy", "upgrade", "rollback", "wire"],
           "Query & Execution": ["read", "invoke", "estimate", "dev"],
@@ -104,6 +105,7 @@ export function createProgram(): Command {
     });
 
   registerInitCommand(program);
+  registerAdoptCommand(program);
   registerZkInitCommand(program);
   registerZkBuildCommand(program);
   registerZkImportCeremonyCommand(program);

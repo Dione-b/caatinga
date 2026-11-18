@@ -38,6 +38,30 @@ Use `--minimal` (or `--empty`) to scaffold a CLI-only project with a Soroban con
 ctg init my-contract-app --minimal
 ```
 
+## `ctg adopt [--network <name>] [--project-name <name>] [--contract-id <id>] [--name <name>] [--force]`
+
+Adopts Caatinga in an **existing** Soroban project (#294): discovers contract crates from the
+Cargo workspace `[workspace] members` (crates declaring `crate-type = ["cdylib"]`), then writes
+`caatinga.config.ts` and a v2 `caatinga.artifacts.json`.
+
+Nothing pre-existing is overwritten:
+
+- An existing `caatinga.config.ts` is left untouched; the network is resolved from it.
+- An existing `caatinga.artifacts.json` is merged — existing entries always win.
+- `--force` replaces only the artifact entry named by `--contract-id`, never the whole file.
+
+Import an already-deployed contract so `ctg status`, `ctg inspect`, `ctg invoke`, and generated
+bindings recognize it without redeploying:
+
+```bash
+ctg adopt --contract-id CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVQ5
+```
+
+The contract ID is validated on-chain through `stellar contract fetch`, and the `wasmHash` is
+re-derived from the fetched WASM bytes — never taken from user input. When `--name` is omitted,
+the single discovered contract crate is used as the entry name; with zero or several crates,
+pass `--name <name>` explicitly.
+
 ## `ctg build [contract]`
 
 Builds one configured contract with `stellar contract build`. Omit `contract` to build **every**

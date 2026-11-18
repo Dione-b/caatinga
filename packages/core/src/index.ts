@@ -265,3 +265,16 @@ export {
 } from "./templates/template-manifest.schema.js";
 
 export { isTransientTestnetSmokeFailure } from "./ci/is-transient-testnet-smoke-failure.js";
+
+export {
+  adoptProject,
+  IMPORTED_SOURCE_MARKER,
+  type AdoptImport,
+  type AdoptProjectOptions,
+  type AdoptProjectResult,
+} from "./adopt/adopt-project.js";
+export {
+  discoverCargoWorkspace,
+  type DiscoveredContract,
+  type DiscoverCargoWorkspaceResult,
+} from "./adopt/discover-cargo-workspace.js";
