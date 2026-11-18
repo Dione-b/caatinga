@@ -303,16 +303,16 @@ const productionTriggerTests: Record<CaatingaErrorCodeValue, { file: string; tri
     trigger: "assertEmbedVkInvokeSupported(",
   },
   [CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE]: {
-    file: "packages/core/src/errors/to-caatinga-error.test.ts",
-    trigger: "toCaatingaError(",
+    file: "packages/zk/src/ceremony/import-ceremony.test.ts",
+    trigger: "importCeremony(",
   },
   [CaatingaErrorCode.ZK_CEREMONY_TAMPERED]: {
     file: "packages/zk/src/ceremony/ceremony-integrity.test.ts",
     trigger: "assertCeremonyIntegrity(",
   },
   [CaatingaErrorCode.ZK_CHECKSUM_MISMATCH]: {
-    file: "packages/core/src/errors/to-caatinga-error.test.ts",
-    trigger: "toCaatingaError(",
+    file: "packages/zk/src/install/verify-checksum.test.ts",
+    trigger: "verifyFileChecksum(",
   },
   [CaatingaErrorCode.DOCTOR_PARTIAL_DEPLOY]: {
     file: "packages/core/src/errors/error-codes.test.ts",

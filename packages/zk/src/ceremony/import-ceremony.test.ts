@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CaatingaErrorCode, toCaatingaError } from "@caatinga/core";
 import { hashCircuitSources } from "../build/circuit-sources.js";
 import { importCeremony } from "./import-ceremony.js";
 import { assertCeremonyMatchesCircuit } from "./ceremony-guards.js";
@@ -261,15 +262,20 @@ describe("importCeremony", () => {
       })
     );
 
-    await expect(
-      importCeremony({ circuitName: "main", circuitPath, artifactsDir, ceremonyDir })
-    ).rejects.toThrow(
-      expect.objectContaining({
-        code: "ZK_CEREMONY_INCOMPATIBLE",
-        message: expect.stringContaining("bn128"),
-      })
-    );
+    let thrown: unknown;
+    try {
+      await importCeremony({ circuitName: "main", circuitPath, artifactsDir, ceremonyDir });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toMatchObject({
+      code: "ZK_CEREMONY_INCOMPATIBLE",
+      message: expect.stringContaining("bn128"),
+    });
+    expect(toCaatingaError(thrown).code).toBe(CaatingaErrorCode.ZK_CEREMONY_INCOMPATIBLE);
   });
+
   it("should_preserve_a_powers_of_tau_file_shipped_with_the_ceremony", async () => {
     const circuitPath = await seedCircuit(path.join(tmpRoot, "circuits"));
     const artifactsDir = path.join(tmpRoot, ".artifacts/zk/main");
