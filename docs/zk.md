@@ -162,15 +162,16 @@ import {
 
 `ZkError` is thrown by ZK library functions with a `code` property:
 
-| Code                      | Meaning                                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------------------- |
-| `ZK_VK_REQUIRED`          | Verification key is required but not provided                                             |
-| `ZK_INVOKE_FAILED`        | On-chain verification call failed                                                         |
-| `ZK_VERIFY_FAILED`        | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI) |
-| `ZK_DEV_CEREMONY_BLOCKED` | Mainnet blocked for dev-ceremony artifacts (maps to `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)   |
-| `ZK_UNSUPPORTED_PLATFORM` | Operation not supported on current platform                                               |
-| `ZK_DOWNLOAD_FAILED`      | Downloading a ZK tool (Circom/snarkjs) failed                                             |
-| `ZK_CHECKSUM_MISMATCH`    | A downloaded ZK tool did not match its pinned checksum                                    |
+| Code                       | Meaning                                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `ZK_VK_REQUIRED`           | Verification key is required but not provided                                                                         |
+| `ZK_INVOKE_FAILED`         | On-chain verification call failed                                                                                     |
+| `ZK_VERIFY_FAILED`         | On-chain verifier returned `false` (maps to `CAATINGA_ZK_VERIFICATION_FAILED` in the CLI)                             |
+| `ZK_DEV_CEREMONY_BLOCKED`  | Mainnet blocked for dev-ceremony artifacts (maps to `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`)                               |
+| `ZK_UNSUPPORTED_PLATFORM`  | Operation not supported on current platform                                                                           |
+| `ZK_DOWNLOAD_FAILED`       | Downloading a ZK tool (Circom/snarkjs) failed                                                                         |
+| `ZK_CHECKSUM_MISMATCH`     | A downloaded ZK tool did not match its pinned checksum (maps to `CAATINGA_ZK_CHECKSUM_MISMATCH`)                      |
+| `ZK_CEREMONY_INCOMPATIBLE` | Ceremony artifacts are incompatible with the circuit or supported curve (maps to `CAATINGA_ZK_CEREMONY_INCOMPATIBLE`) |
 
 ## Dynamic VK vs embedded VK
 

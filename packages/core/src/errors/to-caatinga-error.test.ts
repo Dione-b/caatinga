@@ -89,7 +89,7 @@ describe("toCaatingaError", () => {
   });
 
   it("should_map_every_ZkError_code_used_in_packages_zk", () => {
-    const zkCodePattern = /["'](ZK_[A-Z0-9_]+)["']/g;
+    const zkCodePattern = /new\s+ZkError\s*\([\s\S]*?,\s*["'](ZK_[A-Z0-9_]+)["']/g;
     const discoveredCodes = new Set<string>();
 
     for (const filePath of listZkSourceFiles(zkSrcDir)) {

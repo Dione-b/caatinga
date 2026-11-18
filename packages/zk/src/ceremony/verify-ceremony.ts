@@ -38,7 +38,7 @@ export type VerifyCeremonyResult = {
 
 const ZKEY_OK_PATTERN = /ZKey Ok!/;
 const ZKEY_REJECTED_PATTERN =
-  /INVALID(?:\(\d+\))?:|(?:Coeffs|A|B1|B2) section is not identical|(?:L|H) section does not match|Curve does not match/i;
+  /INVALID(?:\(\d+\))?:|(?:Coeffs|A|B1|B2) section is not identical|(?:L|H) section does not match|Curve does not match|circuit too big for this power of tau ceremony|Powers of tau is not prepared\.|zkey file is not groth16|invalid zkey/i;
 
 /**
  * Offline, reproducible check of an imported ceremony:
@@ -106,15 +106,12 @@ export async function verifyCeremony(
       verifyError = error;
     }
     if (!ZKEY_OK_PATTERN.test(output)) {
-      const tampered = new ZkError(
+      throw new ZkError(
         `snarkjs zkey verify rejected ${zkeyPath} against ${path.basename(ptauPath)} and the compiled circuit.`,
         "ZK_CEREMONY_TAMPERED",
-        "The proving key does not derive from this circuit and powers-of-tau. Obtain the ceremony's published artifacts again and re-import them."
+        "The proving key does not derive from this circuit and powers-of-tau. Obtain the ceremony's published artifacts again and re-import them.",
+        verifyError === undefined ? undefined : { cause: verifyError }
       );
-      if (verifyError !== undefined) {
-        tampered.cause = verifyError;
-      }
-      throw tampered;
     }
     zkey = "verified";
   }

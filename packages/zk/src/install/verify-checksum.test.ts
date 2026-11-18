@@ -2,6 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { CaatingaErrorCode, toCaatingaError } from "@caatinga/core";
 import { sha256File } from "../artifacts/files.js";
 import { verifyFileChecksum } from "./verify-checksum.js";
 
@@ -58,9 +59,15 @@ describe("verifyFileChecksum", () => {
   });
 
   it("should_delete_the_file_and_raise_on_mismatch", async () => {
-    await expect(verifyFileChecksum(filePath, EXPECTED, "circom")).rejects.toMatchObject({
-      code: "ZK_CHECKSUM_MISMATCH",
-    });
+    let thrown: unknown;
+    try {
+      await verifyFileChecksum(filePath, EXPECTED, "circom");
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toMatchObject({ code: "ZK_CHECKSUM_MISMATCH" });
+    expect(toCaatingaError(thrown).code).toBe(CaatingaErrorCode.ZK_CHECKSUM_MISMATCH);
 
     await expect(sha256File(filePath)).rejects.toThrow();
   });
