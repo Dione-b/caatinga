@@ -1,5 +1,13 @@
 ## Breaking changes policy
 
+## 3.14.0
+
+### Patch Changes
+
+- Updated dependencies [d26666c]
+  - @caatinga/core@3.14.0
+  - @caatinga/zk@3.14.0
+
 ## 3.13.0
 
 ### Minor Changes
