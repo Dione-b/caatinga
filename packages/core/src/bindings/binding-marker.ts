@@ -1,6 +1,7 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import { atomicWriteFile } from "../fs/atomic-write-file.js";
 
 export const BINDING_MARKER_FILENAME = ".caatinga-bindings.json";
 
@@ -16,7 +17,7 @@ export type BindingMarker = z.infer<typeof BindingMarkerSchema>;
 
 export async function writeBindingMarker(outputDir: string, marker: BindingMarker): Promise<void> {
   const markerPath = path.join(outputDir, BINDING_MARKER_FILENAME);
-  await writeFile(markerPath, `${JSON.stringify(marker, null, 2)}\n`, "utf8");
+  await atomicWriteFile(markerPath, `${JSON.stringify(marker, null, 2)}\n`);
 }
 
 /** Returns null when the marker is absent or unreadable — freshness degrades, never throws. */
