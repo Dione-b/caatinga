@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { CaatingaConfig } from "../config/config.schema.js";
 import { writeArtifacts } from "../artifacts/write-artifacts.js";
-import { evaluateEnvDrift } from "./evaluate-env-drift.js";
+import { CaatingaErrorCode } from "../errors/CaatingaError.js";
+import { evaluateEnvDrift, evaluateWasmDrift } from "./evaluate-env-drift.js";
 import { syncFrontendEnv } from "./sync-frontend-env.js";
 
 const tempDirs: string[] = [];
@@ -156,5 +158,94 @@ describe("evaluateEnvDrift", () => {
     });
 
     expect(report).toBeNull();
+  });
+});
+
+describe("evaluateWasmDrift", () => {
+  const wasmBytes = Buffer.from("local-counter-wasm");
+  const localHash = createHash("sha256").update(wasmBytes).digest("hex");
+
+  async function setupProject(
+    artifactWasmHash: string
+  ): Promise<{ config: CaatingaConfig; cwd: string }> {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "caatinga-wasm-drift-"));
+    tempDirs.push(cwd);
+    const wasmPath = path.join(cwd, "counter.wasm");
+    await writeFile(wasmPath, wasmBytes);
+    await writeArtifacts(
+      {
+        project: "app",
+        version: 1,
+        networks: {
+          testnet: {
+            contracts: {
+              counter: {
+                contractId: `C${"C".repeat(55)}`,
+                wasmHash: artifactWasmHash,
+                deployedAt: "2026-07-04T00:00:00.000Z",
+                sourcePath: "./contracts/counter",
+                wasmPath,
+                dependencies: [],
+                resolvedDeployArgs: {},
+              },
+            },
+            dependencyGraph: { counter: [] },
+          },
+        },
+      },
+      cwd
+    );
+    const config: CaatingaConfig = {
+      project: "app",
+      defaultNetwork: "testnet",
+      contracts: {
+        counter: {
+          path: path.join(cwd, "contracts/counter"),
+          wasm: wasmPath,
+          dependsOn: [],
+          deployArgs: {},
+        },
+      },
+      networks: {
+        testnet: {
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          networkPassphrase: "Test SDF Network ; September 2015",
+        },
+      },
+    };
+    return { config, cwd };
+  }
+
+  it("should_throw_network_not_found_for_unknown_network", async () => {
+    const { config, cwd } = await setupProject(localHash);
+
+    await expect(
+      evaluateWasmDrift({ config, cwd, networkName: "does-not-exist" })
+    ).rejects.toMatchObject({ code: CaatingaErrorCode.NETWORK_NOT_FOUND });
+  });
+
+  it("should_report_no_drift_when_local_wasm_matches_artifact", async () => {
+    const { config, cwd } = await setupProject(localHash);
+
+    const lines = await evaluateWasmDrift({ config, cwd });
+
+    expect(lines).toEqual([
+      { contract: "counter", localWasmHash: localHash, artifactWasmHash: localHash, drift: false },
+    ]);
+  });
+
+  it("should_report_drift_when_local_wasm_differs_from_artifact", async () => {
+    const { config, cwd } = await setupProject("b".repeat(64));
+
+    const lines = await evaluateWasmDrift({ config, cwd, networkName: "testnet" });
+
+    expect(lines).toEqual([
+      {
+        contract: "counter",
+        localWasmHash: localHash,
+        artifactWasmHash: "b".repeat(64),
+        drift: true,
+      },
+    ]);
   });
 });
