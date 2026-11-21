@@ -133,9 +133,9 @@ export async function evaluateWasmDrift(options: {
 > {
   const cwd = options.cwd ?? process.cwd();
   const config = options.config ?? (await loadConfig({ cwd }));
+  const network = resolveNetwork(config, options.networkName);
   const artifacts = await readArtifacts(cwd);
-  const networkName = options.networkName ?? config.defaultNetwork;
-  const networkArtifacts = artifacts.networks[networkName];
+  const networkArtifacts = artifacts.networks[network.name];
 
   const lines: Array<{
     contract: string;
