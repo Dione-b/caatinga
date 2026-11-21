@@ -3,7 +3,6 @@ import { NETWORK_METADATA_BY_PASSPHRASE } from "../networks/network-metadata.js"
 import { runCommand } from "../shell/run-command.js";
 import { buildStellarNetworkArgsFromConfig } from "./build-stellar-network-args.js";
 import { parseContractId } from "./parse-contract-id.js";
-import { isLikelyPublicKeySource } from "./strkey.js";
 import { TRANSACTION_TIMEOUT_MS } from "../shell/command-timeouts.js";
 import { STELLAR_CLI_SIGNING_FAILURE_REGEX } from "./version.js";
 
