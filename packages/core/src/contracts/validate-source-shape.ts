@@ -1,5 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
-import { isLikelyPublicKeySource } from "../stellar-cli/recover-deploy-contract-id.js";
+import { isLikelyPublicKeySource } from "../stellar-cli/strkey.js";
 
 const STELLAR_SECRET_KEY_PATTERN = /^S[A-Z2-7]{55}$/;
 
