@@ -37,8 +37,44 @@ describe("recovery scenarios", () => {
     await writeFile(path.join(tmpDir, "caatinga.artifacts.json"), "{not-json", "utf8");
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
       code: CaatingaErrorCode.ARTIFACT_INVALID,
-      hint: expect.stringContaining("Fix the JSON shape"),
+      hint: expect.stringContaining("Fix the JSON syntax"),
     });
+  });
+
+  it("should_name_invalid_artifact_fields_and_document_recovery", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-recovery-"));
+    await writeFile(
+      path.join(tmpDir, "caatinga.artifacts.json"),
+      JSON.stringify({
+        project: "recovery-app",
+        version: 2,
+        networks: {
+          testnet: {
+            contracts: {
+              counter: {
+                contractId: "malformed",
+                wasmHash: "not-a-hash",
+                deployedAt: "2026-01-01T00:00:00.000Z",
+                sourcePath: "contracts/counter",
+                wasmPath: "target/wasm32v1-none/release/counter.wasm",
+              },
+            },
+          },
+        },
+      }),
+      "utf8"
+    );
+
+    try {
+      await readArtifacts(tmpDir);
+      expect.fail("readArtifacts should reject invalid contract artifact fields");
+    } catch (error) {
+      expect(error).toMatchObject({
+        code: CaatingaErrorCode.ARTIFACT_INVALID,
+        hint: expect.stringContaining("docs/recovery-scenarios.md#invalid-artifacts"),
+      });
+      expect((error as Error).message).toContain("networks.testnet.contracts.counter.contractId");
+    }
   });
 
   it("should_return_CAATINGA_STELLAR_CLI_NOT_FOUND_for_missing_binary", async () => {

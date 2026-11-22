@@ -21,11 +21,26 @@ Actionable recovery paths for common failure modes. For the full error reference
 
 ## Invalid artifacts
 
-| Code                          | Recovery command                                                                                |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| `CAATINGA_ARTIFACT_NOT_FOUND` | `ctg init` or copy `caatinga.artifacts.json` from a teammate                                    |
-| `CAATINGA_ARTIFACT_INVALID`   | Fix JSON manually, or delete and redeploy: `ctg deploy --network <network> --source <identity>` |
-| Unsupported schema version    | Upgrade CLI: `npm install -g @caatinga/cli@latest`                                              |
+| Code                          | Recovery command                                                                                                       |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `CAATINGA_ARTIFACT_NOT_FOUND` | `ctg init` or copy `caatinga.artifacts.json` from a teammate                                                           |
+| `CAATINGA_ARTIFACT_INVALID`   | Use the field paths in the error to fix or remove the offending entry, or restore the file from Git before redeploying |
+| Unsupported schema version    | Upgrade CLI: `npm install -g @caatinga/cli@latest`                                                                     |
+
+`ctg` validates contract IDs and WASM hashes before any command reads deployment state. If an
+existing file contains a value rejected by a newer CLI, the error names each invalid field and
+points back here; `ctg migrate artifacts` cannot repair this case because it intentionally requires
+a successfully parsed artifact file.
+
+Manual recovery:
+
+1. Copy `caatinga.artifacts.json` to a backup outside the project.
+2. Open the original and fix the named `contractId` (`C` plus 55 base32 characters) or
+   `wasmHash` (64 lowercase hexadecimal characters), using a trusted deployment record or
+   on-chain state. If the deployment record is not recoverable, remove that contract entry and
+   redeploy it.
+3. Run `ctg status` or the command that originally failed. Once the file validates, use
+   `ctg migrate artifacts` separately if it is still on schema v1.
 
 **Migration:** `ctg migrate artifacts` upgrades schema v1 → v2 on disk.
 

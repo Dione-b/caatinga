@@ -36,11 +36,26 @@ export async function readArtifacts(cwd = process.cwd()): Promise<CaatingaArtifa
       );
     }
 
-    if (error instanceof SyntaxError || error instanceof z.ZodError) {
+    if (error instanceof SyntaxError) {
       throw new CaatingaError(
         "caatinga.artifacts.json is invalid.",
         CaatingaErrorCode.ARTIFACT_INVALID,
-        "Fix the JSON shape before running Caatinga commands."
+        "Fix the JSON syntax before running Caatinga commands. See docs/recovery-scenarios.md#invalid-artifacts."
+      );
+    }
+
+    if (error instanceof z.ZodError) {
+      const details = error.issues
+        .map((issue) => {
+          const field = issue.path.length > 0 ? issue.path.join(".") : "<root>";
+          return `${field}: ${issue.message}`;
+        })
+        .join("; ");
+
+      throw new CaatingaError(
+        `caatinga.artifacts.json failed validation${details ? ` (${details})` : ""}.`,
+        CaatingaErrorCode.ARTIFACT_INVALID,
+        "Fix or remove the named artifact entry, then rerun the command. See docs/recovery-scenarios.md#invalid-artifacts."
       );
     }
 
