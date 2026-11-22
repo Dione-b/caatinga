@@ -4,6 +4,7 @@ import { registerDeployCommand } from "./commands/deploy.command.js";
 import { registerUpgradeCommand } from "./commands/upgrade.command.js";
 import { registerDevCommand } from "./commands/dev.command.js";
 import { registerDoctorCommand } from "./commands/doctor.command.js";
+import { registerFixCommand } from "./commands/fix.command.js";
 import { registerGenerateCommand } from "./commands/generate.command.js";
 import { registerInitCommand } from "./commands/init.command.js";
 import { registerZkInitCommand } from "./commands/zk-init.command.js";
@@ -50,7 +51,15 @@ export function createProgram(): Command {
           "Build & Compilation": ["build"],
           "Deployment & Lifecycle": ["deploy", "upgrade", "rollback", "wire"],
           "Query & Execution": ["read", "invoke", "estimate", "dev"],
-          "Status & Diagnostics": ["status", "inspect", "doctor", "sync-env", "migrate", "version"],
+          "Status & Diagnostics": [
+            "status",
+            "inspect",
+            "doctor",
+            "fix",
+            "sync-env",
+            "migrate",
+            "version",
+          ],
           "Zero-Knowledge (ZK) Proofs": ["zk"],
           "Automation & CI": ["smoke", "regression", "ci"],
         };
@@ -112,6 +121,7 @@ export function createProgram(): Command {
   registerZkInvokeCommand(program);
   registerDevCommand(program);
   registerDoctorCommand(program);
+  registerFixCommand(program);
   registerBuildCommand(program);
   registerDeployCommand(program);
   registerUpgradeCommand(program);

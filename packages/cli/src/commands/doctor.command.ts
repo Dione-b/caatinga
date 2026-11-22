@@ -9,6 +9,7 @@ import { evaluateWasmDriftDiagnostics } from "./doctor-wasm-drift.js";
 import { reportCliVersionChannel } from "./doctor-cli-version.js";
 import { runCliAction } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
+import { runFix } from "./fix.command.js";
 import {
   loadConfig,
   formatNetworkOrigin,
@@ -26,6 +27,9 @@ type DoctorOptions = {
   strictEnv?: boolean;
   strictBindings?: boolean;
   strict?: boolean;
+  fix?: boolean;
+  dryRun?: boolean;
+  yes?: boolean;
 };
 
 function printDeployCoverageLine(line: DeployCoverageLine): void {
@@ -243,10 +247,21 @@ export function registerDoctorCommand(program: Command): void {
     .option("--strict-env", "Fail when frontend env file drifts from artifacts")
     .option("--strict-bindings", "Fail when bindings are not fresh (stale, missing, or unknown)")
     .option("--strict", "Enable --strict-env and --strict-bindings")
+    .option("--fix", "Repair safe project corruption before running diagnostics")
+    .option("--dry-run", "Print repairs without changing files (used with --fix)")
+    .option("--yes", "Approve non-interactive repairs (used with --fix)")
     .action((options: DoctorOptions) =>
       runCliAction(async () => {
         logger.info("Caatinga Doctor");
         logger.info("");
+
+        if (options.fix) {
+          await runFix(
+            { dryRun: options.dryRun, yes: options.yes, includeOrphanJs: true },
+            process.cwd()
+          );
+          logger.info("");
+        }
 
         const strictEnv = options.strictEnv === true || options.strict === true;
         const strictBindings = options.strictBindings === true || options.strict === true;
