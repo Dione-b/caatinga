@@ -58,11 +58,24 @@ export async function artifactsDiagnostic(): Promise<Diagnostic> {
     await readArtifacts();
     return { ok: true, label: "caatinga.artifacts.json found" };
   } catch {
-    return {
-      ok: false,
-      label: "caatinga.artifacts.json not found or invalid",
-      fix: `Run ${npxCli("init")}, or restore a valid caatinga.artifacts.json file.`,
-    };
+    try {
+      const config = await loadConfig();
+      return {
+        ok: false,
+        label: "caatinga.artifacts.json not found or invalid",
+        fix: `Create caatinga.artifacts.json with ${JSON.stringify({
+          project: config.project,
+          version: 2,
+          networks: {},
+        })}, or restore a valid caatinga.artifacts.json file.`,
+      };
+    } catch {
+      return {
+        ok: false,
+        label: "caatinga.artifacts.json not found or invalid",
+        fix: `Run ${npxCli("init")}, or restore a valid caatinga.artifacts.json file.`,
+      };
+    }
   }
 }
 

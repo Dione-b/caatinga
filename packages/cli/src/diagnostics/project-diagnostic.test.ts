@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CaatingaError, CaatingaErrorCode, type CaatingaConfig } from "@caatinga/core";
-import { configDiagnostic, networkDiagnostic } from "./project-diagnostic.js";
+import { artifactsDiagnostic, configDiagnostic, networkDiagnostic } from "./project-diagnostic.js";
 
 const loadConfigMock = vi.hoisted(() => vi.fn());
 
@@ -80,5 +80,31 @@ describe("networkDiagnostic", () => {
       ok: true,
       label: "network testnet found",
     });
+  });
+});
+
+describe("artifactsDiagnostic", () => {
+  beforeEach(() => {
+    loadConfigMock.mockReset();
+  });
+
+  it("suggests creating caatinga.artifacts.json in-place when caatinga.config.ts exists", async () => {
+    loadConfigMock.mockResolvedValue(config);
+
+    const result = await artifactsDiagnostic();
+    expect(result.ok).toBe(false);
+    expect(result.fix).toContain('"project":"app"');
+    expect(result.fix).toContain('"version":2');
+    expect(result.fix).not.toContain("init");
+  });
+
+  it("keeps the init hint when caatinga.config.ts is absent", async () => {
+    loadConfigMock.mockRejectedValue(
+      new CaatingaError("caatinga.config.ts was not found.", CaatingaErrorCode.CONFIG_NOT_FOUND)
+    );
+
+    const result = await artifactsDiagnostic();
+    expect(result.ok).toBe(false);
+    expect(result.fix).toContain("init");
   });
 });

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import { loadConfig } from "../config/load-config.js";
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
 import {
   CaatingaArtifactsSchema,
@@ -29,10 +30,23 @@ export async function readArtifacts(cwd = process.cwd()): Promise<CaatingaArtifa
     return CaatingaArtifactsSchema.parse(parsedJson);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      let hint =
+        "Run ctg init, or create the artifacts file before deploying or generating bindings.";
+      try {
+        const config = await loadConfig({ cwd });
+        hint = `Create caatinga.artifacts.json with ${JSON.stringify({
+          project: config.project,
+          version: CURRENT_ARTIFACTS_SCHEMA_VERSION,
+          networks: {},
+        })} before deploying or generating bindings.`;
+      } catch {
+        // Keep the ctg init hint when no valid caatinga.config.ts is present.
+      }
+
       throw new CaatingaError(
         "caatinga.artifacts.json was not found.",
         CaatingaErrorCode.ARTIFACT_NOT_FOUND,
-        "Run ctg init, or create the artifacts file before deploying or generating bindings."
+        hint
       );
     }
 
