@@ -1,5 +1,5 @@
 import { CaatingaError, CaatingaErrorCode } from "../errors/CaatingaError.js";
-import { STELLAR_ADDRESS_REGEX } from "../stellar-cli/strkey.js";
+import { CONTRACT_ID_REGEX, STELLAR_ADDRESS_REGEX, STRKEY_BODY } from "../stellar-cli/strkey.js";
 import { assertSafeCliArgs, formatNamedCliArgs } from "./format-cli-args.js";
 import { resolveSourceAddress } from "./resolve-source-address.js";
 import type { DeployArgValue } from "./resolve-deploy-args.js";
@@ -12,8 +12,27 @@ export type ResolveMethodArgsOptions = {
   resolveAliases?: boolean;
 };
 
+/** Muxed account strkey (`M` prefix): 55 base32 chars of key plus 13 more for the 64-bit id. */
+const MUXED_ADDRESS_REGEX = new RegExp(`^M${STRKEY_BODY}[A-Z2-7]{13}$`);
+/** Integer literals, e.g. i128/u64 amounts and ids. */
+const INTEGER_REGEX = /^-?\d+$/;
+/** 32-byte values in hex, e.g. BytesN<32> hashes. */
+const HEX_32_BYTES_REGEX = /^[0-9a-fA-F]{64}$/;
+
+/**
+ * Whether a method arg should be resolved with `stellar keys address`. Values that are already
+ * on-chain identifiers (account, contract or muxed strkeys) or obvious literals (integers,
+ * 32-byte hex) are never aliases, so resolved `${contracts.<name>.contractId}` placeholders,
+ * amounts and hashes pass through unchanged.
+ */
 function looksLikeStellarAlias(value: string): boolean {
-  if (STELLAR_ADDRESS_REGEX.test(value)) {
+  if (
+    STELLAR_ADDRESS_REGEX.test(value) ||
+    CONTRACT_ID_REGEX.test(value) ||
+    MUXED_ADDRESS_REGEX.test(value) ||
+    INTEGER_REGEX.test(value) ||
+    HEX_32_BYTES_REGEX.test(value)
+  ) {
     return false;
   }
 
