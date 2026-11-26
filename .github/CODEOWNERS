@@ -1,0 +1,24 @@
+# Supply-chain sensitive paths: changes here need a maintainer review.
+# Enforced when branch protection on `main` requires review from Code Owners.
+
+# CI, release and repository automation
+/.github/                                   @Dione-b
+/scripts/                                   @Dione-b
+/eslint.config.js                           @Dione-b
+/.npmrc                                     @Dione-b
+
+# Dependency manifests and lockfiles
+package.json                                @Dione-b
+pnpm-lock.yaml                              @Dione-b
+Cargo.toml                                  @Dione-b
+Cargo.lock                                  @Dione-b
+
+# Code that downloads, installs or executes third-party tools
+/packages/zk/src/install/                   @Dione-b
+/packages/core/src/shell/                   @Dione-b
+/packages/core/src/config/load-config.ts    @Dione-b
+
+# Install-override contract and scaffolds shipped into user projects
+/packages/client/src/vite/wallet-stubs.ts   @Dione-b
+/packages/templates/                        @Dione-b
+/packages/core/scaffolds/                   @Dione-b
