@@ -37,17 +37,17 @@
     "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && node scripts/check-no-obfuscation.mjs && bash scripts/check-fixture-references.sh && pnpm build && pnpm check:wasm-targets && pnpm test && pnpm test:compat && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.10",
-    "@eslint/js": "^9.0.0",
-    "@types/node": "^22.10.2",
+    "@changesets/cli": "^2.31.1",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.20.5",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "knip": "5",
-    "prettier": "^3.0.0",
-    "turbo": "^2.3.3",
+    "prettier": "^3.10.1",
+    "turbo": "^2.11.13",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.0.0",
-    "yaml": "^2.7.0"
+    "typescript-eslint": "^8.74.0",
+    "yaml": "^2.9.1"
   },
   "dependencies": {
     "@caatinga/client": "^3.1.1",
