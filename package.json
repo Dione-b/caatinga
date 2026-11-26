@@ -24,6 +24,7 @@
     "check:fixtures": "bash scripts/check-fixture-references.sh",
     "check:wasm-targets": "bash scripts/check-wasm-target-paths.sh",
     "check:template-imports": "node scripts/check-template-imports.mjs",
+    "check:obfuscation": "node scripts/check-no-obfuscation.mjs",
     "zk:benchmark": "node scripts/zk-verify-benchmark.mjs",
     "changeset": "changeset",
     "pack:packages": "( cd packages/core && pnpm pack --pack-destination ../../packed ) && ( cd packages/zk && pnpm pack --pack-destination ../../packed ) && ( cd packages/client && pnpm pack --pack-destination ../../packed ) && ( cd packages/cli && pnpm pack --pack-destination ../../packed )",
@@ -33,7 +34,7 @@
     "pre:publish": "bash scripts/pre-publish.sh",
     "pre:publish:keep-going": "bash scripts/pre-publish.sh --keep-going",
     "publish:dry-run": "pnpm publish -r --access public --dry-run --no-git-checks --tag latest",
-    "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && bash scripts/check-fixture-references.sh && pnpm build && pnpm check:wasm-targets && pnpm test && pnpm test:compat && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
+    "ci:publish-matrix": "bash scripts/check-version-alignment.sh && bash scripts/check-ci-stellar-pin.sh && node scripts/check-no-obfuscation.mjs && bash scripts/check-fixture-references.sh && pnpm build && pnpm check:wasm-targets && pnpm test && pnpm test:compat && pnpm ci:snapshot-pack && pnpm publish:dry-run && SKIP_PACK=1 PACKED_DIR=\"$PWD/packed\" pnpm test:consumer && PACKED_DIR=\"$PWD/packed\" pnpm test:consumer:client-bundlers"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
@@ -51,5 +52,10 @@
   "dependencies": {
     "@caatinga/client": "^3.1.1",
     "@caatinga/core": "^3.1.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

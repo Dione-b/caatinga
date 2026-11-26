@@ -22,6 +22,11 @@ export default tsEslint.config(
   ...tsEslint.configs.recommended,
   {
     rules: {
+      // Dynamic code execution has no legitimate use here; see scripts/check-no-obfuscation.mjs.
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+      "no-script-url": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {

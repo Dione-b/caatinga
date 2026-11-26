@@ -43,14 +43,20 @@ canonical, up-to-date instructions live in the upstream repository:
 The upstream install script populates the local `.claude/skills/` and `.codex/skills/`
 directories when run with a project prefix:
 
+Download the script from a pinned commit, read it, then run the local copy. Replace
+`<commit-sha>` with a commit you have reviewed in the upstream repository:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kaankacar/stellar-build/main/install.sh | bash -s -- --prefix=$(pwd)
+curl -fsSL -o stellar-build-install.sh \
+  https://raw.githubusercontent.com/kaankacar/stellar-build/<commit-sha>/install.sh
+less stellar-build-install.sh
+bash stellar-build-install.sh --prefix="$(pwd)"
 ```
 
-::: warning Review before piping to a shell
-This command pipes a remote script straight into `bash`. Download and read the script first,
-and prefer a pinned tag or commit over `main`, so you know exactly what runs. Always follow
-the upstream repository's own verified instructions as the source of truth.
+::: warning Do not pipe remote scripts into a shell
+Avoid piping a downloaded script straight into a shell, and avoid installing from `main`: the branch can change between the
+time you read the script and the time it runs. Always follow the upstream repository's own
+verified instructions as the source of truth.
 :::
 
 party-mode spawns subagents in git worktrees and needs a stable HEAD, so commit the workspace

@@ -39,7 +39,7 @@ const { values } = parseArgs({
     },
     snarkjs: {
       type: "string",
-      default: path.join(zkTools, "snarkjs-0.7.5", "node_modules", ".bin", "snarkjs"),
+      default: path.join(zkTools, "snarkjs-0.7.5-locked", "node_modules", ".bin", "snarkjs"),
     },
     // Power 8 covers circuits up to 2^8 constraints, far beyond the sizes here.
     ptau: { type: "string", default: path.join(zkTools, "ptau", "bls12-381", "pot8_final.ptau") },

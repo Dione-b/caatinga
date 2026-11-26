@@ -37,7 +37,7 @@ LOCAL_CLIENT_DEP="file:${ROOT_DIR}/packages/client"
 LOCAL_CLI_DEP="file:${ROOT_DIR}/packages/cli"
 export LOCAL_CORE_DEP LOCAL_CLIENT_DEP LOCAL_CLI_DEP
 
-SNARKJS_BIN="${HOME}/.caatinga/zk-tools/snarkjs-0.7.5/node_modules/.bin/snarkjs"
+SNARKJS_BIN="${HOME}/.caatinga/zk-tools/snarkjs-0.7.5-locked/node_modules/.bin/snarkjs"
 export SNARKJS_BIN
 
 mkdir -p "$ARTIFACT_DIR"

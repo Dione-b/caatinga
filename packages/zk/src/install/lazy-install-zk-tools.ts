@@ -6,9 +6,15 @@ import { ZkError } from "../errors/ZkError.js";
 import { devContributionInput } from "./dev-contribution.js";
 import { downloadWithProgress } from "./download-with-progress.js";
 import type { ZkInstallProgress } from "./install-progress.js";
+import snarkjsPackageLock from "./snarkjs-package-lock.json" with { type: "json" };
 import { verifyFileChecksum } from "./verify-checksum.js";
 
 const SNARKJS_VERSION = "0.7.5";
+/**
+ * Install dir name for snarkjs. The `-locked` suffix keeps installs made before the
+ * lockfile pin (plain `npm install`, unpinned transitive deps) from being reused.
+ */
+const SNARKJS_INSTALL_DIR = `snarkjs-${SNARKJS_VERSION}-locked`;
 const CIRCOM_VERSION = "2.1.9";
 
 /**
@@ -88,8 +94,15 @@ export async function ensureCircom(progress?: ZkInstallProgress): Promise<string
   return binaryPath;
 }
 
+/**
+ * Installs snarkjs from a committed lockfile (`snarkjs-package-lock.json`) with
+ * `npm ci --ignore-scripts`: every transitive package is pinned to an exact version and
+ * sha512 integrity, and no dependency install script runs on the user's machine. A
+ * republished or hijacked transitive dependency fails the install instead of executing.
+ * Regenerate the lockfile when bumping SNARKJS_VERSION (see the comment in the test file).
+ */
 export async function ensureSnarkjs(progress?: ZkInstallProgress): Promise<string> {
-  const installDir = path.join(zkCacheDir(), `snarkjs-${SNARKJS_VERSION}`);
+  const installDir = path.join(zkCacheDir(), SNARKJS_INSTALL_DIR);
   const cliPath = path.join(installDir, "node_modules", ".bin", "snarkjs");
 
   try {
@@ -103,12 +116,26 @@ export async function ensureSnarkjs(progress?: ZkInstallProgress): Promise<strin
     await mkdir(installDir, { recursive: true });
     await writeFile(
       path.join(installDir, "package.json"),
-      JSON.stringify({ name: "caatinga-zk-snarkjs", private: true, version: "0.0.0" }, null, 2),
+      JSON.stringify(
+        {
+          name: "caatinga-zk-snarkjs",
+          private: true,
+          version: "0.0.0",
+          dependencies: { snarkjs: SNARKJS_VERSION },
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+    await writeFile(
+      path.join(installDir, "package-lock.json"),
+      `${JSON.stringify(snarkjsPackageLock, null, 2)}\n`,
       "utf8"
     );
     await runCommand(
       "npm",
-      ["install", "--no-save", "--legacy-peer-deps", `snarkjs@${SNARKJS_VERSION}`],
+      ["ci", "--ignore-scripts", "--legacy-peer-deps", "--no-audit", "--no-fund"],
       {
         cwd: installDir,
       }
