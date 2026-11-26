@@ -27,7 +27,7 @@ official `groth16_verifier` pattern.
 
 - **Protocol 27+** on the target network. BLS12-381 itself only needs Protocol 22, but the verifier is built with `soroban-sdk` 27, and a contract built with SDK major N declares protocol N in its wasm: a network below that rejects the upload. The [protocol pre-flight](#protocol-pre-flight) checks this before any transaction is built.
 - **Verifier contract:** `soroban-sdk = "27.0.6"`, Rust `1.91.1`.
-- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary — freshly downloaded or read from cache — is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)).
+- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary — freshly downloaded or read from cache — is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)). snarkjs is installed from a committed lockfile with `npm ci --ignore-scripts`: every transitive package is pinned by version and integrity hash, and no dependency install script runs.
 
 ## Quick start
 

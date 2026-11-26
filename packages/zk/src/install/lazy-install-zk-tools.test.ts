@@ -1,4 +1,4 @@
-import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -142,5 +142,95 @@ describe("ensureCircom", () => {
     expect(resolvedPath).toBe(binaryPath);
     expect(statuses).toEqual(["Using cached circom v2.1.9"]);
     await expect(access(binaryPath)).resolves.toBeUndefined();
+  });
+});
+
+/**
+ * snarkjs is installed from the committed `snarkjs-package-lock.json`. To bump SNARKJS_VERSION,
+ * regenerate it in an empty dir with
+ * `npm install --package-lock-only --ignore-scripts --legacy-peer-deps --save-exact snarkjs@<version>`
+ * (package.json: `{ "name": "caatinga-zk-snarkjs", "private": true, "version": "0.0.0" }`).
+ */
+describe("ensureSnarkjs", () => {
+  let tempHome = "";
+
+  afterEach(async () => {
+    vi.resetAllMocks();
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    if (tempHome) {
+      await rm(tempHome, { recursive: true, force: true });
+      tempHome = "";
+    }
+  });
+
+  async function loadEnsureSnarkjs() {
+    vi.resetModules();
+    const module = await import("./lazy-install-zk-tools.js");
+    return module.ensureSnarkjs;
+  }
+
+  it("should_install_from_the_pinned_lockfile_without_running_install_scripts", async () => {
+    tempHome = await mkdtemp(path.join(os.tmpdir(), "caatinga-zk-home-"));
+    vi.stubEnv("HOME", tempHome);
+    runCommandMock.mockResolvedValue({ all: "" });
+
+    const ensureSnarkjs = await loadEnsureSnarkjs();
+    const cliPath = await ensureSnarkjs();
+
+    const installDir = path.join(tempHome, ".caatinga", "zk-tools", "snarkjs-0.7.5-locked");
+    expect(cliPath).toBe(path.join(installDir, "node_modules", ".bin", "snarkjs"));
+    expect(runCommandMock).toHaveBeenCalledOnce();
+    const [command, args, options] = runCommandMock.mock.calls[0] ?? [];
+    expect(command).toBe("npm");
+    expect(args).toContain("ci");
+    expect(args).toContain("--ignore-scripts");
+    expect(args).not.toContain("install");
+    expect(options).toMatchObject({ cwd: installDir });
+
+    const manifest = JSON.parse(await readFile(path.join(installDir, "package.json"), "utf8"));
+    const lock = JSON.parse(await readFile(path.join(installDir, "package-lock.json"), "utf8"));
+    expect(manifest.dependencies).toEqual({ snarkjs: "0.7.5" });
+    expect(lock.packages[""].dependencies).toEqual(manifest.dependencies);
+    expect(lock.packages["node_modules/snarkjs"].version).toBe("0.7.5");
+  });
+
+  it("should_pin_every_locked_package_to_the_npm_registry_with_integrity", async () => {
+    const { default: lock } = await import("./snarkjs-package-lock.json", {
+      with: { type: "json" },
+    });
+    const entries = Object.entries(
+      lock.packages as Record<
+        string,
+        { resolved?: string; integrity?: string; hasInstallScript?: boolean }
+      >
+    ).filter(([key]) => key !== "");
+
+    expect(entries.length).toBeGreaterThan(0);
+    for (const [key, entry] of entries) {
+      expect(entry.resolved, key).toMatch(/^https:\/\/registry\.npmjs\.org\//);
+      expect(entry.integrity, key).toMatch(/^sha512-/);
+      expect(entry.hasInstallScript, key).toBeUndefined();
+    }
+  });
+
+  it("should_reuse_an_existing_locked_install_without_running_npm", async () => {
+    tempHome = await mkdtemp(path.join(os.tmpdir(), "caatinga-zk-home-"));
+    vi.stubEnv("HOME", tempHome);
+    const binDir = path.join(
+      tempHome,
+      ".caatinga",
+      "zk-tools",
+      "snarkjs-0.7.5-locked",
+      "node_modules",
+      ".bin"
+    );
+    await mkdir(binDir, { recursive: true });
+    await writeFile(path.join(binDir, "snarkjs"), "", "utf8");
+
+    const ensureSnarkjs = await loadEnsureSnarkjs();
+    await ensureSnarkjs();
+
+    expect(runCommandMock).not.toHaveBeenCalled();
   });
 });
