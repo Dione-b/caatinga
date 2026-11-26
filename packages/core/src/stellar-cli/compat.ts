@@ -11,8 +11,7 @@ export {
 export type CompatibilityStatus = "supported" | "untested" | "unsupported";
 
 export type CompatibilityWarningCode =
-  | "STELLAR_CLI_UNTESTED_VERSION"
-  | "STELLAR_CLI_MISSING_FEATURE";
+  "STELLAR_CLI_UNTESTED_VERSION" | "STELLAR_CLI_MISSING_FEATURE";
 
 export type CompatibilityWarning = {
   code: CompatibilityWarningCode;

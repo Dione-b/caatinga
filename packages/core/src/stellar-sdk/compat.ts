@@ -7,8 +7,7 @@ export { STELLAR_SDK_LAST_TESTED_VERSION, STELLAR_SDK_MIN_VERSION } from "./vers
 export type SdkCompatibilityStatus = "supported" | "untested" | "unsupported";
 
 export type SdkCompatibilityWarningCode =
-  | "STELLAR_SDK_UNTESTED_VERSION"
-  | "STELLAR_SDK_VERSION_PARSE_FAILED";
+  "STELLAR_SDK_UNTESTED_VERSION" | "STELLAR_SDK_VERSION_PARSE_FAILED";
 
 export type SdkCompatibilityWarning = {
   code: SdkCompatibilityWarningCode;

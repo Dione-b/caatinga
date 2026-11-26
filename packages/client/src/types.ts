@@ -60,13 +60,7 @@ export interface CaatingaClientConfig {
  * see docs/runtime-invoke-pipeline.md for the full RPC status mapping.
  */
 export type CaatingaInvokeStatus =
-  | "built"
-  | "prepared"
-  | "signed"
-  | "submitted"
-  | "pending"
-  | "confirmed"
-  | "failed";
+  "built" | "prepared" | "signed" | "submitted" | "pending" | "confirmed" | "failed";
 
 export interface CaatingaInvokeOptions {
   debugXdr?: boolean;
