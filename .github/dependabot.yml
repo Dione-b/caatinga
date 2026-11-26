@@ -20,6 +20,11 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Contracted public ranges (see packages/core/src/stellar-sdk/version.ts
+      # and src/release/package-manifest.test.ts); bumped deliberately together
+      # with STELLAR_SDK_LAST_TESTED_VERSION and the templates.
+      - dependency-name: "@stellar/stellar-sdk"
+      - dependency-name: "@creit.tech/stellar-wallets-kit"
     groups:
       npm-minor-patch:
         update-types:
