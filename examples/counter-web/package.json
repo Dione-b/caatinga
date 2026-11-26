@@ -12,7 +12,7 @@
     "@caatinga/client": "workspace:*",
     "@caatinga/core": "workspace:*",
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "vite": "^6.0.6"
