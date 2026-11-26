@@ -15,3 +15,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Major bumps (eslint, vite, plugin-react, ...) need a planned migration
+    # and are upgraded by hand; Dependabot only proposes minor/patch.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
