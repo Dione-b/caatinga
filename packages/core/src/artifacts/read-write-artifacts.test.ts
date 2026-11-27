@@ -55,6 +55,20 @@ describe("writeArtifacts and readArtifacts", () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
     await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
       code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
+      hint: expect.stringContaining("Run ctg init"),
+    });
+  });
+
+  it("should_suggest_in_place_artifacts_creation_when_config_exists", async () => {
+    tmpDir = await mkdtemp(path.join(os.tmpdir(), "caatinga-art-"));
+    await writeFile(
+      path.join(tmpDir, "caatinga.config.ts"),
+      'export default { project: "adopted-app", defaultNetwork: "testnet", contracts: {}, networks: { testnet: { rpcUrl: "https://soroban-testnet.stellar.org", networkPassphrase: "Test SDF Network ; September 2015" } } };',
+      "utf8"
+    );
+    await expect(readArtifacts(tmpDir)).rejects.toMatchObject({
+      code: CaatingaErrorCode.ARTIFACT_NOT_FOUND,
+      hint: expect.stringContaining('"project":"adopted-app"'),
     });
   });
 
