@@ -239,6 +239,24 @@ describe("ensureCircom without a pinned release asset", () => {
     }
   );
 
+  it("should_read_the_version_from_the_circom_compiler_line_only", async () => {
+    stubPlatform("darwin", "arm64");
+    runCommandMock.mockResolvedValue({ all: "wrapper 0.0.1\ncircom compiler 2.1.9\n" });
+
+    const ensureCircom = await loadEnsureCircom();
+
+    await expect(ensureCircom()).resolves.toBe("circom");
+  });
+
+  it("should_reject_a_version_number_that_is_not_on_the_circom_compiler_line", async () => {
+    stubPlatform("darwin", "arm64");
+    runCommandMock.mockResolvedValue({ all: "some other tool 2.9.9\n" });
+
+    const ensureCircom = await loadEnsureCircom();
+
+    await expect(ensureCircom()).rejects.toMatchObject({ code: "ZK_UNSUPPORTED_PLATFORM" });
+  });
+
   it("should_not_consult_path_when_a_pinned_asset_exists", async () => {
     stubPlatform("linux", "x64");
     vi.stubEnv("CAATINGA_CIRCOM", "/opt/circom/bin/circom");

@@ -81,7 +81,7 @@ async function resolveInstalledCircom(
       { cause: error }
     );
   }
-  const found = /(\d+)\.(\d+)\.(\d+)/.exec(output);
+  const found = /circom compiler (\d+)\.(\d+)\.(\d+)/.exec(output);
   const version = found ? found.slice(1).map(Number) : [];
   if (!found || !isSupportedCircomVersion(version)) {
     throw new ZkError(
@@ -91,7 +91,7 @@ async function resolveInstalledCircom(
     );
   }
   progress?.onStatus?.(
-    `No pinned circom release for ${platformLabel}; using circom ${found[0]} from ${command} (not checksum-verified by Caatinga)`
+    `No pinned circom release for ${platformLabel}; using circom ${found.slice(1, 4).join(".")} from ${command} (not checksum-verified by Caatinga)`
   );
   return command;
 }
