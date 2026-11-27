@@ -71,6 +71,41 @@ describe("resolveMethodArgs", () => {
     expect(looksLikeStellarAlias("${source.address}")).toBe(false);
   });
 
+  it("should_not_treat_contract_ids_as_aliases", () => {
+    expect(looksLikeStellarAlias("C" + "A".repeat(55))).toBe(false);
+  });
+
+  it("should_not_treat_muxed_addresses_as_aliases", () => {
+    expect(looksLikeStellarAlias("M" + "A".repeat(68))).toBe(false);
+  });
+
+  it("should_not_treat_integers_as_aliases", () => {
+    expect(looksLikeStellarAlias("100000000000")).toBe(false);
+    expect(looksLikeStellarAlias("-500")).toBe(false);
+  });
+
+  it("should_not_treat_64_char_hex_hashes_as_aliases", () => {
+    expect(looksLikeStellarAlias("ab".repeat(32))).toBe(false);
+    expect(looksLikeStellarAlias("AB".repeat(32))).toBe(false);
+  });
+
+  it("should_still_treat_alias_names_with_digits_as_aliases", () => {
+    expect(looksLikeStellarAlias("alice2")).toBe(true);
+    expect(looksLikeStellarAlias("funder-a")).toBe(true);
+    expect(looksLikeStellarAlias("ab".repeat(31))).toBe(true);
+  });
+
+  it("should_pass_resolved_contract_ids_and_numbers_through_unchanged", async () => {
+    const contractId = "C" + "B".repeat(55);
+    const hash = "0f".repeat(32);
+    const result = await resolveMethodArgs({
+      args: { auction: contractId, amount: "100000000000", doc_hash: hash },
+    });
+
+    expect(result).toEqual({ auction: contractId, amount: "100000000000", doc_hash: hash });
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
   it("should_keep_backslash_escaped_values_literal", async () => {
     const result = await resolveMethodArgs({
       args: { name: "\\Dione", caller: "alice" },
