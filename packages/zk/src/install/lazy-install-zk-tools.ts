@@ -31,31 +31,76 @@ function zkCacheDir(): string {
   return path.join(process.env.HOME ?? os.homedir(), ".caatinga", "zk-tools");
 }
 
-function circomAssetName(): string {
-  const platform = process.platform;
+function circomAssetName(): string | undefined {
   const arch = process.arch === "x64" ? "amd64" : process.arch;
-  if (platform === "linux") {
+  if (process.platform === "linux") {
     return `circom-linux-${arch}`;
   }
-  if (platform === "darwin") {
+  if (process.platform === "darwin") {
     return `circom-macos-${arch}`;
   }
-  throw new ZkError(
-    `Unsupported platform for automatic circom install: ${platform}`,
-    "ZK_UNSUPPORTED_PLATFORM",
-    "Install circom 2.x manually and ensure it is on PATH."
+  return undefined;
+}
+
+/** Lowest circom release the generated circuits are validated against. */
+const MIN_CIRCOM_VERSION = [2, 1, 9] as const;
+
+function isSupportedCircomVersion(version: number[]): boolean {
+  const [major = 0, minor = 0, patch = 0] = version;
+  if (major !== MIN_CIRCOM_VERSION[0]) {
+    return false;
+  }
+  return minor !== MIN_CIRCOM_VERSION[1]
+    ? minor > MIN_CIRCOM_VERSION[1]
+    : patch >= MIN_CIRCOM_VERSION[2];
+}
+
+/**
+ * iden3/circom publishes no release asset for macOS arm64 or Linux arm64, and none is pinned here
+ * for Windows, so there is nothing Caatinga could checksum and download. Instead use a circom the
+ * user already installed: `CAATINGA_CIRCOM` (path or command) if set, else `circom` on PATH. The binary
+ * is only run after `--version` reports a supported release; no download or checksum is involved.
+ */
+async function resolveInstalledCircom(
+  platformLabel: string,
+  progress?: ZkInstallProgress
+): Promise<string> {
+  const command = process.env.CAATINGA_CIRCOM?.trim() || "circom";
+  const hint =
+    `Install circom ${MIN_CIRCOM_VERSION.join(".")} or newer 2.x ` +
+    "(cargo install --locked --git https://github.com/iden3/circom) so that `circom --version` " +
+    "works on PATH, or set CAATINGA_CIRCOM to the circom binary.";
+  let output: string;
+  try {
+    output = (await runCommand(command, ["--version"])).all;
+  } catch (error) {
+    throw new ZkError(
+      `No circom release is pinned for ${platformLabel} and \`${command}\` could not be run`,
+      "ZK_UNSUPPORTED_PLATFORM",
+      hint,
+      { cause: error }
+    );
+  }
+  const found = /circom compiler (\d+)\.(\d+)\.(\d+)/.exec(output);
+  const version = found ? found.slice(1).map(Number) : [];
+  if (!found || !isSupportedCircomVersion(version)) {
+    throw new ZkError(
+      `\`${command}\` reports an unsupported circom version: ${output.trim() || "no output"}`,
+      "ZK_UNSUPPORTED_PLATFORM",
+      hint
+    );
+  }
+  progress?.onStatus?.(
+    `No pinned circom release for ${platformLabel}; using circom ${found.slice(1, 4).join(".")} from ${command} (not checksum-verified by Caatinga)`
   );
+  return command;
 }
 
 export async function ensureCircom(progress?: ZkInstallProgress): Promise<string> {
   const asset = circomAssetName();
-  const expectedSha256 = CIRCOM_SHA256[asset];
-  if (!expectedSha256) {
-    throw new ZkError(
-      `No pinned checksum for circom asset: ${asset}`,
-      "ZK_UNSUPPORTED_PLATFORM",
-      "Install circom 2.x manually and ensure it is on PATH."
-    );
+  const expectedSha256 = asset ? CIRCOM_SHA256[asset] : undefined;
+  if (!asset || !expectedSha256) {
+    return resolveInstalledCircom(`${process.platform}-${process.arch}`, progress);
   }
 
   const installDir = path.join(zkCacheDir(), "circom", CIRCOM_VERSION);

@@ -12,22 +12,22 @@ official `groth16_verifier` pattern.
 
 ## Support matrix
 
-| Item                                                     | Status                                                                  |
-| -------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Circom + snarkjs + Groth16 + BLS12-381                   | Supported                                                               |
-| Dynamic VK (`verify_proof`)                              | Supported (default)                                                     |
-| Embedded VK (`verify_proof_embedded`, `--embed-vk`)      | Supported — see [Dynamic VK vs embedded VK](#dynamic-vk-vs-embedded-vk) |
-| MPC ceremony import (`ctg zk import-ceremony`)           | Supported; running the ceremony itself is out of scope                  |
-| Offline ceremony verification (`ctg zk verify-ceremony`) | Supported                                                               |
-| BN254                                                    | Out of scope                                                            |
-| Noir / UltraHonk, zkVMs                                  | Not supported                                                           |
-| Automatic Circom install                                 | Linux and macOS; on Windows, put `circom` on `PATH` manually            |
+| Item                                                     | Status                                                                                                      |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Circom + snarkjs + Groth16 + BLS12-381                   | Supported                                                                                                   |
+| Dynamic VK (`verify_proof`)                              | Supported (default)                                                                                         |
+| Embedded VK (`verify_proof_embedded`, `--embed-vk`)      | Supported — see [Dynamic VK vs embedded VK](#dynamic-vk-vs-embedded-vk)                                     |
+| MPC ceremony import (`ctg zk import-ceremony`)           | Supported; running the ceremony itself is out of scope                                                      |
+| Offline ceremony verification (`ctg zk verify-ceremony`) | Supported                                                                                                   |
+| BN254                                                    | Out of scope                                                                                                |
+| Noir / UltraHonk, zkVMs                                  | Not supported                                                                                               |
+| Automatic Circom install                                 | Linux amd64 and macOS amd64 (pinned, checksum-verified); elsewhere, use an installed `circom` (see Tooling) |
 
 ## Requirements
 
 - **Protocol 27+** on the target network. BLS12-381 itself only needs Protocol 22, but the verifier is built with `soroban-sdk` 27, and a contract built with SDK major N declares protocol N in its wasm: a network below that rejects the upload. The [protocol pre-flight](#protocol-pre-flight) checks this before any transaction is built.
 - **Verifier contract:** `soroban-sdk = "27.0.6"`, Rust `1.91.1`.
-- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary — freshly downloaded or read from cache — is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)). snarkjs is installed from a committed lockfile with `npm ci --ignore-scripts`: every transitive package is pinned by version and integrity hash, and no dependency install script runs.
+- **Tooling:** Circom 2 and snarkjs (installed on first use into `~/.caatinga/zk-tools`). The first `ctg zk build` prints download and setup progress in the terminal (circom binary, snarkjs cache, dev powers-of-tau). Every `circom` binary that Caatinga downloads (freshly downloaded or read from cache) is verified against a pinned SHA-256 before use; a mismatch deletes the file and raises `ZK_CHECKSUM_MISMATCH` instead of running an unverified binary (see [errors reference](./errors.md)). iden3/circom publishes no release asset for macOS arm64, Linux arm64 or Windows, so there is nothing to pin there. On those platforms Caatinga does not download circom: it runs the `circom` you installed (set `CAATINGA_CIRCOM` to a path or command, otherwise `circom` on `PATH`), requires version 2.1.9 or a newer 2.x from `circom --version`, and prints a status line saying the binary is not checksum-verified by Caatinga. Install it with `cargo install --locked --git https://github.com/iden3/circom`. `CAATINGA_CIRCOM` is ignored on platforms that have a pinned asset. snarkjs is installed from a committed lockfile with `npm ci --ignore-scripts`: every transitive package is pinned by version and integrity hash, and no dependency install script runs.
 
 ## Quick start
 
