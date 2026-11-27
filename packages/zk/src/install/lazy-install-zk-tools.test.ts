@@ -1,7 +1,7 @@
 import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const downloadWithProgressMock = vi.hoisted(() => vi.fn());
 const runCommandMock = vi.hoisted(() => vi.fn());
@@ -19,10 +19,28 @@ vi.mock("./verify-checksum.js", () => ({
   verifyFileChecksum: verifyFileChecksumMock,
 }));
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, "platform");
+const originalArch = Object.getOwnPropertyDescriptor(process, "arch");
+
+function stubPlatform(platform: string, arch: string) {
+  Object.defineProperty(process, "platform", { value: platform, configurable: true });
+  Object.defineProperty(process, "arch", { value: arch, configurable: true });
+}
+
+function restorePlatform() {
+  if (originalPlatform) Object.defineProperty(process, "platform", originalPlatform);
+  if (originalArch) Object.defineProperty(process, "arch", originalArch);
+}
+
 describe("ensureCircom", () => {
   let tempHome = "";
 
+  beforeEach(() => {
+    stubPlatform("linux", "x64");
+  });
+
   afterEach(async () => {
+    restorePlatform();
     vi.resetAllMocks();
     vi.resetModules();
     vi.unstubAllEnvs();
@@ -142,6 +160,102 @@ describe("ensureCircom", () => {
     expect(resolvedPath).toBe(binaryPath);
     expect(statuses).toEqual(["Using cached circom v2.1.9"]);
     await expect(access(binaryPath)).resolves.toBeUndefined();
+  });
+});
+
+describe("ensureCircom without a pinned release asset", () => {
+  afterEach(() => {
+    restorePlatform();
+    vi.resetAllMocks();
+    vi.resetModules();
+    vi.unstubAllEnvs();
+  });
+
+  async function loadEnsureCircom() {
+    vi.resetModules();
+    const module = await import("./lazy-install-zk-tools.js");
+    return module.ensureCircom;
+  }
+
+  it("should_use_circom_on_path_when_platform_has_no_release_asset", async () => {
+    stubPlatform("darwin", "arm64");
+    runCommandMock.mockResolvedValue({ all: "circom compiler 2.2.3\n" });
+    const statuses: string[] = [];
+
+    const ensureCircom = await loadEnsureCircom();
+    const circom = await ensureCircom({ onStatus: (message) => statuses.push(message) });
+
+    expect(circom).toBe("circom");
+    expect(runCommandMock).toHaveBeenCalledWith("circom", ["--version"]);
+    expect(downloadWithProgressMock).not.toHaveBeenCalled();
+    expect(verifyFileChecksumMock).not.toHaveBeenCalled();
+    expect(statuses.join("\n")).toContain("No pinned circom release for darwin-arm64");
+    expect(statuses.join("\n")).toContain("circom 2.2.3");
+  });
+
+  it("should_prefer_caatinga_circom_env_over_path", async () => {
+    stubPlatform("darwin", "arm64");
+    vi.stubEnv("CAATINGA_CIRCOM", "/opt/circom/bin/circom");
+    runCommandMock.mockResolvedValue({ all: "circom compiler 2.1.9\n" });
+
+    const ensureCircom = await loadEnsureCircom();
+
+    await expect(ensureCircom()).resolves.toBe("/opt/circom/bin/circom");
+    expect(runCommandMock).toHaveBeenCalledWith("/opt/circom/bin/circom", ["--version"]);
+  });
+
+  it("should_fall_back_on_platforms_without_any_asset_name", async () => {
+    stubPlatform("win32", "x64");
+    runCommandMock.mockResolvedValue({ all: "circom compiler 2.1.9\n" });
+
+    const ensureCircom = await loadEnsureCircom();
+
+    await expect(ensureCircom()).resolves.toBe("circom");
+  });
+
+  it("should_throw_actionable_error_when_circom_is_not_found", async () => {
+    stubPlatform("darwin", "arm64");
+    runCommandMock.mockRejectedValue(new Error("spawn circom ENOENT"));
+
+    const ensureCircom = await loadEnsureCircom();
+    const error = await ensureCircom().catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({
+      code: "ZK_UNSUPPORTED_PLATFORM",
+      hint: expect.stringContaining("CAATINGA_CIRCOM"),
+    });
+    expect(downloadWithProgressMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["circom compiler 2.0.8", "circom compiler 1.0.0", "not circom at all"])(
+    "should_reject_unsupported_circom_version_%s",
+    async (output) => {
+      stubPlatform("darwin", "arm64");
+      runCommandMock.mockResolvedValue({ all: output });
+
+      const ensureCircom = await loadEnsureCircom();
+
+      await expect(ensureCircom()).rejects.toMatchObject({ code: "ZK_UNSUPPORTED_PLATFORM" });
+    }
+  );
+
+  it("should_not_consult_path_when_a_pinned_asset_exists", async () => {
+    stubPlatform("linux", "x64");
+    vi.stubEnv("CAATINGA_CIRCOM", "/opt/circom/bin/circom");
+    downloadWithProgressMock.mockImplementation(async (_url, destination) => {
+      await mkdir(path.dirname(destination), { recursive: true });
+      await writeFile(destination, "downloaded-circom", "utf8");
+    });
+    const tempHome = await mkdtemp(path.join(os.tmpdir(), "caatinga-zk-home-"));
+    vi.stubEnv("HOME", tempHome);
+
+    const ensureCircom = await loadEnsureCircom();
+    const circom = await ensureCircom();
+
+    expect(circom).toContain("circom-linux-amd64");
+    expect(runCommandMock).not.toHaveBeenCalled();
+    expect(verifyFileChecksumMock).toHaveBeenCalledOnce();
+    await rm(tempHome, { recursive: true, force: true });
   });
 });
 
